@@ -1,0 +1,22 @@
+﻿using Microsoft.AspNetCore.Identity;
+using System;
+
+namespace PosMaster.Dal
+{
+	public class User : IdentityUser
+	{
+		public string Role { get; set; }
+		public DateTime LastLoginTime { get; set; }
+		public DateTime DateCreated { get; set; }
+		public DateTime DateLastModified { get; set; }
+		public Guid ClientId { get; set; }
+		public Guid InstanceId { get; set; }
+		public string Personnel { get; set; }
+		public string LastModifiedBy { get; set; }
+		public string Notes { get; set; }
+		public string ImagePath { get; set; }
+		public string IdNumber { get; set; }
+		public string Gender { get; set; }
+		public EntityStatus Status { get; set; }
+	}
+}
