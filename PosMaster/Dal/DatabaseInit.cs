@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -18,9 +19,12 @@ namespace PosMaster.Dal
 
 		private static async Task SeedDataAsync(IServiceProvider serviceProvider)
 		{
-			var clientId = Guid.NewGuid();
-			var instanceId = Guid.NewGuid();
+			var clientId = Guid.Parse("bb0a26bc-1e0a-4b60-a5a4-7ffb43c060c6");
+			var instanceId = Guid.Parse("f1781e2d-577d-4db6-9565-e7718b86cc7f");
 			var context = serviceProvider.GetService<DatabaseContext>();
+			Console.WriteLine("Applying migrations ...");
+			context.Database.Migrate();
+			Console.WriteLine("Seeding default data ...");
 			var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 			var userManager = serviceProvider.GetRequiredService<UserManager<User>>();
 			var roleNames = new List<string> {
@@ -95,8 +99,8 @@ namespace PosMaster.Dal
 					Id = instanceId,
 					InstanceId = instanceId,
 					ClientId = clientId,
-					Code = "DEFAULT INST",
-					Name = "DATABASE INSTANCE",
+					Code = "DEFAULT",
+					Name = "DEFAULT INSTANCE",
 					Personnel = Constants.SuperAdminUserName
 				};
 				context.ClientInstances.Add(instance);
@@ -174,6 +178,7 @@ namespace PosMaster.Dal
 				context.UnitOfMeasures.Add(unitOfMeasure);
 				context.SaveChanges();
 			}
+			Console.WriteLine("Done. Seeding complete");
 		}
 	}
 }

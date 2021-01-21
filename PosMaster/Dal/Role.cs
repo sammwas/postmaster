@@ -2,9 +2,9 @@
 {
 	public static class Role
 	{
-		public static string SuperAdmin { get; set; }
-		public static string Admin { get; set; }
-		public static string Manager { get; set; }
-		public static string Clerk { get; set; }
+		public const string SuperAdmin = "SuperAdmin";
+		public const string Admin = "Admin";
+		public const string Manager = "Manager";
+		public const string Clerk = "Clerk";
 	}
 }
