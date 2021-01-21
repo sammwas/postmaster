@@ -1,11 +1,43 @@
-﻿
+﻿using PosMaster.Dal;
 using System.ComponentModel.DataAnnotations;
 
 namespace PosMaster.ViewModels
 {
 	public class ClientViewModel : BaseViewModel
 	{
-	
+		public ClientViewModel()
+		{
+
+		}
+
+		public ClientViewModel(Client client)
+		{
+			Id = client.Id;
+			Code = client.Code;
+			Name = client.Name;
+			Slogan = client.Slogan;
+			CurrencyFull = client.CurrencyFull;
+			CurrencyShort = client.CurrencyShort;
+			CountryFull = client.CountryFull;
+			CountryShort = client.CountryShort;
+			Vision = client.Vision;
+			Mission = client.Mission;
+			LogoPath = client.LogoPath;
+			EnforcePassword = client.EnforcePassword;
+			PasswordExpiryMonths = client.PasswordExpiryMonths;
+			PostalAddress = client.PostalAddress;
+			Town = client.Town;
+			EmailAddress = client.EmailAddress;
+			PrimaryTelephone = client.PrimaryTelephone;
+			SecondaryTelephone = client.SecondaryTelephone;
+			PrimaryColor = client.PrimaryColor;
+			SecondaryColor = client.SecondaryColor;
+			PhoneNumberLength = client.PhoneNumberLength;
+			TelephoneCode = client.TelephoneCode;
+			DisplayBuyingPrice = client.DisplayBuyingPrice;
+			IsEditMode = true;
+		}
+
 		[Required]
 		public string Name { get; set; }
 		public string Slogan { get; set; }

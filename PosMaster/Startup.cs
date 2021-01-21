@@ -8,21 +8,26 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Net.Http.Headers;
 using PosMaster.Dal;
 using PosMaster.Dal.Interfaces;
+using PosMaster.Services;
 using System;
 
 namespace PosMaster
 {
 	public class Startup
 	{
-		public Startup(IConfiguration configuration)
+		public Startup(IConfiguration configuration, IWebHostEnvironment webHostEnvironment)
 		{
 			Configuration = configuration;
+			WebHostEnvironment = webHostEnvironment;
 		}
 
-		public IConfiguration Configuration { get; }
+		private IConfiguration Configuration { get; }
+		private IWebHostEnvironment WebHostEnvironment { get; }
 
 		public void ConfigureServices(IServiceCollection services)
 		{
+
+			services.AddTransient(m => new FileUploadService(WebHostEnvironment));
 			services.AddScoped<IClientInterface, ClientImplementation>();
 
 			var server = Configuration["Database:Server"];
@@ -73,13 +78,13 @@ namespace PosMaster
 			services.AddMvc();
 			services.AddMemoryCache();
 			services.AddControllers();
-
+			services.AddDistributedMemoryCache();
 			services.AddControllersWithViews();
 		}
 
-		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+		public void Configure(IApplicationBuilder app)
 		{
-			if (env.IsDevelopment())
+			if (WebHostEnvironment.IsDevelopment())
 				app.UseDeveloperExceptionPage();
 			else
 				app.UseExceptionHandler("/Home/Error");

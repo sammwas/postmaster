@@ -1,20 +1,27 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using PosMaster.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace PosMaster.Services
 {
-	public static class FileUploadService
+	public class FileUploadService
 	{
-		public static async Task<FormUploadReturnData> Upload(IFormFile file, string webRootPath, string currentPath = "", string folder = "uploads")
+		private readonly IWebHostEnvironment _webHostEnvironment;
+		public FileUploadService(IWebHostEnvironment webHostEnvironment)
+		{
+			_webHostEnvironment = webHostEnvironment;
+		}
+		public async Task<FormUploadReturnData> Upload(Guid clientId, IFormFile file, string currentPath = "")
 		{
 			var res = new FormUploadReturnData();
 			try
 			{
+				var webRootPath = _webHostEnvironment.WebRootPath;
+				var folder = Path.Combine("uploads", $"{clientId}");
 				if (file == null)
 				{
 					res.Message = "No file provided";
