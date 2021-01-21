@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Net.Http.Headers;
 using PosMaster.Dal;
+using PosMaster.Dal.Interfaces;
 using System;
 
 namespace PosMaster
@@ -22,6 +23,8 @@ namespace PosMaster
 
 		public void ConfigureServices(IServiceCollection services)
 		{
+			services.AddScoped<IClientInterface, ClientImplementation>();
+
 			var server = Configuration["Database:Server"];
 			var port = Configuration["Database:Port"];
 			var user = Configuration["Database:UserName"];
