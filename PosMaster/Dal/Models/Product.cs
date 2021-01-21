@@ -2,7 +2,7 @@
 
 namespace PosMaster.Dal
 {
-	public class Product
+	public class Product : BaseEntity
 	{
 		public Guid ProductCategoryId { get; set; }
 		public ProductCategory ProductCategory { get; set; }

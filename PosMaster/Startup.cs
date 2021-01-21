@@ -25,11 +25,11 @@ namespace PosMaster
 
 		public void ConfigureServices(IServiceCollection services)
 		{
-			var server = Configuration["DBServer"] ?? "localhost";
-			var port = Configuration["DBPort"] ?? "2345";
-			var user = Configuration["DBUser"] ?? "postgres";
-			var password = Configuration["DBPassword"] ?? "12345678";
-			var database = Configuration["DBName"] ?? "posmaster_db";
+			var server = Configuration["Database:Server"];
+			var port = Configuration["Database:Port"];
+			var user = Configuration["Database:UserName"];
+			var password = Configuration["Database:Password"];
+			var database = Configuration["Database:Name"];
 			var conString = $"Host={server};Port={int.Parse(port)};" +
 				$"Database={database};User Id={user};Password={password}";
 			Console.WriteLine($"DbConnection string :- {conString}");
@@ -69,7 +69,6 @@ namespace PosMaster
 				options.AccessDeniedPath = "/Home/AccessDenied";
 				options.SlidingExpiration = true;
 			});
-
 
 			services.AddMvc();
 			services.AddMemoryCache();
