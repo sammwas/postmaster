@@ -8,7 +8,7 @@ namespace PosMaster.Dal
 		public string Role { get; set; }
 		public DateTime LastLoginTime { get; set; }
 		public DateTime DateCreated { get; set; }
-		public DateTime DateLastModified { get; set; }
+		public DateTime? DateLastModified { get; set; }
 		public Guid ClientId { get; set; }
 		public Guid InstanceId { get; set; }
 		public string Personnel { get; set; }
@@ -17,6 +17,9 @@ namespace PosMaster.Dal
 		public string ImagePath { get; set; }
 		public string IdNumber { get; set; }
 		public string Gender { get; set; }
+		public string FirstName { get; set; }
+		public string LastName { get; set; }
 		public EntityStatus Status { get; set; }
+		public DateTime PasswordChangeDate { get; set; }
 	}
 }

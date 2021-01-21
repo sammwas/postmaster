@@ -30,7 +30,7 @@ namespace PosMaster.Migrations
                     Role = table.Column<string>(type: "text", nullable: true),
                     LastLoginTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     DateCreated = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
                     ClientId = table.Column<Guid>(type: "uuid", nullable: false),
                     InstanceId = table.Column<Guid>(type: "uuid", nullable: false),
                     Personnel = table.Column<string>(type: "text", nullable: true),
@@ -39,7 +39,10 @@ namespace PosMaster.Migrations
                     ImagePath = table.Column<string>(type: "text", nullable: true),
                     IdNumber = table.Column<string>(type: "text", nullable: true),
                     Gender = table.Column<string>(type: "text", nullable: true),
+                    FirstName = table.Column<string>(type: "text", nullable: true),
+                    LastName = table.Column<string>(type: "text", nullable: true),
                     Status = table.Column<int>(type: "integer", nullable: false),
+                    PasswordChangeDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     UserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
@@ -75,6 +78,7 @@ namespace PosMaster.Migrations
                     Mission = table.Column<string>(type: "text", nullable: true),
                     LogoPath = table.Column<string>(type: "text", nullable: true),
                     EnforcePassword = table.Column<bool>(type: "boolean", nullable: false),
+                    PasswordExpiryMonths = table.Column<int>(type: "integer", nullable: false),
                     PostalAddress = table.Column<string>(type: "text", nullable: true),
                     Town = table.Column<string>(type: "text", nullable: true),
                     EmailAddress = table.Column<string>(type: "text", nullable: true),
@@ -87,12 +91,13 @@ namespace PosMaster.Migrations
                     DisplayBuyingPrice = table.Column<bool>(type: "boolean", nullable: false),
                     Code = table.Column<string>(type: "text", nullable: true),
                     DateCreated = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
                     ClientId = table.Column<Guid>(type: "uuid", nullable: false),
                     InstanceId = table.Column<Guid>(type: "uuid", nullable: false),
                     Personnel = table.Column<string>(type: "text", nullable: true),
                     LastModifiedBy = table.Column<string>(type: "text", nullable: true),
-                    Notes = table.Column<string>(type: "text", nullable: true)
+                    Notes = table.Column<string>(type: "text", nullable: true),
+                    Status = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -114,37 +119,17 @@ namespace PosMaster.Migrations
                     Town = table.Column<string>(type: "text", nullable: true),
                     Code = table.Column<string>(type: "text", nullable: true),
                     DateCreated = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
                     ClientId = table.Column<Guid>(type: "uuid", nullable: false),
                     InstanceId = table.Column<Guid>(type: "uuid", nullable: false),
                     Personnel = table.Column<string>(type: "text", nullable: true),
                     LastModifiedBy = table.Column<string>(type: "text", nullable: true),
-                    Notes = table.Column<string>(type: "text", nullable: true)
+                    Notes = table.Column<string>(type: "text", nullable: true),
+                    Status = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Customers", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Expenses",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    ExpenseType = table.Column<string>(type: "text", nullable: true),
-                    Amount = table.Column<decimal>(type: "numeric", nullable: false),
-                    Code = table.Column<string>(type: "text", nullable: true),
-                    DateCreated = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    ClientId = table.Column<Guid>(type: "uuid", nullable: false),
-                    InstanceId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Personnel = table.Column<string>(type: "text", nullable: true),
-                    LastModifiedBy = table.Column<string>(type: "text", nullable: true),
-                    Notes = table.Column<string>(type: "text", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Expenses", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -156,12 +141,13 @@ namespace PosMaster.Migrations
                     MaxApprovedAmount = table.Column<decimal>(type: "numeric", nullable: false),
                     Code = table.Column<string>(type: "text", nullable: true),
                     DateCreated = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
                     ClientId = table.Column<Guid>(type: "uuid", nullable: false),
                     InstanceId = table.Column<Guid>(type: "uuid", nullable: false),
                     Personnel = table.Column<string>(type: "text", nullable: true),
                     LastModifiedBy = table.Column<string>(type: "text", nullable: true),
-                    Notes = table.Column<string>(type: "text", nullable: true)
+                    Notes = table.Column<string>(type: "text", nullable: true),
+                    Status = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -177,12 +163,13 @@ namespace PosMaster.Migrations
                     ImagePath = table.Column<string>(type: "text", nullable: true),
                     Code = table.Column<string>(type: "text", nullable: true),
                     DateCreated = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
                     ClientId = table.Column<Guid>(type: "uuid", nullable: false),
                     InstanceId = table.Column<Guid>(type: "uuid", nullable: false),
                     Personnel = table.Column<string>(type: "text", nullable: true),
                     LastModifiedBy = table.Column<string>(type: "text", nullable: true),
-                    Notes = table.Column<string>(type: "text", nullable: true)
+                    Notes = table.Column<string>(type: "text", nullable: true),
+                    Status = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -198,12 +185,13 @@ namespace PosMaster.Migrations
                     ImagePath = table.Column<string>(type: "text", nullable: true),
                     Code = table.Column<string>(type: "text", nullable: true),
                     DateCreated = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
                     ClientId = table.Column<Guid>(type: "uuid", nullable: false),
                     InstanceId = table.Column<Guid>(type: "uuid", nullable: false),
                     Personnel = table.Column<string>(type: "text", nullable: true),
                     LastModifiedBy = table.Column<string>(type: "text", nullable: true),
-                    Notes = table.Column<string>(type: "text", nullable: true)
+                    Notes = table.Column<string>(type: "text", nullable: true),
+                    Status = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -225,12 +213,13 @@ namespace PosMaster.Migrations
                     Website = table.Column<string>(type: "text", nullable: true),
                     Code = table.Column<string>(type: "text", nullable: true),
                     DateCreated = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
                     ClientId = table.Column<Guid>(type: "uuid", nullable: false),
                     InstanceId = table.Column<Guid>(type: "uuid", nullable: false),
                     Personnel = table.Column<string>(type: "text", nullable: true),
                     LastModifiedBy = table.Column<string>(type: "text", nullable: true),
-                    Notes = table.Column<string>(type: "text", nullable: true)
+                    Notes = table.Column<string>(type: "text", nullable: true),
+                    Status = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -245,12 +234,13 @@ namespace PosMaster.Migrations
                     Name = table.Column<string>(type: "text", nullable: true),
                     Code = table.Column<string>(type: "text", nullable: true),
                     DateCreated = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
                     ClientId = table.Column<Guid>(type: "uuid", nullable: false),
                     InstanceId = table.Column<Guid>(type: "uuid", nullable: false),
                     Personnel = table.Column<string>(type: "text", nullable: true),
                     LastModifiedBy = table.Column<string>(type: "text", nullable: true),
-                    Notes = table.Column<string>(type: "text", nullable: true)
+                    Notes = table.Column<string>(type: "text", nullable: true),
+                    Status = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -272,12 +262,13 @@ namespace PosMaster.Migrations
                     LogoutTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
                     Code = table.Column<string>(type: "text", nullable: true),
                     DateCreated = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
                     ClientId = table.Column<Guid>(type: "uuid", nullable: false),
                     InstanceId = table.Column<Guid>(type: "uuid", nullable: false),
                     Personnel = table.Column<string>(type: "text", nullable: true),
                     LastModifiedBy = table.Column<string>(type: "text", nullable: true),
-                    Notes = table.Column<string>(type: "text", nullable: true)
+                    Notes = table.Column<string>(type: "text", nullable: true),
+                    Status = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -407,12 +398,13 @@ namespace PosMaster.Migrations
                     SecondaryTelephone = table.Column<string>(type: "text", nullable: true),
                     Code = table.Column<string>(type: "text", nullable: true),
                     DateCreated = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
                     ClientId = table.Column<Guid>(type: "uuid", nullable: false),
                     InstanceId = table.Column<Guid>(type: "uuid", nullable: false),
                     Personnel = table.Column<string>(type: "text", nullable: true),
                     LastModifiedBy = table.Column<string>(type: "text", nullable: true),
-                    Notes = table.Column<string>(type: "text", nullable: true)
+                    Notes = table.Column<string>(type: "text", nullable: true),
+                    Status = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -421,6 +413,34 @@ namespace PosMaster.Migrations
                         name: "FK_ClientInstances_Clients_ClientId",
                         column: x => x.ClientId,
                         principalTable: "Clients",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Expenses",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    ExpenseTypeId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Amount = table.Column<decimal>(type: "numeric", nullable: false),
+                    Code = table.Column<string>(type: "text", nullable: true),
+                    DateCreated = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    ClientId = table.Column<Guid>(type: "uuid", nullable: false),
+                    InstanceId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Personnel = table.Column<string>(type: "text", nullable: true),
+                    LastModifiedBy = table.Column<string>(type: "text", nullable: true),
+                    Notes = table.Column<string>(type: "text", nullable: true),
+                    Status = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Expenses", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Expenses_ExpenseTypes_ExpenseTypeId",
+                        column: x => x.ExpenseTypeId,
+                        principalTable: "ExpenseTypes",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -441,12 +461,13 @@ namespace PosMaster.Migrations
                     UnitOfMeasure = table.Column<string>(type: "text", nullable: true),
                     Code = table.Column<string>(type: "text", nullable: true),
                     DateCreated = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
                     ClientId = table.Column<Guid>(type: "uuid", nullable: false),
                     InstanceId = table.Column<Guid>(type: "uuid", nullable: false),
                     Personnel = table.Column<string>(type: "text", nullable: true),
                     LastModifiedBy = table.Column<string>(type: "text", nullable: true),
-                    Notes = table.Column<string>(type: "text", nullable: true)
+                    Notes = table.Column<string>(type: "text", nullable: true),
+                    Status = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -470,12 +491,13 @@ namespace PosMaster.Migrations
                     SupplierId = table.Column<Guid>(type: "uuid", nullable: false),
                     Code = table.Column<string>(type: "text", nullable: true),
                     DateCreated = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
                     ClientId = table.Column<Guid>(type: "uuid", nullable: false),
                     InstanceId = table.Column<Guid>(type: "uuid", nullable: false),
                     Personnel = table.Column<string>(type: "text", nullable: true),
                     LastModifiedBy = table.Column<string>(type: "text", nullable: true),
-                    Notes = table.Column<string>(type: "text", nullable: true)
+                    Notes = table.Column<string>(type: "text", nullable: true),
+                    Status = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -497,12 +519,13 @@ namespace PosMaster.Migrations
                     SupplierId = table.Column<Guid>(type: "uuid", nullable: false),
                     Code = table.Column<string>(type: "text", nullable: true),
                     DateCreated = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
                     ClientId = table.Column<Guid>(type: "uuid", nullable: false),
                     InstanceId = table.Column<Guid>(type: "uuid", nullable: false),
                     Personnel = table.Column<string>(type: "text", nullable: true),
                     LastModifiedBy = table.Column<string>(type: "text", nullable: true),
-                    Notes = table.Column<string>(type: "text", nullable: true)
+                    Notes = table.Column<string>(type: "text", nullable: true),
+                    Status = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -528,12 +551,13 @@ namespace PosMaster.Migrations
                     UnitPrice = table.Column<decimal>(type: "numeric", nullable: false),
                     Code = table.Column<string>(type: "text", nullable: true),
                     DateCreated = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
                     ClientId = table.Column<Guid>(type: "uuid", nullable: false),
                     InstanceId = table.Column<Guid>(type: "uuid", nullable: false),
                     Personnel = table.Column<string>(type: "text", nullable: true),
                     LastModifiedBy = table.Column<string>(type: "text", nullable: true),
-                    Notes = table.Column<string>(type: "text", nullable: true)
+                    Notes = table.Column<string>(type: "text", nullable: true),
+                    Status = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -556,12 +580,13 @@ namespace PosMaster.Migrations
                     PriceTo = table.Column<decimal>(type: "numeric", nullable: false),
                     Code = table.Column<string>(type: "text", nullable: true),
                     DateCreated = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
                     ClientId = table.Column<Guid>(type: "uuid", nullable: false),
                     InstanceId = table.Column<Guid>(type: "uuid", nullable: false),
                     Personnel = table.Column<string>(type: "text", nullable: true),
                     LastModifiedBy = table.Column<string>(type: "text", nullable: true),
-                    Notes = table.Column<string>(type: "text", nullable: true)
+                    Notes = table.Column<string>(type: "text", nullable: true),
+                    Status = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -584,12 +609,13 @@ namespace PosMaster.Migrations
                     QuantityTo = table.Column<decimal>(type: "numeric", nullable: false),
                     Code = table.Column<string>(type: "text", nullable: true),
                     DateCreated = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
                     ClientId = table.Column<Guid>(type: "uuid", nullable: false),
                     InstanceId = table.Column<Guid>(type: "uuid", nullable: false),
                     Personnel = table.Column<string>(type: "text", nullable: true),
                     LastModifiedBy = table.Column<string>(type: "text", nullable: true),
-                    Notes = table.Column<string>(type: "text", nullable: true)
+                    Notes = table.Column<string>(type: "text", nullable: true),
+                    Status = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -618,12 +644,13 @@ namespace PosMaster.Migrations
                     IsWalkIn = table.Column<bool>(type: "boolean", nullable: false),
                     Code = table.Column<string>(type: "text", nullable: true),
                     DateCreated = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
                     ClientId = table.Column<Guid>(type: "uuid", nullable: false),
                     InstanceId = table.Column<Guid>(type: "uuid", nullable: false),
                     Personnel = table.Column<string>(type: "text", nullable: true),
                     LastModifiedBy = table.Column<string>(type: "text", nullable: true),
-                    Notes = table.Column<string>(type: "text", nullable: true)
+                    Notes = table.Column<string>(type: "text", nullable: true),
+                    Status = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -683,6 +710,11 @@ namespace PosMaster.Migrations
                 name: "IX_ClientInstances_ClientId",
                 table: "ClientInstances",
                 column: "ClientId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Expenses_ExpenseTypeId",
+                table: "Expenses",
+                column: "ExpenseTypeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_GoodReceivedNotes_SupplierId",
@@ -749,9 +781,6 @@ namespace PosMaster.Migrations
                 name: "Expenses");
 
             migrationBuilder.DropTable(
-                name: "ExpenseTypes");
-
-            migrationBuilder.DropTable(
                 name: "GoodReceivedNotes");
 
             migrationBuilder.DropTable(
@@ -786,6 +815,9 @@ namespace PosMaster.Migrations
 
             migrationBuilder.DropTable(
                 name: "Clients");
+
+            migrationBuilder.DropTable(
+                name: "ExpenseTypes");
 
             migrationBuilder.DropTable(
                 name: "Suppliers");

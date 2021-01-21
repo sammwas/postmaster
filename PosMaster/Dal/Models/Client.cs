@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace PosMaster.Dal
+﻿namespace PosMaster.Dal
 {
 	public class Client : BaseEntity
 	{
@@ -14,6 +12,7 @@ namespace PosMaster.Dal
 		public string Mission { get; set; }
 		public string LogoPath { get; set; }
 		public bool EnforcePassword { get; set; }
+		public int PasswordExpiryMonths { get; set; }
 		public string PostalAddress { get; set; }
 		public string Town { get; set; }
 		public string EmailAddress { get; set; }
@@ -22,8 +21,7 @@ namespace PosMaster.Dal
 		public string PrimaryColor { get; set; }
 		public string SecondaryColor { get; set; }
 		public int PhoneNumberLength { get; set; }
-		public string TelephoneCode { get; set; }
-		public List<ClientInstance> ClientInstances { get; set; }
+		public string TelephoneCode { get; set; } 
 		public bool DisplayBuyingPrice { get; set; }
 	}
 }

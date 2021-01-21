@@ -10,7 +10,7 @@ using PosMaster.Dal;
 namespace PosMaster.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20210121110720_Initial Db")]
+    [Migration("20210121130124_InitialDb")]
     partial class InitialDb
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -178,7 +178,7 @@ namespace PosMaster.Migrations
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<DateTime>("DateLastModified")
+                    b.Property<DateTime?>("DateLastModified")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<bool>("DisplayBuyingPrice")
@@ -208,6 +208,9 @@ namespace PosMaster.Migrations
                     b.Property<string>("Notes")
                         .HasColumnType("text");
 
+                    b.Property<int>("PasswordExpiryMonths")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Personnel")
                         .HasColumnType("text");
 
@@ -231,6 +234,9 @@ namespace PosMaster.Migrations
 
                     b.Property<string>("Slogan")
                         .HasColumnType("text");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
 
                     b.Property<string>("TelephoneCode")
                         .HasColumnType("text");
@@ -264,7 +270,7 @@ namespace PosMaster.Migrations
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<DateTime>("DateLastModified")
+                    b.Property<DateTime?>("DateLastModified")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<Guid>("InstanceId")
@@ -303,6 +309,9 @@ namespace PosMaster.Migrations
                     b.Property<string>("SecondaryTelephone")
                         .HasColumnType("text");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Town")
                         .HasColumnType("text");
 
@@ -328,7 +337,7 @@ namespace PosMaster.Migrations
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<DateTime>("DateLastModified")
+                    b.Property<DateTime?>("DateLastModified")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("FirstName")
@@ -364,6 +373,9 @@ namespace PosMaster.Migrations
                     b.Property<string>("PostalAddress")
                         .HasColumnType("text");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Town")
                         .HasColumnType("text");
 
@@ -390,11 +402,11 @@ namespace PosMaster.Migrations
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<DateTime>("DateLastModified")
+                    b.Property<DateTime?>("DateLastModified")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<string>("ExpenseType")
-                        .HasColumnType("text");
+                    b.Property<Guid>("ExpenseTypeId")
+                        .HasColumnType("uuid");
 
                     b.Property<Guid>("InstanceId")
                         .HasColumnType("uuid");
@@ -408,7 +420,12 @@ namespace PosMaster.Migrations
                     b.Property<string>("Personnel")
                         .HasColumnType("text");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("ExpenseTypeId");
 
                     b.ToTable("Expenses");
                 });
@@ -428,7 +445,7 @@ namespace PosMaster.Migrations
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<DateTime>("DateLastModified")
+                    b.Property<DateTime?>("DateLastModified")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<Guid>("InstanceId")
@@ -448,6 +465,9 @@ namespace PosMaster.Migrations
 
                     b.Property<string>("Personnel")
                         .HasColumnType("text");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -469,7 +489,7 @@ namespace PosMaster.Migrations
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<DateTime>("DateLastModified")
+                    b.Property<DateTime?>("DateLastModified")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<Guid>("InstanceId")
@@ -492,6 +512,9 @@ namespace PosMaster.Migrations
 
                     b.Property<Guid>("PoId")
                         .HasColumnType("uuid");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
 
                     b.Property<Guid>("SupplierId")
                         .HasColumnType("uuid");
@@ -518,7 +541,7 @@ namespace PosMaster.Migrations
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<DateTime>("DateLastModified")
+                    b.Property<DateTime?>("DateLastModified")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("ImagePath")
@@ -538,6 +561,9 @@ namespace PosMaster.Migrations
 
                     b.Property<string>("Personnel")
                         .HasColumnType("text");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -559,7 +585,7 @@ namespace PosMaster.Migrations
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<DateTime>("DateLastModified")
+                    b.Property<DateTime?>("DateLastModified")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<decimal>("DeliveredQuantity")
@@ -588,6 +614,9 @@ namespace PosMaster.Migrations
 
                     b.Property<Guid>("ProductId")
                         .HasColumnType("uuid");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
 
                     b.Property<decimal>("UnitPrice")
                         .HasColumnType("numeric");
@@ -623,7 +652,7 @@ namespace PosMaster.Migrations
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<DateTime>("DateLastModified")
+                    b.Property<DateTime?>("DateLastModified")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("ImagePath")
@@ -653,6 +682,9 @@ namespace PosMaster.Migrations
                     b.Property<decimal>("SellingPrice")
                         .HasColumnType("numeric");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
                     b.Property<string>("UnitOfMeasure")
                         .HasColumnType("text");
 
@@ -678,7 +710,7 @@ namespace PosMaster.Migrations
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<DateTime>("DateLastModified")
+                    b.Property<DateTime?>("DateLastModified")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("ImagePath")
@@ -698,6 +730,9 @@ namespace PosMaster.Migrations
 
                     b.Property<string>("Personnel")
                         .HasColumnType("text");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -719,7 +754,7 @@ namespace PosMaster.Migrations
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<DateTime>("DateLastModified")
+                    b.Property<DateTime?>("DateLastModified")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<Guid>("InstanceId")
@@ -743,6 +778,9 @@ namespace PosMaster.Migrations
                     b.Property<Guid>("ProductId")
                         .HasColumnType("uuid");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ProductId");
@@ -765,7 +803,7 @@ namespace PosMaster.Migrations
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<DateTime>("DateLastModified")
+                    b.Property<DateTime?>("DateLastModified")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<Guid>("InstanceId")
@@ -789,6 +827,9 @@ namespace PosMaster.Migrations
                     b.Property<decimal>("QuantityTo")
                         .HasColumnType("numeric");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ProductId");
@@ -811,7 +852,7 @@ namespace PosMaster.Migrations
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<DateTime>("DateLastModified")
+                    b.Property<DateTime?>("DateLastModified")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<Guid>("InstanceId")
@@ -828,6 +869,9 @@ namespace PosMaster.Migrations
 
                     b.Property<string>("Personnel")
                         .HasColumnType("text");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
 
                     b.Property<Guid>("SupplierId")
                         .HasColumnType("uuid");
@@ -857,7 +901,7 @@ namespace PosMaster.Migrations
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<DateTime>("DateLastModified")
+                    b.Property<DateTime?>("DateLastModified")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<decimal>("Discount")
@@ -893,6 +937,9 @@ namespace PosMaster.Migrations
                     b.Property<decimal>("Quantity")
                         .HasColumnType("numeric");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
                     b.Property<decimal>("UnitPrice")
                         .HasColumnType("numeric");
 
@@ -920,7 +967,7 @@ namespace PosMaster.Migrations
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<DateTime>("DateLastModified")
+                    b.Property<DateTime?>("DateLastModified")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("EmailAddress")
@@ -953,6 +1000,9 @@ namespace PosMaster.Migrations
                     b.Property<string>("SecondaryTelephone")
                         .HasColumnType("text");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Town")
                         .HasColumnType("text");
 
@@ -979,7 +1029,7 @@ namespace PosMaster.Migrations
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<DateTime>("DateLastModified")
+                    b.Property<DateTime?>("DateLastModified")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<Guid>("InstanceId")
@@ -996,6 +1046,9 @@ namespace PosMaster.Migrations
 
                     b.Property<string>("Personnel")
                         .HasColumnType("text");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -1020,7 +1073,7 @@ namespace PosMaster.Migrations
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<DateTime>("DateLastModified")
+                    b.Property<DateTime?>("DateLastModified")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Email")
@@ -1029,6 +1082,9 @@ namespace PosMaster.Migrations
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("boolean");
+
+                    b.Property<string>("FirstName")
+                        .HasColumnType("text");
 
                     b.Property<string>("Gender")
                         .HasColumnType("text");
@@ -1048,6 +1104,9 @@ namespace PosMaster.Migrations
                     b.Property<string>("LastModifiedBy")
                         .HasColumnType("text");
 
+                    b.Property<string>("LastName")
+                        .HasColumnType("text");
+
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("boolean");
 
@@ -1064,6 +1123,9 @@ namespace PosMaster.Migrations
 
                     b.Property<string>("Notes")
                         .HasColumnType("text");
+
+                    b.Property<DateTime>("PasswordChangeDate")
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("PasswordHash")
                         .HasColumnType("text");
@@ -1123,7 +1185,7 @@ namespace PosMaster.Migrations
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<DateTime>("DateLastModified")
+                    b.Property<DateTime?>("DateLastModified")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<Guid>("InstanceId")
@@ -1152,6 +1214,9 @@ namespace PosMaster.Migrations
 
                     b.Property<string>("RefererUrl")
                         .HasColumnType("text");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
 
                     b.Property<bool>("Success")
                         .HasColumnType("boolean");
@@ -1217,11 +1282,24 @@ namespace PosMaster.Migrations
 
             modelBuilder.Entity("PosMaster.Dal.ClientInstance", b =>
                 {
-                    b.HasOne("PosMaster.Dal.Client", null)
-                        .WithMany("ClientInstances")
+                    b.HasOne("PosMaster.Dal.Client", "Client")
+                        .WithMany()
                         .HasForeignKey("ClientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Client");
+                });
+
+            modelBuilder.Entity("PosMaster.Dal.Expense", b =>
+                {
+                    b.HasOne("PosMaster.Dal.ExpenseType", "ExpenseType")
+                        .WithMany()
+                        .HasForeignKey("ExpenseTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ExpenseType");
                 });
 
             modelBuilder.Entity("PosMaster.Dal.GoodReceivedNote", b =>
@@ -1305,11 +1383,6 @@ namespace PosMaster.Migrations
                     b.Navigation("Customer");
 
                     b.Navigation("Product");
-                });
-
-            modelBuilder.Entity("PosMaster.Dal.Client", b =>
-                {
-                    b.Navigation("ClientInstances");
                 });
 #pragma warning restore 612, 618
         }

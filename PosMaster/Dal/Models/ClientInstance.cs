@@ -4,6 +4,7 @@ namespace PosMaster.Dal
 {
 	public class ClientInstance : BaseEntity
 	{
+		public Client Client { get; set; }
 		public DateTime OpeningTime { get; set; }
 		public DateTime ClosingTime { get; set; }
 		public string Latitude { get; set; }
