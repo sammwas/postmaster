@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using PosMaster.ViewModels;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,9 +20,11 @@ namespace PosMaster.Dal.Interfaces
 	public class ClientImplementation : IClientInterface
 	{
 		private readonly DatabaseContext _context;
-		public ClientImplementation(DatabaseContext context)
+		private ILogger<ClientImplementation> _logger;
+		public ClientImplementation(DatabaseContext context, ILogger<ClientImplementation> logger)
 		{
 			_context = context;
+			_logger = logger;
 		}
 
 		public Task<ReturnData<Client>> AllAsync(int pageNumber, int perPage, int currentPage, string search)
@@ -31,6 +35,7 @@ namespace PosMaster.Dal.Interfaces
 		public async Task<ReturnData<Client>> ByIdAsync(Guid id)
 		{
 			var result = new ReturnData<Client> { Data = new Client() };
+			_logger.LogInformation($"{nameof(ByIdAsync)} get client by id - {id}");
 			try
 			{
 				var client = await _context.Clients.FirstOrDefaultAsync(c => c.Id.Equals(id));
@@ -38,11 +43,13 @@ namespace PosMaster.Dal.Interfaces
 				result.Message = result.Success ? "Found" : "Not Found";
 				if (result.Success)
 					result.Data = client;
+				_logger.LogInformation($"{nameof(ByIdAsync)}  client {id} {result.Message}");
 				return result;
 			}
 			catch (Exception ex)
 			{
 				Console.WriteLine(ex);
+				_logger.LogError($"{nameof(ByIdAsync)}  client {id} {ex.Message}");
 				result.ErrorMessage = ex.Message;
 				result.Message = "Error occured";
 				return result;
@@ -121,7 +128,15 @@ namespace PosMaster.Dal.Interfaces
 					Notes = model.Notes
 				};
 				client.ClientId = client.InstanceId = client.Id;
+				var instance = new ClientInstance
+				{
+					ClientId = client.Id,
+					Name = "MAIN",
+					Personnel = model.Personnel
+				};
+				instance.InstanceId = instance.Id;
 				_context.Clients.Add(client);
+				_context.ClientInstances.Add(instance);
 				await _context.SaveChangesAsync();
 				result.Success = true;
 				result.Message = "Added";

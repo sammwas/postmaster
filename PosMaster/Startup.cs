@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Net.Http.Headers;
 using PosMaster.Dal;
 using PosMaster.Dal.Interfaces;
@@ -82,13 +83,14 @@ namespace PosMaster
 			services.AddControllersWithViews();
 		}
 
-		public void Configure(IApplicationBuilder app)
+		public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
 		{
 			if (WebHostEnvironment.IsDevelopment())
 				app.UseDeveloperExceptionPage();
 			else
 				app.UseExceptionHandler("/Home/Error");
 
+			loggerFactory.AddFile("Logs/PosMaster-{Date}.txt");
 			app.UseStaticFiles(new StaticFileOptions
 			{
 				OnPrepareResponse = ctx =>
