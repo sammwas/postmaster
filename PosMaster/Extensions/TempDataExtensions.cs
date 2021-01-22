@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using PosMaster.Dal;
 
 namespace PosMaster.Extensions
 {
@@ -10,12 +11,6 @@ namespace PosMaster.Extensions
 			@this["title"] = title;
 			@this["type"] = type.ToString();
 		}
-
-		public enum AlertLevel
-		{
-			Success,
-			Warning,
-			Error
-		}
+		 
 	}
 }

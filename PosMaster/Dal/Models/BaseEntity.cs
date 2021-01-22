@@ -29,4 +29,17 @@ namespace PosMaster.Dal
 		Active,
 		Closed
 	}
+
+	public enum DataSource
+	{
+		Web,
+		Mobile
+	}
+
+	public enum AlertLevel
+	{
+		Success,
+		Warning,
+		Error
+	}
 }
