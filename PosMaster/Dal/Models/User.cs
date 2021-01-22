@@ -17,10 +17,12 @@ namespace PosMaster.Dal
 		public string ImagePath { get; set; }
 		public string IdNumber { get; set; }
 		public string Gender { get; set; }
+		public string Title { get; set; }
 		public string FirstName { get; set; }
+		public string MiddleName { get; set; }
 		public string LastName { get; set; }
 		public EntityStatus Status { get; set; }
 		public DateTime PasswordChangeDate { get; set; }
-		public string FullName => $"{FirstName} {LastName}";
+		public string FullName => $"{FirstName} {MiddleName} {LastName}";
 	}
 }

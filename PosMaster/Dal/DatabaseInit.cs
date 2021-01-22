@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using MailKit.Security;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -65,6 +66,23 @@ namespace PosMaster.Dal
 					await userManager.AddToRoleAsync(poweruser, Role.Admin);
 					await userManager.AddToRoleAsync(poweruser, Role.SuperAdmin);
 				}
+			}
+
+			if (!context.SystemSettings.Any())
+			{
+				var settings = new SystemSetting
+				{
+					ClientId = clientId,
+					InstanceId = instanceId,
+					Personnel = Constants.SuperAdminUserName,
+					Name = "PosMaster",
+					Version = "1.0.1",
+					Tagline = "Best POS in the Market",
+					TermsAndConditions = "USE AS IS",
+					EmailAddress = Constants.SystemEmailAddress
+				};
+				context.SystemSettings.Add(settings);
+				context.SaveChanges();
 			}
 
 			if (!context.Clients.Any())
@@ -178,6 +196,27 @@ namespace PosMaster.Dal
 				context.UnitOfMeasures.Add(unitOfMeasure);
 				context.SaveChanges();
 			}
+
+			if (!context.EmailSettings.Any())
+			{
+				var setting = new EmailSetting
+				{
+					ClientId = clientId,
+					InstanceId = instanceId,
+					SmtpServer = "smtp.gmail.com",
+					SmtpPort = "587",
+					SmtpPassword = "PosMaster123.#",
+					SmtpUsername = Constants.SystemEmailAddress,
+					SenderFromEmail = Constants.SystemEmailAddress,
+					SenderFromName = "PosMaster",
+					SocketOptions = SecureSocketOptions.StartTls,
+					Code = "DEFAULT",
+					Personnel = Constants.SuperAdminUserName
+				};
+				context.EmailSettings.Add(setting);
+				context.SaveChanges();
+			}
+
 			Console.WriteLine("Done. Seeding complete");
 		}
 	}

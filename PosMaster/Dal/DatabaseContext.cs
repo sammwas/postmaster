@@ -9,6 +9,7 @@ namespace PosMaster.Dal
 		{
 
 		}
+		public DbSet<SystemSetting> SystemSettings { get; set; }
 		public DbSet<Client> Clients { get; set; }
 		public DbSet<ClientInstance> ClientInstances { get; set; }
 		public DbSet<UnitOfMeasure> UnitOfMeasures { get; set; }
@@ -27,6 +28,7 @@ namespace PosMaster.Dal
 		public DbSet<GoodReceivedNote> GoodReceivedNotes { get; set; }
 		public DbSet<PoGrnProduct> PoGrnProducts { get; set; }
 		public DbSet<EmailSetting> EmailSettings { get; set; }
+		public DbSet<SmsSetting> SmsSettings { get; set; }
 		public DbSet<Notification> Notifications { get; set; }
 	}
 }

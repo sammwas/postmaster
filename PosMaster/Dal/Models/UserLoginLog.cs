@@ -12,7 +12,6 @@ namespace PosMaster.Dal
 		public DataSource Source { get; set; }
 		public bool IsHttps { get; set; }
 		public bool Success { get; set; }
-		public string Message { get; set; }
 		public string IpAddress { get; set; }
 		public DateTime? LogoutTime { get; set; }
 	}
