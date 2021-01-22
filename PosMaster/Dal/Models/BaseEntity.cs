@@ -20,6 +20,7 @@ namespace PosMaster.Dal
 		public string LastModifiedBy { get; set; }
 		public string Notes { get; set; }
 		public EntityStatus Status { get; set; }
+
 	}
 
 	public enum EntityStatus

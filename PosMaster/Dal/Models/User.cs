@@ -21,5 +21,6 @@ namespace PosMaster.Dal
 		public string LastName { get; set; }
 		public EntityStatus Status { get; set; }
 		public DateTime PasswordChangeDate { get; set; }
+		public string FullName => $"{FirstName} {LastName}";
 	}
 }

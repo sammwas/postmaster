@@ -25,7 +25,8 @@ namespace PosMaster.Controllers
 			{
 
 			}
-			return View(new ClientViewModel(result.Data));
+			var model = result.Success ? new ClientViewModel(result.Data) : new ClientViewModel();
+			return View(model);
 		}
 	}
 }

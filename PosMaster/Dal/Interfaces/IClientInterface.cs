@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using PosMaster.ViewModels;
-using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +11,7 @@ namespace PosMaster.Dal.Interfaces
 	public interface IClientInterface
 	{
 		Task<ReturnData<Client>> EditAsync(ClientViewModel model);
-		Task<ReturnData<Client>> AllAsync(int pageNumber, int perPage, int currentPage, string search);
+		Task<ReturnData<List<Client>>> AllAsync();
 		Task<ReturnData<Client>> ByIdAsync(Guid id);
 	}
 
@@ -20,22 +19,46 @@ namespace PosMaster.Dal.Interfaces
 	public class ClientImplementation : IClientInterface
 	{
 		private readonly DatabaseContext _context;
-		private ILogger<ClientImplementation> _logger;
+		private readonly ILogger<ClientImplementation> _logger;
 		public ClientImplementation(DatabaseContext context, ILogger<ClientImplementation> logger)
 		{
 			_context = context;
 			_logger = logger;
 		}
 
-		public Task<ReturnData<Client>> AllAsync(int pageNumber, int perPage, int currentPage, string search)
+		public async Task<ReturnData<List<Client>>> AllAsync()
 		{
-			throw new NotImplementedException();
+			var result = new ReturnData<List<Client>> { Data = new List<Client>() };
+			var tag = nameof(AllAsync);
+			_logger.LogInformation($"{tag} get all clients");
+			try
+			{
+				var data = await _context.Clients
+					.OrderByDescending(c => c.DateCreated)
+					.ToListAsync();
+				result.Success = data.Any();
+				result.Message = result.Success ? "Found" : "Not Found";
+				if (result.Success)
+					result.Data = data;
+				_logger.LogInformation($"{tag} found {data.Count} clients");
+				return result;
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex);
+				result.ErrorMessage = ex.Message;
+				result.Message = "Error occured";
+				_logger.LogError($"{tag} {result.Message} : {ex}");
+				return result;
+			}
+
 		}
 
 		public async Task<ReturnData<Client>> ByIdAsync(Guid id)
 		{
 			var result = new ReturnData<Client> { Data = new Client() };
-			_logger.LogInformation($"{nameof(ByIdAsync)} get client by id - {id}");
+			var tag = nameof(ByIdAsync);
+			_logger.LogInformation($"{tag} get client by id - {id}");
 			try
 			{
 				var client = await _context.Clients.FirstOrDefaultAsync(c => c.Id.Equals(id));
@@ -43,15 +66,15 @@ namespace PosMaster.Dal.Interfaces
 				result.Message = result.Success ? "Found" : "Not Found";
 				if (result.Success)
 					result.Data = client;
-				_logger.LogInformation($"{nameof(ByIdAsync)}  client {id} {result.Message}");
+				_logger.LogInformation($"{tag} client {id} {result.Message}");
 				return result;
 			}
 			catch (Exception ex)
 			{
 				Console.WriteLine(ex);
-				_logger.LogError($"{nameof(ByIdAsync)}  client {id} {ex.Message}");
 				result.ErrorMessage = ex.Message;
 				result.Message = "Error occured";
+				_logger.LogError($"{tag} {result.Message} : {ex}");
 				return result;
 			}
 		}
@@ -59,6 +82,8 @@ namespace PosMaster.Dal.Interfaces
 		public async Task<ReturnData<Client>> EditAsync(ClientViewModel model)
 		{
 			var result = new ReturnData<Client> { Data = new Client() };
+			var tag = nameof(EditAsync);
+			_logger.LogInformation($"{tag} edit client");
 			try
 			{
 				if (model.IsEditMode)
@@ -67,6 +92,7 @@ namespace PosMaster.Dal.Interfaces
 					if (dbClient == null)
 					{
 						result.Message = "Not Found";
+						_logger.LogInformation($"{tag} update failed {model.Id} : {result.Message}");
 						return result;
 					}
 					dbClient.Code = model.Code;
@@ -99,6 +125,7 @@ namespace PosMaster.Dal.Interfaces
 					result.Data = dbClient;
 					result.Success = true;
 					result.Message = "Updated";
+					_logger.LogInformation($"{tag} updated {dbClient.Name} {model.Id} : {result.Message}");
 					return result;
 				}
 				var client = new Client
@@ -140,6 +167,7 @@ namespace PosMaster.Dal.Interfaces
 				await _context.SaveChangesAsync();
 				result.Success = true;
 				result.Message = "Added";
+				_logger.LogInformation($"{tag} added {client.Name}  {client.Id} : {result.Message}");
 				result.Data = client;
 				return result;
 			}
@@ -148,6 +176,7 @@ namespace PosMaster.Dal.Interfaces
 				Console.WriteLine(ex);
 				result.ErrorMessage = ex.Message;
 				result.Message = "Error occured";
+				_logger.LogError($"{tag} {result.Message} : {ex}");
 				return result;
 			}
 		}

@@ -16,6 +16,10 @@ namespace PosMaster.ViewModels
 		public string Personnel { get; set; }
 		[HiddenInput]
 		public Guid Id { get; set; }
+		[HiddenInput]
+		public Guid ClientId { get; set; }
+		[HiddenInput]
+		public Guid InstanceId { get; set; }
 		[Required]
 		public string Code { get; set; }
 	}

@@ -26,5 +26,7 @@ namespace PosMaster.Dal
 		public DbSet<PurchaseOrder> PurchaseOrders { get; set; }
 		public DbSet<GoodReceivedNote> GoodReceivedNotes { get; set; }
 		public DbSet<PoGrnProduct> PoGrnProducts { get; set; }
+		public DbSet<EmailSetting> EmailSettings { get; set; }
+		public DbSet<Notification> Notifications { get; set; }
 	}
 }
