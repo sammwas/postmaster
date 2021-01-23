@@ -4,11 +4,7 @@ using System.ComponentModel.DataAnnotations;
 namespace PosMaster.ViewModels
 {
 	public class ResetPasswordViewModel
-	{
-		[Required]
-		[Display(Name = "Email Address")]
-		[DataType(DataType.EmailAddress)]
-		public string EmailAddress { get; set; }
+	{	 
 		[HiddenInput]
 		public string Id { get; set; }
 		[Required]

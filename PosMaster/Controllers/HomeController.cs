@@ -41,7 +41,7 @@ namespace PosMaster.Controllers
 			await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
 			ViewData["ReturnUrl"] = returnUrl;
 			_logger.LogInformation($"{nameof(Index)} application started");
-			return View();
+			return View(new LoginViewModel());
 		}
 
 		[HttpPost]
@@ -275,14 +275,14 @@ namespace PosMaster.Controllers
 
 		[HttpGet]
 		[AllowAnonymous]
-		public IActionResult ResetPassword(string code = null)
+		public IActionResult ResetPassword(string userId, string code)
 		{
 			if (code == null)
 			{
 				throw new ApplicationException("A code must be supplied for password reset.");
 			}
 
-			var model = new ResetPasswordViewModel { Code = code };
+			var model = new ResetPasswordViewModel { Code = code,Id=userId };
 			return View(model);
 		}
 
@@ -296,7 +296,7 @@ namespace PosMaster.Controllers
 				return View(model);
 			}
 
-			var user = await _userManager.FindByEmailAsync(model.EmailAddress);
+			var user = await _userManager.FindByIdAsync(model.Id);
 			if (user == null)
 			{
 				return RedirectToAction(nameof(ResetPasswordConfirmation));
