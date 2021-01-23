@@ -5,6 +5,10 @@ namespace PosMaster.Dal
 {
 	public class User : IdentityUser
 	{
+		public User()
+		{
+			DateCreated = DateTime.Now;
+		}
 		public string Role { get; set; }
 		public DateTime LastLoginTime { get; set; }
 		public DateTime DateCreated { get; set; }

@@ -60,7 +60,8 @@ namespace PosMaster.Dal.Interfaces
 			_logger.LogInformation($"{tag} get client instance by id - {id}");
 			try
 			{
-				var client = await _context.ClientInstances.FirstOrDefaultAsync(c => c.Id.Equals(id));
+				var client = await _context.ClientInstances.Include(c => c.Client)
+					.FirstOrDefaultAsync(c => c.Id.Equals(id));
 				result.Success = client != null;
 				result.Message = result.Success ? "Found" : "Not Found";
 				if (result.Success)

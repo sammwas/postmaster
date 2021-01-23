@@ -34,6 +34,7 @@ namespace PosMaster
 			services.AddScoped<IClientInterface, ClientImplementation>();
 			services.AddScoped<IClientInstanceInterface, ClientInstanceImplementation>();
 			services.AddScoped<ISystemSettingInterface, SystemSettingImplementation>();
+			services.AddScoped<IProductInterface, ProductImplementation>();
 
 			var server = Configuration["Database:Server"];
 			var port = Configuration["Database:Port"];
