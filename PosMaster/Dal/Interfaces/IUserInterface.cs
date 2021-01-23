@@ -26,6 +26,16 @@ namespace PosMaster.Dal.Interfaces
 			_logger.LogInformation($"{tag} add login log for {log.UserName}");
 			try
 			{
+				if (log.Success)
+				{
+					var user = _context.Users
+						.FirstOrDefault(u => u.Email.ToLower().Equals(log.UserName.ToLower()));
+					if (user != null)
+					{
+						user.LastLoginTime = DateTime.Now;
+						_context.SaveChanges();
+					}
+				}
 				await _context.UserLoginLogs.AddAsync(log);
 				await _context.SaveChangesAsync();
 				result.Success = true;

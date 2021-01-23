@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -15,6 +10,9 @@ using PosMaster.Extensions;
 using PosMaster.Models;
 using PosMaster.Services;
 using PosMaster.ViewModels;
+using System;
+using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace PosMaster.Controllers
 {
@@ -24,21 +22,27 @@ namespace PosMaster.Controllers
 		private readonly SignInManager<User> _signInManager;
 		private readonly IEmailService _emailService;
 		private readonly IUserInterface _userInterface;
+		private readonly IClientInstanceInterface _instanceInterface;
 		private readonly ILogger<HomeController> _logger;
+		private readonly ICookiesService _cookiesService;
 
 		public HomeController(UserManager<User> userManager, SignInManager<User> signInManager,
-		IEmailService emailService, IUserInterface userInterface, ILogger<HomeController> logger)
+		IEmailService emailService, IUserInterface userInterface, ILogger<HomeController> logger,
+		IClientInstanceInterface instanceInterface, ICookiesService cookiesService)
 		{
 			_userManager = userManager;
 			_signInManager = signInManager;
 			_emailService = emailService;
 			_userInterface = userInterface;
 			_logger = logger;
+			_instanceInterface = instanceInterface;
+			_cookiesService = cookiesService;
 		}
 
 		public async Task<IActionResult> Index(string returnUrl = null)
 		{
 			await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+			_cookiesService.Remove();
 			ViewData["ReturnUrl"] = returnUrl;
 			_logger.LogInformation($"{nameof(Index)} application started");
 			return View(new LoginViewModel());
@@ -103,6 +107,19 @@ namespace PosMaster.Controllers
 						return View(model);
 					}
 
+					var userData = new UserCookieData(user);
+					var instanceResult = await _instanceInterface.ByIdAsync(user.InstanceId);
+					if (instanceResult.Success)
+					{
+						var instance = instanceResult.Data;
+						userData.InstanceCode = instance.Code;
+						userData.InstanceName = instance.Name;
+						var client = instance.Client;
+						userData.ClientCode = client.Code;
+						userData.ClientName = client.Name;
+						userData.ClientLogoPath = client.LogoPath;
+					}
+					_cookiesService.Store(userData);
 					var msg_ = "User logged in success";
 					_logger.LogInformation(msg_);
 					TempData.SetData(AlertLevel.Success, "Login Success", msg_);
@@ -282,7 +299,7 @@ namespace PosMaster.Controllers
 				throw new ApplicationException("A code must be supplied for password reset.");
 			}
 
-			var model = new ResetPasswordViewModel { Code = code,Id=userId };
+			var model = new ResetPasswordViewModel { Code = code, Id = userId };
 			return View(model);
 		}
 

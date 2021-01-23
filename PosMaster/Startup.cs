@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -27,7 +28,7 @@ namespace PosMaster
 
 		public void ConfigureServices(IServiceCollection services)
 		{
-
+			services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 			services.AddTransient(m => new FileUploadService(WebHostEnvironment));
 			services.AddScoped<IEmailService, EmailService>();
 			services.AddScoped<IUserInterface, UserInterface>();
@@ -35,6 +36,7 @@ namespace PosMaster
 			services.AddScoped<IClientInstanceInterface, ClientInstanceImplementation>();
 			services.AddScoped<ISystemSettingInterface, SystemSettingImplementation>();
 			services.AddScoped<IProductInterface, ProductImplementation>();
+			services.AddScoped<ICookiesService, CookiesService>();
 
 			var server = Configuration["Database:Server"];
 			var port = Configuration["Database:Port"];
