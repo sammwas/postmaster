@@ -1,0 +1,149 @@
+﻿@model ClientViewModel
+@{
+    ViewData["Active"] = "Clients";
+    var statuses = Helpers.Statuses();
+    var option = Model.IsEditMode ? "Update" : "Add";
+    var title = $"{option} Client";
+    ViewData["Title"] = title;
+}
+
+<div class="card card-primary">
+        <div class="card-header">
+            <h3 class="card-title">@ViewData["Title"]</h3>
+        </div>
+
+        <form role="form" method="post" autocomplete="off">
+            <div asp-validation-summary="All"></div>
+            <input asp-for="Id" />
+            <input asp-for="IsEditMode" />
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="Code"></label>
+                            <input asp-for="Code" class="form-control" placeholder="Code">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="Name"></label>
+                            <input asp-for="Name" class="form-control" placeholder="Name">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="EmailAddress"></label>
+                            <input asp-for="EmailAddress" class="form-control" placeholder="abc@example.com">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="PostalAddress"></label>
+                            <input asp-for="PostalAddress" class="form-control" placeholder="Postal Address">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="Town"></label>
+                            <input asp-for="Town" class="form-control" placeholder="Nairobi">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="Slogan"></label>
+                            <input asp-for="Slogan" class="form-control" placeholder="Slogan">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="PrimaryTelephone"></label>
+                            <input asp-for="PrimaryTelephone" class="form-control" placeholder="07XXXXXXXX">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="SecondaryTelephone"></label>
+                            <input asp-for="SecondaryTelephone" class="form-control" placeholder="07XXXXXXXX">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="CurrencyShort"></label>
+                            <input asp-for="CurrencyShort" class="form-control" placeholder="abc@example.com">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="CurrencyFull"></label>
+                            <input asp-for="CurrencyFull" class="form-control" placeholder="Postal Address">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="CountryShort"></label>
+                            <input asp-for="CountryShort" class="form-control" placeholder="abc@example.com">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="CountryFull"></label>
+                            <input asp-for="CountryFull" class="form-control" placeholder="Postal Address">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label asp-for="Notes"></label>
+                            <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Notes"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-check">
+                            <input asp-for="EnforcePassword" class="form-check-input">
+                            <label class="form-check-label" asp-for="EnforcePassword"></label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-check">
+                            <input class="form-check-input" asp-for="DisplayBuyingPrice">
+                            <label class="form-check-label" asp-for="DisplayBuyingPrice"></label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <p><strong>Status</strong></p>
+                    </div>
+                    @foreach (var item in statuses)
+                    {
+                        <div class="col-md-3">
+                            <div class="form-check">
+                                <input class="form-check-input" id="@item.Id" type="radio" asp-for="Status" value="@item.Id">
+                                <label class="form-check-label" for="@item.Id">@item.Text</label>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+            <!-- /.card-body -->
+
+            <div class="card-footer">
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </div>
+        </form>
+    </div>

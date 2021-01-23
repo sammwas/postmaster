@@ -18,68 +18,68 @@ namespace PosMaster.Dal.Interfaces
 	}
 
 
-	public class ClientImplementation : IClientInterface
-	{
-		private readonly DatabaseContext _context;
-		private readonly ILogger<ClientImplementation> _logger;
-		public ClientImplementation(DatabaseContext context, ILogger<ClientImplementation> logger)
-		{
-			_context = context;
-			_logger = logger;
-		}
+    public class ClientImplementation : IClientInterface
+    {
+        private readonly DatabaseContext _context;
+        private readonly ILogger<ClientImplementation> _logger;
+        public ClientImplementation(DatabaseContext context, ILogger<ClientImplementation> logger)
+        {
+            _context = context;
+            _logger = logger;
+        }
 
-		public async Task<ReturnData<List<Client>>> AllAsync()
-		{
-			var result = new ReturnData<List<Client>> { Data = new List<Client>() };
-			var tag = nameof(AllAsync);
-			_logger.LogInformation($"{tag} get all clients");
-			try
-			{
-				var data = await _context.Clients
-					.OrderByDescending(c => c.DateCreated)
-					.ToListAsync();
-				result.Success = data.Any();
-				result.Message = result.Success ? "Found" : "Not Found";
-				if (result.Success)
-					result.Data = data;
-				_logger.LogInformation($"{tag} found {data.Count} clients");
-				return result;
-			}
-			catch (Exception ex)
-			{
-				Console.WriteLine(ex);
-				result.ErrorMessage = ex.Message;
-				result.Message = "Error occured";
-				_logger.LogError($"{tag} {result.Message} : {ex}");
-				return result;
-			}
+        public async Task<ReturnData<List<Client>>> AllAsync()
+        {
+            var result = new ReturnData<List<Client>> { Data = new List<Client>() };
+            var tag = nameof(AllAsync);
+            _logger.LogInformation($"{tag} get all clients");
+            try
+            {
+                var data = await _context.Clients
+                    .OrderByDescending(c => c.DateCreated)
+                    .ToListAsync();
+                result.Success = data.Any();
+                result.Message = result.Success ? "Found" : "Not Found";
+                if (result.Success)
+                    result.Data = data;
+                _logger.LogInformation($"{tag} found {data.Count} clients");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                result.ErrorMessage = ex.Message;
+                result.Message = "Error occured";
+                _logger.LogError($"{tag} {result.Message} : {ex}");
+                return result;
+            }
 
-		}
+        }
 
-		public async Task<ReturnData<Client>> ByIdAsync(Guid id)
-		{
-			var result = new ReturnData<Client> { Data = new Client() };
-			var tag = nameof(ByIdAsync);
-			_logger.LogInformation($"{tag} get client by id - {id}");
-			try
-			{
-				var client = await _context.Clients.FirstOrDefaultAsync(c => c.Id.Equals(id));
-				result.Success = client != null;
-				result.Message = result.Success ? "Found" : "Not Found";
-				if (result.Success)
-					result.Data = client;
-				_logger.LogInformation($"{tag} client {id} {result.Message}");
-				return result;
-			}
-			catch (Exception ex)
-			{
-				Console.WriteLine(ex);
-				result.ErrorMessage = ex.Message;
-				result.Message = "Error occured";
-				_logger.LogError($"{tag} {result.Message} : {ex}");
-				return result;
-			}
-		}
+        public async Task<ReturnData<Client>> ByIdAsync(Guid id)
+        {
+            var result = new ReturnData<Client> { Data = new Client() };
+            var tag = nameof(ByIdAsync);
+            _logger.LogInformation($"{tag} get client by id - {id}");
+            try
+            {
+                var client = await _context.Clients.FirstOrDefaultAsync(c => c.Id.Equals(id));
+                result.Success = client != null;
+                result.Message = result.Success ? "Found" : "Not Found";
+                if (result.Success)
+                    result.Data = client;
+                _logger.LogInformation($"{tag} client {id} {result.Message}");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                result.ErrorMessage = ex.Message;
+                result.Message = "Error occured";
+                _logger.LogError($"{tag} {result.Message} : {ex}");
+                return result;
+            }
+        }
 
 		public async Task<ReturnData<Client>> EditAsync(ClientViewModel model)
 		{
