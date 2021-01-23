@@ -36,6 +36,8 @@ namespace PosMaster.ViewModels
 			TelephoneCode = client.TelephoneCode;
 			DisplayBuyingPrice = client.DisplayBuyingPrice;
 			IsEditMode = true;
+			Notes = client.Notes;
+			Status = client.Status;
 		}
 
 		[Required]

@@ -5,12 +5,17 @@ using System.ComponentModel.DataAnnotations;
 
 namespace PosMaster.ViewModels
 {
-	public class BaseViewModel
+	public abstract class BaseViewModel
 	{
+        public BaseViewModel()
+        {
+			Status = EntityStatus.Active;
+        }
 		public string ErrorMessage { get; set; }
 		public string Message { get; set; }
 		public string Notes { get; set; }
 		public bool Success { get; set; }
+		[HiddenInput]
 		public bool IsEditMode { get; set; }
 		public EntityStatus Status { get; set; }
 		public string Personnel { get; set; }
