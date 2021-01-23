@@ -80,6 +80,5 @@ namespace PosMaster.ViewModels
 		[Display(Name = "Display Product Buying Price")]
 		public bool DisplayBuyingPrice { get; set; }
 		public bool IsNewImage { get; set; }
-		public string NewImagePath { get; set; }
 	}
 }

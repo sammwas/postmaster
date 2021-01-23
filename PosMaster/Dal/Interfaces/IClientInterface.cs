@@ -121,7 +121,7 @@ namespace PosMaster.Dal.Interfaces
 					dbClient.DateLastModified = DateTime.UtcNow;
 					dbClient.LastModifiedBy = model.Personnel;
 					if (model.IsNewImage)
-						dbClient.LogoPath = model.NewImagePath;
+						dbClient.LogoPath = model.LogoPath;
 					await _context.SaveChangesAsync();
 					result.Data = dbClient;
 					result.Success = true;

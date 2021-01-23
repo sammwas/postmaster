@@ -12,6 +12,8 @@ namespace PosMaster.Dal.Interfaces
 	{
 		Task<ReturnData<Product>> EditAsync(ProductViewModel model);
 		Task<ReturnData<List<Product>>> AllAsync();
+		Task<ReturnData<List<Product>>> ByClientIdAsync(Guid clientId);
+		Task<ReturnData<List<Product>>> ByInstanceIdAsync(Guid instanceId);
 		Task<ReturnData<Product>> ByIdAsync(Guid id);
 	}
 
@@ -24,6 +26,7 @@ namespace PosMaster.Dal.Interfaces
 			_context = context;
 			_logger = logger;
 		}
+
 		public async Task<ReturnData<List<Product>>> AllAsync()
 		{
 			var result = new ReturnData<List<Product>> { Data = new List<Product>() };
@@ -52,11 +55,40 @@ namespace PosMaster.Dal.Interfaces
 			}
 		}
 
+		public async Task<ReturnData<List<Product>>> ByClientIdAsync(Guid clientId)
+		{
+			var result = new ReturnData<List<Product>> { Data = new List<Product>() };
+			var tag = nameof(ByClientIdAsync);
+			_logger.LogInformation($"{tag} get all client {clientId} products");
+			try
+			{
+				var data = await _context.Products
+					.Include(c => c.ProductCategory)
+					.Where(c => c.ClientId.Equals(clientId))
+					.OrderByDescending(c => c.DateCreated)
+					.ToListAsync();
+				result.Success = data.Any();
+				result.Message = result.Success ? "Found" : "Not Found";
+				if (result.Success)
+					result.Data = data;
+				_logger.LogInformation($"{tag} found {data.Count} products");
+				return result;
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex);
+				result.ErrorMessage = ex.Message;
+				result.Message = "Error occured";
+				_logger.LogError($"{tag} {result.Message} : {ex}");
+				return result;
+			}
+		}
+
 		public async Task<ReturnData<Product>> ByIdAsync(Guid id)
 		{
 			var result = new ReturnData<Product> { Data = new Product() };
 			var tag = nameof(ByIdAsync);
-			_logger.LogInformation($"{tag} get product by id - {id}");
+			_logger.LogInformation($"{tag} get product by id {id}");
 			try
 			{
 				var client = await _context.Products.Include(p => p.ProductCategory)
@@ -66,6 +98,35 @@ namespace PosMaster.Dal.Interfaces
 				if (result.Success)
 					result.Data = client;
 				_logger.LogInformation($"{tag} product {id} {result.Message}");
+				return result;
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex);
+				result.ErrorMessage = ex.Message;
+				result.Message = "Error occured";
+				_logger.LogError($"{tag} {result.Message} : {ex}");
+				return result;
+			}
+		}
+
+		public async Task<ReturnData<List<Product>>> ByInstanceIdAsync(Guid instanceId)
+		{
+			var result = new ReturnData<List<Product>> { Data = new List<Product>() };
+			var tag = nameof(ByInstanceIdAsync);
+			_logger.LogInformation($"{tag} get all instance {instanceId} products");
+			try
+			{
+				var data = await _context.Products
+					.Include(c => c.ProductCategory)
+					.Where(c => c.InstanceId.Equals(instanceId))
+					.OrderByDescending(c => c.DateCreated)
+					.ToListAsync();
+				result.Success = data.Any();
+				result.Message = result.Success ? "Found" : "Not Found";
+				if (result.Success)
+					result.Data = data;
+				_logger.LogInformation($"{tag} found {data.Count} products");
 				return result;
 			}
 			catch (Exception ex)
@@ -109,7 +170,7 @@ namespace PosMaster.Dal.Interfaces
 					dbProduct.Notes = model.Notes;
 					dbProduct.Status = model.Status;
 					if (model.IsNewImage)
-						dbProduct.ImagePath = model.NewImagePath;
+						dbProduct.ImagePath = model.ImagePath;
 					await _context.SaveChangesAsync();
 					result.Success = true;
 					result.Message = "Updated";

@@ -48,6 +48,5 @@ namespace PosMaster.ViewModels
 		[Required]
 		public string UnitOfMeasure { get; set; }
 		public bool IsNewImage { get; set; }
-		public string NewImagePath { get; set; }
 	}
 }
