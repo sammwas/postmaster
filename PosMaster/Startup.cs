@@ -30,8 +30,9 @@ namespace PosMaster
 
 			services.AddTransient(m => new FileUploadService(WebHostEnvironment));
 			services.AddScoped<IEmailService, EmailService>();
-			services.AddScoped<IClientInterface, ClientImplementation>();
 			services.AddScoped<IUserInterface, UserInterface>();
+			services.AddScoped<IClientInterface, ClientImplementation>();
+			services.AddScoped<IClientInstanceInterface, ClientInstanceImplementation>();
 
 			var server = Configuration["Database:Server"];
 			var port = Configuration["Database:Port"];

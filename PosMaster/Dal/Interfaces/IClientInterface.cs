@@ -117,6 +117,7 @@ namespace PosMaster.Dal.Interfaces
 					dbClient.TelephoneCode = model.TelephoneCode;
 					dbClient.DisplayBuyingPrice = model.DisplayBuyingPrice;
 					dbClient.Notes = model.Notes;
+					dbClient.Status = model.Status;
 					dbClient.DateLastModified = DateTime.UtcNow;
 					dbClient.LastModifiedBy = model.Personnel;
 					if (model.IsNewImage)
@@ -158,8 +159,10 @@ namespace PosMaster.Dal.Interfaces
 				var instance = new ClientInstance
 				{
 					ClientId = client.Id,
+					Code = "MAIN",
 					Name = "MAIN",
-					Personnel = model.Personnel
+					Personnel = model.Personnel,
+					Status = EntityStatus.Active
 				};
 				instance.InstanceId = instance.Id;
 				_context.Clients.Add(client);
