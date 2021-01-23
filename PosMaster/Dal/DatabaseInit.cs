@@ -44,7 +44,7 @@ namespace PosMaster.Dal
 			{
 				var poweruser = new User
 				{
-					UserName = Constants.SuperAdminUserName,
+					UserName = Constants.SuperAdminEmail,
 					Email = Constants.SuperAdminEmail,
 					FirstName = "SYS",
 					LastName = "ADMIN",
@@ -74,7 +74,7 @@ namespace PosMaster.Dal
 				{
 					ClientId = clientId,
 					InstanceId = instanceId,
-					Personnel = Constants.SuperAdminUserName,
+					Personnel = Constants.SuperAdminEmail,
 					Name = "PosMaster",
 					Version = "1.0.1",
 					Tagline = "Best POS in the Market",
@@ -104,7 +104,7 @@ namespace PosMaster.Dal
 					PhoneNumberLength = 10,
 					TelephoneCode = "+254",
 					DisplayBuyingPrice = true,
-					Personnel = Constants.SuperAdminUserName
+					Personnel = Constants.SuperAdminEmail
 				};
 				context.Clients.Add(client);
 				context.SaveChanges();
@@ -119,7 +119,7 @@ namespace PosMaster.Dal
 					ClientId = clientId,
 					Code = "DEFAULT",
 					Name = "DEFAULT INSTANCE",
-					Personnel = Constants.SuperAdminUserName
+					Personnel = Constants.SuperAdminEmail
 				};
 				context.ClientInstances.Add(instance);
 				context.SaveChanges();
@@ -135,7 +135,7 @@ namespace PosMaster.Dal
 					PhoneNumber = "0000000000",
 					ClientId = clientId,
 					InstanceId = instanceId,
-					Personnel = Constants.SuperAdminUserName
+					Personnel = Constants.SuperAdminEmail
 				};
 				context.Customers.Add(customer);
 				context.SaveChanges();
@@ -149,7 +149,7 @@ namespace PosMaster.Dal
 					InstanceId = instanceId,
 					Name = "DEFAULT TYPE",
 					Code = "DEFAULT",
-					Personnel = Constants.SuperAdminUserName
+					Personnel = Constants.SuperAdminEmail
 				};
 				context.ExpenseTypes.Add(expenseType);
 				context.SaveChanges();
@@ -163,7 +163,7 @@ namespace PosMaster.Dal
 					InstanceId = instanceId,
 					Name = "CASH",
 					Code = "CASH",
-					Personnel = Constants.SuperAdminUserName
+					Personnel = Constants.SuperAdminEmail
 				};
 				context.PaymentModes.Add(payment);
 				context.SaveChanges();
@@ -177,7 +177,7 @@ namespace PosMaster.Dal
 					InstanceId = instanceId,
 					Name = "DEFAULT",
 					Code = "DEFAULT",
-					Personnel = Constants.SuperAdminUserName
+					Personnel = Constants.SuperAdminEmail
 				};
 				context.ProductCategories.Add(productCategory);
 				context.SaveChanges();
@@ -191,7 +191,7 @@ namespace PosMaster.Dal
 					InstanceId = instanceId,
 					Name = "PIECES",
 					Code = "PIECES",
-					Personnel = Constants.SuperAdminUserName
+					Personnel = Constants.SuperAdminEmail
 				};
 				context.UnitOfMeasures.Add(unitOfMeasure);
 				context.SaveChanges();
@@ -211,7 +211,7 @@ namespace PosMaster.Dal
 					SenderFromName = "PosMaster",
 					SocketOptions = SecureSocketOptions.StartTls,
 					Code = "DEFAULT",
-					Personnel = Constants.SuperAdminUserName
+					Personnel = Constants.SuperAdminEmail
 				};
 				context.EmailSettings.Add(setting);
 				context.SaveChanges();
