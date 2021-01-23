@@ -9,8 +9,7 @@ namespace PosMaster.Dal
 		{
 			DateCreated = DateTime.Now;
 		}
-		public string Role { get; set; }
-		public DateTime LastLoginTime { get; set; }
+		public string Role { get; set; } 
 		public DateTime DateCreated { get; set; }
 		public DateTime? DateLastModified { get; set; }
 		public Guid ClientId { get; set; }

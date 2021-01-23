@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using MailKit.Security;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using PosMaster.ViewModels;
 using System;
@@ -13,6 +14,7 @@ namespace PosMaster.Dal.Interfaces
 		Task<ReturnData<Client>> EditAsync(ClientViewModel model);
 		Task<ReturnData<List<Client>>> AllAsync();
 		Task<ReturnData<Client>> ByIdAsync(Guid id);
+		void SeedDefaultData(Guid clientId, Guid instanceId, bool isSeeding = false);
 	}
 
 
@@ -168,6 +170,8 @@ namespace PosMaster.Dal.Interfaces
 				_context.Clients.Add(client);
 				_context.ClientInstances.Add(instance);
 				await _context.SaveChangesAsync();
+				SeedDefaultData(client.Id, instance.Id);
+
 				result.Success = true;
 				result.Message = "Added";
 				_logger.LogInformation($"{tag} added {client.Name}  {client.Id} : {result.Message}");
@@ -181,6 +185,114 @@ namespace PosMaster.Dal.Interfaces
 				result.Message = "Error occured";
 				_logger.LogError($"{tag} {result.Message} : {ex}");
 				return result;
+			}
+		}
+
+		public void SeedDefaultData(Guid clientId, Guid instanceId, bool isSeeding = false)
+		{
+			if (!_context.Customers.Any(c => c.ClientId.Equals(clientId)))
+			{
+				var customer = new Customer
+				{
+					Code = Constants.WalkInCustomerCode,
+					FirstName = "WALK IN",
+					Gender = "----",
+					PhoneNumber = "0000000000",
+					ClientId = clientId,
+					InstanceId = instanceId,
+					Personnel = Constants.SuperAdminEmail
+				};
+				_context.Customers.Add(customer);
+				_context.SaveChanges();
+			}
+
+			if (!_context.ExpenseTypes.Any(c => c.ClientId.Equals(clientId)))
+			{
+				var expenseType = new ExpenseType
+				{
+					ClientId = clientId,
+					InstanceId = instanceId,
+					Name = "DEFAULT TYPE",
+					Code = "DEFAULT",
+					Personnel = Constants.SuperAdminEmail
+				};
+				_context.ExpenseTypes.Add(expenseType);
+				_context.SaveChanges();
+			}
+
+			if (!_context.PaymentModes.Any(c => c.ClientId.Equals(clientId)))
+			{
+				var payment = new PaymentMode
+				{
+					ClientId = clientId,
+					InstanceId = instanceId,
+					Name = "CASH",
+					Code = "CASH",
+					Personnel = Constants.SuperAdminEmail
+				};
+				_context.PaymentModes.Add(payment);
+				_context.SaveChanges();
+			}
+
+			if (!_context.ProductCategories.Any(c => c.ClientId.Equals(clientId)))
+			{
+				var productCategory = new ProductCategory
+				{
+					ClientId = clientId,
+					InstanceId = instanceId,
+					Name = "DEFAULT",
+					Code = "DEFAULT",
+					Personnel = Constants.SuperAdminEmail
+				};
+				_context.ProductCategories.Add(productCategory);
+				_context.SaveChanges();
+			}
+
+			if (!_context.UnitOfMeasures.Any(c => c.ClientId.Equals(clientId)))
+			{
+				var unitOfMeasure = new UnitOfMeasure
+				{
+					ClientId = clientId,
+					InstanceId = instanceId,
+					Name = "PIECES",
+					Code = "PIECES",
+					Personnel = Constants.SuperAdminEmail
+				};
+				_context.UnitOfMeasures.Add(unitOfMeasure);
+				_context.SaveChanges();
+			}
+
+			if (!_context.EmailSettings.Any(c => c.ClientId.Equals(clientId)))
+			{
+				var setting = new EmailSetting
+				{
+					ClientId = clientId,
+					InstanceId = instanceId,
+					SmtpServer = isSeeding ? "smtp.gmail.com" : "",
+					SmtpPort = isSeeding ? "587" : "",
+					SmtpPassword = isSeeding ? "PosMaster123.#" : "",
+					SmtpUsername = isSeeding ? Constants.SystemEmailAddress : "",
+					SenderFromEmail = isSeeding ? Constants.SystemEmailAddress : "",
+					SenderFromName = isSeeding ? "PosMaster" : "",
+					SocketOptions = SecureSocketOptions.StartTls,
+					Code = "DEFAULT",
+					Personnel = Constants.SuperAdminEmail
+				};
+				_context.EmailSettings.Add(setting);
+				_context.SaveChanges();
+			}
+
+			if (!_context.SmsSettings.Any(c => c.ClientId.Equals(clientId)))
+			{
+				var setting = new SmsSetting
+				{
+					ClientId = clientId,
+					InstanceId = instanceId,
+					Code = "DEFAULT",
+					Personnel = Constants.SuperAdminEmail
+				};
+				_context.SmsSettings.Add(setting);
+				_context.SaveChanges();
 			}
 		}
 	}

@@ -18,11 +18,13 @@ namespace PosMaster.Services
 			ClientId = user.ClientId;
 			InstanceId = user.InstanceId;
 			Role = user.Role;
+			ImagePath = user.ImagePath;
 		}
 		public string UserId { get; set; }
 		public string FirstName { get; set; }
 		public string FullName { get; set; }
 		public string Role { get; set; }
+		public string ImagePath { get; set; }
 		public Guid ClientId { get; set; }
 		public string ClientCode { get; set; }
 		public string ClientName { get; set; }

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using PosMaster.Dal.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,6 +29,7 @@ namespace PosMaster.Dal
 			Console.WriteLine("Seeding default data ...");
 			var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 			var userManager = serviceProvider.GetRequiredService<UserManager<User>>();
+			var clientInterface = serviceProvider.GetRequiredService<IClientInterface>();
 			var roleNames = new List<string> {
 				Role.SuperAdmin, Role.Admin, Role.Clerk, Role.Manager
 			};
@@ -125,98 +127,7 @@ namespace PosMaster.Dal
 				context.SaveChanges();
 			}
 
-			if (!context.Customers.Any())
-			{
-				var customer = new Customer
-				{
-					Code = Constants.WalkInCustomerCode,
-					FirstName = "WALK IN",
-					Gender = "----",
-					PhoneNumber = "0000000000",
-					ClientId = clientId,
-					InstanceId = instanceId,
-					Personnel = Constants.SuperAdminEmail
-				};
-				context.Customers.Add(customer);
-				context.SaveChanges();
-			}
-
-			if (!context.ExpenseTypes.Any())
-			{
-				var expenseType = new ExpenseType
-				{
-					ClientId = clientId,
-					InstanceId = instanceId,
-					Name = "DEFAULT TYPE",
-					Code = "DEFAULT",
-					Personnel = Constants.SuperAdminEmail
-				};
-				context.ExpenseTypes.Add(expenseType);
-				context.SaveChanges();
-			}
-
-			if (!context.PaymentModes.Any())
-			{
-				var payment = new PaymentMode
-				{
-					ClientId = clientId,
-					InstanceId = instanceId,
-					Name = "CASH",
-					Code = "CASH",
-					Personnel = Constants.SuperAdminEmail
-				};
-				context.PaymentModes.Add(payment);
-				context.SaveChanges();
-			}
-
-			if (!context.ProductCategories.Any())
-			{
-				var productCategory = new ProductCategory
-				{
-					ClientId = clientId,
-					InstanceId = instanceId,
-					Name = "DEFAULT",
-					Code = "DEFAULT",
-					Personnel = Constants.SuperAdminEmail
-				};
-				context.ProductCategories.Add(productCategory);
-				context.SaveChanges();
-			}
-
-			if (!context.UnitOfMeasures.Any())
-			{
-				var unitOfMeasure = new UnitOfMeasure
-				{
-					ClientId = clientId,
-					InstanceId = instanceId,
-					Name = "PIECES",
-					Code = "PIECES",
-					Personnel = Constants.SuperAdminEmail
-				};
-				context.UnitOfMeasures.Add(unitOfMeasure);
-				context.SaveChanges();
-			}
-
-			if (!context.EmailSettings.Any())
-			{
-				var setting = new EmailSetting
-				{
-					ClientId = clientId,
-					InstanceId = instanceId,
-					SmtpServer = "smtp.gmail.com",
-					SmtpPort = "587",
-					SmtpPassword = "PosMaster123.#",
-					SmtpUsername = Constants.SystemEmailAddress,
-					SenderFromEmail = Constants.SystemEmailAddress,
-					SenderFromName = "PosMaster",
-					SocketOptions = SecureSocketOptions.StartTls,
-					Code = "DEFAULT",
-					Personnel = Constants.SuperAdminEmail
-				};
-				context.EmailSettings.Add(setting);
-				context.SaveChanges();
-			}
-
+			clientInterface.SeedDefaultData(clientId, instanceId, true);
 			Console.WriteLine("Done. Seeding complete");
 		}
 	}
