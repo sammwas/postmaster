@@ -24,10 +24,10 @@ namespace PosMaster.Controllers
                 TempData.SetData(AlertLevel.Warning, "Client Instances", result.Message);
             return View(result.Data);
         }
-        public async Task<IActionResult> Edit(Guid? id) 
+        public async Task<IActionResult> Edit(Guid clientId, Guid? id) 
         {
             if(id == null)
-                return View(new ClientInstanceViewModel ());
+                return View(new ClientInstanceViewModel {ClientId = clientId });
 
             var result = await _clientInstanceInterface.ByIdAsync(id.Value);
             if (!result.Success)
