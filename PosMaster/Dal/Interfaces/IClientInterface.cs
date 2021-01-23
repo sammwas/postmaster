@@ -161,6 +161,7 @@ namespace PosMaster.Dal.Interfaces
                 client.ClientId = client.InstanceId = client.Id;
                 var instance = new ClientInstance
                 {
+                    Id = Guid.NewGuid(),
                     ClientId = client.Id,
                     Code = "MAIN",
                     Name = $"MAIN - {model.Name}",
