@@ -1,10 +1,11 @@
 ﻿using PosMaster.Dal;
+using PosMaster.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+using System.Text;
 
-namespace PosMaster.ViewModels
+namespace PosMaster.Services
 {
 	public static class Helpers
 	{
@@ -36,6 +37,18 @@ namespace PosMaster.ViewModels
 			if (currentRole.Equals(Role.SuperAdmin))
 				roles.AddRange(new List<string> { Role.Manager, Role.Admin });
 			return roles;
+		}
+
+		public static string Base64Encode(string plainText)
+		{
+			var plainTextBytes = Encoding.UTF8.GetBytes(plainText);
+			return Convert.ToBase64String(plainTextBytes);
+		}
+
+		public static string Base64Decode(string base64EncodedData)
+		{
+			var base64EncodedBytes = Convert.FromBase64String(base64EncodedData);
+			return Encoding.UTF8.GetString(base64EncodedBytes);
 		}
 	}
 }

@@ -21,7 +21,10 @@ namespace PosMaster.Services
 		public UserCookieData Read()
 		{
 			var data = _httpContextAccessor.HttpContext.Request.Cookies[_key];
-			return JsonConvert.DeserializeObject<UserCookieData>(data);
+			if (string.IsNullOrEmpty(data))
+				return new UserCookieData();
+			var encoded = Helpers.Base64Decode(data);
+			return JsonConvert.DeserializeObject<UserCookieData>(EncypterService.Decrypt(encoded));
 		}
 
 		public void Remove()
@@ -35,7 +38,8 @@ namespace PosMaster.Services
 			{
 				//Expires = DateTime.Now.AddSeconds(10)
 			};
-			_httpContextAccessor.HttpContext.Response.Cookies.Append(_key, JsonConvert.SerializeObject(data));
+			var rawData = EncypterService.Encrypt(JsonConvert.SerializeObject(data));
+			_httpContextAccessor.HttpContext.Response.Cookies.Append(_key, Helpers.Base64Encode(rawData));
 			return data;
 		}
 	}

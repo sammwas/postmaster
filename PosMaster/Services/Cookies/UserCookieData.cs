@@ -19,6 +19,7 @@ namespace PosMaster.Services
 			InstanceId = user.InstanceId;
 			Role = user.Role;
 			ImagePath = user.ImagePath;
+			DateCreated = user.DateCreated;
 		}
 		public string UserId { get; set; }
 		public string FirstName { get; set; }
@@ -32,5 +33,6 @@ namespace PosMaster.Services
 		public Guid InstanceId { get; set; }
 		public string InstanceCode { get; set; }
 		public string InstanceName { get; set; }
+		public DateTime DateCreated { get; set; }
 	}
 }

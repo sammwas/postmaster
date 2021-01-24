@@ -6,7 +6,6 @@ namespace PosMaster.Dal
 	{
 		public Guid ExpenseTypeId { get; set; }
 		public ExpenseType ExpenseType { get; set; }
-		public decimal Amount { get; set; }
-		public bool IsLimited => Amount > 0;
+		public decimal Amount { get; set; } 
 	}
 }
