@@ -12,5 +12,6 @@ namespace PosMaster.Dal
 		public decimal UnitPrice { get; set; }
 		public Guid ReceiptId { get; set; }
 		public string ReceiptNo { get; set; }
+		public decimal TaxAmount { get; set; }
 	}
 }

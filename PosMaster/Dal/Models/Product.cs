@@ -14,5 +14,6 @@ namespace PosMaster.Dal
 		public decimal ReorderLevel { get; set; }
 		public decimal AvailableQuantity { get; set; }
 		public string UnitOfMeasure { get; set; }
+		public bool IsTaxable { get; set; }
 	}
 }

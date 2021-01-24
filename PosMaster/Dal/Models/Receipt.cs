@@ -16,10 +16,11 @@ namespace PosMaster.Dal
 		public Product Product { get; set; }
 		public Guid ProductId { get; set; }
 		public decimal Quantity { get; set; }
-		public decimal Amount => (UnitPrice * Quantity) - Discount;
+		public decimal Amount => (UnitPrice * Quantity) + TaxAmount - Discount;
 		public string PaymentMode { get; set; }
 		public string ExternalRef { get; set; }
 		public bool IsCredit { get; set; }
 		public bool IsWalkIn { get; set; }
+		public decimal TaxAmount { get; set; }
 	}
 }

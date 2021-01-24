@@ -269,6 +269,12 @@ namespace PosMaster.Dal.Interfaces
 					Notes = model.Notes,
 					Personnel = model.Personnel
 				};
+				if (product.IsTaxable)
+				{
+					var rate = _context.Clients.Where(c => c.Id.Equals(model.ClientId))
+						.Select(c => c.TaxRate).FirstOrDefault();
+					receipt.TaxAmount = model.Quantity * model.UnitPrice * rate;
+				}
 				product.AvailableQuantity -= model.Quantity;
 				product.DateLastModified = DateTime.Now;
 				product.LastModifiedBy = model.Personnel;
@@ -350,7 +356,8 @@ namespace PosMaster.Dal.Interfaces
 				CustomerId = receipt.CustomerId,
 				Quantity = receipt.Quantity,
 				UnitPrice = receipt.UnitPrice,
-				ReceiptNo = receipt.Code
+				ReceiptNo = receipt.Code,
+				TaxAmount = receipt.TaxAmount
 			};
 			_context.Invoices.Add(invoice);
 			await _context.SaveChangesAsync();
