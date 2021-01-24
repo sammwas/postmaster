@@ -30,5 +30,6 @@ namespace PosMaster.Dal
 		public DbSet<EmailSetting> EmailSettings { get; set; }
 		public DbSet<SmsSetting> SmsSettings { get; set; }
 		public DbSet<Notification> Notifications { get; set; }
+		public DbSet<Invoice> Invoices { get; set; }
 	}
 }

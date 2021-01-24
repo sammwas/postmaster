@@ -248,8 +248,11 @@ namespace PosMaster.Dal.Interfaces
 					return result;
 				}
 
+				var rcptRef = DocumentRefNumber(Document.Receipt, model.ClientId);
 				var receipt = new Receipt
 				{
+					Id = Guid.NewGuid(),
+					Code = rcptRef,
 					UnitPrice = model.UnitPrice,
 					Discount = model.Discount,
 					Customer = customer,
@@ -271,6 +274,9 @@ namespace PosMaster.Dal.Interfaces
 				product.LastModifiedBy = model.Personnel;
 				_context.Receipts.Add(receipt);
 				await _context.SaveChangesAsync();
+
+				if (model.IsCredit)
+					await AddInvoiceAsync(receipt);
 
 				result.Success = true;
 				result.Data = receipt;
@@ -327,6 +333,90 @@ namespace PosMaster.Dal.Interfaces
 				result.Message = "Error occured";
 				_logger.LogError($"{tag} {result.Message} : {ex}");
 				return result;
+			}
+		}
+
+		private async Task<string> AddInvoiceAsync(Receipt receipt)
+		{
+			var invRef = DocumentRefNumber(Document.Invoice, receipt.ClientId);
+			var invoice = new Invoice
+			{
+				Code = invRef,
+				ClientId = receipt.ClientId,
+				ReceiptId = receipt.Id,
+				InstanceId = receipt.InstanceId,
+				Personnel = receipt.Personnel,
+				ProductId = receipt.ProductId,
+				CustomerId = receipt.CustomerId,
+				Quantity = receipt.Quantity,
+				UnitPrice = receipt.UnitPrice,
+				ReceiptNo = receipt.Code
+			};
+			_context.Invoices.Add(invoice);
+			await _context.SaveChangesAsync();
+			return invRef;
+		}
+
+		private string DocumentRefNumber(Document document, Guid clientId)
+		{
+			try
+			{
+				var nextRef = "";
+				var exists = true;
+				var i = 0;
+				var prefix = "";
+				switch (document)
+				{
+					case Document.Receipt:
+						prefix = "RCPT";
+						while (exists)
+						{
+							var nextCount = _context.Receipts.Where(r => r.ClientId.Equals(clientId)).Count() + 1;
+							nextRef = prefix + (nextCount + i).ToString("D4");
+							exists = _context.Receipts.Any(a => a.Code.Equals(nextRef) && a.ClientId.Equals(clientId));
+							i++;
+						}
+						break;
+					case Document.Invoice:
+						prefix = "INV";
+						while (exists)
+						{
+							var nextCount = _context.Invoices.Where(r => r.ClientId.Equals(clientId)).Count() + 1;
+							nextRef = prefix + (nextCount + i).ToString("D4");
+							exists = _context.Invoices.Any(a => a.Code.Equals(nextRef) && a.ClientId.Equals(clientId));
+							i++;
+						}
+						break;
+					case Document.Po:
+						prefix = "PO";
+						while (exists)
+						{
+							var nextCount = _context.PurchaseOrders.Where(p => p.ClientId.Equals(clientId)).Count() + 1;
+							nextRef = prefix + (nextCount + i).ToString("D4");
+							exists = _context.PurchaseOrders.Any(a => a.Code.Equals(nextRef) && a.ClientId.Equals(clientId));
+							i++;
+						}
+						break;
+					case Document.Grn:
+						prefix = "GRN";
+						while (exists)
+						{
+							var nextCount = _context.GoodReceivedNotes.Where(p => p.ClientId.Equals(clientId)).Count() + 1;
+							nextRef = prefix + (nextCount + i).ToString("D4");
+							exists = _context.GoodReceivedNotes.Any(a => a.Code.Equals(nextRef) && a.ClientId.Equals(clientId));
+							i++;
+						}
+						break;
+					default:
+						break;
+				}
+				return nextRef;
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine(e.Message);
+				var rand = new Random().Next(99999, 999999999);
+				return "R" + rand.ToString("D5");
 			}
 		}
 	}

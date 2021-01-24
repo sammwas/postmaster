@@ -25,4 +25,12 @@
 		Warning,
 		Error
 	}
+
+	public enum Document
+	{
+		Receipt,
+		Grn,
+		Po,
+		Invoice
+	}
 }

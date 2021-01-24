@@ -10,5 +10,6 @@
 		public string Location { get; set; }
 		public string PostalAddress { get; set; }
 		public string Town { get; set; }
+		public decimal CreditLimit { get; set; }
 	}
 }
