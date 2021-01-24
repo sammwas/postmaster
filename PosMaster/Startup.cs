@@ -30,13 +30,15 @@ namespace PosMaster
 		{
 			services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 			services.AddTransient(m => new FileUploadService(WebHostEnvironment));
+			services.AddScoped<ICookiesService, CookiesService>();
+
 			services.AddScoped<IEmailService, EmailService>();
 			services.AddScoped<IUserInterface, UserInterface>();
 			services.AddScoped<IClientInterface, ClientImplementation>();
 			services.AddScoped<IClientInstanceInterface, ClientInstanceImplementation>();
 			services.AddScoped<ISystemSettingInterface, SystemSettingImplementation>();
 			services.AddScoped<IProductInterface, ProductImplementation>();
-			services.AddScoped<ICookiesService, CookiesService>();
+			services.AddScoped<IExpenseInterface, ExpenseImplementation>();
 
 			var server = Configuration["Database:Server"];
 			var port = Configuration["Database:Port"];

@@ -344,6 +344,8 @@ namespace PosMaster.Dal.Interfaces
 
 		private async Task<string> AddInvoiceAsync(Receipt receipt)
 		{
+			var tag = nameof(AddInvoiceAsync);
+			_logger.LogInformation($"{tag} add customer invoice. product {receipt.ProductId}, customer {receipt.CustomerId}");
 			var invRef = DocumentRefNumber(Document.Invoice, receipt.ClientId);
 			var invoice = new Invoice
 			{
@@ -361,6 +363,7 @@ namespace PosMaster.Dal.Interfaces
 			};
 			_context.Invoices.Add(invoice);
 			await _context.SaveChangesAsync();
+			_logger.LogInformation($"{tag} invoice {invRef} add for client {receipt.ClientId}");
 			return invRef;
 		}
 
