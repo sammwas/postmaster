@@ -96,6 +96,10 @@ namespace PosMaster.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditUnitOfMeasure(UnitOfMeasureViewModel model) 
         {
+            var userData = _cookieService.Read();
+            model.ClientId = userData.ClientId;
+            model.InstanceId = userData.InstanceId;
+            model.Personnel = User.Identity.Name;
             var option = model.IsEditMode ? "Update" : "Add";
             var title = $"{option} Unit of Measure";
             if (!ModelState.IsValid)
@@ -109,7 +113,7 @@ namespace PosMaster.Controllers
             TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, title, result.Message);
             if (!result.Success)
                 return View(model);
-            return RedirectToAction(nameof(ProductCategories), model.ClientId);
+            return RedirectToAction(nameof(ProductCategories), new { model.ClientId });
         }
         public async Task<IActionResult> ExpenseTypes(Guid clientId) 
         {
@@ -139,6 +143,10 @@ namespace PosMaster.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditExpenseType(ExpenseTypeViewModel model) 
         {
+            var userData = _cookieService.Read();
+            model.ClientId = userData.ClientId;
+            model.InstanceId = userData.InstanceId;
+            model.Personnel = User.Identity.Name;
             var option = model.IsEditMode ? "Update" : "Add";
             var title = $"{option} Expense Type";
             if (!ModelState.IsValid)
@@ -152,7 +160,7 @@ namespace PosMaster.Controllers
             TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, title, result.Message);
             if (!result.Success)
                 return View(model);
-            return RedirectToAction(nameof(ProductCategories), model.ClientId);
+            return RedirectToAction(nameof(ProductCategories), new { model.ClientId });
         }
         public async Task<IActionResult> PaymentModes(Guid clientId) 
         {
@@ -182,6 +190,10 @@ namespace PosMaster.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditPaymentMode(PaymentModeViewModel model)
         {
+            var userData = _cookieService.Read();
+            model.ClientId = userData.ClientId;
+            model.InstanceId = userData.InstanceId;
+            model.Personnel = User.Identity.Name;
             var option = model.IsEditMode ? "Update" : "Add";
             var title = $"{option} Payment Mode";
             if (!ModelState.IsValid)
@@ -195,7 +207,7 @@ namespace PosMaster.Controllers
             TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, title, result.Message);
             if (!result.Success)
                 return View(model);
-            return RedirectToAction(nameof(PaymentModes), model.ClientId);
+            return RedirectToAction(nameof(PaymentModes), new { model.ClientId });
         }
     }
 }

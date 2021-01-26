@@ -61,9 +61,9 @@ namespace PosMaster.Controllers
             }
             return View(result.Data);
         }
-        public async Task<IActionResult> Summary()
-        {
-            return View();
-        }
+        //public async Task<IActionResult> Summary()
+        //{
+        //    return View();
+        //}
     }
 }
