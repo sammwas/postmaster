@@ -5,7 +5,7 @@ namespace PosMaster.Dal
 	public class EmailSetting : BaseEntity
 	{
 		public string SmtpServer { get; set; }
-		public string SmtpPort { get; set; }
+		public int SmtpPort { get; set; }
 		public string SmtpUsername { get; set; }
 		public string SmtpPassword { get; set; }
 		public string SenderFromEmail { get; set; }

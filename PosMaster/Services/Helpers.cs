@@ -1,4 +1,5 @@
-﻿using PosMaster.Dal;
+﻿using MailKit.Security;
+using PosMaster.Dal;
 using PosMaster.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -19,6 +20,18 @@ namespace PosMaster.Services
 		{
 			var statusesList = Enum.GetValues(typeof(EntityStatus))
 				.Cast<EntityStatus>()
+				.ToList();
+			return statusesList.Select(s => new FormSelectViewModel
+			{
+				Id = s.ToString(),
+				Text = s.ToString()
+			}).ToList();
+		}
+
+		public static List<FormSelectViewModel> SocketOptions()
+		{
+			var statusesList = Enum.GetValues(typeof(SecureSocketOptions))
+				.Cast<SecureSocketOptions>()
 				.ToList();
 			return statusesList.Select(s => new FormSelectViewModel
 			{
