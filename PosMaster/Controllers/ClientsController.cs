@@ -54,8 +54,11 @@ namespace PosMaster.Controllers
         public async Task<IActionResult> All()
         {
             var result = await _clientInterface.AllAsync();
-            if (!result.Success)
+            if (!result.Success) 
+            {
                 TempData.SetData(AlertLevel.Warning, "Clients", result.Message);
+                return View();
+            }
             return View(result.Data);
         }
         public async Task<IActionResult> Summary()
