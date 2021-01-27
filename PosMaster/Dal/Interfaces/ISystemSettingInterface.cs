@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using PosMaster.ViewModels;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace PosMaster.Dal.Interfaces
@@ -44,7 +45,7 @@ namespace PosMaster.Dal.Interfaces
 					_logger.LogInformation($"{tag} {result.Message}");
 					return result;
 				}
-				var dbSettings = await _context.SystemSettings.FirstOrDefaultAsync();
+				var dbSettings = await _context.SystemSettings.Take(1).FirstOrDefaultAsync();
 				var data = dbSettings == null ? new SystemSettingMiniViewModel { Name = "PosMaster" }
 				: new SystemSettingMiniViewModel(dbSettings);
 				result.Success = true;
