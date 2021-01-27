@@ -34,5 +34,6 @@ namespace PosMaster.ViewModels
 		public string PostalAddress { get; set; }
 		public string Town { get; set; }
 		public string LogoPath { get; set; }
+		public bool IsNewImage { get; set; }
 	}
 }
