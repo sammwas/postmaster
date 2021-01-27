@@ -2,97 +2,103 @@
     <div class="card-header">
         <h3 class="card-title">@ViewData["Title"]</h3>
     </div>
-    <div class="receipt-line-item">
-        <form role="form" method="post" autocomplete="off">
-            <div asp-validation-summary="All" class="text-danger"></div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="form-group">
-                            <label>Product</label>
-                            <select class="form-control select2" style="width: 100%;" id="selectedProduct">
-                                <option value="">--Select Product--</option>
-                            </select>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="receipt-line-item">
+                <form role="form" method="post" autocomplete="off">
+                    <div asp-validation-summary="All" class="text-danger"></div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>Product</label>
+                                    <select class="form-control select2" style="width: 100%;" id="selectedProduct">
+                                        <option value="">--Select Product--</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Quantity</label>
+                                    <input class="form-control" value="" id="currentQuantity" readonly>
+                                    <span class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Unit of Measure</label>
+                                    <input class="form-control">
+                                    <span class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Selling Price</label>
+                                    <input class="form-control">
+                                    <span class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Payment Mode</label>
+                                    <input class="form-control">
+                                    <span class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Ref No:</label>
+                                    <input class="form-control">
+                                    <span class="text-danger"></span>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label>Quantity</label>
-                            <input class="form-control" value="" id="currentQuantity" readonly>
-                            <span class="text-danger"></span>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label>Unit of Measure</label>
-                            <input class="form-control">
-                            <span class="text-danger"></span>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label>Selling Price</label>
-                            <input class="form-control">
-                            <span class="text-danger"></span>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label>Payment Mode</label>
-                            <input class="form-control">
-                            <span class="text-danger"></span>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label>Ref No:</label>
-                            <input class="form-control">
-                            <span class="text-danger"></span>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
-            <div class="card-footer">
-                <span class="text-left"><button class="btn btn-default">Cancel</button></span>
-                <span class="text-right"><button type="submit" class="btn btn-primary">Add</button></span>
+                    <div class="card-footer">
+                        <span class="text-left"><button class="btn btn-default">Cancel</button></span>
+                        <span class="text-right"><button type="submit" class="btn btn-primary">Add</button></span>
+                    </div>
+                </form>
             </div>
-        </form>
-    </div>
-    <div class="receipt-items">
-        <div class="receipt-header">
-            <h3 class="card-title">Receipt</h3>
         </div>
-        <table id="example1" class="table table-bordered table-striped">
-            <thead>
-                <tr>
-                    <th>Qty</th>
-                    <th>Code</th>
-                    <th>Name</th>
-                    <th>Price</th>
-                    <th>Amount</th>
-                    <th>Options</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr></tr>
-            </tbody>
-            <tfoot>
-                <tr>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-                    <th>Total Amount</th>
-                    <th>0.00</th>
-                    <th></th>
-                </tr>
-            </tfoot>
-        </table>
-    </div>
+        <div class="col-md-8">
+            <div class="receipt-items">
+                <div class="receipt-header">
+                    <h3 class="card-title">Receipt</h3>
+                </div>
+                <table id="example1" class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>Qty</th>
+                            <th>Code</th>
+                            <th>Name</th>
+                            <th>Price</th>
+                            <th>Amount</th>
+                            <th>Options</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr></tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th>Total Amount</th>
+                            <th>0.00</th>
+                            <th></th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>     
 </div>
