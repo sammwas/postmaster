@@ -2,3 +2,14 @@
 // for details on configuring this project to bundle and minify static web assets.
 
 // Write your JavaScript code.
+$(document).ready(function() {
+    let currentQty;
+    let productCode  
+    $("#selectedProduct").change(function () {
+        currentQty = $('option:selected', this).attr('data-qty');
+        productCode = $('option:selected', this).attr('data-pcode') 
+        $('#currentQuantity').val(currentQty);
+        $('#productCode').val(productCode)
+    });
+    
+});

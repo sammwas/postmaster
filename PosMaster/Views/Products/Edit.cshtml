@@ -1,11 +1,17 @@
-﻿@model ProductViewModel
+﻿@inject IMasterDataInterface _masterDataInterface;
+@inject ICookiesService _cookies;
+@model ProductViewModel
 @{
     ViewData["Active"] = "Products";
     var statuses = Helpers.Statuses();
     var option = Model.IsEditMode ? "Update" : "Add";
     var title = $"{option} Product";
     ViewData["Title"] = title;
+    var userData = _cookies.Read();
+    var productCategories = await _masterDataInterface.ProductCategoriesAsync(userData.ClientId);
+    var unitsOfMeasure = await _masterDataInterface.UnitOfMeasuresAsync(userData.ClientId);
 }
+
 
 <div class="card card-primary">
     <div class="card-header">
@@ -13,7 +19,7 @@
     </div>
 
     <form role="form" method="post" autocomplete="off">
-        <div asp-validation-summary="All"></div>
+        <div asp-validation-summary="All" class="text-danger"></div>
         <input asp-for="Id" />
         <input asp-for="IsEditMode" />
         <div class="card-body">
@@ -22,12 +28,14 @@
                     <div class="form-group">
                         <label asp-for="Code"></label>
                         <input asp-for="Code" class="form-control" placeholder="Code">
+                        <span asp-validation-for="Code" class="text-danger"></span>
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-group">
                         <label asp-for="Name"></label>
                         <input asp-for="Name" class="form-control" placeholder="Name">
+                        <span asp-validation-for="Name" class="text-danger"></span>
                     </div>
                 </div>
             </div>
@@ -36,12 +44,14 @@
                     <div class="form-group">
                         <label asp-for="BuyingPrice"></label>
                         <input asp-for="BuyingPrice" class="form-control">
+                        <span asp-validation-for="BuyingPrice" class="text-danger"></span>
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-group">
                         <label asp-for="SellingPrice"></label>
                         <input asp-for="SellingPrice" class="form-control">
+                        <span asp-validation-for="SellingPrice" class="text-danger"></span>
                     </div>
                 </div>
             </div>
@@ -63,13 +73,25 @@
                 <div class="col-md-6">
                     <div class="form-group">
                         <label asp-for="UnitOfMeasure"></label>
-                        <input asp-for="UnitOfMeasure" class="form-control">
+                        <select class="form-control select2" asp-for="UnitOfMeasure" style="width: 100%;">
+                            <option value="">--Select Unit of Measure--</option>
+                            @foreach (var item in unitsOfMeasure.Data)
+                            {
+                                <option value="@item.Name" title="@item.Notes">@item.Code - @item.Name</option>
+                            }
+                        </select>
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-group">
-                        <label asp-for="ImagePath"></label>
-                        <input asp-for="ImagePath" class="form-control">
+                        <label asp-for="ProductCategoryId"></label>
+                        <select class="form-control select2" asp-for="ProductCategoryId" style="width: 100%;">
+                            <option value="">--Select Category--</option>
+                            @foreach (var item in productCategories.Data)
+                            {
+                                <option value="@item.Id" title="@item.Notes">@item.Code - @item.Name</option>
+                            }
+                        </select>
                     </div>
                 </div>
             </div>

@@ -13,59 +13,42 @@ namespace PosMaster.Controllers
 {
     public class ProductsController : Controller
     {
-        private IProductInterface _producutInterface;
-        private ICookiesService _cookieService;
+        private readonly IProductInterface _producutInterface;
+        private readonly ICookiesService _cookieService;
+        private readonly FileUploadService _fileUploadService;
 
-        public ProductsController(IProductInterface productInterface, ICookiesService cookiesService)
+        public ProductsController(IProductInterface productInterface, ICookiesService cookiesService,FileUploadService fileUploadService)
         {
             _producutInterface = productInterface;
             _cookieService = cookiesService;
+            _fileUploadService = fileUploadService;
         }
         public async Task<IActionResult> All()
         {
             var user = _cookieService.Read();
-
-            if (user.Role == Role.SuperAdmin) 
+            if (User.IsInRole(Role.SuperAdmin))
             {
                 var result = await _producutInterface.AllAsync();
                 if (!result.Success)
-                {
                     TempData.SetData(AlertLevel.Warning, "Products", result.Message);
-                    return View();
-                }
                 return View(result.Data);
             }
-            if (user.Role == Role.Manager)
+            if (User.IsInRole(Role.Manager) || User.IsInRole(Role.Admin))
             {
                 var result = await _producutInterface.ByClientIdAsync(user.ClientId);
                 if (!result.Success)
-                {
                     TempData.SetData(AlertLevel.Warning, "Products", result.Message);
-                    return View();
-                }
                 return View(result.Data);
             }
-            if (user.Role == Role.Admin)
-            {
-                var result = await _producutInterface.ByClientIdAsync(user.ClientId);
-                if (!result.Success)
-                {
-                    TempData.SetData(AlertLevel.Warning, "Products", result.Message);
-                    return View();
-                }
-                return View(result.Data);
-            }
-            if (user.Role == Role.Clerk) 
+
+            if (User.IsInRole(Role.Clerk)) 
             {
                 var result = await _producutInterface.ByInstanceIdAsync(user.InstanceId);
                 if (!result.Success)
-                {
                     TempData.SetData(AlertLevel.Warning, "Products", result.Message);
-                    return View();
-                }
                 return View(result.Data);
             }
-            return View();
+            return View(new List<Product>());
         }
         public async Task<IActionResult> Edit(Guid? id) 
         {
@@ -98,6 +81,17 @@ namespace PosMaster.Controllers
                 TempData.SetData(AlertLevel.Warning, title, message);
                 return View(model);
             }
+            if (model.File!=null)
+            {
+                var uploadResult = await _fileUploadService.UploadAsync(model.ClientId, model.File);
+                if (!uploadResult.Success)
+                {
+                    ModelState.AddModelError("File", $"Upload Failed :-{uploadResult.Message}");
+                    return View(model);
+                }
+                model.IsNewImage = true;
+                model.ImagePath = uploadResult.PathUrl;
+            }
 
             var result = await _producutInterface.EditAsync(model);
             TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, title, result.Message);
@@ -105,6 +99,36 @@ namespace PosMaster.Controllers
                 return View(model);
             return RedirectToAction(nameof(All));
         }
-
+        public async Task<IActionResult> ProductStockAdjustment(Guid? clientId) 
+        {
+            var result = await _producutInterface.ByClientIdAsync(clientId.Value);
+            var model = new ProductStockAdjustmentViewModel
+            {
+                Products = result.Data
+            };
+            return View(model);
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ProductStockAdjustment(ProductStockAdjustmentViewModel model)
+        {
+            var userData = _cookieService.Read();
+            model.ClientId = userData.ClientId;
+            model.InstanceId = userData.InstanceId;
+            model.Personnel = User.Identity.Name;
+            var option = model.IsEditMode ? "Update" : "Add";
+            var title = $"{option} Product";
+            if (!ModelState.IsValid)
+            {
+                var message = "Missing fields";
+                TempData.SetData(AlertLevel.Warning, title, message);
+                return View(model);
+            }
+            var result = await _producutInterface.AdjustProductStockAsync(model);
+            TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, title, result.Message);
+            if (!result.Success)
+                return View(model);
+            return RedirectToAction(nameof(All));
+        }
     }
 }
