@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using PosMaster.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -8,17 +9,17 @@ using System.Threading.Tasks;
 
 namespace PosMaster.Dal.Interfaces
 {
-    public interface IProductInterface
-    {
-        Task<ReturnData<Product>> EditAsync(ProductViewModel model);
-        Task<ReturnData<List<Product>>> AllAsync();
-        Task<ReturnData<List<Product>>> ByClientIdAsync(Guid clientId);
-        Task<ReturnData<List<Product>>> ByInstanceIdAsync(Guid instanceId);
-        Task<ReturnData<Product>> ByIdAsync(Guid id);
-        Task<ReturnData<Receipt>> ProductSaleAsync(ProductSaleViewModel model);
-        Task<ReturnData<List<Receipt>>> ReceiptsAsync(Guid? clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "");
-        Task<ReturnData<ProductStockAdjustmentLog>> AdjustProductStockAsync(ProductStockAdjustmentViewModel model);
-    }
+	public interface IProductInterface
+	{
+		Task<ReturnData<Product>> EditAsync(ProductViewModel model);
+		Task<ReturnData<List<Product>>> AllAsync();
+		Task<ReturnData<List<Product>>> ByClientIdAsync(Guid clientId);
+		Task<ReturnData<List<Product>>> ByInstanceIdAsync(Guid instanceId);
+		Task<ReturnData<Product>> ByIdAsync(Guid id);
+		Task<ReturnData<Receipt>> ProductsSaleAsync(ProductSaleViewModel model);
+		Task<ReturnData<List<Receipt>>> ReceiptsAsync(Guid? clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "");
+		Task<ReturnData<ProductStockAdjustmentLog>> AdjustProductStockAsync(ProductStockAdjustmentViewModel model);
+	}
 
     public class ProductImplementation : IProductInterface
     {
@@ -265,155 +266,173 @@ namespace PosMaster.Dal.Interfaces
             }
         }
 
-        public async Task<ReturnData<Receipt>> ProductSaleAsync(ProductSaleViewModel model)
-        {
-            var result = new ReturnData<Receipt> { Data = new Receipt() };
-            var tag = nameof(ProductSaleAsync);
-            _logger.LogInformation($"{tag} sell {model.Quantity} of product {model.ProductId} at {model.UnitPrice}");
-            try
-            {
-                var customer = model.IsWalkIn ?
-                    await _context.Customers.FirstOrDefaultAsync(c => c.Code.Equals(Constants.WalkInCustomerCode) && c.ClientId.Equals(model.ClientId))
-                    : await _context.Customers.FirstOrDefaultAsync(c => c.Id.Equals(Guid.Parse(model.CustomerId)));
-                if (customer == null)
-                {
-                    result.Message = "Provided customer not Found";
-                    _logger.LogWarning($"{tag} sale failed {model.ProductId} : {result.Message}");
-                    return result;
-                }
-                var product = await _context.Products.FirstOrDefaultAsync(p => p.Id.Equals(Guid.Parse(model.ProductId)));
-                if (product == null)
-                {
-                    result.Message = "Provided product not Found";
-                    _logger.LogWarning($"{tag} sale failed {model.ProductId} : {result.Message}");
-                    return result;
-                }
+		public async Task<ReturnData<Receipt>> ProductsSaleAsync(ProductSaleViewModel model)
+		{
+			var result = new ReturnData<Receipt> { Data = new Receipt() };
+			var tag = nameof(ProductsSaleAsync);
+			_logger.LogInformation($"{tag} sell : credit {model.IsCredit} , walkin {model.IsWalkIn}");
+			try
+			{
+				var customer = model.IsWalkIn ?
+					await _context.Customers.FirstOrDefaultAsync(c => c.Code.Equals(Constants.WalkInCustomerCode) && c.ClientId.Equals(model.ClientId))
+					: await _context.Customers.FirstOrDefaultAsync(c => c.Id.Equals(Guid.Parse(model.CustomerId)));
 
-                if (product.AvailableQuantity < model.Quantity)
-                {
-                    result.Message = $"{product.Name} available quantity is {product.AvailableQuantity}";
-                    _logger.LogWarning($"{tag} sale failed {model.ProductId} : {result.Message}");
-                    return result;
-                }
+				var lineItems = string.IsNullOrEmpty(model.LineItemListStr) ?
+					new List<ReceiptLineItemMiniViewModel>()
+					: JsonConvert.DeserializeObject<List<ReceiptLineItemMiniViewModel>>(model.LineItemListStr);
 
-                var rcptRef = DocumentRefNumber(Document.Receipt, model.ClientId);
-                var receipt = new Receipt
-                {
-                    Id = Guid.NewGuid(),
-                    Code = rcptRef,
-                    UnitPrice = product.SellingPrice,
-                    Discount = model.Discount,
-                    Customer = customer,
-                    CustomerId = customer.Id,
-                    ClientId = product.ClientId,
-                    InstanceId = product.InstanceId,
-                    Product = product,
-                    ProductId = product.Id,
-                    Quantity = model.Quantity,
-                    PaymentMode = model.PaymentMode,
-                    ExternalRef = model.ExternalRef,
-                    IsCredit = model.IsCredit,
-                    IsWalkIn = model.IsWalkIn,
-                    Notes = model.Notes,
-                    Personnel = model.Personnel
-                };
-                if (product.IsTaxable)
-                {
-                    var rate = _context.Clients.Where(c => c.Id.Equals(model.ClientId))
-                        .Select(c => c.TaxRate).FirstOrDefault();
-                    receipt.TaxAmount = model.Quantity * model.UnitPrice * rate;
-                }
-                product.AvailableQuantity -= model.Quantity;
-                product.DateLastModified = DateTime.Now;
-                product.LastModifiedBy = model.Personnel;
-                _context.Receipts.Add(receipt);
-                await _context.SaveChangesAsync();
+				if (customer == null)
+				{
+					result.Message = "Provided customer not Found";
+					_logger.LogWarning($"{tag} sale failed {model.CustomerId} : {result.Message}");
+					return result;
+				}
+
+				if (!lineItems.Any())
+				{
+					result.Message = "No line items found";
+					_logger.LogWarning($"{tag} sale failed {model.CustomerId} : {result.Message}");
+					return result;
+				}
+
+				var rcptRef = DocumentRefNumber(Document.Receipt, model.ClientId);
+				var receipt = new Receipt
+				{
+					Id = Guid.NewGuid(),
+					Code = rcptRef,
+					Discount = model.Discount,
+					Customer = customer,
+					CustomerId = customer.Id,
+					ClientId = model.ClientId,
+					InstanceId = model.InstanceId,
+					PaymentMode = model.PaymentMode,
+					ExternalRef = model.ExternalRef,
+					IsCredit = model.IsCredit,
+					IsWalkIn = model.IsWalkIn,
+					Notes = model.Notes,
+					Personnel = model.Personnel
+				};
+				var i = 0;
+				foreach (var item in lineItems)
+				{
+					i++;
+					var product = await _context.Products.FirstOrDefaultAsync(p => p.Id.Equals(item.ProductId));
+					if (product == null)
+					{
+						result.Message = "Provided product not Found";
+						_logger.LogWarning($"{tag} sale failed {item.ProductId} : {result.Message}");
+						continue;
+					}
+
+					if (product.AvailableQuantity < item.Quantity)
+					{
+						result.Message = $"{product.Name} available quantity is {product.AvailableQuantity}";
+						_logger.LogWarning($"{tag} sale failed {item.ProductId} : {result.Message}");
+						continue;
+					}
+					var lineItem = new ReceiptLineItem
+					{
+						ReceiptId = receipt.Id,
+						Code = $"{receipt.Code}-{i}",
+						ProductId = product.Id,
+						TaxRate = product.TaxRate,
+						SellingPrice = product.SellingPrice,
+						UnitPrice = item.UnitPrice,
+						Quantity = item.Quantity,
+						Discount = item.Discount,
+						Personnel = receipt.Personnel,
+						ClientId = receipt.ClientId,
+						InstanceId = receipt.InstanceId
+					};
+					receipt.ReceiptLineItems.Add(lineItem);
+					product.AvailableQuantity -= item.Quantity;
+					product.DateLastModified = DateTime.Now;
+					product.LastModifiedBy = model.Personnel;
+				}
+				_context.Receipts.Add(receipt);
+				await _context.SaveChangesAsync();
 
                 if (model.IsCredit)
                     await AddInvoiceAsync(receipt);
 
-                result.Success = true;
-                result.Data = receipt;
-                result.Message = $"Receipt {receipt.Code} Added";
-                _logger.LogInformation($"{tag} product  {model.ProductId} sold : {result.Message}");
-                return result;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-                result.ErrorMessage = ex.Message;
-                result.Message = "Error occured";
-                _logger.LogError($"{tag} {result.Message} : {ex}");
-                return result;
-            }
-        }
+				result.Success = true;
+				result.Data = receipt;
+				result.Message = $"Receipt {receipt.Code} Added";
+				_logger.LogInformation($"{tag} sold {i} of {lineItems.Count} products: {result.Message}");
+				return result;
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex);
+				result.ErrorMessage = ex.Message;
+				result.Message = "Error occured";
+				_logger.LogError($"{tag} {result.Message} : {ex}");
+				return result;
+			}
+		}
 
-        public async Task<ReturnData<List<Receipt>>> ReceiptsAsync(Guid? clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "")
-        {
-            var result = new ReturnData<List<Receipt>> { Data = new List<Receipt>() };
-            var tag = nameof(ReceiptsAsync);
-            _logger.LogInformation($"{tag} get receipts: clientId {clientId}, instanceId {instanceId}, duration {dateFrom}-{dateTo}, search {search}");
-            try
-            {
-                var dataQuery = _context.Receipts.Include(r => r.Product)
-                    .ThenInclude(p => p.ProductCategory)
-                    .Include(r => r.Customer)
-                    .AsQueryable();
-                if (clientId != null)
-                    dataQuery = dataQuery.Where(r => r.ClientId.Equals(clientId.Value));
-                if (instanceId != null)
-                    dataQuery = dataQuery.Where(r => r.InstanceId.Equals(instanceId.Value));
-                var hasFromDate = DateTime.TryParse(dateFrom, out var dtFrom);
-                var hasToDate = DateTime.TryParse(dateTo, out var dtTo);
-                if (hasFromDate)
-                    dataQuery = dataQuery.Where(r => r.DateCreated.Date >= dtFrom.Date);
-                if (hasToDate)
-                    dataQuery = dataQuery.Where(r => r.DateCreated.Date <= dtTo.Date);
-                if (!string.IsNullOrEmpty(search))
-                    dataQuery = dataQuery.Where(r => r.Code.ToLower().Contains(search.ToLower()));
-                var data = await dataQuery.OrderByDescending(r => r.DateCreated)
-                    .ToListAsync();
-                result.Success = data.Any();
-                result.Message = result.Success ? "Found" : "Not Found";
-                if (result.Success)
-                    result.Data = data;
-                _logger.LogInformation($"{tag} found {data.Count} receipts");
-                return result;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-                result.ErrorMessage = ex.Message;
-                result.Message = "Error occured";
-                _logger.LogError($"{tag} {result.Message} : {ex}");
-                return result;
-            }
-        }
+		public async Task<ReturnData<List<Receipt>>> ReceiptsAsync(Guid? clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "")
+		{
+			var result = new ReturnData<List<Receipt>> { Data = new List<Receipt>() };
+			var tag = nameof(ReceiptsAsync);
+			_logger.LogInformation($"{tag} get receipts: clientId {clientId}, instanceId {instanceId}, duration {dateFrom}-{dateTo}, search {search}");
+			try
+			{
+				var dataQuery = _context.Receipts
+					.Include(r => r.ReceiptLineItems)
+					.Include(r => r.Customer)
+					.AsQueryable();
+				if (clientId != null)
+					dataQuery = dataQuery.Where(r => r.ClientId.Equals(clientId.Value));
+				if (instanceId != null)
+					dataQuery = dataQuery.Where(r => r.InstanceId.Equals(instanceId.Value));
+				var hasFromDate = DateTime.TryParse(dateFrom, out var dtFrom);
+				var hasToDate = DateTime.TryParse(dateTo, out var dtTo);
+				if (hasFromDate)
+					dataQuery = dataQuery.Where(r => r.DateCreated.Date >= dtFrom.Date);
+				if (hasToDate)
+					dataQuery = dataQuery.Where(r => r.DateCreated.Date <= dtTo.Date);
+				if (!string.IsNullOrEmpty(search))
+					dataQuery = dataQuery.Where(r => r.Code.ToLower().Contains(search.ToLower()));
+				var data = await dataQuery.OrderByDescending(r => r.DateCreated)
+					.ToListAsync();
+				result.Success = data.Any();
+				result.Message = result.Success ? "Found" : "Not Found";
+				if (result.Success)
+					result.Data = data;
+				_logger.LogInformation($"{tag} found {data.Count} receipts");
+				return result;
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex);
+				result.ErrorMessage = ex.Message;
+				result.Message = "Error occured";
+				_logger.LogError($"{tag} {result.Message} : {ex}");
+				return result;
+			}
+		}
 
-        private async Task<string> AddInvoiceAsync(Receipt receipt)
-        {
-            var tag = nameof(AddInvoiceAsync);
-            _logger.LogInformation($"{tag} add customer invoice. product {receipt.ProductId}, customer {receipt.CustomerId}");
-            var invRef = DocumentRefNumber(Document.Invoice, receipt.ClientId);
-            var invoice = new Invoice
-            {
-                Code = invRef,
-                ClientId = receipt.ClientId,
-                ReceiptId = receipt.Id,
-                InstanceId = receipt.InstanceId,
-                Personnel = receipt.Personnel,
-                ProductId = receipt.ProductId,
-                CustomerId = receipt.CustomerId,
-                Quantity = receipt.Quantity,
-                UnitPrice = receipt.UnitPrice,
-                ReceiptNo = receipt.Code,
-                TaxAmount = receipt.TaxAmount
-            };
-            _context.Invoices.Add(invoice);
-            await _context.SaveChangesAsync();
-            _logger.LogInformation($"{tag} invoice {invRef} add for client {receipt.ClientId}");
-            return invRef;
-        }
+		private async Task<string> AddInvoiceAsync(Receipt receipt)
+		{
+			var tag = nameof(AddInvoiceAsync);
+			_logger.LogInformation($"{tag} add customer invoice. receipt {receipt.Code}, customer {receipt.CustomerId}");
+			var invRef = DocumentRefNumber(Document.Invoice, receipt.ClientId);
+			var invoice = new Invoice
+			{
+				Code = invRef,
+				ClientId = receipt.ClientId,
+				ReceiptId = receipt.Id,
+				InstanceId = receipt.InstanceId,
+				Personnel = receipt.Personnel,
+				CustomerId = receipt.CustomerId,
+				ReceiptNo = receipt.Code
+			};
+			_context.Invoices.Add(invoice);
+			await _context.SaveChangesAsync();
+			_logger.LogInformation($"{tag} invoice {invRef} add for client {receipt.ClientId}");
+			return invRef;
+		}
 
         private string DocumentRefNumber(Document document, Guid clientId)
         {

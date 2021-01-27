@@ -6,5 +6,6 @@
 		public static string SuperAdminEmail = "admin@posmaster.co.ke";
 		public static string SuperAdminPassword = "Password.123#";
 		public static string SystemEmailAddress = "posmaster@gmail.com";
+		public static string DefaultPaymentMode = "CASH";
 	}
 }

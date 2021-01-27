@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace PosMaster.Dal
 {
@@ -8,19 +10,16 @@ namespace PosMaster.Dal
 		{
 			IsWalkIn = true;
 			IsCredit = false;
+			ReceiptLineItems = new List<ReceiptLineItem>();
 		}
-		public decimal UnitPrice { get; set; }
-		public decimal Discount { get; set; }
 		public Customer Customer { get; set; }
 		public Guid CustomerId { get; set; }
-		public Product Product { get; set; }
-		public Guid ProductId { get; set; }
-		public decimal Quantity { get; set; }
-		public decimal Amount => (UnitPrice * Quantity) + TaxAmount - Discount;
 		public string PaymentMode { get; set; }
 		public string ExternalRef { get; set; }
 		public bool IsCredit { get; set; }
 		public bool IsWalkIn { get; set; }
-		public decimal TaxAmount { get; set; }
+		public decimal Discount { get; set; }
+		public List<ReceiptLineItem> ReceiptLineItems { get; set; }
+		public decimal TotalAmount => ReceiptLineItems.Sum(i => i.Amount);
 	}
 }
