@@ -6,8 +6,6 @@ using PosMaster.Extensions;
 using PosMaster.Services;
 using PosMaster.ViewModels;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace PosMaster.Controllers
@@ -26,6 +24,7 @@ namespace PosMaster.Controllers
 			_settingInterface = settingInterface;
 		}
 
+		[HttpGet]
 		[Authorize(Roles = "SuperAdmin")]
 		public async Task<IActionResult> System()
 		{
@@ -37,6 +36,7 @@ namespace PosMaster.Controllers
 
 		[HttpPost]
 		[Authorize(Roles = "SuperAdmin")]
+		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> System(SystemSettingMiniViewModel model)
 		{
 			if (!ModelState.IsValid)
@@ -48,5 +48,30 @@ namespace PosMaster.Controllers
 				TempData.SetData(AlertLevel.Warning, "Settings", result.Message);
 			return View(model);
 		}
+
+		[HttpGet]
+		public async Task<IActionResult> EmailSettings(Guid clientId)
+		{
+			var result = await _clientInterface.ClientEmailSettingAsync(clientId);
+			if (!result.Success)
+				TempData.SetData(AlertLevel.Warning, "Email Settings", result.Message);
+			return View(new EmailSettingViewModel(result.Data));
+		}
+
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> EmailSettings(EmailSettingViewModel model)
+		{
+			if (!ModelState.IsValid)
+				return View(model);
+			var userData = _cookieService.Read();
+			model.ClientId = userData.ClientId;
+			model.InstanceId = userData.InstanceId;
+			model.Personnel = User.Identity.Name;
+			var result = await _clientInterface.UpdateEmailSettingAsync(model);
+			TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, "Email Settings", result.Message);
+			return View(new EmailSettingViewModel(result.Data));
+		}
+
 	}
 }
