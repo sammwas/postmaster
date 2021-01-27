@@ -17,7 +17,7 @@ namespace PosMaster.Controllers
         private readonly ICookiesService _cookieService;
         private readonly FileUploadService _fileUploadService;
 
-        public ProductsController(IProductInterface productInterface, ICookiesService cookiesService,FileUploadService fileUploadService)
+        public ProductsController(IProductInterface productInterface, ICookiesService cookiesService, FileUploadService fileUploadService)
         {
             _producutInterface = productInterface;
             _cookieService = cookiesService;
@@ -26,35 +26,18 @@ namespace PosMaster.Controllers
         public async Task<IActionResult> All()
         {
             var user = _cookieService.Read();
-            if (User.IsInRole(Role.SuperAdmin))
-            {
-                var result = await _producutInterface.AllAsync();
-                if (!result.Success)
-                    TempData.SetData(AlertLevel.Warning, "Products", result.Message);
-                return View(result.Data);
-            }
-            if (User.IsInRole(Role.Manager) || User.IsInRole(Role.Admin))
-            {
-                var result = await _producutInterface.ByClientIdAsync(user.ClientId);
-                if (!result.Success)
-                    TempData.SetData(AlertLevel.Warning, "Products", result.Message);
-                return View(result.Data);
-            }
-
-            if (User.IsInRole(Role.Clerk)) 
-            {
-                var result = await _producutInterface.ByInstanceIdAsync(user.InstanceId);
-                if (!result.Success)
-                    TempData.SetData(AlertLevel.Warning, "Products", result.Message);
-                return View(result.Data);
-            }
-            return View(new List<Product>());
+            var result = User.IsInRole(Role.Clerk) ?
+            await _producutInterface.ByInstanceIdAsync(user.InstanceId) :
+            await _producutInterface.ByClientIdAsync(user.ClientId);
+            if (!result.Success)
+                TempData.SetData(AlertLevel.Warning, "Products", result.Message);
+            return View(result.Data);
         }
-        public async Task<IActionResult> Edit(Guid? id) 
+        public async Task<IActionResult> Edit(Guid? id)
         {
             if (id == null)
                 return View(new ProductViewModel { Status = EntityStatus.Active });
-   
+
             var result = await _producutInterface.ByIdAsync(id.Value);
             if (!result.Success)
             {
@@ -81,7 +64,7 @@ namespace PosMaster.Controllers
                 TempData.SetData(AlertLevel.Warning, title, message);
                 return View(model);
             }
-            if (model.File!=null)
+            if (model.File != null)
             {
                 var uploadResult = await _fileUploadService.UploadAsync(model.ClientId, model.File);
                 if (!uploadResult.Success)
@@ -99,7 +82,7 @@ namespace PosMaster.Controllers
                 return View(model);
             return RedirectToAction(nameof(All));
         }
-        public async Task<IActionResult> ProductStockAdjustment(Guid? clientId) 
+        public async Task<IActionResult> ProductStockAdjustment(Guid? clientId)
         {
             var result = await _producutInterface.ByClientIdAsync(clientId.Value);
             var model = new ProductStockAdjustmentViewModel
