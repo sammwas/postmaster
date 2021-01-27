@@ -28,6 +28,7 @@ namespace PosMaster.ViewModels
             AvailableQuantity = product.AvailableQuantity;
             UnitOfMeasure = product.UnitOfMeasure;
             IsEditMode = true;
+            Notes = product.Notes;
         }
 
         [Required]
