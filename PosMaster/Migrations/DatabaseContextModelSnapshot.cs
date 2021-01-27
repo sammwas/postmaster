@@ -239,9 +239,6 @@ namespace PosMaster.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
-                    b.Property<decimal>("TaxRate")
-                        .HasColumnType("numeric");
-
                     b.Property<string>("TelephoneCode")
                         .HasColumnType("text");
 
@@ -430,8 +427,8 @@ namespace PosMaster.Migrations
                     b.Property<string>("SmtpPassword")
                         .HasColumnType("text");
 
-                    b.Property<string>("SmtpPort")
-                        .HasColumnType("text");
+                    b.Property<int>("SmtpPort")
+                        .HasColumnType("integer");
 
                     b.Property<string>("SmtpServer")
                         .HasColumnType("text");
@@ -652,6 +649,8 @@ namespace PosMaster.Migrations
 
                     b.HasIndex("ProductId");
 
+                    b.HasIndex("ReceiptId");
+
                     b.ToTable("Invoices");
                 });
 
@@ -840,9 +839,6 @@ namespace PosMaster.Migrations
                     b.Property<Guid>("InstanceId")
                         .HasColumnType("uuid");
 
-                    b.Property<bool>("IsTaxable")
-                        .HasColumnType("boolean");
-
                     b.Property<string>("LastModifiedBy")
                         .HasColumnType("text");
 
@@ -866,6 +862,9 @@ namespace PosMaster.Migrations
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
+
+                    b.Property<decimal>("TaxRate")
+                        .HasColumnType("numeric");
 
                     b.Property<string>("UnitOfMeasure")
                         .HasColumnType("text");
@@ -1113,16 +1112,65 @@ namespace PosMaster.Migrations
                     b.Property<string>("Personnel")
                         .HasColumnType("text");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CustomerId");
+
+                    b.ToTable("Receipts");
+                });
+
+            modelBuilder.Entity("PosMaster.Dal.ReceiptLineItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ClientId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Code")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<DateTime?>("DateLastModified")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<decimal>("Discount")
+                        .HasColumnType("numeric");
+
+                    b.Property<Guid>("InstanceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Personnel")
+                        .HasColumnType("text");
+
                     b.Property<Guid>("ProductId")
                         .HasColumnType("uuid");
 
                     b.Property<decimal>("Quantity")
                         .HasColumnType("numeric");
 
+                    b.Property<Guid>("ReceiptId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("SellingPrice")
+                        .HasColumnType("numeric");
+
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
-                    b.Property<decimal>("TaxAmount")
+                    b.Property<decimal>("TaxRate")
                         .HasColumnType("numeric");
 
                     b.Property<decimal>("UnitPrice")
@@ -1130,11 +1178,11 @@ namespace PosMaster.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CustomerId");
-
                     b.HasIndex("ProductId");
 
-                    b.ToTable("Receipts");
+                    b.HasIndex("ReceiptId");
+
+                    b.ToTable("ReceiptLineItem");
                 });
 
             modelBuilder.Entity("PosMaster.Dal.SmsSetting", b =>
@@ -1645,9 +1693,17 @@ namespace PosMaster.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("PosMaster.Dal.Receipt", "Receipt")
+                        .WithMany()
+                        .HasForeignKey("ReceiptId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Customer");
 
                     b.Navigation("Product");
+
+                    b.Navigation("Receipt");
                 });
 
             modelBuilder.Entity("PosMaster.Dal.PoGrnProduct", b =>
@@ -1713,15 +1769,29 @@ namespace PosMaster.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("Customer");
+                });
+
+            modelBuilder.Entity("PosMaster.Dal.ReceiptLineItem", b =>
+                {
                     b.HasOne("PosMaster.Dal.Product", "Product")
                         .WithMany()
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Customer");
+                    b.HasOne("PosMaster.Dal.Receipt", null)
+                        .WithMany("ReceiptLineItems")
+                        .HasForeignKey("ReceiptId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("PosMaster.Dal.Receipt", b =>
+                {
+                    b.Navigation("ReceiptLineItems");
                 });
 #pragma warning restore 612, 618
         }

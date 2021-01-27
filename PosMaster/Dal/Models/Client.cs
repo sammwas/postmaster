@@ -24,6 +24,5 @@
 		public string TelephoneCode { get; set; }
 		public bool DisplayBuyingPrice { get; set; }
 		public string InvoiceTerms { get; set; }
-		public decimal TaxRate { get; set; }
 	}
 }

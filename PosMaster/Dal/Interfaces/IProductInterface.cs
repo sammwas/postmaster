@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using PosMaster.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -15,7 +16,7 @@ namespace PosMaster.Dal.Interfaces
 		Task<ReturnData<List<Product>>> ByClientIdAsync(Guid clientId);
 		Task<ReturnData<List<Product>>> ByInstanceIdAsync(Guid instanceId);
 		Task<ReturnData<Product>> ByIdAsync(Guid id);
-		Task<ReturnData<Receipt>> ProductSaleAsync(ProductSaleViewModel model);
+		Task<ReturnData<Receipt>> ProductsSaleAsync(ProductSaleViewModel model);
 		Task<ReturnData<List<Receipt>>> ReceiptsAsync(Guid? clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "");
 		Task<ReturnData<ProductStockAdjustmentLog>> AdjustProductStockAsync(ProductStockAdjustmentViewModel model);
 	}
@@ -265,34 +266,32 @@ namespace PosMaster.Dal.Interfaces
 			}
 		}
 
-		public async Task<ReturnData<Receipt>> ProductSaleAsync(ProductSaleViewModel model)
+		public async Task<ReturnData<Receipt>> ProductsSaleAsync(ProductSaleViewModel model)
 		{
 			var result = new ReturnData<Receipt> { Data = new Receipt() };
-			var tag = nameof(ProductSaleAsync);
-			_logger.LogInformation($"{tag} sell {model.Quantity} of product {model.ProductId} at {model.UnitPrice}");
+			var tag = nameof(ProductsSaleAsync);
+			_logger.LogInformation($"{tag} sell : credit {model.IsCredit} , walkin {model.IsWalkIn}");
 			try
 			{
 				var customer = model.IsWalkIn ?
 					await _context.Customers.FirstOrDefaultAsync(c => c.Code.Equals(Constants.WalkInCustomerCode) && c.ClientId.Equals(model.ClientId))
 					: await _context.Customers.FirstOrDefaultAsync(c => c.Id.Equals(Guid.Parse(model.CustomerId)));
+
+				var lineItems = string.IsNullOrEmpty(model.LineItemListStr) ?
+					new List<ReceiptLineItemMiniViewModel>()
+					: JsonConvert.DeserializeObject<List<ReceiptLineItemMiniViewModel>>(model.LineItemListStr);
+
 				if (customer == null)
 				{
 					result.Message = "Provided customer not Found";
-					_logger.LogWarning($"{tag} sale failed {model.ProductId} : {result.Message}");
-					return result;
-				}
-				var product = await _context.Products.FirstOrDefaultAsync(p => p.Id.Equals(Guid.Parse(model.ProductId)));
-				if (product == null)
-				{
-					result.Message = "Provided product not Found";
-					_logger.LogWarning($"{tag} sale failed {model.ProductId} : {result.Message}");
+					_logger.LogWarning($"{tag} sale failed {model.CustomerId} : {result.Message}");
 					return result;
 				}
 
-				if (product.AvailableQuantity < model.Quantity)
+				if (!lineItems.Any())
 				{
-					result.Message = $"{product.Name} available quantity is {product.AvailableQuantity}";
-					_logger.LogWarning($"{tag} sale failed {model.ProductId} : {result.Message}");
+					result.Message = "No line items found";
+					_logger.LogWarning($"{tag} sale failed {model.CustomerId} : {result.Message}");
 					return result;
 				}
 
@@ -301,15 +300,11 @@ namespace PosMaster.Dal.Interfaces
 				{
 					Id = Guid.NewGuid(),
 					Code = rcptRef,
-					UnitPrice = model.UnitPrice,
 					Discount = model.Discount,
 					Customer = customer,
 					CustomerId = customer.Id,
 					ClientId = model.ClientId,
 					InstanceId = model.InstanceId,
-					Product = product,
-					ProductId = product.Id,
-					Quantity = model.Quantity,
 					PaymentMode = model.PaymentMode,
 					ExternalRef = model.ExternalRef,
 					IsCredit = model.IsCredit,
@@ -317,15 +312,43 @@ namespace PosMaster.Dal.Interfaces
 					Notes = model.Notes,
 					Personnel = model.Personnel
 				};
-				if (product.IsTaxable)
+				var i = 0;
+				foreach (var item in lineItems)
 				{
-					var rate = _context.Clients.Where(c => c.Id.Equals(model.ClientId))
-						.Select(c => c.TaxRate).FirstOrDefault();
-					receipt.TaxAmount = model.Quantity * model.UnitPrice * rate;
+					i++;
+					var product = await _context.Products.FirstOrDefaultAsync(p => p.Id.Equals(item.ProductId));
+					if (product == null)
+					{
+						result.Message = "Provided product not Found";
+						_logger.LogWarning($"{tag} sale failed {item.ProductId} : {result.Message}");
+						continue;
+					}
+
+					if (product.AvailableQuantity < item.Quantity)
+					{
+						result.Message = $"{product.Name} available quantity is {product.AvailableQuantity}";
+						_logger.LogWarning($"{tag} sale failed {item.ProductId} : {result.Message}");
+						continue;
+					}
+					var lineItem = new ReceiptLineItem
+					{
+						ReceiptId = receipt.Id,
+						Code = $"{receipt.Code}-{i}",
+						ProductId = product.Id,
+						TaxRate = product.TaxRate,
+						SellingPrice = product.SellingPrice,
+						UnitPrice = item.UnitPrice,
+						Quantity = item.Quantity,
+						Discount = item.Discount,
+						Personnel = receipt.Personnel,
+						ClientId = receipt.ClientId,
+						InstanceId = receipt.InstanceId
+					};
+					receipt.ReceiptLineItems.Add(lineItem);
+					product.AvailableQuantity -= item.Quantity;
+					product.DateLastModified = DateTime.Now;
+					product.LastModifiedBy = model.Personnel;
 				}
-				product.AvailableQuantity -= model.Quantity;
-				product.DateLastModified = DateTime.Now;
-				product.LastModifiedBy = model.Personnel;
 				_context.Receipts.Add(receipt);
 				await _context.SaveChangesAsync();
 
@@ -335,7 +358,7 @@ namespace PosMaster.Dal.Interfaces
 				result.Success = true;
 				result.Data = receipt;
 				result.Message = $"Receipt {receipt.Code} Added";
-				_logger.LogInformation($"{tag} product  {model.ProductId} sold : {result.Message}");
+				_logger.LogInformation($"{tag} sold {i} of {lineItems.Count} products: {result.Message}");
 				return result;
 			}
 			catch (Exception ex)
@@ -355,8 +378,8 @@ namespace PosMaster.Dal.Interfaces
 			_logger.LogInformation($"{tag} get receipts: clientId {clientId}, instanceId {instanceId}, duration {dateFrom}-{dateTo}, search {search}");
 			try
 			{
-				var dataQuery = _context.Receipts.Include(r => r.Product)
-					.ThenInclude(p => p.ProductCategory)
+				var dataQuery = _context.Receipts
+					.Include(r => r.ReceiptLineItems)
 					.Include(r => r.Customer)
 					.AsQueryable();
 				if (clientId != null)
@@ -393,7 +416,7 @@ namespace PosMaster.Dal.Interfaces
 		private async Task<string> AddInvoiceAsync(Receipt receipt)
 		{
 			var tag = nameof(AddInvoiceAsync);
-			_logger.LogInformation($"{tag} add customer invoice. product {receipt.ProductId}, customer {receipt.CustomerId}");
+			_logger.LogInformation($"{tag} add customer invoice. receipt {receipt.Code}, customer {receipt.CustomerId}");
 			var invRef = DocumentRefNumber(Document.Invoice, receipt.ClientId);
 			var invoice = new Invoice
 			{
@@ -402,12 +425,8 @@ namespace PosMaster.Dal.Interfaces
 				ReceiptId = receipt.Id,
 				InstanceId = receipt.InstanceId,
 				Personnel = receipt.Personnel,
-				ProductId = receipt.ProductId,
 				CustomerId = receipt.CustomerId,
-				Quantity = receipt.Quantity,
-				UnitPrice = receipt.UnitPrice,
-				ReceiptNo = receipt.Code,
-				TaxAmount = receipt.TaxAmount
+				ReceiptNo = receipt.Code
 			};
 			_context.Invoices.Add(invoice);
 			await _context.SaveChangesAsync();

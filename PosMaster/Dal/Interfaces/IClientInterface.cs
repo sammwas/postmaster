@@ -256,8 +256,8 @@ namespace PosMaster.Dal.Interfaces
 				{
 					ClientId = clientId,
 					InstanceId = instanceId,
-					Name = "CASH",
-					Code = "CASH",
+					Name = Constants.DefaultPaymentMode,
+					Code = Constants.DefaultPaymentMode,
 					Personnel = Constants.SuperAdminEmail
 				};
 				_context.PaymentModes.Add(payment);

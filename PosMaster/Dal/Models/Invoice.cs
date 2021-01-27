@@ -5,6 +5,7 @@ namespace PosMaster.Dal
 	public class Invoice : BaseEntity
 	{
 		public Customer Customer { get; set; }
+		public Receipt Receipt { get; set; }
 		public Guid CustomerId { get; set; }
 		public Product Product { get; set; }
 		public Guid ProductId { get; set; }
