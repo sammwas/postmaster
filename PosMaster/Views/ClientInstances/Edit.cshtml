@@ -1,78 +1,75 @@
 ﻿@model ClientInstanceViewModel
 @{
-    ViewData["Active"] = "Clients";
-    var statuses = Helpers.Statuses();
-    var option = Model.IsEditMode ? "Update" : "Add";
-    var title = $"{option} Client instance";
-    ViewData["Title"] = title;
+	ViewData["Active"] = "Clients";
+	var statuses = Helpers.Statuses();
+	var option = Model.IsEditMode ? "Update" : "Add";
+	var title = $"{option} Client instance";
+	ViewData["Title"] = title;
 }
 
 <div class="card card-primary">
-    <div class="card-header">
-        <h3 class="card-title">@ViewData["Title"]</h3>
-    </div>
-
-    <form method="post" autocomplete="off">
-        <div asp-validation-summary="All"></div>
-        <input asp-for="Id" />
-        <input asp-for="IsEditMode" />
-        <input asp-for="ClientId" />
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label asp-for="Code"></label>
-                        <input asp-for="Code" placeholder="Code" class="form-control">
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label asp-for="Name"></label>
-                        <input asp-for="Name" placeholder="Name" class="form-control">
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label asp-for="Town"></label>
-                        <input asp-for="Town" class="form-control" placeholder="Town">
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label asp-for="Location"></label>
-                        <input asp-for="Location" class="form-control" placeholder="Location">
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label asp-for="PrimaryTelephone"></label>
-                        <input asp-for="PrimaryTelephone" class="form-control" placeholder="07XXXXXXXX">
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label asp-for="SecondaryTelephone"></label>
-                        <input asp-for="SecondaryTelephone" class="form-control" placeholder="07XXXXXXXX">
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="form-group">
-                        <label asp-for="Notes"></label>
-                        <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Notes"></textarea>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- /.card-body -->
-
-        <div class="card-footer">
-            <button type="submit" class="btn btn-primary">Submit</button>
-        </div>
-    </form>
+	<div class="card-header">
+		<h3 class="card-title">@ViewData["Title"]</h3>
+	</div>
+	<form method="post" autocomplete="off">
+		<div asp-validation-summary="All"></div>
+		<input asp-for="Id" />
+		<input asp-for="IsEditMode" />
+		<input asp-for="ClientId" />
+		<div class="card-body">
+			<div class="row">
+				<div class="col-md-6">
+					<div class="form-group">
+						<label asp-for="Code"></label>
+						<input asp-for="Code" placeholder="Code" class="form-control">
+					</div>
+				</div>
+				<div class="col-md-6">
+					<div class="form-group">
+						<label asp-for="Name"></label>
+						<input asp-for="Name" placeholder="Name" class="form-control">
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-6">
+					<div class="form-group">
+						<label asp-for="Town"></label>
+						<input asp-for="Town" class="form-control" placeholder="Town">
+					</div>
+				</div>
+				<div class="col-md-6">
+					<div class="form-group">
+						<label asp-for="Location"></label>
+						<input asp-for="Location" class="form-control" placeholder="Location">
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-6">
+					<div class="form-group">
+						<label asp-for="PrimaryTelephone"></label>
+						<input asp-for="PrimaryTelephone" class="form-control" placeholder="07XXXXXXXX">
+					</div>
+				</div>
+				<div class="col-md-6">
+					<div class="form-group">
+						<label asp-for="SecondaryTelephone"></label>
+						<input asp-for="SecondaryTelephone" class="form-control" placeholder="07XXXXXXXX">
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12">
+					<div class="form-group">
+						<label asp-for="Notes"></label>
+						<textarea asp-for="Notes" class="form-control" rows="3" placeholder="Notes"></textarea>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="card-footer">
+			<button type="submit" class="btn btn-primary">Submit</button>
+		</div>
+	</form>
 </div>

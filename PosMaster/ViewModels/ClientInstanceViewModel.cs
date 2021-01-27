@@ -27,6 +27,8 @@ namespace PosMaster.ViewModels
 			ClientId = instance.ClientId;
 			InstanceId = instance.InstanceId;
 			IsEditMode = true;
+			Code = instance.Code;
+			Status = instance.Status;
 		}
 
 		[Display(Name = "Opening Time")]

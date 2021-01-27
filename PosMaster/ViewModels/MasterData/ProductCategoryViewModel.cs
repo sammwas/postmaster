@@ -19,6 +19,8 @@ namespace PosMaster.ViewModels
 			ClientId = category.ClientId;
 			InstanceId = category.InstanceId;
 			IsEditMode = true;
+			Notes = category.Notes;
+			Status = category.Status;
 		}
 
 		[Required]

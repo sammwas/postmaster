@@ -10,15 +10,17 @@ namespace PosMaster.ViewModels
 
 		}
 
-		public PaymentModeViewModel(PaymentMode category)
+		public PaymentModeViewModel(PaymentMode mode)
 		{
-			Id = category.Id;
-			Code = category.Code;
-			Name = category.Name;
-			ImagePath = category.ImagePath;
-			ClientId = category.ClientId;
-			InstanceId = category.InstanceId;
+			Id = mode.Id;
+			Code = mode.Code;
+			Name = mode.Name;
+			ImagePath = mode.ImagePath;
+			ClientId = mode.ClientId;
+			InstanceId = mode.InstanceId;
 			IsEditMode = true;
+			Notes = mode.Notes;
+			Status = mode.Status;
 		}
 
 		[Required]

@@ -1,10 +1,12 @@
 ﻿using MailKit.Net.Smtp;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using MimeKit;
 using PosMaster.Dal;
 using PosMaster.Dal.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -18,9 +20,13 @@ namespace PosMaster.Services
 	public class EmailService : IEmailService
 	{
 		private readonly DatabaseContext _context;
-		public EmailService(DatabaseContext context)
+		private readonly ICookiesService _cookies;
+		private readonly IWebHostEnvironment _webHost;
+		public EmailService(DatabaseContext context, ICookiesService cookies, IWebHostEnvironment webHost)
 		{
 			_context = context;
+			_cookies = cookies;
+			_webHost = webHost;
 		}
 		public async Task<ReturnData<string>> SendAsync(EmailAddress address, string subject, string content)
 		{
@@ -46,8 +52,11 @@ namespace PosMaster.Services
 				message.From.Add(new MailboxAddress(settings.SenderFromName, settings.SenderFromEmail));
 				message.Subject = emailMessage.Subject;
 
+				var logo = _cookies.Read().ClientLogoPath;
+				var path = Path.Combine(_webHost.WebRootPath, logo);
 				var builder = new BodyBuilder();
-				//var image = builder.LinkedResources.Add(emailMessage.Logo); 
+				if (File.Exists(path))
+					builder.LinkedResources.Add(path);
 				builder.HtmlBody = emailMessage.Content;
 
 				message.Body = builder.ToMessageBody();
@@ -55,7 +64,7 @@ namespace PosMaster.Services
 				using (var emailClient = new SmtpClient())
 				{
 					var smtpServer = settings.SmtpServer;
-					var smtpPort = int.Parse(settings.SmtpPort);
+					var smtpPort = settings.SmtpPort;
 					var smtpUsername = settings.SmtpUsername;
 					var smtpPassword = settings.SmtpPassword;
 					try

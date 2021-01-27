@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
+using System;
 
 namespace PosMaster.Services
 {
@@ -37,9 +38,11 @@ namespace PosMaster.Services
 			var options = new CookieOptions
 			{
 				//Expires = DateTime.Now.AddSeconds(10)
+				SameSite = SameSiteMode.Strict,
+				HttpOnly = true
 			};
 			var rawData = EncypterService.Encrypt(JsonConvert.SerializeObject(data));
-			_httpContextAccessor.HttpContext.Response.Cookies.Append(_key, Helpers.Base64Encode(rawData));
+			_httpContextAccessor.HttpContext.Response.Cookies.Append(_key, Helpers.Base64Encode(rawData), options);
 			return data;
 		}
 	}

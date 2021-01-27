@@ -17,6 +17,7 @@ namespace PosMaster.Dal.Interfaces
 		Task<ReturnData<Product>> ByIdAsync(Guid id);
 		Task<ReturnData<Receipt>> ProductSaleAsync(ProductSaleViewModel model);
 		Task<ReturnData<List<Receipt>>> ReceiptsAsync(Guid? clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "");
+		Task<ReturnData<ProductStockAdjustmentLog>> AdjustProductStockAsync(ProductStockAdjustmentViewModel model);
 	}
 
 	public class ProductImplementation : IProductInterface
@@ -27,6 +28,53 @@ namespace PosMaster.Dal.Interfaces
 		{
 			_context = context;
 			_logger = logger;
+		}
+
+		public async Task<ReturnData<ProductStockAdjustmentLog>> AdjustProductStockAsync(ProductStockAdjustmentViewModel model)
+		{
+			var result = new ReturnData<ProductStockAdjustmentLog> { Data = new ProductStockAdjustmentLog() };
+			var tag = nameof(AdjustProductStockAsync);
+			_logger.LogInformation($"{tag} adjust stock for product {model.ProductId}");
+			try
+			{
+				var product = await _context.Products
+					.FirstOrDefaultAsync(p => p.Id.Equals(Guid.Parse(model.ProductId)));
+				if (product == null)
+				{
+					result.Message = "Not Found";
+					_logger.LogWarning($"{tag} adjustment failed {model.ProductId} : {result.Message}");
+					return result;
+				}
+				var count = _context.ProductStockAdjustmentLogs.Count(p => p.ProductId.Equals(product.Id));
+				var log = new ProductStockAdjustmentLog
+				{
+					Code = $"{product.Code}-{count + 1}",
+					ProductId = product.Id,
+					QuantityFrom = product.AvailableQuantity,
+					QuantityTo = model.QuantityTo,
+					ClientId = model.ClientId,
+					InstanceId = model.InstanceId,
+					Personnel = model.Personnel,
+					Notes = model.Notes
+				};
+				product.AvailableQuantity = model.QuantityTo;
+				product.LastModifiedBy = model.Personnel;
+				product.DateLastModified = DateTime.Now;
+				_context.ProductStockAdjustmentLogs.Add(log);
+				await _context.SaveChangesAsync();
+				result.Success = true;
+				result.Message = "Adjusted";
+				result.Data = log;
+				return result;
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex);
+				result.ErrorMessage = ex.Message;
+				result.Message = "Error occured";
+				_logger.LogError($"{tag} {result.Message} : {ex}");
+				return result;
+			}
 		}
 
 		public async Task<ReturnData<List<Product>>> AllAsync()
