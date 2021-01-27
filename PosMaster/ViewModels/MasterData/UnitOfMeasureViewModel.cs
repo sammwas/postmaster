@@ -19,6 +19,7 @@ namespace PosMaster.ViewModels
 			Status = unit.Status;
 			Name = unit.Name;
 			IsEditMode = true;
+			Code = unit.Code;
 		}
 		[Required]
 		public string Name { get; set; }

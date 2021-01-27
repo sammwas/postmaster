@@ -20,6 +20,7 @@ namespace PosMaster.ViewModels
 			Name = type.Name;
 			IsEditMode = true;
 			MaxApprovedAmount = type.MaxApprovedAmount;
+			Code = type.Code;
 		}
 
 		[Required]
