@@ -13,5 +13,6 @@ namespace PosMaster.ViewModels
 		[Display(Name = "Email Address")]
 		[DataType(DataType.EmailAddress)]
 		public string EmailAddress { get; set; }
+		public bool IsHttps { get; set; }
 	}
 }

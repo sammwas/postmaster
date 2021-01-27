@@ -45,7 +45,7 @@ namespace PosMaster.Controllers
 			_cookiesService.Remove();
 			ViewData["ReturnUrl"] = returnUrl;
 			_logger.LogInformation($"{nameof(Index)} application started");
-			return View(new LoginViewModel());
+			return View(new LoginViewModel { IsHttps = Request.IsHttps });
 		}
 
 		[HttpPost]
@@ -54,6 +54,7 @@ namespace PosMaster.Controllers
 		public async Task<IActionResult> Index(LoginViewModel model, string returnUrl = null)
 		{
 			ViewData["ReturnUrl"] = returnUrl;
+			model.IsHttps = Request.IsHttps;
 			var log = new UserLoginLog
 			{
 				ReturnUrl = returnUrl,
