@@ -16,12 +16,14 @@ namespace PosMaster.Controllers
 		private readonly IClientInterface _clientInterface;
 		private readonly ICookiesService _cookieService;
 		private readonly ISystemSettingInterface _settingInterface;
-
-		public SettingsController(IClientInterface clientInterface, ISystemSettingInterface settingInterface, ICookiesService cookiesService)
+		private readonly IEmailService _emailService;
+		public SettingsController(IClientInterface clientInterface, ISystemSettingInterface settingInterface,
+			ICookiesService cookiesService, IEmailService emailService)
 		{
 			_clientInterface = clientInterface;
 			_cookieService = cookiesService;
 			_settingInterface = settingInterface;
+			_emailService = emailService;
 		}
 
 		[HttpGet]
@@ -73,5 +75,33 @@ namespace PosMaster.Controllers
 			return View(new EmailSettingViewModel(result.Data));
 		}
 
+		public IActionResult SendTestEmail()
+		{
+			var userData = _cookieService.Read();
+			return View(new TestEmailViewModel
+			{
+				Recipient = userData.EmailAddress,
+				Subject = $"{userData.ClientName} Test Email - {DateTime.Now}"
+			});
+		}
+
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> SendTestEmail(TestEmailViewModel model)
+		{
+			if (!ModelState.IsValid)
+				return View(model);
+			var userData = _cookieService.Read();
+			var address = model.Recipient.Equals(userData.EmailAddress) ?
+				 new EmailAddress(userData) :
+				new EmailAddress(userData)
+				{
+					Address = model.Recipient,
+					Name = model.Recipient.Split('@')[0]
+				};
+			var result = await _emailService.SendAsync(address, model.Subject, model.Content);
+			TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, "Test Email", result.Message);
+			return View(model);
+		}
 	}
 }
