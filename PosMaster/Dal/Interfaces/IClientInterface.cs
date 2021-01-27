@@ -16,6 +16,7 @@ namespace PosMaster.Dal.Interfaces
 		Task<ReturnData<Client>> ByIdAsync(Guid id);
 		void SeedDefaultData(Guid clientId, Guid instanceId, bool isSeeding = false);
 		Task<ReturnData<EmailSetting>> UpdateEmailSettingAsync(EmailSettingViewModel model);
+		Task<ReturnData<EmailSetting>> ClientEmailSettingAsync(Guid clientId);
 	}
 
 
@@ -70,6 +71,32 @@ namespace PosMaster.Dal.Interfaces
 				if (result.Success)
 					result.Data = client;
 				_logger.LogInformation($"{tag} client {id} {result.Message}");
+				return result;
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex);
+				result.ErrorMessage = ex.Message;
+				result.Message = "Error occured";
+				_logger.LogError($"{tag} {result.Message} : {ex}");
+				return result;
+			}
+		}
+
+		public async Task<ReturnData<EmailSetting>> ClientEmailSettingAsync(Guid clientId)
+		{
+			var result = new ReturnData<EmailSetting> { Data = new EmailSetting() };
+			var tag = nameof(ClientEmailSettingAsync);
+			_logger.LogInformation($"{tag} get client email settings - {clientId}");
+			try
+			{
+				var setting = await _context.EmailSettings
+					.FirstOrDefaultAsync(c => c.ClientId.Equals(clientId));
+				result.Success = setting != null;
+				result.Message = result.Success ? "Found" : "Not Found";
+				if (result.Success)
+					result.Data = setting;
+				_logger.LogInformation($"{tag} email settings {clientId} {result.Message}");
 				return result;
 			}
 			catch (Exception ex)

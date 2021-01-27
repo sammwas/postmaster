@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using PosMaster.ViewModels;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace PosMaster.Dal.Interfaces
@@ -12,7 +13,7 @@ namespace PosMaster.Dal.Interfaces
 	{
 
 		Task<ReturnData<SystemSettingMiniViewModel>> ReadAsync();
-		Task<ReturnData<SystemSettingMiniViewModel>> Update(SystemSettingMiniViewModel model, string personnel);
+		Task<ReturnData<SystemSettingMiniViewModel>> UpdateAsync(SystemSettingMiniViewModel model, string personnel);
 	}
 
 	public class SystemSettingImplementation : ISystemSettingInterface
@@ -44,7 +45,7 @@ namespace PosMaster.Dal.Interfaces
 					_logger.LogInformation($"{tag} {result.Message}");
 					return result;
 				}
-				var dbSettings = await _context.SystemSettings.FirstOrDefaultAsync();
+				var dbSettings = await _context.SystemSettings.Take(1).FirstOrDefaultAsync();
 				var data = dbSettings == null ? new SystemSettingMiniViewModel { Name = "PosMaster" }
 				: new SystemSettingMiniViewModel(dbSettings);
 				result.Success = true;
@@ -64,9 +65,42 @@ namespace PosMaster.Dal.Interfaces
 			}
 		}
 
-		public Task<ReturnData<SystemSettingMiniViewModel>> Update(SystemSettingMiniViewModel model, string personnel)
+		public async Task<ReturnData<SystemSettingMiniViewModel>> UpdateAsync(SystemSettingMiniViewModel model, string personnel)
 		{
-			throw new NotImplementedException();
+			var result = new ReturnData<SystemSettingMiniViewModel> { Data = new SystemSettingMiniViewModel() };
+			var tag = nameof(UpdateAsync);
+			_logger.LogInformation($"{tag} update system settings");
+			try
+			{
+				var settings = await _context.SystemSettings.Take(1).FirstAsync();
+				settings.Name = model.Name;
+				settings.Tagline = model.Tagline;
+				settings.Description = model.Description;
+				settings.Version = model.Version;
+				settings.PhoneNumber = model.PhoneNumber;
+				settings.EmailAddress = model.EmailAddress;
+				settings.PostalAddress = model.PostalAddress;
+				settings.Town = model.Town;
+				if (model.IsNewImage)
+					settings.LogoPath = model.LogoPath;
+				settings.DateLastModified = DateTime.Now;
+				settings.LastModifiedBy = personnel;
+				await _context.SaveChangesAsync();
+				result.Success = true;
+				result.Message = "Updated";
+				result.Data = new SystemSettingMiniViewModel(settings);
+				_cache.Set(_key, JsonConvert.SerializeObject(result.Data));
+				_logger.LogInformation($"{tag} {result.Message}");
+				return result;
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex);
+				result.ErrorMessage = ex.Message;
+				result.Message = "Error occured";
+				_logger.LogError($"{tag} {result.Message} : {ex}");
+				return result;
+			}
 		}
 	}
 }
