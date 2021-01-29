@@ -52,7 +52,7 @@ namespace PosMaster.Services
 				message.From.Add(new MailboxAddress(settings.SenderFromName, settings.SenderFromEmail));
 				message.Subject = emailMessage.Subject;
 
-				var logo = _cookies.Read().ClientLogoPath;
+				var logo = _cookies.Read().ClientLogoPath ?? "";
 				var path = Path.Combine(_webHost.WebRootPath, logo);
 				var builder = new BodyBuilder();
 				if (File.Exists(path))
@@ -89,10 +89,12 @@ namespace PosMaster.Services
 				res.Data = message.MessageId;
 				return res;
 			}
-			catch (Exception)
+			catch (Exception e)
 			{
-
-				throw;
+				Console.WriteLine(e);
+				res.Message = "Error occured. Try later";
+				res.ErrorMessage = e.Message;
+				return res;
 			}
 		}
 
