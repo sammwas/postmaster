@@ -250,7 +250,60 @@ namespace PosMaster.Controllers
 			}
 
 			var result = await _userManager.ConfirmEmailAsync(user, code);
-			return View(result.Succeeded ? "ConfirmEmail" : "Error");
+			if (!result.Succeeded)
+			{
+				return View(nameof(Error));
+			}
+
+			var hasPassword = await _userManager.HasPasswordAsync(user);
+			if (hasPassword)
+				return View(nameof(ConfirmEmailConfirmation));
+			return View(nameof(SetPassword), new { userId });
+		}
+
+		[HttpGet]
+		[AllowAnonymous]
+		public IActionResult ConfirmEmailConfirmation()
+		{
+			return View();
+		}
+
+		[HttpGet]
+		[AllowAnonymous]
+		public IActionResult SetPassword(string userId)
+		{
+			return View(new ResetPasswordViewModel { Id = userId });
+		}
+
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		[AllowAnonymous]
+		public async Task<IActionResult> SetPassword(ResetPasswordViewModel model)
+		{
+
+			if (!ModelState.IsValid)
+			{
+				return View(model);
+			}
+
+			var user = await _userManager.FindByIdAsync(model.Id);
+			if (user == null)
+			{
+				_logger.LogInformation($"Unable to load user with ID '{model.Id}'.");
+				return View(model);
+			}
+
+			var result = await _userManager.AddPasswordAsync(user, model.Password);
+			if (result.Succeeded)
+				return View(nameof(SetPasswordConfirmation));
+			return View(model);
+		}
+
+		[HttpGet]
+		[AllowAnonymous]
+		public IActionResult SetPasswordConfirmation()
+		{
+			return View();
 		}
 
 		[HttpGet]

@@ -182,7 +182,7 @@ namespace PosMaster.Dal.Interfaces
 					}
 					user.Email = user.UserName = model.EmailAddress;
 					user.NormalizedEmail = user.NormalizedUserName = model.EmailAddress.ToUpper();
-				}
+				} 
 				await _context.SaveChangesAsync();
 				result.Data = new UserViewModel(user);
 				result.Success = true;

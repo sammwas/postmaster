@@ -21,13 +21,15 @@ namespace PosMaster.Controllers
 		private readonly IEmailService _emailService;
 		private readonly ILogger<UsersController> _logger;
 		private readonly IClientInstanceInterface _clientInstanceInterface;
+		private readonly IUserInterface _userInterface;
 		public UsersController(UserManager<User> userManager, IEmailService emailService, ILogger<UsersController> logger,
-			  IClientInstanceInterface clientInstanceInterface)
+			  IClientInstanceInterface clientInstanceInterface, IUserInterface userInterface)
 		{
 			_userManager = userManager;
 			_emailService = emailService;
 			_logger = logger;
 			_clientInstanceInterface = clientInstanceInterface;
+			_userInterface = userInterface;
 		}
 
 		public async Task<IActionResult> Edit(string id = null)
@@ -57,12 +59,26 @@ namespace PosMaster.Controllers
 			{
 
 			}
+			var hasDob = DateTime.TryParse(model.DoB, out var dob);
 			var instance = instanceRes.Data;
+			model.InstanceId = instance.Id;
+			model.ClientId = instance.ClientId;
+			model.DoB = hasDob ? dob.ToString() : DateTime.Now.AddYears(-18).ToString();
+			if (model.IsEditMode)
+			{
+
+				var updateRes = await _userInterface.UpdateAsync(model);
+				if (!updateRes.Success)
+				{
+
+				}
+
+			}
 			var user = new User
 			{
 				Status = EntityStatus.Active,
-				ClientId = instance.ClientId,
-				InstanceId = instance.Id,
+				ClientId = model.ClientId,
+				InstanceId = model.Id,
 				Role = model.Role,
 				Personnel = User.Identity.Name,
 				IdNumber = model.IdNumber,
@@ -72,7 +88,9 @@ namespace PosMaster.Controllers
 				MiddleName = model.MiddleName,
 				LastName = model.LastName,
 				Email = model.EmailAddress,
-				UserName = model.EmailAddress
+				UserName = model.EmailAddress,
+				MaritalStatus = model.MaritalStatus,
+				DateOfBirth = DateTime.Parse(model.DoB)
 			};
 			user.NormalizedEmail = user.NormalizedUserName = model.EmailAddress.ToUpper();
 			var result = await _userManager.CreateAsync(user);
@@ -84,10 +102,6 @@ namespace PosMaster.Controllers
 			return View(model);
 
 		}
-
-
-
-
 
 		public async Task<IActionResult> ResetPassword(string id)
 		{
@@ -135,6 +149,24 @@ namespace PosMaster.Controllers
 			}
 		}
 
+		public async Task<IActionResult> Confirm(string id)
+		{
+			try
+			{
+				var confirmRes = await _userInterface.ConfirmEmailAsync(id, User.Identity.Name);
+				if (!confirmRes.Success)
+				{
+
+				}
+				return RedirectToAction("Edit", new { id });
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine(e);
+				_logger.LogError($"Error getting user {id} to confirm email :-{e.Message}");
+				return RedirectToAction("Edit", new { id });
+			}
+		}
 
 		private void AddErrors(IdentityResult result)
 		{
