@@ -27,11 +27,6 @@ namespace PosMaster.Extensions
 				$"<br/>View the attachment by clicking this link: <a href='{HtmlEncoder.Default.Encode(link)}'>link</a>");
 		}
 
-		public static Task SendStudentDeclinedAsync(this IEmailService emailSender, EmailAddress address)
-		{
-			return emailSender.SendAsync(address, "Attachment Declined",
-				$"Dear {address.Name}, <br/><br/>Your attachment has been Declined. " +
-				$"<br/> Kindly visit the portal for more details.");
-		}
+
 	}
 }

@@ -31,5 +31,7 @@ namespace PosMaster.Dal
 		public DbSet<SmsSetting> SmsSettings { get; set; }
 		public DbSet<Notification> Notifications { get; set; }
 		public DbSet<Invoice> Invoices { get; set; }
+		public DbSet<ReceiptLineItem> ReceiptLineItems { get; set; }
+		public DbSet<GoodReturnedNote> GoodReturnedNotes { get; set; }
 	}
 }

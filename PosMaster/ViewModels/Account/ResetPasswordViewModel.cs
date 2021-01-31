@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 namespace PosMaster.ViewModels
 {
 	public class ResetPasswordViewModel
-	{	 
+	{
 		[HiddenInput]
 		public string Id { get; set; }
 		[Required]
@@ -18,5 +18,6 @@ namespace PosMaster.ViewModels
 		public string ConfirmPassword { get; set; }
 		[HiddenInput]
 		public string Code { get; set; }
+		public string UserName { get; set; }
 	}
 }
