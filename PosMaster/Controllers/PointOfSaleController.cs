@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using PosMaster.Dal;
 using PosMaster.Dal.Interfaces;
 using PosMaster.Extensions;
@@ -10,6 +11,7 @@ using System.Threading.Tasks;
 
 namespace PosMaster.Controllers
 {
+    [Authorize]
     public class PointOfSaleController : Controller
     {
         private readonly IProductInterface _productInterface;

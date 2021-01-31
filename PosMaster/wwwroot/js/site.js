@@ -11,5 +11,10 @@ $(document).ready(function() {
         $('#currentQuantity').val(currentQty);
         $('#productCode').val(productCode)
     });
-    
+
+    let unitOfMeasure;
+    $('#selectedProductItem').change(function () {
+        unitOfMeasure = $('option:selected', this).attr('data-uom');
+        $('#unitOfMeasure').val(unitOfMeasure);
+    });
 });
