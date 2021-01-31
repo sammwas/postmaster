@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace PosMaster.Controllers
 {
-	[Authorize(Roles = "SuperAdmin")]
+	[Authorize]
 	public class ClientsController : Controller
 	{
 		private readonly IClientInterface _clientInterface;
@@ -52,6 +52,8 @@ namespace PosMaster.Controllers
 
 			return RedirectToAction(nameof(All));
 		}
+
+		[Authorize(Roles = "SuperAdmin")]
 		public async Task<IActionResult> All()
 		{
 			var result = await _clientInterface.AllAsync();

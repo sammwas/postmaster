@@ -22,250 +22,250 @@ namespace PosMaster.Dal.Interfaces
 		Task<ReturnData<ProductStockAdjustmentLog>> AdjustProductStockAsync(ProductStockAdjustmentViewModel model);
 	}
 
-    public class ProductImplementation : IProductInterface
-    {
-        private readonly DatabaseContext _context;
-        private readonly ILogger<ProductImplementation> _logger;
-        public ProductImplementation(DatabaseContext context, ILogger<ProductImplementation> logger)
-        {
-            _context = context;
-            _logger = logger;
-        }
+	public class ProductImplementation : IProductInterface
+	{
+		private readonly DatabaseContext _context;
+		private readonly ILogger<ProductImplementation> _logger;
+		public ProductImplementation(DatabaseContext context, ILogger<ProductImplementation> logger)
+		{
+			_context = context;
+			_logger = logger;
+		}
 
-        public async Task<ReturnData<ProductStockAdjustmentLog>> AdjustProductStockAsync(ProductStockAdjustmentViewModel model)
-        {
-            var result = new ReturnData<ProductStockAdjustmentLog> { Data = new ProductStockAdjustmentLog() };
-            var tag = nameof(AdjustProductStockAsync);
-            _logger.LogInformation($"{tag} adjust stock for product {model.ProductId}");
-            try
-            {
-                var product = await _context.Products
-                    .FirstOrDefaultAsync(p => p.Id.Equals(Guid.Parse(model.ProductId)));
-                if (product == null)
-                {
-                    result.Message = "Not Found";
-                    _logger.LogWarning($"{tag} adjustment failed {model.ProductId} : {result.Message}");
-                    return result;
-                }
-                var count = _context.ProductStockAdjustmentLogs.Count(p => p.ProductId.Equals(product.Id));
-                var log = new ProductStockAdjustmentLog
-                {
-                    Code = $"{product.Code}-{count + 1}",
-                    ProductId = product.Id,
-                    QuantityFrom = product.AvailableQuantity,
-                    QuantityTo = model.QuantityTo,
-                    ClientId = model.ClientId,
-                    InstanceId = model.InstanceId,
-                    Personnel = model.Personnel,
-                    Notes = model.Notes
-                };
-                product.AvailableQuantity = model.QuantityTo;
-                product.LastModifiedBy = model.Personnel;
-                product.DateLastModified = DateTime.Now;
-                _context.ProductStockAdjustmentLogs.Add(log);
-                await _context.SaveChangesAsync();
-                result.Success = true;
-                result.Message = "Adjusted";
-                result.Data = log;
-                return result;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-                result.ErrorMessage = ex.Message;
-                result.Message = "Error occured";
-                _logger.LogError($"{tag} {result.Message} : {ex}");
-                return result;
-            }
-        }
+		public async Task<ReturnData<ProductStockAdjustmentLog>> AdjustProductStockAsync(ProductStockAdjustmentViewModel model)
+		{
+			var result = new ReturnData<ProductStockAdjustmentLog> { Data = new ProductStockAdjustmentLog() };
+			var tag = nameof(AdjustProductStockAsync);
+			_logger.LogInformation($"{tag} adjust stock for product {model.ProductId}");
+			try
+			{
+				var product = await _context.Products
+					.FirstOrDefaultAsync(p => p.Id.Equals(Guid.Parse(model.ProductId)));
+				if (product == null)
+				{
+					result.Message = "Not Found";
+					_logger.LogWarning($"{tag} adjustment failed {model.ProductId} : {result.Message}");
+					return result;
+				}
+				var count = _context.ProductStockAdjustmentLogs.Count(p => p.ProductId.Equals(product.Id));
+				var log = new ProductStockAdjustmentLog
+				{
+					Code = $"{product.Code}-{count + 1}",
+					ProductId = product.Id,
+					QuantityFrom = product.AvailableQuantity,
+					QuantityTo = model.QuantityTo,
+					ClientId = model.ClientId,
+					InstanceId = model.InstanceId,
+					Personnel = model.Personnel,
+					Notes = model.Notes
+				};
+				product.AvailableQuantity = model.QuantityTo;
+				product.LastModifiedBy = model.Personnel;
+				product.DateLastModified = DateTime.Now;
+				_context.ProductStockAdjustmentLogs.Add(log);
+				await _context.SaveChangesAsync();
+				result.Success = true;
+				result.Message = "Adjusted";
+				result.Data = log;
+				return result;
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex);
+				result.ErrorMessage = ex.Message;
+				result.Message = "Error occured";
+				_logger.LogError($"{tag} {result.Message} : {ex}");
+				return result;
+			}
+		}
 
-        public async Task<ReturnData<List<Product>>> AllAsync()
-        {
-            var result = new ReturnData<List<Product>> { Data = new List<Product>() };
-            var tag = nameof(AllAsync);
-            _logger.LogInformation($"{tag} get all products");
-            try
-            {
-                var data = await _context.Products
-                    .Include(c => c.ProductCategory)
-                    .OrderByDescending(c => c.DateCreated)
-                    .ToListAsync();
-                result.Success = data.Any();
-                result.Message = result.Success ? "Found" : "Not Found";
-                if (result.Success)
-                    result.Data = data;
-                _logger.LogInformation($"{tag} found {data.Count} products");
-                return result;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-                result.ErrorMessage = ex.Message;
-                result.Message = "Error occured";
-                _logger.LogError($"{tag} {result.Message} : {ex}");
-                return result;
-            }
-        }
+		public async Task<ReturnData<List<Product>>> AllAsync()
+		{
+			var result = new ReturnData<List<Product>> { Data = new List<Product>() };
+			var tag = nameof(AllAsync);
+			_logger.LogInformation($"{tag} get all products");
+			try
+			{
+				var data = await _context.Products
+					.Include(c => c.ProductCategory)
+					.OrderByDescending(c => c.DateCreated)
+					.ToListAsync();
+				result.Success = data.Any();
+				result.Message = result.Success ? "Found" : "Not Found";
+				if (result.Success)
+					result.Data = data;
+				_logger.LogInformation($"{tag} found {data.Count} products");
+				return result;
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex);
+				result.ErrorMessage = ex.Message;
+				result.Message = "Error occured";
+				_logger.LogError($"{tag} {result.Message} : {ex}");
+				return result;
+			}
+		}
 
-        public async Task<ReturnData<List<Product>>> ByClientIdAsync(Guid clientId)
-        {
-            var result = new ReturnData<List<Product>> { Data = new List<Product>() };
-            var tag = nameof(ByClientIdAsync);
-            _logger.LogInformation($"{tag} get all client {clientId} products");
-            try
-            {
-                var data = await _context.Products
-                    .Include(c => c.ProductCategory)
-                    .Where(c => c.ClientId.Equals(clientId))
-                    .OrderByDescending(c => c.DateCreated)
-                    .ToListAsync();
-                result.Success = data.Any();
-                result.Message = result.Success ? "Found" : "Not Found";
-                if (result.Success)
-                    result.Data = data;
-                _logger.LogInformation($"{tag} found {data.Count} products");
-                return result;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-                result.ErrorMessage = ex.Message;
-                result.Message = "Error occured";
-                _logger.LogError($"{tag} {result.Message} : {ex}");
-                return result;
-            }
-        }
+		public async Task<ReturnData<List<Product>>> ByClientIdAsync(Guid clientId)
+		{
+			var result = new ReturnData<List<Product>> { Data = new List<Product>() };
+			var tag = nameof(ByClientIdAsync);
+			_logger.LogInformation($"{tag} get all client {clientId} products");
+			try
+			{
+				var data = await _context.Products
+					.Include(c => c.ProductCategory)
+					.Where(c => c.ClientId.Equals(clientId))
+					.OrderByDescending(c => c.DateCreated)
+					.ToListAsync();
+				result.Success = data.Any();
+				result.Message = result.Success ? "Found" : "Not Found";
+				if (result.Success)
+					result.Data = data;
+				_logger.LogInformation($"{tag} found {data.Count} products");
+				return result;
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex);
+				result.ErrorMessage = ex.Message;
+				result.Message = "Error occured";
+				_logger.LogError($"{tag} {result.Message} : {ex}");
+				return result;
+			}
+		}
 
-        public async Task<ReturnData<Product>> ByIdAsync(Guid id)
-        {
-            var result = new ReturnData<Product> { Data = new Product() };
-            var tag = nameof(ByIdAsync);
-            _logger.LogInformation($"{tag} get product by id {id}");
-            try
-            {
-                var client = await _context.Products.Include(p => p.ProductCategory)
-                    .FirstOrDefaultAsync(c => c.Id.Equals(id));
-                result.Success = client != null;
-                result.Message = result.Success ? "Found" : "Not Found";
-                if (result.Success)
-                    result.Data = client;
-                _logger.LogInformation($"{tag} product {id} {result.Message}");
-                return result;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-                result.ErrorMessage = ex.Message;
-                result.Message = "Error occured";
-                _logger.LogError($"{tag} {result.Message} : {ex}");
-                return result;
-            }
-        }
+		public async Task<ReturnData<Product>> ByIdAsync(Guid id)
+		{
+			var result = new ReturnData<Product> { Data = new Product() };
+			var tag = nameof(ByIdAsync);
+			_logger.LogInformation($"{tag} get product by id {id}");
+			try
+			{
+				var client = await _context.Products.Include(p => p.ProductCategory)
+					.FirstOrDefaultAsync(c => c.Id.Equals(id));
+				result.Success = client != null;
+				result.Message = result.Success ? "Found" : "Not Found";
+				if (result.Success)
+					result.Data = client;
+				_logger.LogInformation($"{tag} product {id} {result.Message}");
+				return result;
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex);
+				result.ErrorMessage = ex.Message;
+				result.Message = "Error occured";
+				_logger.LogError($"{tag} {result.Message} : {ex}");
+				return result;
+			}
+		}
 
-        public async Task<ReturnData<List<Product>>> ByInstanceIdAsync(Guid instanceId)
-        {
-            var result = new ReturnData<List<Product>> { Data = new List<Product>() };
-            var tag = nameof(ByInstanceIdAsync);
-            _logger.LogInformation($"{tag} get all instance {instanceId} products");
-            try
-            {
-                var data = await _context.Products
-                    .Include(c => c.ProductCategory)
-                    .Where(c => c.InstanceId.Equals(instanceId))
-                    .OrderByDescending(c => c.DateCreated)
-                    .ToListAsync();
-                result.Success = data.Any();
-                result.Message = result.Success ? "Found" : "Not Found";
-                if (result.Success)
-                    result.Data = data;
-                _logger.LogInformation($"{tag} found {data.Count} products");
-                return result;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-                result.ErrorMessage = ex.Message;
-                result.Message = "Error occured";
-                _logger.LogError($"{tag} {result.Message} : {ex}");
-                return result;
-            }
-        }
+		public async Task<ReturnData<List<Product>>> ByInstanceIdAsync(Guid instanceId)
+		{
+			var result = new ReturnData<List<Product>> { Data = new List<Product>() };
+			var tag = nameof(ByInstanceIdAsync);
+			_logger.LogInformation($"{tag} get all instance {instanceId} products");
+			try
+			{
+				var data = await _context.Products
+					.Include(c => c.ProductCategory)
+					.Where(c => c.InstanceId.Equals(instanceId))
+					.OrderByDescending(c => c.DateCreated)
+					.ToListAsync();
+				result.Success = data.Any();
+				result.Message = result.Success ? "Found" : "Not Found";
+				if (result.Success)
+					result.Data = data;
+				_logger.LogInformation($"{tag} found {data.Count} products");
+				return result;
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex);
+				result.ErrorMessage = ex.Message;
+				result.Message = "Error occured";
+				_logger.LogError($"{tag} {result.Message} : {ex}");
+				return result;
+			}
+		}
 
-        public async Task<ReturnData<Product>> EditAsync(ProductViewModel model)
-        {
-            var result = new ReturnData<Product> { Data = new Product() };
-            var tag = nameof(EditAsync);
-            _logger.LogInformation($"{tag} edit product");
-            try
-            {
-                if (model.IsEditMode)
-                {
-                    var dbProduct = await _context.Products
-                        .FirstOrDefaultAsync(c => c.Id.Equals(model.Id));
-                    if (dbProduct == null)
-                    {
-                        result.Message = "Not Found";
-                        _logger.LogWarning($"{tag} update failed {model.Id} : {result.Message}");
-                        return result;
-                    }
-                    dbProduct.Code = model.Code;
-                    dbProduct.ProductCategoryId = Guid.Parse(model.ProductCategoryId);
-                    dbProduct.Name = model.Name;
-                    dbProduct.ReorderLevel = model.ReorderLevel;
-                    dbProduct.BuyingPrice = model.BuyingPrice;
-                    dbProduct.SellingPrice = model.SellingPrice;
-                    dbProduct.AllowDiscount = model.AllowDiscount;
-                    dbProduct.AvailableQuantity = model.AvailableQuantity;
-                    dbProduct.UnitOfMeasure = model.UnitOfMeasure;
-                    dbProduct.LastModifiedBy = model.Personnel;
-                    dbProduct.DateLastModified = DateTime.Now;
-                    dbProduct.Notes = model.Notes;
-                    dbProduct.Status = model.Status;
-                    if (model.IsNewImage)
-                        dbProduct.ImagePath = model.ImagePath;
-                    await _context.SaveChangesAsync();
-                    result.Success = true;
-                    result.Message = "Updated";
-                    result.Data = dbProduct;
-                    _logger.LogInformation($"{tag} updated {dbProduct.Name} {model.Id} : {result.Message}");
-                    return result;
-                }
+		public async Task<ReturnData<Product>> EditAsync(ProductViewModel model)
+		{
+			var result = new ReturnData<Product> { Data = new Product() };
+			var tag = nameof(EditAsync);
+			_logger.LogInformation($"{tag} edit product");
+			try
+			{
+				if (model.IsEditMode)
+				{
+					var dbProduct = await _context.Products
+						.FirstOrDefaultAsync(c => c.Id.Equals(model.Id));
+					if (dbProduct == null)
+					{
+						result.Message = "Not Found";
+						_logger.LogWarning($"{tag} update failed {model.Id} : {result.Message}");
+						return result;
+					}
+					dbProduct.Code = model.Code;
+					dbProduct.ProductCategoryId = Guid.Parse(model.ProductCategoryId);
+					dbProduct.Name = model.Name;
+					dbProduct.ReorderLevel = model.ReorderLevel;
+					dbProduct.BuyingPrice = model.BuyingPrice;
+					dbProduct.SellingPrice = model.SellingPrice;
+					dbProduct.AllowDiscount = model.AllowDiscount;
+					dbProduct.AvailableQuantity = model.AvailableQuantity;
+					dbProduct.UnitOfMeasure = model.UnitOfMeasure;
+					dbProduct.LastModifiedBy = model.Personnel;
+					dbProduct.DateLastModified = DateTime.Now;
+					dbProduct.Notes = model.Notes;
+					dbProduct.Status = model.Status;
+					if (model.IsNewImage)
+						dbProduct.ImagePath = model.ImagePath;
+					await _context.SaveChangesAsync();
+					result.Success = true;
+					result.Message = "Updated";
+					result.Data = dbProduct;
+					_logger.LogInformation($"{tag} updated {dbProduct.Name} {model.Id} : {result.Message}");
+					return result;
+				}
 
-                var product = new Product
-                {
-                    Code = model.Code,
-                    ProductCategoryId = Guid.Parse(model.ProductCategoryId),
-                    Name = model.Name,
-                    ReorderLevel = model.ReorderLevel,
-                    BuyingPrice = model.BuyingPrice,
-                    SellingPrice = model.SellingPrice,
-                    AllowDiscount = model.AllowDiscount,
-                    AvailableQuantity = model.AvailableQuantity,
-                    UnitOfMeasure = model.UnitOfMeasure,
-                    Notes = model.Notes,
-                    ClientId = model.ClientId,
-                    InstanceId = model.InstanceId,
-                    Personnel = model.Personnel,
-                    Status = model.Status,
-                    ImagePath = model.ImagePath
-                };
-                _context.Products.Add(product);
-                await _context.SaveChangesAsync();
-                result.Success = true;
-                result.Message = "Added";
-                result.Data = product;
-                _logger.LogInformation($"{tag} added {product.Name}  {product.Id} : {result.Message}");
-                return result;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-                result.ErrorMessage = ex.Message;
-                result.Message = "Error occured";
-                _logger.LogError($"{tag} {result.Message} : {ex}");
-                return result;
-            }
-        }
+				var product = new Product
+				{
+					Code = model.Code,
+					ProductCategoryId = Guid.Parse(model.ProductCategoryId),
+					Name = model.Name,
+					ReorderLevel = model.ReorderLevel,
+					BuyingPrice = model.BuyingPrice,
+					SellingPrice = model.SellingPrice,
+					AllowDiscount = model.AllowDiscount,
+					AvailableQuantity = model.AvailableQuantity,
+					UnitOfMeasure = model.UnitOfMeasure,
+					Notes = model.Notes,
+					ClientId = model.ClientId,
+					InstanceId = model.InstanceId,
+					Personnel = model.Personnel,
+					Status = model.Status,
+					ImagePath = model.ImagePath
+				};
+				_context.Products.Add(product);
+				await _context.SaveChangesAsync();
+				result.Success = true;
+				result.Message = "Added";
+				result.Data = product;
+				_logger.LogInformation($"{tag} added {product.Name}  {product.Id} : {result.Message}");
+				return result;
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex);
+				result.ErrorMessage = ex.Message;
+				result.Message = "Error occured";
+				_logger.LogError($"{tag} {result.Message} : {ex}");
+				return result;
+			}
+		}
 
         public async Task<ReturnData<Customer>> GetCustomerAsync()
         {   
@@ -366,8 +366,8 @@ namespace PosMaster.Dal.Interfaces
 				_context.Receipts.Add(receipt);
 				await _context.SaveChangesAsync();
 
-                if (model.IsCredit)
-                    await AddInvoiceAsync(receipt);
+				if (model.IsCredit)
+					await AddInvoiceAsync(receipt);
 
 				result.Success = true;
 				result.Data = receipt;
@@ -394,6 +394,8 @@ namespace PosMaster.Dal.Interfaces
 			{
 				var dataQuery = _context.Receipts
 					.Include(r => r.ReceiptLineItems)
+					.ThenInclude(r => r.Product)
+					.ThenInclude(r => r.ProductCategory)
 					.Include(r => r.Customer)
 					.AsQueryable();
 				if (clientId != null)
@@ -448,67 +450,67 @@ namespace PosMaster.Dal.Interfaces
 			return invRef;
 		}
 
-        private string DocumentRefNumber(Document document, Guid clientId)
-        {
-            try
-            {
-                var nextRef = "";
-                var exists = true;
-                var i = 0;
-                var prefix = "";
-                switch (document)
-                {
-                    case Document.Receipt:
-                        prefix = "RCPT";
-                        while (exists)
-                        {
-                            var nextCount = _context.Receipts.Where(r => r.ClientId.Equals(clientId)).Count() + 1;
-                            nextRef = prefix + (nextCount + i).ToString("D4");
-                            exists = _context.Receipts.Any(a => a.Code.Equals(nextRef) && a.ClientId.Equals(clientId));
-                            i++;
-                        }
-                        break;
-                    case Document.Invoice:
-                        prefix = "INV";
-                        while (exists)
-                        {
-                            var nextCount = _context.Invoices.Where(r => r.ClientId.Equals(clientId)).Count() + 1;
-                            nextRef = prefix + (nextCount + i).ToString("D4");
-                            exists = _context.Invoices.Any(a => a.Code.Equals(nextRef) && a.ClientId.Equals(clientId));
-                            i++;
-                        }
-                        break;
-                    case Document.Po:
-                        prefix = "PO";
-                        while (exists)
-                        {
-                            var nextCount = _context.PurchaseOrders.Where(p => p.ClientId.Equals(clientId)).Count() + 1;
-                            nextRef = prefix + (nextCount + i).ToString("D4");
-                            exists = _context.PurchaseOrders.Any(a => a.Code.Equals(nextRef) && a.ClientId.Equals(clientId));
-                            i++;
-                        }
-                        break;
-                    case Document.Grn:
-                        prefix = "GRN";
-                        while (exists)
-                        {
-                            var nextCount = _context.GoodReceivedNotes.Where(p => p.ClientId.Equals(clientId)).Count() + 1;
-                            nextRef = prefix + (nextCount + i).ToString("D4");
-                            exists = _context.GoodReceivedNotes.Any(a => a.Code.Equals(nextRef) && a.ClientId.Equals(clientId));
-                            i++;
-                        }
-                        break;
-                    default:
-                        break;
-                }
-                return nextRef;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-                var rand = new Random().Next(99999, 999999999);
-                return "R" + rand.ToString("D5");
-            }
-        }
-    }
+		private string DocumentRefNumber(Document document, Guid clientId)
+		{
+			try
+			{
+				var nextRef = "";
+				var exists = true;
+				var i = 0;
+				var prefix = "";
+				switch (document)
+				{
+					case Document.Receipt:
+						prefix = "RCPT";
+						while (exists)
+						{
+							var nextCount = _context.Receipts.Where(r => r.ClientId.Equals(clientId)).Count() + 1;
+							nextRef = prefix + (nextCount + i).ToString("D4");
+							exists = _context.Receipts.Any(a => a.Code.Equals(nextRef) && a.ClientId.Equals(clientId));
+							i++;
+						}
+						break;
+					case Document.Invoice:
+						prefix = "INV";
+						while (exists)
+						{
+							var nextCount = _context.Invoices.Where(r => r.ClientId.Equals(clientId)).Count() + 1;
+							nextRef = prefix + (nextCount + i).ToString("D4");
+							exists = _context.Invoices.Any(a => a.Code.Equals(nextRef) && a.ClientId.Equals(clientId));
+							i++;
+						}
+						break;
+					case Document.Po:
+						prefix = "PO";
+						while (exists)
+						{
+							var nextCount = _context.PurchaseOrders.Where(p => p.ClientId.Equals(clientId)).Count() + 1;
+							nextRef = prefix + (nextCount + i).ToString("D4");
+							exists = _context.PurchaseOrders.Any(a => a.Code.Equals(nextRef) && a.ClientId.Equals(clientId));
+							i++;
+						}
+						break;
+					case Document.Grn:
+						prefix = "GRN";
+						while (exists)
+						{
+							var nextCount = _context.GoodReceivedNotes.Where(p => p.ClientId.Equals(clientId)).Count() + 1;
+							nextRef = prefix + (nextCount + i).ToString("D4");
+							exists = _context.GoodReceivedNotes.Any(a => a.Code.Equals(nextRef) && a.ClientId.Equals(clientId));
+							i++;
+						}
+						break;
+					default:
+						break;
+				}
+				return nextRef;
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine(e.Message);
+				var rand = new Random().Next(99999, 999999999);
+				return "R" + rand.ToString("D5");
+			}
+		}
+	}
 }
