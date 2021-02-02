@@ -148,15 +148,13 @@
 									<a href="#">Friends</a>
 								</div>
 							</div>
-							<!-- /.row -->
 						</li>
-						<!-- Menu Footer-->
 						<li class="user-footer">
 							<div class="pull-left">
-								<a href="#" class="btn btn-default btn-flat">Profile</a>
+								<a asp-controller="Users" asp-action="Edit" asp-route-id="@userData.UserId" class="btn btn-default btn-flat">Profile</a>
 							</div>
 							<div class="pull-right">
-								<a href="#" class="btn btn-default btn-flat">Sign out</a>
+								<a asp-controller="Home" asp-action="Logout" class="btn btn-default btn-flat">Sign out</a>
 							</div>
 						</li>
 					</ul>

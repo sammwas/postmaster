@@ -138,6 +138,16 @@ namespace PosMaster.Controllers
 
 		}
 
+		public async Task<IActionResult> ResendConfirmLink(string id)
+		{
+			var user = await _userManager.FindByIdAsync(id);
+			var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+			var callbackUrl = Url.EmailConfirmationLink(user.Id, code, Request.Scheme);
+			var result = await _emailService.SendEmailConfirmationAsync(new EmailAddress(user), callbackUrl);
+			TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, "Confirm Link", result.Message);
+			return RedirectToAction(nameof(Edit), new { id });
+		}
+
 		public async Task<IActionResult> ResetPassword(string id)
 		{
 			var userResult = await _userManager.FindByIdAsync(id);

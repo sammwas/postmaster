@@ -42,7 +42,7 @@ namespace PosMaster.Services
 
 		public static List<string> UserRoles(string currentRole)
 		{
-			var roles = new List<string> { Role.Clerk };
+			var roles = new List<string> { Role.Clerk, currentRole };
 			if (currentRole.Equals(Role.Admin))
 				return roles;
 			if (currentRole.Equals(Role.Manager))

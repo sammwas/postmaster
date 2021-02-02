@@ -2,133 +2,131 @@
 @inject ICookiesService _cookies;
 @model ProductViewModel
 @{
-    ViewData["Active"] = "Products";
-    var statuses = Helpers.Statuses();
-    var option = Model.IsEditMode ? "Update" : "Add";
-    var title = $"{option} Product";
-    ViewData["Title"] = title;
-    var userData = _cookies.Read();
-    var productCategories = await _masterDataInterface.ProductCategoriesAsync(userData.ClientId);
-    var unitsOfMeasure = await _masterDataInterface.UnitOfMeasuresAsync(userData.ClientId);
+	ViewData["Active"] = "Products";
+	var statuses = Helpers.Statuses();
+	var option = Model.IsEditMode ? "Update" : "Add";
+	var title = $"{option} Product";
+	ViewData["Title"] = title;
+	var userData = _cookies.Read();
+	var productCategories = await _masterDataInterface.ProductCategoriesAsync(userData.ClientId);
+	var unitsOfMeasure = await _masterDataInterface.UnitOfMeasuresAsync(userData.ClientId);
 }
-
-
 <div class="card card-primary">
-    <div class="card-header">
-        <h3 class="card-title">@ViewData["Title"]</h3>
-    </div>
+	<div class="card-header">
+		<h3 class="card-title">@ViewData["Title"]</h3>
+	</div>
 
-    <form role="form" method="post" autocomplete="off">
-        <div asp-validation-summary="All" class="text-danger"></div>
-        <input asp-for="Id" />
-        <input asp-for="IsEditMode" />
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label asp-for="Code"></label>
-                        <input asp-for="Code" class="form-control" placeholder="Code">
-                        <span asp-validation-for="Code" class="text-danger"></span>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label asp-for="Name"></label>
-                        <input asp-for="Name" class="form-control" placeholder="Name">
-                        <span asp-validation-for="Name" class="text-danger"></span>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label asp-for="BuyingPrice"></label>
-                        <input asp-for="BuyingPrice" class="form-control">
-                        <span asp-validation-for="BuyingPrice" class="text-danger"></span>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label asp-for="SellingPrice"></label>
-                        <input asp-for="SellingPrice" class="form-control">
-                        <span asp-validation-for="SellingPrice" class="text-danger"></span>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label asp-for="AvailableQuantity"></label>
-                        <input asp-for="AvailableQuantity" class="form-control">
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label asp-for="ReorderLevel"></label>
-                        <input asp-for="ReorderLevel" class="form-control">
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label asp-for="UnitOfMeasure"></label>
-                        <select class="form-control select2" asp-for="UnitOfMeasure" style="width: 100%;">
-                            <option value="">--Select Unit of Measure--</option>
-                            @foreach (var item in unitsOfMeasure.Data)
-                            {
-                                <option value="@item.Name" title="@item.Notes">@item.Code - @item.Name</option>
-                            }
-                        </select>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label asp-for="ProductCategoryId"></label>
-                        <select class="form-control select2" asp-for="ProductCategoryId" style="width: 100%;">
-                            <option value="">--Select Category--</option>
-                            @foreach (var item in productCategories.Data)
-                            {
-                                <option value="@item.Id" title="@item.Notes">@item.Code - @item.Name</option>
-                            }
-                        </select>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="form-group">
-                        <label asp-for="Notes"></label>
-                        <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Notes"></textarea>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="form-check">
-                        <input asp-for="AllowDiscount" class="form-check-input">
-                        <label class="form-check-label" asp-for="AllowDiscount"></label>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-12">
-                    <p><strong>Status</strong></p>
-                </div>
-                @foreach (var item in statuses)
-                {
-                    <div class="col-md-3">
-                        <div class="form-check">
-                            <input class="form-check-input" id="@item.Id" type="radio" asp-for="Status" value="@item.Id">
-                            <label class="form-check-label" for="@item.Id">@item.Text</label>
-                        </div>
-                    </div>
-                }
-            </div>
-        </div>
+	<form role="form" method="post" autocomplete="off">
+		<div asp-validation-summary="All" class="text-danger"></div>
+		<input asp-for="Id" />
+		<input asp-for="IsEditMode" />
+		<div class="card-body">
+			<div class="row">
+				<div class="col-md-6">
+					<div class="form-group">
+						<label asp-for="Code"></label>
+						<input asp-for="Code" class="form-control" placeholder="Code">
+						<span asp-validation-for="Code" class="text-danger"></span>
+					</div>
+				</div>
+				<div class="col-md-6">
+					<div class="form-group">
+						<label asp-for="Name"></label>
+						<input asp-for="Name" class="form-control" placeholder="Name">
+						<span asp-validation-for="Name" class="text-danger"></span>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-6">
+					<div class="form-group">
+						<label asp-for="BuyingPrice"></label>
+						<input asp-for="BuyingPrice" class="form-control">
+						<span asp-validation-for="BuyingPrice" class="text-danger"></span>
+					</div>
+				</div>
+				<div class="col-md-6">
+					<div class="form-group">
+						<label asp-for="SellingPrice"></label>
+						<input asp-for="SellingPrice" class="form-control">
+						<span asp-validation-for="SellingPrice" class="text-danger"></span>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-6">
+					<div class="form-group">
+						<label asp-for="AvailableQuantity"></label>
+						<input asp-for="AvailableQuantity" class="form-control">
+					</div>
+				</div>
+				<div class="col-md-6">
+					<div class="form-group">
+						<label asp-for="ReorderLevel"></label>
+						<input asp-for="ReorderLevel" class="form-control">
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-6">
+					<div class="form-group">
+						<label asp-for="UnitOfMeasure"></label>
+						<select class="form-control select2" asp-for="UnitOfMeasure" style="width: 100%;">
+							<option value="">--Select Unit of Measure--</option>
+							@foreach (var item in unitsOfMeasure.Data)
+							{
+								<option value="@item.Name" title="@item.Notes">@item.Code - @item.Name</option>
+							}
+						</select>
+					</div>
+				</div>
+				<div class="col-md-6">
+					<div class="form-group">
+						<label asp-for="ProductCategoryId"></label>
+						<select class="form-control select2" asp-for="ProductCategoryId" style="width: 100%;">
+							<option value="">--Select Category--</option>
+							@foreach (var item in productCategories.Data)
+							{
+								<option value="@item.Id" title="@item.Notes">@item.Code - @item.Name</option>
+							}
+						</select>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12">
+					<div class="form-group">
+						<label asp-for="Notes"></label>
+						<textarea asp-for="Notes" class="form-control" rows="3" placeholder="Notes"></textarea>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12">
+					<div class="form-check">
+						<input asp-for="AllowDiscount" class="form-check-input">
+						<label class="form-check-label" asp-for="AllowDiscount"></label>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12">
+					<p><strong>Status</strong></p>
+				</div>
+				@foreach (var item in statuses)
+				{
+					<div class="col-md-3">
+						<div class="form-check">
+							<input class="form-check-input" id="@item.Id" type="radio" asp-for="Status" value="@item.Id">
+							<label class="form-check-label" for="@item.Id">@item.Text</label>
+						</div>
+					</div>
+				}
+			</div>
+		</div>
 
-        <div class="card-footer">
-            <button type="submit" class="btn btn-primary">Submit</button>
-        </div>
-    </form>
+		<div class="card-footer">
+			<button type="submit" class="btn btn-primary">Submit</button>
+		</div>
+	</form>
 </div>

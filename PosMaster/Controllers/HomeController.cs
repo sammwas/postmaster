@@ -234,6 +234,16 @@ namespace PosMaster.Controllers
 			return View();
 		}
 
+		public async Task<IActionResult> Logout()
+		{
+			var personnel = User.Identity.Name;
+			await _userInterface.LogOutAsync(personnel);
+			await _signInManager.SignOutAsync();
+			_logger.LogInformation($"User {personnel} logged out.");
+			TempData.SetData(AlertLevel.Success, "Logout", "You have logged out");
+			return RedirectToAction(nameof(Index));
+		}
+
 		[HttpGet]
 		[AllowAnonymous]
 		public async Task<IActionResult> ConfirmEmail(string userId, string code)
@@ -246,7 +256,8 @@ namespace PosMaster.Controllers
 			var user = await _userManager.FindByIdAsync(userId);
 			if (user == null)
 			{
-				throw new ApplicationException($"Unable to load user with ID '{userId}'.");
+				_logger.LogError($"Unable to load user with ID '{userId}'.");
+				return View(nameof(Error));
 			}
 
 			var result = await _userManager.ConfirmEmailAsync(user, code);
@@ -258,7 +269,7 @@ namespace PosMaster.Controllers
 			var hasPassword = await _userManager.HasPasswordAsync(user);
 			if (hasPassword)
 				return View(nameof(ConfirmEmailConfirmation));
-			return View(nameof(SetPassword), new { userId });
+			return RedirectToAction(nameof(SetPassword), new { userId });
 		}
 
 		[HttpGet]

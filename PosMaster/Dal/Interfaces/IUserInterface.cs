@@ -12,6 +12,7 @@ namespace PosMaster.Dal.Interfaces
 	public interface IUserInterface
 	{
 		Task<ReturnData<string>> AddLoginLogAsync(UserLoginLog log);
+		Task<ReturnData<string>> LogOutAsync(string personnel);
 		Task<ReturnData<List<UserViewModel>>> AllAsync();
 		Task<ReturnData<List<UserViewModel>>> ByClientIdAsync(Guid clientId);
 		Task<ReturnData<List<UserViewModel>>> ByInstanceIdAsync(Guid instanceId);
@@ -157,6 +158,39 @@ namespace PosMaster.Dal.Interfaces
 				result.Success = true;
 				result.Message = "Confirmed";
 				_logger.LogInformation($"{tag} confirm email for {userId} {result.Message}");
+				return result;
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex);
+				result.ErrorMessage = ex.Message;
+				result.Message = "Error occured";
+				_logger.LogError($"{tag} {result.Message} : {ex}");
+				return result;
+			}
+		}
+
+		public async Task<ReturnData<string>> LogOutAsync(string personnel)
+		{
+			var result = new ReturnData<string>();
+			var tag = nameof(LogOutAsync);
+			_logger.LogInformation($"{tag} user {personnel} logout");
+			try
+			{
+				var loginRec = await _context.UserLoginLogs
+								   .OrderByDescending(l => l.DateCreated)
+								   .FirstOrDefaultAsync(l => l.Personnel.Equals(personnel));
+				if (loginRec != null)
+				{
+					loginRec.DateLastModified = DateTime.Now;
+					loginRec.LastModifiedBy = personnel;
+					loginRec.LogoutTime = DateTime.Now;
+
+					await _context.SaveChangesAsync();
+				}
+				result.Success = true;
+				result.Message = "Logged out";
+				_logger.LogInformation($"{tag} user account log out {personnel} {result.Message}");
 				return result;
 			}
 			catch (Exception ex)

@@ -1,4 +1,5 @@
-﻿using PosMaster.Services;
+﻿using PosMaster.Dal.Interfaces;
+using PosMaster.Services;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 
@@ -6,7 +7,7 @@ namespace PosMaster.Extensions
 {
 	public static class EmailSenderExtensions
 	{
-		public static Task SendEmailConfirmationAsync(this IEmailService emailSender, EmailAddress address, string link)
+		public static Task<ReturnData<string>> SendEmailConfirmationAsync(this IEmailService emailSender, EmailAddress address, string link)
 		{
 			return emailSender.SendAsync(address, "Confirm your Email",
 				$"Dear {address.Name}, <br/>" +
