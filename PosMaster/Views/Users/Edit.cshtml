@@ -1,5 +1,193 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@inject IClientInstanceInterface _instanceInterface;
+@inject ICookiesService _cookies;
+@model UserViewModel
 @{
+	ViewData["Active"] = "Users";
+	var option = Model.IsEditMode ? "Update" : "Add";
+	var title = $"{option} User";
+	ViewData["Title"] = title;
+	var userData = _cookies.Read();
+
+	var statuses = Helpers.Statuses();
+	var userRoles = Helpers.UserRoles(userData.Role);
+	var instancesRes = User.IsInRole(Role.SuperAdmin) ?
+		await _instanceInterface.AllAsync()
+		: await _instanceInterface.ByClientIdAsync(userData.ClientId);
+	var instances = instancesRes.Data;
+	var userTitles = new List<string> { "Mr.", "Mrs.", "Ms." };
 }
+<div class="card card-primary">
+	<div class="card-header">
+		<h3 class="card-title">@ViewData["Title"]</h3>
+	</div>
+	<form role="form" method="post" autocomplete="off">
+		<div asp-validation-summary="All" class="text-danger"></div>
+		<input asp-for="Id" />
+		<input asp-for="UserId" type="hidden" />
+		<input asp-for="EmailConfirmed" type="hidden" />
+		<input asp-for="Code" value="@userData.ClientCode" type="hidden" />
+		<input asp-for="IsEditMode" />
+		<div class="row">
+			<div class="col-md-8">
+				<div class="card-body">
+					<div class="row">
+						<div class="col-md-6">
+							<div class="form-group">
+								<label asp-for="UserInstanceId"></label>
+								<select class="form-control select2" asp-for="UserInstanceId" style="width: 100%;">
+									<option value="">--Select Instance--</option>
+									@foreach (var item in instances)
+									{
+										<option value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
+									}
+								</select>
+								<span asp-validation-for="UserInstanceId" class="text-danger"></span>
+							</div>
+						</div>
+						<div class="col-md-6">
+							<div class="form-group">
+								<label asp-for="Title"></label>
+								<select class="form-control select2" asp-for="Title" style="width: 100%;">
+									<option value="">--Select Title--</option>
+									@foreach (var item in userTitles)
+									{
+										<option value="@item" title="@item">@item</option>
+									}
+								</select>
+								<span asp-validation-for="Title" class="text-danger"></span>
+							</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-6">
+							<div class="form-group">
+								<label asp-for="FirstName"></label>
+								<input asp-for="FirstName" class="form-control" placeholder="John">
+								<span asp-validation-for="FirstName" class="text-danger"></span>
+							</div>
+						</div>
+						<div class="col-md-6">
+							<div class="form-group">
+								<label asp-for="MiddleName"></label>
+								<input asp-for="MiddleName" class="form-control" placeholder="Doe">
+								<span asp-validation-for="MiddleName" class="text-danger"></span>
+							</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-6">
+							<div class="form-group">
+								<label asp-for="LastName"></label>
+								<input asp-for="LastName" class="form-control" placeholder="Bar">
+								<span asp-validation-for="LastName" class="text-danger"></span>
+							</div>
+						</div>
+						<div class="col-md-6">
+							<div class="form-group">
+								<label asp-for="IdNumber"></label>
+								<input asp-for="IdNumber" class="form-control numbers-only" placeholder="123456789">
+								<span asp-validation-for="IdNumber" class="text-danger"></span>
+							</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-6">
+							<div class="form-group">
+								<label asp-for="EmailAddress"></label>
+								<input asp-for="EmailAddress" class="form-control" placeholder="john@doe.com">
+								<span asp-validation-for="EmailAddress" class="text-danger"></span>
+							</div>
+						</div>
+						<div class="col-md-6">
+							<div class="form-group">
+								<label asp-for="PhoneNumber"></label>
+								<input asp-for="PhoneNumber" class="form-control numbers-only" placeholder="07XXXXXXXX">
+								<span asp-validation-for="PhoneNumber" class="text-danger"></span>
+							</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-6">
+							<div class="form-group">
+								<label asp-for="Gender"></label>
+								<div class="col-md-3">
+									<div class="form-check">
+										<input class="form-check-input" id="rdMale" type="radio" asp-for="Gender" value="Male">
+										<label class="form-check-label" for="rdMale">Male</label>
+									</div>
+								</div>
+								<div class="col-md-3">
+									<div class="form-check">
+										<input class="form-check-input" id="rdFemale" type="radio" asp-for="Gender" value="Female">
+										<label class="form-check-label" for="rdFemale">Female</label>
+									</div>
+								</div>
+								<span asp-validation-for="Gender" class="text-danger"></span>
+							</div>
+						</div>
+						<div class="col-md-6">
+							<div class="form-group">
+								<label asp-for="Role"></label>
+								<select class="form-control select2" asp-for="Role" style="width: 100%;">
+									<option value="">--Select Role--</option>
+									@foreach (var item in userRoles)
+									{
+										<option value="@item" title="@item">@item</option>
+									}
+								</select>
+								<span asp-validation-for="Role" class="text-danger"></span>
+							</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-12">
+							<p><strong>Status</strong></p>
+						</div>
+						@foreach (var item in statuses)
+						{
+							<div class="col-md-3">
+								<div class="form-check">
+									<input class="form-check-input" id="@item.Id" type="radio" asp-for="Status" value="@item.Id">
+									<label class="form-check-label" for="@item.Id">@item.Text</label>
+								</div>
+							</div>
+						}
+					</div>
+				</div>
+				<div class="card-footer">
+					<button type="submit" class="btn btn-primary">Submit</button>
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="card">
+					<div class="card-body">
+						<h4>Options</h4>
+						@if (!Model.IsEditMode)
+						{
+							<div>
+								<p class="alert alert-info">
+									<i class="fa fa-info-circle fa-2x"></i><br /> Provide a valid email. Confirmation link will be sent to email.
+									<br />Upon email confirmation, the user will be able to set account password.
+								</p>
+							</div>
+						}
+						else
+						{
+							<div class="row">
+								@if (!string.IsNullOrEmpty(Model.ImagePath))
+								{
+									<img src="~/@Model.ImagePath" alt="@Model.FullName" />
+								}
+								<p><a asp-route-id="@Model.UserId" asp-action="ResetPassword">Change Account Password</a></p>
+								@if (!Model.EmailConfirmed)
+								{
+									<a asp-route-id="@Model.UserId" asp-action="ResendConfirmLink">Resend Email Confirmation Link</a>
+								}
+							</div>
+						}
+					</div>
+				</div>
+			</div>
+		</div>
+	</form>
+</div>

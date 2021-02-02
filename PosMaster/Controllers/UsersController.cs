@@ -86,7 +86,8 @@ namespace PosMaster.Controllers
 			{
 				return View(model);
 			}
-			var instanceRes = await _clientInstanceInterface.ByIdAsync(model.InstanceId);
+
+			var instanceRes = await _clientInstanceInterface.ByIdAsync(Guid.Parse(model.UserInstanceId));
 			if (!instanceRes.Success)
 			{
 				ModelState.AddModelError(string.Empty, $"Provided instance not Found");
@@ -123,7 +124,8 @@ namespace PosMaster.Controllers
 				Email = model.EmailAddress,
 				UserName = model.EmailAddress,
 				MaritalStatus = model.MaritalStatus,
-				DateOfBirth = DateTime.Parse(model.DoB)
+				DateOfBirth = DateTime.Parse(model.DoB),
+				PhoneNumber = model.PhoneNumber
 			};
 			user.NormalizedEmail = user.NormalizedUserName = model.EmailAddress.ToUpper();
 			var result = await _userManager.CreateAsync(user);

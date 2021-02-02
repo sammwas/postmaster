@@ -189,6 +189,7 @@ namespace PosMaster.Dal.Interfaces
 				user.MiddleName = model.MiddleName;
 				user.Gender = model.Gender;
 				user.IdNumber = model.IdNumber;
+				user.PhoneNumber = model.PhoneNumber;
 				user.EmailConfirmed = model.EmailConfirmed;
 				user.InstanceId = model.InstanceId;
 				user.MaritalStatus = model.MaritalStatus;
