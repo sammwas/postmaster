@@ -68,12 +68,6 @@
             $("#quantityBought").val("");
         }
     };
-
-    function removeListItem(index) {
-        issueListItems.splice(index, 1);
-        createIssueListTable();
-    };
-
     var createIssueListTable = function () {
         $("#IssueListTable").html("");
         var tr = "";
@@ -97,4 +91,8 @@
         issueListItems = JSON.parse(list);
         createIssueListTable();
     }
+    function removeListItem(index) {
+        issueListItems.splice(index, 1);
+        createIssueListTable();
+    };
 });
