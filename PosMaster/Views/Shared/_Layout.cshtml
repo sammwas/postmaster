@@ -132,7 +132,7 @@
 
 							<p>
 								@userData.FullName - @userData.Role
-								<small>Member since Nov. 2012</small>
+								<small>Added On : @userData.DateCreated</small>
 							</p>
 						</li>
 						<!-- Menu Body -->
@@ -276,6 +276,35 @@
 									<a asp-controller="MasterData" asp-action="PaymentModes" asp-route-clientId="@userData.ClientId" class="nav-link">
 										<i class="far fa-circle nav-icon"></i>
 										<p>Payment Modes</p>
+									</a>
+								</li>
+							</ul>
+						</li>
+						<li class="nav-item has-treeview">
+							<a href="#" class="nav-link">
+								<i class="nav-icon fas fa-users"></i>
+								<p>
+									Users Management
+									<i class="right fas fa-angle-left"></i>
+								</p>
+							</a>
+							<ul class="nav nav-treeview">
+								<li class="nav-item">
+									<a asp-controller="Users" asp-action="All" class="nav-link">
+										<i class="far fa-circle nav-icon"></i>
+										<p>View All</p>
+									</a>
+								</li>
+								<li class="nav-item">
+									<a asp-controller="Users" asp-action="Edit" asp-route-id="" class="nav-link">
+										<i class="far fa-circle nav-icon"></i>
+										<p>Add New</p>
+									</a>
+								</li>
+								<li class="nav-item">
+									<a asp-controller="Users" asp-action="All" class="nav-link">
+										<i class="far fa-circle nav-icon"></i>
+										<p>Summary</p>
 									</a>
 								</li>
 							</ul>

@@ -22,14 +22,45 @@ namespace PosMaster.Controllers
 		private readonly ILogger<UsersController> _logger;
 		private readonly IClientInstanceInterface _clientInstanceInterface;
 		private readonly IUserInterface _userInterface;
+		private readonly ICookiesService _cookiesService;
 		public UsersController(UserManager<User> userManager, IEmailService emailService, ILogger<UsersController> logger,
-			  IClientInstanceInterface clientInstanceInterface, IUserInterface userInterface)
+			  IClientInstanceInterface clientInstanceInterface, IUserInterface userInterface, ICookiesService cookiesService)
 		{
 			_userManager = userManager;
 			_emailService = emailService;
 			_logger = logger;
 			_clientInstanceInterface = clientInstanceInterface;
 			_userInterface = userInterface;
+			_cookiesService = cookiesService;
+		}
+
+		public async Task<IActionResult> All()
+		{
+			var tag = "Users";
+			var user = _cookiesService.Read();
+			if (User.IsInRole(Role.SuperAdmin))
+			{
+				var result = await _userInterface.AllAsync();
+				if (!result.Success)
+					TempData.SetData(AlertLevel.Warning, tag, result.Message);
+				return View(result.Data);
+			}
+			if (User.IsInRole(Role.Manager) || User.IsInRole(Role.Admin))
+			{
+				var result = await _userInterface.ByClientIdAsync(user.ClientId);
+				if (!result.Success)
+					TempData.SetData(AlertLevel.Warning, tag, result.Message);
+				return View(result.Data);
+			}
+
+			if (User.IsInRole(Role.Clerk))
+			{
+				var result = await _userInterface.ByInstanceIdAsync(user.InstanceId);
+				if (!result.Success)
+					TempData.SetData(AlertLevel.Warning, tag, result.Message);
+				return View(result.Data);
+			}
+			return View(new List<UserViewModel>());
 		}
 
 		public async Task<IActionResult> Edit(string id = null)
@@ -50,6 +81,7 @@ namespace PosMaster.Controllers
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> Edit(UserViewModel model)
 		{
+			var tag = model.IsEditMode ? "Update User" : "Add User";
 			if (!ModelState.IsValid)
 			{
 				return View(model);
@@ -57,7 +89,8 @@ namespace PosMaster.Controllers
 			var instanceRes = await _clientInstanceInterface.ByIdAsync(model.InstanceId);
 			if (!instanceRes.Success)
 			{
-
+				ModelState.AddModelError(string.Empty, $"Provided instance not Found");
+				TempData.SetData(AlertLevel.Warning, $"{tag}", instanceRes.Message);
 			}
 			var hasDob = DateTime.TryParse(model.DoB, out var dob);
 			var instance = instanceRes.Data;
@@ -70,9 +103,9 @@ namespace PosMaster.Controllers
 				var updateRes = await _userInterface.UpdateAsync(model);
 				if (!updateRes.Success)
 				{
-
+					ModelState.AddModelError(string.Empty, $"Update failed");
+					TempData.SetData(AlertLevel.Warning, $"{tag}", updateRes.Message);
 				}
-
 			}
 			var user = new User
 			{
@@ -156,7 +189,7 @@ namespace PosMaster.Controllers
 				var confirmRes = await _userInterface.ConfirmEmailAsync(id, User.Identity.Name);
 				if (!confirmRes.Success)
 				{
-
+					TempData.SetData(AlertLevel.Warning, $"Confirm", $"Not Cofirmed :- {confirmRes.Message}");
 				}
 				return RedirectToAction("Edit", new { id });
 			}
