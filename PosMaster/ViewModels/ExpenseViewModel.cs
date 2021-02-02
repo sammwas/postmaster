@@ -12,6 +12,7 @@ namespace PosMaster.ViewModels
 
 		public ExpenseViewModel(Expense expense)
 		{
+			Code = expense.Code;
 			Id = expense.Id;
 			ClientId = expense.ClientId;
 			InstanceId = expense.InstanceId;

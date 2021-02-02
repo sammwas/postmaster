@@ -12,6 +12,7 @@ namespace PosMaster.Dal.Interfaces
 	{
 		Task<ReturnData<List<Expense>>> AllAsync(Guid? clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "", string personnel = "");
 		Task<ReturnData<Expense>> EditAsync(ExpenseViewModel model);
+		Task<ReturnData<Expense>> ByIdAsync(Guid id);
 	}
 
 	public class ExpenseImplementation : IExpenseInterface
@@ -116,7 +117,8 @@ namespace PosMaster.Dal.Interfaces
 					InstanceId = model.InstanceId,
 					Personnel = model.Personnel,
 					Status = model.Status,
-					Amount = model.Amount
+					Amount = model.Amount,
+					ExpenseTypeId = Guid.Parse(model.ExpenseTypeId)
 				};
 				_context.Expenses.Add(expense);
 				await _context.SaveChangesAsync();
@@ -124,6 +126,31 @@ namespace PosMaster.Dal.Interfaces
 				result.Message = "Added";
 				result.Data = expense;
 				_logger.LogInformation($"{tag} added {expenseType.Name} {expense.Code}  {expense.Id} : {result.Message}");
+				return result;
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex);
+				result.ErrorMessage = ex.Message;
+				result.Message = "Error occured";
+				_logger.LogError($"{tag} {result.Message} : {ex}");
+				return result;
+			}
+		}
+		public async Task<ReturnData<Expense>> ByIdAsync(Guid id) 
+		{
+			var result = new ReturnData<Expense> { Data = new Expense() };
+			var tag = nameof(ByIdAsync);
+			_logger.LogInformation($"{tag} get expense by id {id}");
+			try
+			{
+				var expense = await _context.Expenses.Include(p => p.ExpenseType)
+					.FirstOrDefaultAsync(c => c.Id.Equals(id));
+				result.Success = expense != null;
+				result.Message = result.Success ? "Found" : "Not Found";
+				if (result.Success)
+					result.Data = expense;
+				_logger.LogInformation($"{tag} expense {id} {result.Message}");
 				return result;
 			}
 			catch (Exception ex)

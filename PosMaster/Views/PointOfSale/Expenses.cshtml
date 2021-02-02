@@ -1,0 +1,75 @@
+﻿@model List<Expense>
+@{
+    ViewData["Active"] = "Expenses";
+    ViewData["Title"] = "Expenses";
+}
+<div>
+    <!-- /.card -->
+
+    <div class="card">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card-header">
+                    <h3 class="card-title">@ViewData["Title"] <span class="text-right"><a asp-action="EditExpense" class="btn btn-sm btn-info">Add</a></span></h3>
+                </div>
+            </div>
+            <div class="col-md-4">
+                @if (Model.Any())
+                {
+                    <p class="text-right"><strong>Total Amount: @Model.Sum(r => r.Amount)</strong></p>
+                }
+                else
+                {
+                    <p class="text-right"><strong>Total Amount: 0.00</strong></p>
+                }
+            </div>
+        </div>
+
+        <!-- /.card-header -->
+        <div class="card-body">
+            <table id="example1" class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Type</th>
+                        <th>Date</th>
+                        <th>Amount</th>
+                        <th>Options</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Any())
+                    {
+                        @foreach (var item in Model)
+                        {
+                    <tr>
+                        <td>@item.Code</td>
+                        <td>@item.ExpenseType.Name</td>
+                        <td>@item.DateCreated</td>
+                        <td>@item.Amount</td>
+                        <td class="project-actions text-right">
+                            <a asp-action="EditExpense" asp-route-id="@item.Id" class="btn btn-info btn-xs">
+                                <i class="fas fa-pencil-alt">
+                                </i>
+                                Edit
+                            </a>
+                        </td>
+                    </tr>
+                        }
+
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th>Code</th>
+                        <th>Type</th>
+                        <th>Date</th>
+                        <th>Amount</th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        <!-- /.card-body -->
+    </div>
+    <!-- /.card -->
+</div>

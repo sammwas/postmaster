@@ -212,133 +212,174 @@
 					</div>
 				</div>
 				<nav class="mt-2">
-					<ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-						@if (User.IsInRole(Role.SuperAdmin))
-						{
-							<li class="nav-item has-treeview">
-								<a href="#" class="nav-link">
-									<i class="nav-icon fas fa-chart-pie"></i>
-									<p>
-										Clients
-										<i class="right fas fa-angle-left"></i>
-									</p>
-								</a>
-								<ul class="nav nav-treeview">
-									<li class="nav-item">
-										<a asp-controller="Clients" asp-action="All" class="nav-link">
-											<i class="far fa-circle nav-icon"></i>
-											<p>View All</p>
-										</a>
-									</li>
-									<li class="nav-item">
-										<a asp-controller="Clients" asp-action="Edit" asp-route-id="" class="nav-link">
-											<i class="far fa-circle nav-icon"></i>
-											<p>Add New</p>
-										</a>
-									</li>
-									<li class="nav-item">
-										<a asp-controller="Clients" asp-action="Summary" class="nav-link">
-											<i class="far fa-circle nav-icon"></i>
-											<p>Summary</p>
-										</a>
-									</li>
-								</ul>
-							</li>
-						}
-						<li class="nav-item has-treeview">
-							<a href="#" class="nav-link">
-								<i class="nav-icon far fa-plus-square"></i>
-								<p>
-									Master Data
-									<i class="right fas fa-angle-left"></i>
-								</p>
-							</a>
-							<ul class="nav nav-treeview">
+                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+                        <li class="nav-item has-treeview">
+                            <a href="#" class="nav-link">
+                                <i class="nav-icon far fa-plus-square"></i>
+                                <p>
+                                    Point Of Sale
+                                    <i class="right fas fa-angle-left"></i>
+                                </p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a asp-controller="PointOfSale" asp-action="Index" class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Sell</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a asp-controller="PointOfSale" asp-action="Receipts" class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Receipts</p>
+                                    </a>
+                                </li>                                
 								<li class="nav-item">
-									<a asp-controller="MasterData" asp-action="ProductCategories" asp-route-clientId="@userData.ClientId" class="nav-link">
-										<i class="far fa-circle nav-icon"></i>
-										<p>Product Categories</p>
-									</a>
-								</li>
-								<li class="nav-item">
-									<a asp-controller="MasterData" asp-action="UnitOfMeasures" asp-route-clientId="@userData.ClientId" class="nav-link">
-										<i class="far fa-circle nav-icon"></i>
-										<p>Unit of Measures</p>
-									</a>
-								</li>
-								<li class="nav-item">
-									<a asp-controller="MasterData" asp-action="ExpenseTypes" asp-route-clientId="@userData.ClientId" class="nav-link">
-										<i class="far fa-circle nav-icon"></i>
-										<p>Expense Types</p>
-									</a>
-								</li>
-								<li class="nav-item">
-									<a asp-controller="MasterData" asp-action="PaymentModes" asp-route-clientId="@userData.ClientId" class="nav-link">
-										<i class="far fa-circle nav-icon"></i>
-										<p>Payment Modes</p>
-									</a>
-								</li>
-							</ul>
-						</li>
-						<li class="nav-item has-treeview">
-							<a href="#" class="nav-link">
-								<i class="nav-icon fas fa-th"></i>
-								<p>
-									Products
-									<i class="right fas fa-angle-left"></i>
-								</p>
-							</a>
-							<ul class="nav nav-treeview">
-								<li class="nav-item">
-									<a asp-controller="Products" asp-action="All" class="nav-link">
-										<i class="far fa-circle nav-icon"></i>
-										<p>View All</p>
-									</a>
-								</li>
-								<li class="nav-item">
-									<a asp-controller="Products" asp-action="Edit" asp-route-id="" class="nav-link">
-										<i class="far fa-circle nav-icon"></i>
-										<p>Add New</p>
-									</a>
-								</li>
-								<li class="nav-item">
-									<a asp-controller="Products" asp-action="ProductStockAdjustment" asp-route-clientId="@userData.ClientId" class="nav-link">
-										<i class="far fa-circle nav-icon"></i>
-										<p>Stock Adjustment</p>
-									</a>
-								</li>
-							</ul>
-						</li>
-						<li class="nav-item has-treeview">
-							<a href="#" class="nav-link">
-								<i class="nav-icon fas fa-cog"></i>
-								<p>
-									Settings
-									<i class="right fas fa-angle-left"></i>
-								</p>
-							</a>
-							<ul class="nav nav-treeview">
-								<li class="nav-item">
-									<a asp-controller="Clients" asp-action="Edit" asp-route-id="@userData.ClientId" class="nav-link">
-										<i class="far fa-circle nav-icon"></i>
-										<p>Setup</p>
-									</a>
-								</li>
-								<li class="nav-item">
-									<a asp-controller="Settings" asp-action="EmailSettings" asp-route-clientId="@userData.ClientId" class="nav-link">
-										<i class="far fa-circle nav-icon"></i>
-										<p>Email Settings</p>
-									</a>
-								</li>
-								<li class="nav-item">
-									<a asp-controller="Settings" asp-action="SendTestEmail" class="nav-link">
-										<i class="far fa-circle nav-icon"></i>
-										<p>Test Email</p>
-									</a>
-								</li>
-							</ul>
-						</li>
-					</ul>
+                                    <a asp-controller="PointOfSale" asp-action="Expenses" class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Expenses</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Customers</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Return Items</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        @if (User.IsInRole(Role.SuperAdmin))
+                        {
+                            <li class="nav-item has-treeview">
+                                <a href="#" class="nav-link">
+                                    <i class="nav-icon fas fa-chart-pie"></i>
+                                    <p>
+                                        Clients
+                                        <i class="right fas fa-angle-left"></i>
+                                    </p>
+                                </a>
+                                <ul class="nav nav-treeview">
+                                    <li class="nav-item">
+                                        <a asp-controller="Clients" asp-action="All" class="nav-link">
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>View All</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a asp-controller="Clients" asp-action="Edit" asp-route-id="" class="nav-link">
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>Add New</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a asp-controller="Clients" asp-action="Summary" class="nav-link">
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>Summary</p>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                        }
+                        <li class="nav-item has-treeview">
+                            <a href="#" class="nav-link">
+                                <i class="nav-icon far fa-plus-square"></i>
+                                <p>
+                                    Master Data
+                                    <i class="right fas fa-angle-left"></i>
+                                </p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a asp-controller="MasterData" asp-action="ProductCategories" asp-route-clientId="@userData.ClientId" class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Product Categories</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a asp-controller="MasterData" asp-action="UnitOfMeasures" asp-route-clientId="@userData.ClientId" class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Unit of Measures</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a asp-controller="MasterData" asp-action="ExpenseTypes" asp-route-clientId="@userData.ClientId" class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Expense Types</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a asp-controller="MasterData" asp-action="PaymentModes" asp-route-clientId="@userData.ClientId" class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Payment Modes</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="nav-item has-treeview">
+                            <a href="#" class="nav-link">
+                                <i class="nav-icon fas fa-th"></i>
+                                <p>
+                                    Products
+                                    <i class="right fas fa-angle-left"></i>
+                                </p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a asp-controller="Products" asp-action="All" class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>View All</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a asp-controller="Products" asp-action="Edit" asp-route-id="" class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Add New</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a asp-controller="Products" asp-action="ProductStockAdjustment" asp-route-clientId="@userData.ClientId" class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Stock Adjustment</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="nav-item has-treeview">
+                            <a href="#" class="nav-link">
+                                <i class="nav-icon fas fa-cog"></i>
+                                <p>
+                                    Settings
+                                    <i class="right fas fa-angle-left"></i>
+                                </p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a asp-controller="Clients" asp-action="Edit" asp-route-id="@userData.ClientId" class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Setup</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a asp-controller="Settings" asp-action="EmailSettings" asp-route-clientId="@userData.ClientId" class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Email Settings</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a asp-controller="Settings" asp-action="SendTestEmail" class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Test Email</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
 				</nav>
 
 			</div>

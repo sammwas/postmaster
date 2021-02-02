@@ -1,5 +1,7 @@
 ﻿@inject IProductInterface _productInterface;
+@inject IMasterDataInterface _masterDataInterface;
 @inject ICookiesService _cookies;
+@model ProductSaleViewModel
 @{
     ViewData["Active"] = "Point Of Sale";
     var statuses = Helpers.Statuses();
@@ -7,7 +9,7 @@
     ViewData["Title"] = title;
     var userData = _cookies.Read();
     var products = await _productInterface.ByInstanceIdAsync(userData.InstanceId);
-    var customer = await _productInterface.GetCustomerAsync();
+    var paymentModes = await _masterDataInterface.PaymentModesAsync(userData.ClientId);
 }
 <div class="card card-primary">
     <div class="card-header">
@@ -16,7 +18,7 @@
     <div class="row">
         <div class="col-md-4">
             <div class="receipt-line-item">
-                <form role="form" autocomplete="off">
+                <form role="form" autocomplete="off" id="productListForm">
                     <div asp-validation-summary="All" class="text-danger"></div>
                     <div class="card-body">
                         <div class="row">
@@ -27,7 +29,7 @@
                                         <option value="">--Select Product--</option>
                                         @foreach (var item in products.Data)
                                         {
-                                            <option data-qty="@item.AvailableQuantity" value="@item.Id" title="@item.Notes" data-uom="@item.UnitOfMeasure">@item.Code - @item.Name</option>
+                                            <option data-qty="@item.AvailableQuantity" value="@item.Id" title="@item.Notes" data-uom="@item.UnitOfMeasure" data-price="@item.SellingPrice">@item.Name @item.UnitOfMeasure</option>
                                         }
                                     </select>
                                 </div>
@@ -43,55 +45,27 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>Unit of Measure</label>
-                                    <input class="form-control" id="unitOfMeasure">
-                                    <span class="text-danger"></span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
                                     <label>Selling Price</label>
                                     <input class="form-control" id="sellingPrice">
                                     <span class="text-danger"></span>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Payment Mode</label>
-                                    <input class="form-control" id="paymentMode">
-                                    <span class="text-danger"></span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group" id="refNo">
-                                    <label>Ref No:</label>
-                                    <input class="form-control">
-                                    <span class="text-danger"></span>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <br />
-                                <p id="issMsg"></p>
-                            </div>
                         </div>
                     </div>
-
+                    <div class="row">
+                        <div class="col-md-6">
+                            <br />
+                            <p id="issMsg"></p>
+                        </div>
+                    </div>
                     <div class="card-footer">
-                        <span class="text-left"><button class="btn btn-default">Cancel</button></span>
-                        <span class="text-right"><button type="submit" class="btn btn-primary" id="add-list-item" onclick="addItemToList()">Add</button></span>
+                        <span class="text-right"><button type="submit" class="btn btn-primary" id="issBtnAdd">Add</button></span>
                     </div>
                 </form>
             </div>
         </div>
         <div class="col-md-8">
             <div class="receipt-items">
-                <div class="receipt-header">
-                    <h3 class="card-title">Receipt</h3>
-                </div>
                 <table id="example1" class="table table-bordered table-striped">
                     <thead>
                         <tr>
@@ -118,85 +92,38 @@
                     <strong>Total Value : <span id="issTotal">0</span>  </strong>
                 </p>
                 <br />
-                <form asp-action="IssueItem" method="post">
-                    <div class="input-group">
+                <form method="post" autocomplete="off">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <div class="form-group">
+                                    <label>Payment Mode</label>
+                                    <select asp-for="PaymentMode" class="form-control select2" style="width: 100%;" id="paymentMode">
+                                        <option value="">--Select Payment Mode--</option>
+                                        @foreach (var item in paymentModes.Data)
+                                        {
+                                            <option value="@item.Id" title="@item.Notes">@item.Name</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group" id="refNo">
+                                <label>Reference No</label>
+                                <input asp-for="ExternalRef" class="form-control" id="refNoVal">
+                                <span class="text-danger"></span>
+                            </div>
+                        </div>
                     </div>
-                    <input name="Records" id="issListRecords" type="hidden" />
-                    <input name="Customer" value="@customer.Data.ClientId" type="hidden" />
-                    <input name="PaymentMode" value="cash" type="hidden" />
-                    <button disabled class="btn btn-primary" type="submit" id="btnSumbitIss"> <i class="fa fa-save"></i> Submit List </button>
+                    <input asp-for="LineItemListStr" id="issListRecords"  type="hidden" />
+                    <input asp-for="Code"  type="hidden" value="@userData.InstanceCode" />
+                    <input asp-for="InstanceId"  type="hidden" value="@userData.InstanceId" />
+                    <input asp-for="ClientId"  type="hidden" value="@userData.ClientId" />
+                    <input asp-for="CustomerId" value="@Constants.WalkInCustomerCode" type="hidden" />
+                    <button disabled class="btn btn-primary" type="submit" id="btnSumbitIss"> <i class="fa fa-save"></i> Submit</button>
                 </form>
             </div>
         </div>
     </div>
 </div>
-<script>
-    var issueListItems = [];
-    function addItemToList() {
-        debugger;
-        var productId = $("#productItem option:selected");
-        //var itemCode = $("#issItemId option:selected").text().split(' ').[0];
-        var itemName = $("#issItemId option:selected").text();
-        console.log(itemName);
-        var quantity = $("#quantityBought").val();
-        var unitPrice = $("#sellingPrice").val();
-        var avQuantity = $("#productItem option:selected").attr("data-qty");
-        var discount = 0;
-        var taxAmount = 0;
-
-        if (productId === "") {
-            $("#issMsg").text("select an item first");
-            $("#issItemId").focus();
-        }
-        else if (quantity === "") {
-            $("#issMsg").text("quantity is required");
-            $("#quantityBought").focus();
-        }
-        else if (unitPrice === "") {
-            $("#issMsg").text("price is required");
-            $("#issWarehouseId").focus();
-        }
-        else if (parseInt(quantity) > parseInt(avQuantity)) {
-            $("#issMsg").text("available quantity is " + avQuantity);
-            $("#quantityBought").focus();
-        }
-        else {
-            $("#issMsg").text("");
-            var listItem = {
-                "productId": productId,
-                "quantity": quantity,
-                "unitPrice": unitPrice,
-                "discount": discount,
-                "taxAmount": taxAmount,
-                "itemName": itemName
-            }
-            issueListItems.push(listItem);
-            createIssueListTable();
-            $("#issListRecords").val(JSON.stringify(issueListItems));
-            $("#quantityBought").val("");
-        }
-    };
-
-    function removeListItem(index) {
-        issueListItems.splice(index, 1);
-        createIssueListTable();
-    };
-
-    var createIssueListTable = function () {
-        $("#IssueListTable").html("");
-        var tr = "";
-        var total = 0;
-        var index = 0;
-        $.each(issueListItems, function () {
-            var trTotal = this.quantity * this.unitPrice;
-            total += trTotal;
-            tr += '<tr><td>' + this.itemName + '</td><td>' + this.quantity + '</td><td>' + this.unitPrice + '</td><td>' + trTotal + '</td>'
-                + '<td><button class="btn btn-danger btn-sm" onclick="removeListItem(' + index + ')">Remove</button> </td > </tr > ';
-            index++;
-        });
-
-        issueListItems.length > 0 ? $("#btnSumbitIss").prop("disabled", false) : $("#btnSumbitIss").prop("disabled", true);
-        $("#IssueListTable").html(tr);
-        $("#issTotal").text(total);
-    };
-</script>
