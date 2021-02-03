@@ -23,8 +23,10 @@ namespace PosMaster.Controllers
 		private readonly IClientInstanceInterface _clientInstanceInterface;
 		private readonly IUserInterface _userInterface;
 		private readonly ICookiesService _cookiesService;
+		private readonly FileUploadService _fileUploadService;
 		public UsersController(UserManager<User> userManager, IEmailService emailService, ILogger<UsersController> logger,
-			  IClientInstanceInterface clientInstanceInterface, IUserInterface userInterface, ICookiesService cookiesService)
+			  IClientInstanceInterface clientInstanceInterface, IUserInterface userInterface, ICookiesService cookiesService,
+			  FileUploadService fileUploadService)
 		{
 			_userManager = userManager;
 			_emailService = emailService;
@@ -32,6 +34,7 @@ namespace PosMaster.Controllers
 			_clientInstanceInterface = clientInstanceInterface;
 			_userInterface = userInterface;
 			_cookiesService = cookiesService;
+			_fileUploadService = fileUploadService;
 		}
 
 		public async Task<IActionResult> All()
@@ -211,6 +214,33 @@ namespace PosMaster.Controllers
 				_logger.LogError($"Error getting user {id} to confirm email :-{e.Message}");
 				return RedirectToAction("Edit", new { id });
 			}
+		}
+
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> Upload(UploadImageViewModel model)
+		{
+			var tag = "Upload";
+			if (!ModelState.IsValid)
+			{
+				TempData.SetData(AlertLevel.Warning, tag, "Image is Required");
+				return RedirectToAction(nameof(Edit), new { id = model.UserId });
+			}
+			var user = _cookiesService.Read();
+			var uploadResult = await _fileUploadService.UploadAsync(user.ClientId, model.File);
+			if (uploadResult.Success)
+			{
+				model.CurrentImage = uploadResult.PathUrl;
+				var iRes = await _userInterface.UpdateImageAsync(model);
+				if (iRes.Success)
+				{
+					user.ImagePath = model.CurrentImage;
+					_cookiesService.Store(user);
+					_fileUploadService.Delete(iRes.Data);
+				}
+			}
+			TempData.SetData(uploadResult.Success ? AlertLevel.Success : AlertLevel.Warning, tag, uploadResult.Message);
+			return RedirectToAction(nameof(Edit), new { id = model.UserId });
 		}
 
 		private void AddErrors(IdentityResult result)

@@ -47,7 +47,6 @@ namespace PosMaster.Dal.Interfaces
                 var data = await dataQuery.OrderBy(r => r.DateCreated).ToListAsync();
                 result.Success = data.Any();
                 result.Message = result.Success ? "Found" : "Not Found";
-
                 var dates = data.Select(a => a.DateCreated.Date).Distinct().ToList();
                 foreach (var date in dates)
                 {
