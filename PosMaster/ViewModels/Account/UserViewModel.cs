@@ -16,6 +16,7 @@ namespace PosMaster.ViewModels
 			UserId = user.Id;
 			ClientId = user.ClientId;
 			InstanceId = user.InstanceId;
+			UserInstanceId = user.InstanceId.ToString();
 			Notes = user.Notes;
 			Status = user.Status;
 			EmailAddress = user.Email;
@@ -33,13 +34,19 @@ namespace PosMaster.ViewModels
 			MaritalStatus = user.MaritalStatus;
 			IsEditMode = true;
 			DoB = user.DateOfBirth.ToString("dd-MMM-yyyy");
+			FullName = user.FullName;
 		}
 		[HiddenInput]
 		public string UserId { get; set; }
+		[Required]
+		[Display(Name = "Instance")]
+		public string UserInstanceId { get; set; }
 		[DataType(DataType.EmailAddress)]
 		[Required]
+		[Display(Name = "Email Address")]
 		public string EmailAddress { get; set; }
 		[Required]
+		[Display(Name = "Phone Number")]
 		public string PhoneNumber { get; set; }
 		public bool EmailConfirmed { get; set; }
 		[Required]
@@ -47,17 +54,21 @@ namespace PosMaster.ViewModels
 		public DateTime DateCreated { get; set; }
 		public string ImagePath { get; set; }
 		[Required]
+		[Display(Name = "Id Number")]
 		public string IdNumber { get; set; }
 		[Required]
 		public string Gender { get; set; }
 		[Required]
 		public string Title { get; set; }
 		[Required]
+		[Display(Name = "First Name")]
 		public string FirstName { get; set; }
+		[Display(Name = "Middle Name")]
 		public string MiddleName { get; set; }
+		[Display(Name = "Last Name")]
 		public string LastName { get; set; }
 		public string MaritalStatus { get; set; }
-		public string FullName => $"{FirstName} {MiddleName} {LastName}";
+		public string FullName { get; set; }
 		public bool IsNewImage { get; set; }
 		[Display(Name = "Date of Birth")]
 		public string DoB { get; set; }

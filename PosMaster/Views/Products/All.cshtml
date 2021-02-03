@@ -1,74 +1,69 @@
 ﻿@model List<Product>
 @{
-    ViewData["Active"] = "Products";
-    ViewData["Title"] = "Products";
+	ViewData["Active"] = "Products";
+	ViewData["Title"] = "Products";
 }
 <div>
-    <!-- /.card -->
-
-    <div class="card">
-        <div class="card-header">
-            <h3 class="card-title">@ViewData["Title"] <span class="text-right"><a asp-action="Edit" asp-route-id="" class="btn btn-sm btn-info">Add New</a></span></h3>
-        </div>
-        <!-- /.card-header -->
-        <div class="card-body">
-            <table id="example1" class="table table-bordered table-striped">
-                <thead>
-                    <tr>
-                        <th>Code</th>
-                        <th>Name</th>
-                        <th>Category</th>
-                        <th>Buying</th>
-                        <th>Selling</th>
-                        <th>Quantity</th>
-                        <th>Reorder</th>
-                        <th>Unit</th>
-                        <th>Options</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model)
-                    {
-                        <tr>
-                            <td>@item.Code</td>
-                            <td>@item.Name</td>
-                            <td>@item.ProductCategory.Name</td>
-                            <td>@item.BuyingPrice</td>
-                            <td>@item.SellingPrice</td>
-                            <td>@item.AvailableQuantity</td>
-                            <td>@item.ReorderLevel</td>
-                            <td>@item.UnitOfMeasure</td>
-                            <td class="project-actions text-right">
-                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-info btn-xs">
-                                    <i class="fas fa-pencil-alt">
-                                    </i>
-                                    Edit
-                                </a>
-                                <a asp-action="ById" asp-route-id="@item.Id" class="btn btn-danger btn-xs">
-                                    <i class="fas fa-trash">
-                                    </i>
-                                    Delete
-                                </a>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-                <tfoot>
-                    <tr>
-                        <th>Code</th>
-                        <th>Name</th>
-                        <th>Category</th>
-                        <th>Buying</th>
-                        <th>Selling</th>
-                        <th>Quantity</th>
-                        <th>Reorder</th>
-                        <th>Unit</th>
-                        <th>Options</th>
-                    </tr>
-                </tfoot>
-            </table>
-        </div>
-        <!-- /.card-body -->
-    </div>
-    <!-- /.card -->
+	<div class="card">
+		<div class="card-header">
+			<h3 class="card-title">@ViewData["Title"] <span class="text-right"><a asp-action="Edit" asp-route-id="" class="btn btn-sm btn-info">Add New</a></span></h3>
+		</div>
+		<div class="card-body">
+			<table id="example1" class="table table-bordered table-striped">
+				<thead>
+					<tr>
+						<th>Code</th>
+						<th>Name</th>
+						<th>Category</th>
+						<th>Buying</th>
+						<th>Selling</th>
+						<th>Quantity</th>
+						<th>Reorder</th>
+						<th>Unit</th>
+						<th>Options</th>
+					</tr>
+				</thead>
+				<tbody>
+					@foreach (var item in Model)
+					{
+						<tr>
+							<td>@item.Code</td>
+							<td>@item.Name</td>
+							<td>@item.ProductCategory.Name</td>
+							<td>@item.BuyingPrice</td>
+							<td>@item.SellingPrice</td>
+							<td>@item.AvailableQuantity</td>
+							<td>@item.ReorderLevel</td>
+							<td>@item.UnitOfMeasure</td>
+							<td class="project-actions text-right">
+								<a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-info btn-xs">
+									<i class="fas fa-pencil-alt">
+									</i>
+									Edit
+								</a>
+								<a asp-action="ById" asp-route-id="@item.Id" class="btn btn-danger btn-xs">
+									<i class="fas fa-trash">
+									</i>
+									Delete
+								</a>
+							</td>
+						</tr>
+					}
+				</tbody>
+				<tfoot>
+					<tr>
+						<th>Code</th>
+						<th>Name</th>
+						<th>Category</th>
+						<th>Buying</th>
+						<th>Selling</th>
+						<th>Quantity</th>
+						<th>Reorder</th>
+						<th>Unit</th>
+						<th>Options</th>
+					</tr>
+				</tfoot>
+			</table>
+		</div>
+	</div>
 </div>

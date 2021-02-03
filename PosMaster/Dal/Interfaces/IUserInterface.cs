@@ -12,6 +12,8 @@ namespace PosMaster.Dal.Interfaces
 	public interface IUserInterface
 	{
 		Task<ReturnData<string>> AddLoginLogAsync(UserLoginLog log);
+		Task<ReturnData<string>> LogOutAsync(string personnel);
+		Task<ReturnData<List<UserViewModel>>> AllAsync();
 		Task<ReturnData<List<UserViewModel>>> ByClientIdAsync(Guid clientId);
 		Task<ReturnData<List<UserViewModel>>> ByInstanceIdAsync(Guid instanceId);
 		Task<ReturnData<UserViewModel>> UpdateAsync(UserViewModel model);
@@ -39,6 +41,33 @@ namespace PosMaster.Dal.Interfaces
 				await _context.SaveChangesAsync();
 				result.Success = true;
 				result.Message = "Added";
+				return result;
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex);
+				result.ErrorMessage = ex.Message;
+				result.Message = "Error occured";
+				_logger.LogError($"{tag} {result.Message} : {ex}");
+				return result;
+			}
+		}
+
+		public async Task<ReturnData<List<UserViewModel>>> AllAsync()
+		{
+			var result = new ReturnData<List<UserViewModel>> { Data = new List<UserViewModel>() };
+			var tag = nameof(AllAsync);
+			_logger.LogInformation($"{tag} get all users");
+			try
+			{
+				var data = await _context.Users
+					.Select(u => new UserViewModel(u))
+					.ToListAsync();
+				result.Success = data.Any();
+				result.Message = result.Success ? "Found" : "Not Found";
+				if (result.Success)
+					result.Data = data;
+				_logger.LogInformation($"{tag} found {data.Count} users");
 				return result;
 			}
 			catch (Exception ex)
@@ -141,6 +170,39 @@ namespace PosMaster.Dal.Interfaces
 			}
 		}
 
+		public async Task<ReturnData<string>> LogOutAsync(string personnel)
+		{
+			var result = new ReturnData<string>();
+			var tag = nameof(LogOutAsync);
+			_logger.LogInformation($"{tag} user {personnel} logout");
+			try
+			{
+				var loginRec = await _context.UserLoginLogs
+								   .OrderByDescending(l => l.DateCreated)
+								   .FirstOrDefaultAsync(l => l.Personnel.Equals(personnel));
+				if (loginRec != null)
+				{
+					loginRec.DateLastModified = DateTime.Now;
+					loginRec.LastModifiedBy = personnel;
+					loginRec.LogoutTime = DateTime.Now;
+
+					await _context.SaveChangesAsync();
+				}
+				result.Success = true;
+				result.Message = "Logged out";
+				_logger.LogInformation($"{tag} user account log out {personnel} {result.Message}");
+				return result;
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex);
+				result.ErrorMessage = ex.Message;
+				result.Message = "Error occured";
+				_logger.LogError($"{tag} {result.Message} : {ex}");
+				return result;
+			}
+		}
+
 		public async Task<ReturnData<UserViewModel>> UpdateAsync(UserViewModel model)
 		{
 			var result = new ReturnData<UserViewModel> { Data = new UserViewModel() };
@@ -161,6 +223,7 @@ namespace PosMaster.Dal.Interfaces
 				user.MiddleName = model.MiddleName;
 				user.Gender = model.Gender;
 				user.IdNumber = model.IdNumber;
+				user.PhoneNumber = model.PhoneNumber;
 				user.EmailConfirmed = model.EmailConfirmed;
 				user.InstanceId = model.InstanceId;
 				user.MaritalStatus = model.MaritalStatus;
@@ -182,7 +245,7 @@ namespace PosMaster.Dal.Interfaces
 					}
 					user.Email = user.UserName = model.EmailAddress;
 					user.NormalizedEmail = user.NormalizedUserName = model.EmailAddress.ToUpper();
-				} 
+				}
 				await _context.SaveChangesAsync();
 				result.Data = new UserViewModel(user);
 				result.Success = true;

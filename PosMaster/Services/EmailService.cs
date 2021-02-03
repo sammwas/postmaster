@@ -87,6 +87,7 @@ namespace PosMaster.Services
 				res.Success = true;
 				res.Message = "Sent";
 				res.Data = message.MessageId;
+				Console.WriteLine($"Email message {message.MessageId}  : {res.Message}");
 				return res;
 			}
 			catch (Exception e)
