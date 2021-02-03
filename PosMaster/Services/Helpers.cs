@@ -3,6 +3,7 @@ using PosMaster.Dal;
 using PosMaster.ViewModels;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 
@@ -10,6 +11,14 @@ namespace PosMaster.Services
 {
 	public static class Helpers
 	{
+		public static DateTime firstDayOfMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+		public static DateTime lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
+		public static DateTime FirstDayOfWeek()
+		{
+			var dayOfWeek = CultureInfo.CurrentCulture.DateTimeFormat.FirstDayOfWeek;
+			int delta = dayOfWeek - DateTime.Now.DayOfWeek;
+			return DateTime.Now.AddDays(delta);
+		}
 		public static string FormatAmount(decimal amount, int dec = 0)
 		{
 			var format = "{0:n" + dec + "}";

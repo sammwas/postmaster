@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using PosMaster.Dal;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using PosMaster.Dal.Interfaces;
+using PosMaster.Extensions;
+using PosMaster.Services;
+using PosMaster.ViewModels;
 using System.Threading.Tasks;
 
 namespace PosMaster.Controllers
@@ -12,46 +12,50 @@ namespace PosMaster.Controllers
 	[Authorize]
 	public class DashboardController : Controller
 	{
-		private UserManager<User> _userManager;
-		public DashboardController(UserManager<User> userManager)
+		private readonly ICookiesService _cookiesService;
+		private readonly IDashboardInterface _dashboardInterface;
+		private readonly string _tag = "Dashboard";
+		public DashboardController(ICookiesService cookiesService, IDashboardInterface dashboardInterface)
 		{
-			_userManager = userManager;
+			_cookiesService = cookiesService;
+			_dashboardInterface = dashboardInterface;
 		}
-		public async Task<IActionResult> Index()
+		public IActionResult Index()
 		{
-			var user = await _userManager.GetUserAsync(User);
-
-			if (user == null)
-				return RedirectToAction("Index", "Home");
-			if (user.Role.Equals(Role.SuperAdmin))
+			if (User.IsInRole(Role.SuperAdmin))
 				return RedirectToAction(nameof(SuperAdmin));
-
-			if (user.Role.Equals(Role.Manager))
-				return RedirectToAction(nameof(Manager), new { user.ClientId });
-
-			if (user.Role.Equals(Role.Admin))
-				return RedirectToAction(nameof(Admin), new { user.ClientId });
-
-			if (user.Role.Equals(Role.Clerk))
-				return RedirectToAction(nameof(Clerk), new { user.InstanceId });
-
-			return RedirectToAction(nameof(Clerk), new { user.InstanceId });
+			if (User.IsInRole(Role.Manager) || User.IsInRole(Role.Admin))
+				return RedirectToAction(nameof(Manager));
+			if (User.IsInRole(Role.Clerk))
+				return RedirectToAction(nameof(Clerk));
+			return RedirectToAction(nameof(Clerk));
 		}
-		public IActionResult SuperAdmin()
+		public async Task<IActionResult> SuperAdmin()
 		{
-			return View();
+			var result = await _dashboardInterface.SuperAdminDashboardAsync();
+			if (!result.Success)
+				TempData.SetData(AlertLevel.Warning, _tag, result.Message);
+			var model = result.Success ? result.Data : new SuperAdminDashboardViewModel();
+			return View(model);
 		}
-		public IActionResult Admin(Guid clientId)
+
+		public async Task<IActionResult> Manager()
 		{
-			return View();
+			var userData = _cookiesService.Read();
+			var result = await _dashboardInterface.ManagerDashboardAsync(userData.ClientId);
+			if (!result.Success)
+				TempData.SetData(AlertLevel.Warning, _tag, result.Message);
+			var model = result.Success ? result.Data : new ManagerDashboardViewModel();
+			return View(model);
 		}
-		public IActionResult Manager(Guid clientId)
+		public async Task<IActionResult> Clerk()
 		{
-			return View();
-		}
-		public IActionResult Clerk(Guid instanceId)
-		{
-			return View();
+			var userData = _cookiesService.Read();
+			var result = await _dashboardInterface.ClerkDashboardAsync(userData.ClientId, User.Identity.Name);
+			if (!result.Success)
+				TempData.SetData(AlertLevel.Warning, _tag, result.Message);
+			var model = result.Success ? result.Data : new ClerkDashboardViewModel();
+			return View(model);
 		}
 	}
 }
