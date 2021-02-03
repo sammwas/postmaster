@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using PosMaster.Services;
 using PosMaster.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -13,6 +14,7 @@ namespace PosMaster.Dal.Interfaces
 	{
 		Task<ReturnData<SuperAdminDashboardViewModel>> SuperAdminDashboardAsync();
 		Task<ReturnData<ManagerDashboardViewModel>> ManagerDashboardAsync(Guid clientId);
+		Task<ReturnData<ClerkDashboardViewModel>> ClerkDashboardAsync(Guid instanceId, string personnel);
 	}
 
 	public class DashboardImplementation : IDashboardInterface
@@ -25,6 +27,57 @@ namespace PosMaster.Dal.Interfaces
 			_logger = logger;
 		}
 
+		public async Task<ReturnData<ClerkDashboardViewModel>> ClerkDashboardAsync(Guid instanceId, string personnel)
+		{
+			var result = new ReturnData<ClerkDashboardViewModel> { Data = new ClerkDashboardViewModel() };
+			var tag = nameof(ClerkDashboardAsync);
+			_logger.LogInformation($"{tag} get clerk {personnel} dashboard figures for instance {instanceId}");
+			try
+			{
+				var firstWeekDay = Helpers.FirstDayOfWeek();
+				var lastWeekDay = firstWeekDay.AddDays(6);
+				var data = new ClerkDashboardViewModel
+				{
+					TodayExpenses = await _context.Expenses
+					.Where(c => c.InstanceId.Equals(instanceId) && c.Personnel.Equals(personnel)
+					  && c.DateCreated.Date.Equals(DateTime.Now.Date)).SumAsync(c => c.Amount),
+					TodayTotalExpenses = await _context.Expenses
+					.Where(c => c.InstanceId.Equals(instanceId)
+					  && c.DateCreated.Date.Equals(DateTime.Now.Date)).SumAsync(c => c.Amount),
+					TodaySales = await _context.ReceiptLineItems
+					.Where(c => c.InstanceId.Equals(instanceId) && c.Personnel.Equals(personnel)
+					  && c.DateCreated.Date.Equals(DateTime.Now.Date)).SumAsync(c => c.Amount),
+					TodayTotalSales = await _context.ReceiptLineItems
+					.Where(c => c.InstanceId.Equals(instanceId)
+					  && c.DateCreated.Date.Equals(DateTime.Now.Date)).SumAsync(c => c.Amount),
+					WeeklySales = await _context.ReceiptLineItems
+					.Where(c => c.InstanceId.Equals(instanceId) && c.Personnel.Equals(personnel)
+					  && c.DateCreated.Date >= firstWeekDay.Date && c.DateCreated <= lastWeekDay.Date).SumAsync(c => c.Amount),
+					WeeklyTotalSales = await _context.ReceiptLineItems
+					.Where(c => c.InstanceId.Equals(instanceId)
+					  && c.DateCreated.Date >= firstWeekDay.Date && c.DateCreated <= lastWeekDay.Date).SumAsync(c => c.Amount),
+					MonthlySales = await _context.ReceiptLineItems
+					.Where(c => c.InstanceId.Equals(instanceId) && c.Personnel.Equals(personnel)
+					&& c.DateCreated.Date >= Helpers.firstDayOfMonth.Date && c.DateCreated <= Helpers.lastDayOfMonth.Date).SumAsync(c => c.Amount),
+					MonthlyTotalSales = await _context.ReceiptLineItems.Where(c => c.InstanceId.Equals(instanceId)
+					&& c.DateCreated.Date >= Helpers.firstDayOfMonth.Date && c.DateCreated <= Helpers.lastDayOfMonth.Date).SumAsync(c => c.Amount)
+				};
+				result.Success = true;
+				result.Message = "Found";
+				result.Data = data;
+				_logger.LogInformation($"{tag} clerk {personnel} dashboard {result.Message} : today sales  {data.TodaySales}");
+				return result;
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex);
+				result.ErrorMessage = ex.Message;
+				result.Message = "Error occured";
+				_logger.LogError($"{tag} {result.Message} : {ex}");
+				return result;
+			}
+		}
+
 		public async Task<ReturnData<ManagerDashboardViewModel>> ManagerDashboardAsync(Guid clientId)
 		{
 			var result = new ReturnData<ManagerDashboardViewModel> { Data = new ManagerDashboardViewModel() };
@@ -32,11 +85,7 @@ namespace PosMaster.Dal.Interfaces
 			_logger.LogInformation($"{tag} get manager dashboard figures");
 			try
 			{
-				var firstDayOfMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
-				var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
-				var dayOfWeek = CultureInfo.CurrentCulture.DateTimeFormat.FirstDayOfWeek;
-				int delta = dayOfWeek - DateTime.Now.DayOfWeek;
-				var firstWeekDay = DateTime.Now.AddDays(delta);
+				var firstWeekDay = Helpers.FirstDayOfWeek();
 				var lastWeekDay = firstWeekDay.AddDays(6);
 				var data = new ManagerDashboardViewModel
 				{
@@ -45,7 +94,7 @@ namespace PosMaster.Dal.Interfaces
 					WeeklySales = await _context.ReceiptLineItems.Where(c => c.ClientId.Equals(clientId)
 					  && c.DateCreated.Date >= firstWeekDay.Date && c.DateCreated <= lastWeekDay.Date).SumAsync(c => c.Amount),
 					MonthlySales = await _context.ReceiptLineItems.Where(c => c.ClientId.Equals(clientId)
-					&& c.DateCreated.Date >= firstDayOfMonth.Date && c.DateCreated <= lastDayOfMonth.Date).SumAsync(c => c.Amount),
+					&& c.DateCreated.Date >= Helpers.firstDayOfMonth.Date && c.DateCreated <= Helpers.lastDayOfMonth.Date).SumAsync(c => c.Amount),
 					Products = await _context.Products.CountAsync(p => p.ClientId.Equals(clientId)),
 					TotalStockValue = await _context.Products.Where(p => p.ClientId.Equals(clientId)).SumAsync(p => p.TotalValue),
 					TotalActualProfit = await _context.ReceiptLineItems.Where(p => p.ClientId.Equals(clientId)).SumAsync(r => r.ActualProfit),

@@ -63,11 +63,7 @@ namespace PosMaster.Dal
 				var realPwd = Constants.SuperAdminPassword;
 				var createPowerUser = await userManager.CreateAsync(poweruser, realPwd);
 				if (createPowerUser.Succeeded)
-				{
-					await userManager.AddToRoleAsync(poweruser, Role.Manager);
-					await userManager.AddToRoleAsync(poweruser, Role.Admin);
 					await userManager.AddToRoleAsync(poweruser, Role.SuperAdmin);
-				}
 			}
 
 			if (!context.SystemSettings.Any())
