@@ -41,6 +41,8 @@ namespace PosMaster
 			services.AddScoped<IExpenseInterface, ExpenseImplementation>();
 			services.AddScoped<ICustomerInterface, CustomerImplementation>();
 			services.AddScoped<ISupplierInterface, SupplierImplementation>();
+			services.AddScoped<IDashboardInterface, DashboardImplementation>();
+			services.AddScoped<IReportingInterface, ReportingImplementation>();
 			services.AddScoped<IMasterDataInterface, MasterDataImplementation>();
 
 			var server = Configuration["Database:Server"];
