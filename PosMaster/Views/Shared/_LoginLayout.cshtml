@@ -15,6 +15,7 @@
 	<link rel="stylesheet" href="~/plugins/icheck-bootstrap/icheck-bootstrap.min.css">
 	<link rel="stylesheet" href="~/dist/css/adminlte.min.css">
 	<link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+	<link href="~/lib/toastr/toastr.min.css" rel="stylesheet">
 </head>
 <body class="hold-transition login-page">
 	<div class="login-box">
@@ -35,5 +36,23 @@
 	<script src="~/plugins/jquery/jquery.min.js"></script>
 	<script src="~/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
 	<script src="~/dist/js/adminlte.min.js"></script>
+	<script src="~/lib/toastr/toastr.min.js"></script>
+	<script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+	<script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+	<script>
+    $(document).ready(function () {
+    var message = '@TempData["Message"]';
+    var title = '@TempData["Title"]';
+    var type = '@TempData["Type"]';
+    if (message.length > 0) {
+        if (type === 'Success')
+            toastr.success(message, title);
+        else if (type === 'Error')
+            toastr.error(message, title);
+        else
+            toastr.warning(message, title);
+        }
+  });
+	</script>
 </body>
 </html>
