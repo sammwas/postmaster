@@ -18,6 +18,7 @@ namespace PosMaster.Dal.Interfaces
 		Task<ReturnData<List<UserViewModel>>> ByInstanceIdAsync(Guid instanceId);
 		Task<ReturnData<UserViewModel>> UpdateAsync(UserViewModel model);
 		Task<ReturnData<string>> ConfirmEmailAsync(string userId, string personnel);
+		Task<ReturnData<string>> UpdateImageAsync(UploadImageViewModel model);
 	}
 	public class UserInterface : IUserInterface
 	{
@@ -251,6 +252,40 @@ namespace PosMaster.Dal.Interfaces
 				result.Success = true;
 				result.Message = "Updated";
 				_logger.LogInformation($"{tag} update user details {model.UserId} {result.Message}");
+				return result;
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex);
+				result.ErrorMessage = ex.Message;
+				result.Message = "Error occured";
+				_logger.LogError($"{tag} {result.Message} : {ex}");
+				return result;
+			}
+		}
+
+		public async Task<ReturnData<string>> UpdateImageAsync(UploadImageViewModel model)
+		{
+			var result = new ReturnData<string>();
+			var tag = nameof(UpdateImageAsync);
+			_logger.LogInformation($"{tag} update user {model.UserId} profile image");
+			try
+			{
+				var user = await _context.Users.FirstOrDefaultAsync(u => u.Id.Equals(model.UserId));
+				if (user == null)
+				{
+					result.Message = "Not Found";
+					_logger.LogInformation($"{tag} update image for {model.UserId} {result.Message}");
+					return result;
+				}
+				var prevImage = user.ImagePath;
+				user.ImagePath = model.CurrentImage;
+				user.DateLastModified = DateTime.Now;
+				await _context.SaveChangesAsync();
+				result.Data = prevImage;
+				result.Success = true;
+				result.Message = "Updated";
+				_logger.LogInformation($"{tag} update image for {model.UserId} {result.Message}");
 				return result;
 			}
 			catch (Exception ex)

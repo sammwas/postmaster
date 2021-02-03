@@ -20,15 +20,15 @@
 	<div class="card-header">
 		<h3 class="card-title">@ViewData["Title"]</h3>
 	</div>
-	<form role="form" method="post" autocomplete="off">
-		<div asp-validation-summary="All" class="text-danger"></div>
-		<input asp-for="Id" />
-		<input asp-for="UserId" type="hidden" />
-		<input asp-for="EmailConfirmed" type="hidden" />
-		<input asp-for="Code" value="@userData.ClientCode" type="hidden" />
-		<input asp-for="IsEditMode" />
-		<div class="row">
-			<div class="col-md-8">
+	<div class="row">
+		<div class="col-md-8">
+			<form role="form" method="post" autocomplete="off">
+				<div asp-validation-summary="All" class="text-danger"></div>
+				<input asp-for="Id" />
+				<input asp-for="UserId" type="hidden" />
+				<input asp-for="EmailConfirmed" type="hidden" />
+				<input asp-for="Code" value="@userData.ClientCode" type="hidden" />
+				<input asp-for="IsEditMode" />
 				<div class="card-body">
 					<div class="row">
 						<div class="col-md-6">
@@ -157,37 +157,56 @@
 				<div class="card-footer">
 					<button type="submit" class="btn btn-primary">Submit</button>
 				</div>
-			</div>
-			<div class="col-md-4">
-				<div class="card">
-					<div class="card-body">
-						<h4>Options</h4>
-						@if (!Model.IsEditMode)
-						{
+
+			</form>
+		</div>
+		<div class="col-md-4">
+			<div class="card">
+				<div class="card-body">
+					<h4>Options</h4>
+					@if (!Model.IsEditMode)
+					{
+						<div>
+							<p class="alert alert-info">
+								<i class="fa fa-info-circle fa-2x"></i><br /> Provide a valid email. Confirmation link will be sent to email.
+								<br />Upon email confirmation, the user will be able to set account password.
+							</p>
+						</div>
+					}
+					else
+					{
+						<div class="row">
+							@if (!string.IsNullOrEmpty(Model.ImagePath))
+							{
+								<img src="~/@Model.ImagePath" alt="@Model.FirstName" />
+							}
 							<div>
-								<p class="alert alert-info">
-									<i class="fa fa-info-circle fa-2x"></i><br /> Provide a valid email. Confirmation link will be sent to email.
-									<br />Upon email confirmation, the user will be able to set account password.
-								</p>
+								<form role="form" method="post" autocomplete="off" asp-action="Upload" enctype="multipart/form-data">
+									<input type="hidden" name="UserId" value="@Model.UserId" />
+									<input type="hidden" name="CurrentImage" value="@Model.ImagePath" />
+									<div class="form-group">
+										<label for="userInputFile">Profile Image</label>
+										<div class="input-group">
+											<div class="custom-file">
+												<input type="file" required class="custom-file-input" accept="image/*" name="File" id="userInputFile">
+												<label class="custom-file-label" for="userInputFile">Choose file</label>
+											</div>
+											<div class="input-group-append">
+												<button type="submit" class="input-group-text bg-primary">Upload</button>
+											</div>
+										</div>
+									</div>
+								</form>
 							</div>
-						}
-						else
-						{
-							<div class="row">
-								@if (!string.IsNullOrEmpty(Model.ImagePath))
-								{
-									<img src="~/@Model.ImagePath" alt="@Model.FullName" />
-								}
-								<p><a asp-route-id="@Model.UserId" asp-action="ResetPassword">Change Account Password</a></p>
-								@if (!Model.EmailConfirmed)
-								{
-									<a asp-route-id="@Model.UserId" asp-action="ResendConfirmLink">Resend Email Confirmation Link</a>
-								}
-							</div>
-						}
-					</div>
+							<p><a asp-route-id="@Model.UserId" asp-action="ResetPassword">Change Account Password</a></p>
+							@if (!Model.EmailConfirmed)
+							{
+								<a asp-route-id="@Model.UserId" asp-action="ResendConfirmLink">Resend Email Confirmation Link</a>
+							}
+						</div>
+					}
 				</div>
 			</div>
 		</div>
-	</form>
+	</div>
 </div>
