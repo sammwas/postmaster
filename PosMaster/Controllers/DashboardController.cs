@@ -2,6 +2,9 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using PosMaster.Dal;
+using PosMaster.Dal.Interfaces;
+using PosMaster.Extensions;
+using PosMaster.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,10 +15,13 @@ namespace PosMaster.Controllers
 	[Authorize]
 	public class DashboardController : Controller
 	{
-		private UserManager<User> _userManager;
-		public DashboardController(UserManager<User> userManager)
+		private readonly UserManager<User> _userManager;
+		private readonly IDashboardInterface _dashboardInterface;
+		private readonly string _tag = "Dashboard";
+		public DashboardController(UserManager<User> userManager, IDashboardInterface dashboardInterface)
 		{
 			_userManager = userManager;
+			_dashboardInterface = dashboardInterface;
 		}
 		public async Task<IActionResult> Index()
 		{
@@ -37,17 +43,25 @@ namespace PosMaster.Controllers
 
 			return RedirectToAction(nameof(Clerk), new { user.InstanceId });
 		}
-		public IActionResult SuperAdmin()
+		public async Task<IActionResult> SuperAdmin()
 		{
-			return View();
+			var result = await _dashboardInterface.SuperAdminDashboardAsync();
+			if (!result.Success)
+				TempData.SetData(AlertLevel.Warning, _tag, result.Message);
+			var model = result.Success ? result.Data : new SuperAdminDashboardViewModel();
+			return View(model);
 		}
 		public IActionResult Admin(Guid clientId)
 		{
 			return View();
 		}
-		public IActionResult Manager(Guid clientId)
+		public async Task<IActionResult> Manager(Guid clientId)
 		{
-			return View();
+			var result = await _dashboardInterface.ManagerDashboardAsync(clientId);
+			if (!result.Success)
+				TempData.SetData(AlertLevel.Warning, _tag, result.Message);
+			var model = result.Success ? result.Data : new ManagerDashboardViewModel();
+			return View(model);
 		}
 		public IActionResult Clerk(Guid instanceId)
 		{

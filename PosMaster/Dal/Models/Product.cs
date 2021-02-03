@@ -16,5 +16,6 @@ namespace PosMaster.Dal
 		public string UnitOfMeasure { get; set; }
 		public decimal TaxRate { get; set; }
 		public bool IsTaxable => TaxRate > 0;
+		public decimal TotalValue => AvailableQuantity * SellingPrice;
 	}
 }
