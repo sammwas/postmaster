@@ -13,6 +13,7 @@ namespace PosMaster.Dal.Interfaces
 		Task<ReturnData<Supplier>> EditAsync(SupplierViewModel model);
 		Task<ReturnData<List<Supplier>>> AllAsync();
 		Task<ReturnData<List<Supplier>>> ByClientIdAsync(Guid clientId);
+		Task<ReturnData<List<Supplier>>> ByInstanceIdAsync(Guid instanceId);
 		Task<ReturnData<Supplier>> ByIdAsync(Guid id);
 	}
 
@@ -79,7 +80,33 @@ namespace PosMaster.Dal.Interfaces
 				return result;
 			}
 		}
-
+		public async Task<ReturnData<List<Supplier>>> ByInstanceIdAsync(Guid instanceId)
+		{
+			var result = new ReturnData<List<Supplier>> { Data = new List<Supplier>() };
+			var tag = nameof(ByClientIdAsync);
+			_logger.LogInformation($"{tag} get suppliers for instance {instanceId}");
+			try
+			{
+				var data = await _context.Suppliers
+					.Where(c => c.InstanceId.Equals(instanceId))
+					.OrderByDescending(c => c.DateCreated)
+					.ToListAsync();
+				result.Success = data.Any();
+				result.Message = result.Success ? "Found" : "Not Found";
+				if (result.Success)
+					result.Data = data;
+				_logger.LogInformation($"{tag} found {data.Count} suppliers");
+				return result;
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex);
+				result.ErrorMessage = ex.Message;
+				result.Message = "Error occured";
+				_logger.LogError($"{tag} {result.Message} : {ex}");
+				return result;
+			}
+		}
 		public async Task<ReturnData<Supplier>> ByIdAsync(Guid id)
 		{
 			var result = new ReturnData<Supplier> { Data = new Supplier() };

@@ -40,6 +40,7 @@ namespace PosMaster.Controllers
                 return View(model);
             }
             model.IsWalkIn = true;
+            model.Personnel = User.Identity.Name;
             var result = await _productInterface.ProductsSaleAsync(model);
             TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, title, result.Message);
             if (!result.Success)

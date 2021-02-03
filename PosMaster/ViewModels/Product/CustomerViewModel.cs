@@ -26,6 +26,7 @@ namespace PosMaster.ViewModels
 			Website = customer.Website;
 			Status = customer.Status;
 			IsEditMode = true;
+			CreditLimit = customer.CreditLimit;
 		}
 
 		[Required]

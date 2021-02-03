@@ -121,7 +121,7 @@ namespace PosMaster.Dal.Interfaces
 				result.Message = result.Success ? "Found" : "Not Found";
 				if (result.Success)
 					result.Data = data;
-				_logger.LogInformation($"{tag} found {data.Count} products");
+				_logger.LogInformation($"{tag} found {data.Count} customers");
 				return result;
 			}
 			catch (Exception ex)
@@ -164,6 +164,7 @@ namespace PosMaster.Dal.Interfaces
 					dbCustomer.DateLastModified = DateTime.Now;
 					dbCustomer.Notes = model.Notes;
 					dbCustomer.Status = model.Status;
+					dbCustomer.CreditLimit = model.CreditLimit;
 					await _context.SaveChangesAsync();
 					result.Success = true;
 					result.Message = "Updated";
@@ -184,7 +185,10 @@ namespace PosMaster.Dal.Interfaces
 					PostalAddress = model.PostalAddress,
 					Location = model.Location,
 					Town = model.Town,
-					Website = model.Website
+					Website = model.Website,
+					FirstName = model.FirstName,
+					LastName = model.LastName,
+					CreditLimit = model.CreditLimit
 				};
 				_context.Customers.Add(Customer);
 				await _context.SaveChangesAsync();

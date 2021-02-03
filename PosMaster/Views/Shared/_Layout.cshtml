@@ -239,7 +239,7 @@
 									</a>
 								</li>
 								<li class="nav-item">
-									<a class="nav-link">
+									<a asp-controller="Customers" asp-action="ByClientId" asp-route-clientId="@userData.ClientId" class="nav-link">
 										<i class="far fa-circle nav-icon"></i>
 										<p>Customers</p>
 									</a>
@@ -373,6 +373,12 @@
 									<a asp-controller="Products" asp-action="ProductStockAdjustment" asp-route-clientId="@userData.ClientId" class="nav-link">
 										<i class="far fa-circle nav-icon"></i>
 										<p>Stock Adjustment</p>
+									</a>
+								</li>
+								<li class="nav-item">
+									<a asp-controller="Suppliers" asp-action="ByClientId" asp-route-clientId="@userData.ClientId" class="nav-link">
+										<i class="far fa-circle nav-icon"></i>
+										<p>Suppliers</p>
 									</a>
 								</li>
 							</ul>

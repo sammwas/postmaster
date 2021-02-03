@@ -112,7 +112,7 @@ namespace PosMaster.Controllers
 			{
 				Status = EntityStatus.Active,
 				ClientId = model.ClientId,
-				InstanceId = model.Id,
+				InstanceId = model.InstanceId,
 				Role = model.Role,
 				Personnel = User.Identity.Name,
 				IdNumber = model.IdNumber,

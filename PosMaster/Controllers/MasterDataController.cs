@@ -117,10 +117,8 @@ namespace PosMaster.Controllers
 		{
 			var result = await _masterDataInterface.ExpenseTypesAsync(clientId);
 			if (!result.Success)
-			{
 				TempData.SetData(AlertLevel.Warning, "Expense Types", result.Message);
-				return View();
-			}
+			
 			return View(result.Data);
 		}
 		public async Task<IActionResult> EditExpenseType(Guid? id)
