@@ -39,8 +39,9 @@ namespace PosMaster.Controllers
 			_cookiesService = cookiesService;
 		}
 
-		public IActionResult Index()
+		public IActionResult Index(string returnUrl = null)
 		{
+			ViewData["ReturnUrl"] = returnUrl;
 			return View();
 		}
 

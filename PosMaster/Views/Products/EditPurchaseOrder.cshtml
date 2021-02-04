@@ -1,0 +1,106 @@
+﻿@inject IProductInterface _productInterface;
+@inject ISupplierInterface _supplierInterface;
+@inject ICookiesService _cookies;
+@model PoViewModel
+@{
+	ViewData["Active"] = "Products";
+	ViewData["Title"] = $"Add Purchase Order";
+	var userData = _cookies.Read();
+	var suppliersRes = await _supplierInterface.ByClientIdAsync(userData.ClientId);
+	var suppliers = suppliersRes.Data;
+	var productsRes = User.IsInRole(Role.Clerk) ?
+		await _productInterface.ByInstanceIdAsync(userData.InstanceId)
+		: await _productInterface.ByClientIdAsync(userData.ClientId);
+	var products = productsRes.Data;
+}
+<div class="card card-primary">
+	<div class="card-header">
+		<h3 class="card-title">@ViewData["Title"]</h3>
+	</div>
+	<div class="row">
+		<div class="col-md-8">
+			<form role="form" method="post" autocomplete="off">
+				<div asp-validation-summary="All" class="text-danger"></div>
+				<input asp-for="Id" />
+				<input asp-for="Code" value="@userData.ClientCode" type="hidden" />
+				<input asp-for="IsEditMode" />
+				<div class="card-body">
+					<div class="col-12">
+						<div class="form-group">
+							<label asp-for="SupplierId"></label>
+							<select class="form-control select2" asp-for="SupplierId" style="width: 100%;">
+								<option value="">--Select Supplier--</option>
+								@foreach (var item in suppliers)
+								{
+									<option value="@item.Id" title="@item.Notes">@item.Code - @item.Name</option>
+								}
+							</select>
+							<span asp-validation-for="SupplierId" class="text-danger"></span>
+						</div>
+
+					</div>
+					<div class="col-12">
+						<div class="form-group">
+							<label asp-for="Name"></label>
+							<input asp-for="Name" class="form-control" placeholder="P.O @userData.ClientCode">
+							<span asp-validation-for="Name" class="text-danger"></span>
+						</div>
+					</div>
+					<div class="col-12">
+						<div class="form-group">
+							<label>Select Product</label>
+							<select class="form-control select2" style="width: 100%;">
+								<option value="">--Select Product--</option>
+								@foreach (var item in products)
+								{
+									<option value="@item" title="@item.Code - @item.Name">@item.Code - @item.Name  (Qty @item.AvailableQuantity)</option>
+								}
+							</select>
+						</div>
+					</div>
+					<div class="col-12 table-responsive">
+						<label>P.O Products</label>
+						<table class="table table-striped">
+							<thead>
+								<tr>
+									<th>#</th>
+									<th>Product</th>
+									<th>Quantity</th>
+									<th>Order Price</th>
+									<th>Notes</th>
+								</tr>
+							</thead>
+							<tbody>
+							</tbody>
+						</table>
+						<input asp-for="ProductsItemsListStr" type="hidden">
+						<span asp-validation-for="ProductsItemsListStr" class="text-danger"></span>
+					</div>
+					<div class="col-12">
+						<div class="form-group">
+							<label asp-for="Notes"></label>
+							<textarea asp-for="Notes" class="form-control" rows="3" placeholder="Notes"></textarea>
+						</div>
+					</div>
+				</div>
+				<div class="card-footer">
+					<button type="submit" class="btn btn-primary">Submit</button>
+				</div>
+
+			</form>
+		</div>
+		<div class="col-md-4">
+			<div class="card">
+				<div class="card-body">
+					<h4>Add Product</h4>
+					<div>
+						<p class="alert alert-info">
+							<i class="fa fa-info-circle fa-2x"></i><br /> Select product to add to P.O line items.
+							<br />You can modify order price, quantity and note
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

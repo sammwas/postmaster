@@ -10,6 +10,7 @@ namespace PosMaster.ViewModels
 		[Required]
 		[Display(Name = "Supplier")]
 		public string SupplierId { get; set; }
+		[Display(Name = "Products")]
 		public string ProductsItemsListStr { get; set; }
 	}
 }

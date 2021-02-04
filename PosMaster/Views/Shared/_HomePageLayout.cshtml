@@ -29,16 +29,16 @@
 				</li>
 			</ul>
 			<ul class="navbar-nav ml-auto">
-				<li class="nav-item">
-					<a class="nav-link" data-widget="fullscreen" href="#" role="button">
-						<i class="fas fa-expand-arrows-alt"></i>
-					</a>
-				</li>
+				@*<li class="nav-item">
+						<a class="nav-link" data-widget="fullscreen" href="#" role="button">
+							<i class="fas fa-expand-arrows-alt"></i>
+						</a>
+					</li>*@
 				@if (!_signInManager.IsSignedIn(User))
 				{
 					<li class="nav-item">
 						<a class="nav-link btn btn-primary" asp-controller="Home"
-						   asp-action="Login" role="button">
+						   asp-action="Login" asp-route-returnUrl="@ViewData["ReturnUrl"]" role="button">
 							<i class="fas fa-user"></i>
 							Login to Account
 						</a>
@@ -47,10 +47,10 @@
 				else
 				{
 					<li class="nav-item">
-						<a class="nav-link" asp-controller="Home"
+						<a class="nav-link btn btn-secondary" asp-controller="Home"
 						   asp-action="Logout" role="button">
 							<i class="fas fa-sign-out"></i>
-					Logout
+							Logout
 						</a>
 					</li>
 				}

@@ -157,5 +157,11 @@ namespace PosMaster.Controllers
 				TempData.SetData(AlertLevel.Warning, "Purchase Orders", result.Message);
 			return View(result.Data);
 		}
+
+		public IActionResult EditPurchaseOrder()
+		{
+			return View();
+		}
+
 	}
 }
