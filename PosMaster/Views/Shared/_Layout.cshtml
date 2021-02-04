@@ -5,6 +5,7 @@
 	var settings = settingRes.Data;
 	var userData = _cookies.Read();
 	var firstChar = userData.FirstName.ElementAtOrDefault(0);
+	var firstDayOfWeek = Helpers.FirstDayOfWeek().ToString("dd-MMM-yyyy");
 }
 <!DOCTYPE html>
 <html>
@@ -24,6 +25,8 @@
 	<link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
 	<link href="~/lib/toastr/toastr.min.css" rel="stylesheet">
 	<link href="~/css/site.css" rel="stylesheet">
+	<link rel="stylesheet" href="~/plugins/summernote/summernote-bs4.min.css">
+
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
 	<div class="wrapper">
@@ -99,7 +102,7 @@
 								</li>
 								<li class="nav-item">
 									<a asp-controller="PointOfSale" asp-action="Receipts"
-									   asp-route-dtFrom="@Helpers.FirstDayOfWeek().ToString("dd-MMM-yyyy")" asp-route-dtTo="@DateTime.Now.ToString("dd-MMM-yyyy")" class="nav-link">
+									   asp-route-dtFrom="@firstDayOfWeek" asp-route-dtTo="@DateTime.Now.ToString("dd-MMM-yyyy")" class="nav-link">
 										<i class="far fa-circle nav-icon"></i>
 										<p>Receipts</p>
 									</a>
@@ -237,7 +240,7 @@
 								</li>
 								<li class="nav-item">
 									<a asp-controller="Products" asp-action="PurchaseOrders"
-									   asp-route-dtFrom="@Helpers.FirstDayOfWeek().ToString("dd-MMM-yyyy")" asp-route-dtTo="@DateTime.Now.ToString("dd-MMM-yyyy")" class="nav-link">
+									   asp-route-dtFrom="@firstDayOfWeek" asp-route-dtTo="@DateTime.Now.ToString("dd-MMM-yyyy")" class="nav-link">
 										<i class="far fa-circle nav-icon"></i>
 										<p>Purchase Orders</p>
 									</a>
@@ -268,7 +271,7 @@
 								</a>
 								<ul class="nav nav-treeview">
 									<li class="nav-item">
-										<a asp-controller="Reports" asp-action="SalesReport" asp-route-dtFrom="@Helpers.FirstDayOfWeek().ToString("dd-MMM-yyyy")" asp-route-dtTo="@DateTime.Now.ToString("dd-MMM-yyyy")" class="nav-link">
+										<a asp-controller="Reports" asp-action="SalesReport" asp-route-dtFrom="@firstDayOfWeek" asp-route-dtTo="@DateTime.Now.ToString("dd-MMM-yyyy")" class="nav-link">
 											<i class="far fa-circle nav-icon"></i>
 											<p>Weekly Report</p>
 										</a>
@@ -316,6 +319,15 @@
 										<p>Test Email</p>
 									</a>
 								</li>
+								@if (User.IsInRole(Role.SuperAdmin))
+								{
+									<li class="nav-item">
+										<a asp-controller="Settings" asp-action="TermsAndPrivacy" class="nav-link">
+											<i class="far fa-circle nav-icon"></i>
+											<p>Terms &amp; Privacy</p>
+										</a>
+									</li>
+								}
 							</ul>
 						</li>
 					</ul>
@@ -340,18 +352,14 @@
 					</div>
 				</div>
 			</div>
-			<!-- /.content-header -->
-			<!-- Main content -->
 			<section class="content">
 				<div class="container-fluid">
 					<main role="main" class="pb-3">
 						@RenderBody()
 					</main>
-				</div><!-- /.container-fluid -->
+				</div>
 			</section>
-			<!-- /.content -->
 		</div>
-		<!-- /.content-wrapper -->
 		<footer class="main-footer">
 			<strong>Copyright &copy; @DateTime.Now.Year <a asp-controller="Dashboard" asp-action="Index">@settings.Name</a>.</strong>
 			All rights reserved.
@@ -380,10 +388,14 @@
 	<script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
 	<script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
 	<script src="~/plugins/bs-custom-file-input/bs-custom-file-input.min.js"></script>
+	<script src="~/plugins/summernote/summernote-bs4.min.js"></script>
+
 	<script>
 		$(function () {
 			bsCustomFileInput.init();
 		});
+
+		$('.rich-text').summernote()
     $(document).ready(function () {
     var opt = "@ViewData["Active"]";
     $("#menu" + opt).addClass("active");

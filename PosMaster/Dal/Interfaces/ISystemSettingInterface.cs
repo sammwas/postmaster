@@ -14,6 +14,8 @@ namespace PosMaster.Dal.Interfaces
 
 		Task<ReturnData<SystemSettingMiniViewModel>> ReadAsync();
 		Task<ReturnData<SystemSettingMiniViewModel>> UpdateAsync(SystemSettingMiniViewModel model, string personnel);
+		Task<ReturnData<TermsAndPrivacyViewModel>> TermsAndPrivacyAsync();
+		Task<ReturnData<TermsAndPrivacyViewModel>> UpdateTermsAndPrivacyAsync(TermsAndPrivacyViewModel model, string personnel);
 	}
 
 	public class SystemSettingImplementation : ISystemSettingInterface
@@ -45,7 +47,7 @@ namespace PosMaster.Dal.Interfaces
 					_logger.LogInformation($"{tag} {result.Message}");
 					return result;
 				}
-				var dbSettings = await _context.SystemSettings.Take(1).FirstOrDefaultAsync();
+				var dbSettings = await _context.SystemSettings.FirstOrDefaultAsync();
 				var data = dbSettings == null ? new SystemSettingMiniViewModel { Name = "PosMaster" }
 				: new SystemSettingMiniViewModel(dbSettings);
 				result.Success = true;
@@ -57,6 +59,37 @@ namespace PosMaster.Dal.Interfaces
 			}
 			catch (Exception ex)
 			{
+				Console.WriteLine(ex);
+				result.ErrorMessage = ex.Message;
+				result.Message = "Error occured";
+				_logger.LogError($"{tag} {result.Message} : {ex}");
+				return result;
+			}
+		}
+
+		public async Task<ReturnData<TermsAndPrivacyViewModel>> TermsAndPrivacyAsync()
+		{
+			var result = new ReturnData<TermsAndPrivacyViewModel> { Data = new TermsAndPrivacyViewModel() };
+			var tag = nameof(TermsAndPrivacyAsync);
+			_logger.LogInformation($"{tag} get system terms and conditions");
+			try
+			{
+				var tp = await _context.SystemSettings
+					.Select(s => new TermsAndPrivacyViewModel
+					{
+						Terms = s.TermsAndConditions,
+						Privacy = s.Privacy
+					})
+					.FirstOrDefaultAsync();
+				result.Success = tp != null;
+				if (result.Success)
+					result.Data = tp;
+				result.Message = result.Success ? "Found" : "Not Found";
+				return result;
+			}
+			catch (Exception ex)
+			{
+
 				Console.WriteLine(ex);
 				result.ErrorMessage = ex.Message;
 				result.Message = "Error occured";
@@ -95,6 +128,42 @@ namespace PosMaster.Dal.Interfaces
 			}
 			catch (Exception ex)
 			{
+				Console.WriteLine(ex);
+				result.ErrorMessage = ex.Message;
+				result.Message = "Error occured";
+				_logger.LogError($"{tag} {result.Message} : {ex}");
+				return result;
+			}
+		}
+
+		public async Task<ReturnData<TermsAndPrivacyViewModel>> UpdateTermsAndPrivacyAsync(TermsAndPrivacyViewModel model, string personnel)
+		{
+			var result = new ReturnData<TermsAndPrivacyViewModel> { Data = new TermsAndPrivacyViewModel() };
+			var tag = nameof(UpdateTermsAndPrivacyAsync);
+			_logger.LogInformation($"{tag} update system terms and conditions by {personnel}");
+			try
+			{
+				var setting = await _context.SystemSettings.FirstOrDefaultAsync();
+				if (setting == null)
+				{
+					result.Message = "Not Found";
+					return result;
+				}
+
+				setting.TermsAndConditions = model.Terms;
+				setting.Privacy = model.Privacy;
+				setting.LastModifiedBy = personnel;
+				setting.DateLastModified = DateTime.Now;
+				await _context.SaveChangesAsync();
+				result.Success = true;
+				if (result.Success)
+					result.Data = model;
+				result.Message = "Updated";
+				return result;
+			}
+			catch (Exception ex)
+			{
+
 				Console.WriteLine(ex);
 				result.ErrorMessage = ex.Message;
 				result.Message = "Error occured";
