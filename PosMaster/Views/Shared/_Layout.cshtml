@@ -98,7 +98,8 @@
 									</a>
 								</li>
 								<li class="nav-item">
-									<a asp-controller="PointOfSale" asp-action="Receipts" class="nav-link">
+									<a asp-controller="PointOfSale" asp-action="Receipts"
+									   asp-route-dtFrom="@Helpers.FirstDayOfWeek().ToString("dd-MMM-yyyy")" asp-route-dtTo="@DateTime.Now.ToString("dd-MMM-yyyy")" class="nav-link">
 										<i class="far fa-circle nav-icon"></i>
 										<p>Receipts</p>
 									</a>

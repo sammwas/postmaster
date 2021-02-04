@@ -1,67 +1,104 @@
-﻿@model List<Receipt>
+﻿@inject IClientInstanceInterface _instanceInterface;
+@inject ICookiesService _cookies;
+@model List<Receipt>
 @{
-    ViewData["Active"] = "Receipts";
-    ViewData["Title"] = "Receipts";
+	ViewData["Active"] = "POS";
+	ViewData["Title"] = "Receipts";
+	var userData = _cookies.Read();
+	var instancesRes = User.IsInRole(Role.SuperAdmin) ?
+		await _instanceInterface.AllAsync()
+		: await _instanceInterface.ByClientIdAsync(userData.ClientId);
+	var instances = instancesRes.Data;
+	var instanceId = ViewData["InstanceId"]?.ToString();
+	var dateToday = DateTime.Now.ToString("dd-MMM-yyyy");
 }
 <div>
-    <!-- /.card -->
+	<div class="card">
+		<div class="row">
+			<div class="col-md-8">
+				<div class="card-header">
+					<h3 class="card-title">@ViewData["Title"] <span class="text-right"><a asp-action="Index" class="btn btn-sm btn-info">Add</a></span></h3>
+				</div>
+			</div>
+			<div class="col-md-4">
+				<p class="text-right"><strong>Total Amount: @Model.Sum(r => r.TotalAmount)</strong></p>
+			</div>
+		</div>
+		<div class="card-body">
+			<form autocomplete="off">
+				<div class="row">
+					<div class="col-md-3">
+						<div class="form-group">
+							<label>Instance</label>
+							<select class="form-control select2" name="insId" style="width: 100%;">
+								<option value="">--Select Instance--</option>
+								@foreach (var item in instances)
+								{
+									if (!string.IsNullOrEmpty(instanceId) && item.Id.ToString().Equals(instanceId))
+									{
+										<option selected="selected" value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
+									}
+									else
+									{
+										<option value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
+									}
+								}
+							</select>
+						</div>
+					</div>
+					<div class="col-md-3">
+						<div class="form-group">
+							<label>Date From</label>
+							<input type="text" name="dtFrom" class="form-control" value="@ViewData["dtFrom"]" placeholder="Date From (@dateToday)" />
+						</div>
+					</div>
+					<div class="col-md-3">
+						<div class="form-group">
+							<label>Date To</label>
+							<input type="text" name="dtTo" class="form-control" value="@ViewData["dtTo"]" placeholder="Date To (@dateToday)" />
+						</div>
+					</div>
+					<div class="col-md-3">
+						<div class="form-group">
+							<br />
+							<button type="submit" class="btn btn-primary">Submit</button>
+						</div>
+					</div>
+				</div>
+			</form>
+			<table id="dataTable" class="table table-bordered table-striped">
+				<thead>
+					<tr>
+						<th>Code</th>
+						<th>Date</th>
+						<th>Personnel</th>
+						<th>Amount</th>
+					</tr>
+				</thead>
+				<tbody>
+					@if (Model.Any())
+					{
+						@foreach (var item in Model)
+						{
+							<tr>
+								<td>@item.Code</td>
+								<td>@item.DateCreated</td>
+								<td>@item.Personnel</td>
+								<td>@item.TotalAmount</td>
+							</tr>
+						}
 
-    <div class="card">
-        <div class="row">
-            <div class="col-md-8">
-                <div class="card-header">
-                    <h3 class="card-title">@ViewData["Title"] <span class="text-right"><a asp-action="Index" class="btn btn-sm btn-info">Add</a></span></h3>
-                </div>
-            </div>
-            <div class="col-md-4">
-                @if (Model.Any())
-                {
-                    <p class="text-right"><strong>Total Amount: @Model.Sum(r => r.TotalAmount)</strong></p>
-                }
-                else
-                {
-                    <p class="text-right"><strong>Total Amount: 0.00</strong></p>
-                }
-            </div>
-        </div>
-
-        <!-- /.card-header -->
-        <div class="card-body">
-            <table id="example1" class="table table-bordered table-striped">
-                <thead>
-                    <tr>
-                        <th>Code</th>
-                        <th>Date</th>
-                        <th>Personnel</th>
-                        <th>Amount</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (Model.Any())
-                    {
-                        @foreach (var item in Model)
-                        {
-                            <tr>
-                                <td>@item.Code</td>
-                                <td>@item.DateCreated</td>
-                                <td>@item.Personnel</td>
-                                <td>@item.TotalAmount</td>
-                            </tr>
-                        }
-
-                    }
-                </tbody>
-                <tfoot>
-                    <tr>
-                        <th>Code</th>
-                        <th>Date</th>
-                        <th>Personnel</th>
-                        <th>Amount</th>
-                    </tr>
-                </tfoot>
-            </table>
-        </div>
-        <!-- /.card-body -->
-    </div>
-    <!-- /.card -->
+					}
+				</tbody>
+				<tfoot>
+					<tr>
+						<th>Code</th>
+						<th>Date</th>
+						<th>Personnel</th>
+						<th>Amount</th>
+					</tr>
+				</tfoot>
+			</table>
+		</div>
+	</div>
 </div>
