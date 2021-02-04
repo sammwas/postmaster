@@ -39,7 +39,12 @@ namespace PosMaster.Controllers
 			_cookiesService = cookiesService;
 		}
 
-		public async Task<IActionResult> Index(string returnUrl = null)
+		public IActionResult Index()
+		{
+			return View();
+		}
+
+		public async Task<IActionResult> Login(string returnUrl = null)
 		{
 			await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
 			_cookiesService.Remove();
@@ -51,7 +56,7 @@ namespace PosMaster.Controllers
 		[HttpPost]
 		[AllowAnonymous]
 		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> Index(LoginViewModel model, string returnUrl = null)
+		public async Task<IActionResult> Login(LoginViewModel model, string returnUrl = null)
 		{
 			ViewData["ReturnUrl"] = returnUrl;
 			model.IsHttps = Request.IsHttps;
@@ -166,7 +171,6 @@ namespace PosMaster.Controllers
 				return View(model);
 			}
 		}
-
 
 		[HttpGet]
 		[AllowAnonymous]
@@ -408,6 +412,11 @@ namespace PosMaster.Controllers
 		}
 
 		public IActionResult Privacy()
+		{
+			return View();
+		}
+
+		public IActionResult Terms()
 		{
 			return View();
 		}
