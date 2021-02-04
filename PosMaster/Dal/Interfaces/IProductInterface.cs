@@ -20,6 +20,7 @@ namespace PosMaster.Dal.Interfaces
 		Task<ReturnData<Receipt>> ProductsSaleAsync(ProductSaleViewModel model);
 		Task<ReturnData<List<Receipt>>> ReceiptsAsync(Guid? clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "");
 		Task<ReturnData<ProductStockAdjustmentLog>> AdjustProductStockAsync(ProductStockAdjustmentViewModel model);
+		Task<ReturnData<PurchaseOrder>> AddPurchaseOrderAsync(PoViewModel model);
 	}
 
 	public class ProductImplementation : IProductInterface
@@ -30,6 +31,68 @@ namespace PosMaster.Dal.Interfaces
 		{
 			_context = context;
 			_logger = logger;
+		}
+
+		public async Task<ReturnData<PurchaseOrder>> AddPurchaseOrderAsync(PoViewModel model)
+		{
+			var result = new ReturnData<PurchaseOrder> { Data = new PurchaseOrder() };
+			var tag = nameof(AddPurchaseOrderAsync);
+			_logger.LogInformation($"{tag} create purchase order for instance {model.InstanceId}");
+			try
+			{
+				var lineItems = string.IsNullOrEmpty(model.ProductsItemsListStr) ?
+				new List<PoGrnProductViewModel>()
+				: JsonConvert.DeserializeObject<List<PoGrnProductViewModel>>(model.ProductsItemsListStr);
+				if (!lineItems.Any())
+				{
+					result.Message = "No line items found";
+					_logger.LogWarning($"{tag} order failed  {model.InstanceId} : {result.Message}");
+					return result;
+				}
+
+				var poRef = DocumentRefNumber(Document.Po, model.ClientId);
+				var purchaseOrder = new PurchaseOrder
+				{
+					Id = Guid.NewGuid(),
+					ClientId = model.ClientId,
+					InstanceId = model.InstanceId,
+					Code = poRef,
+					Name = model.Name,
+					Notes = model.Notes,
+					SupplierId = Guid.Parse(model.SupplierId),
+					Personnel = model.Personnel
+				};
+				_context.PurchaseOrders.Add(purchaseOrder);
+				foreach (var item in lineItems)
+				{
+					var lineProduct = new PoGrnProduct
+					{
+						PurchaseOrderId = purchaseOrder.Id,
+						ProductId = item.ProductId,
+						PoNotes = item.Notes,
+						PoQuantity = item.Quantity,
+						PoUnitPrice = item.UnitPrice,
+						Personnel = model.Personnel,
+						ClientId = model.ClientId,
+						InstanceId = model.InstanceId
+					};
+					_context.PoGrnProducts.Add(lineProduct);
+				}
+				await _context.SaveChangesAsync();
+				result.Success = true;
+				result.Data = purchaseOrder;
+				result.Message = $"PO {poRef} Added";
+				_logger.LogInformation($"{tag} added {lineItems.Count} products: {result.Message}");
+				return result;
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex);
+				result.ErrorMessage = ex.Message;
+				result.Message = "Error occured";
+				_logger.LogError($"{tag} {result.Message} : {ex}");
+				return result;
+			}
 		}
 
 		public async Task<ReturnData<ProductStockAdjustmentLog>> AdjustProductStockAsync(ProductStockAdjustmentViewModel model)
