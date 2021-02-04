@@ -6,8 +6,6 @@ using PosMaster.Extensions;
 using PosMaster.Services;
 using PosMaster.ViewModels;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace PosMaster.Controllers
@@ -28,6 +26,7 @@ namespace PosMaster.Controllers
 		{
 			return View();
 		}
+
 		[HttpPost]
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> Index(ProductSaleViewModel model)
@@ -47,6 +46,7 @@ namespace PosMaster.Controllers
 				return View(model);
 			return RedirectToAction(nameof(Index));
 		}
+
 		public async Task<IActionResult> Receipts(string insId = "", string dtFrom = "", string dtTo = "", string search = "")
 		{
 			ViewData["InstanceId"] = insId;
@@ -67,13 +67,31 @@ namespace PosMaster.Controllers
 				TempData.SetData(AlertLevel.Warning, "Receipts", result.Message);
 			return View(result.Data);
 		}
-		public async Task<IActionResult> Expenses(Guid? clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "", string personnel = "")
+		public async Task<IActionResult> Expenses(string insId = "", string dtFrom = "", string dtTo = "", string search = "")
 		{
-			var result = await _expenseInterface.AllAsync(clientId, instanceId, dateFrom, dateTo, search, personnel);
+			ViewData["InstanceId"] = insId;
+			ViewData["DtFrom"] = dtFrom;
+			ViewData["DtTo"] = dtTo;
+			ViewData["Search"] = search;
+			var userData = _cookieService.Read();
+			Guid? clientId = null;
+			Guid? instanceId = null;
+			if (!User.IsInRole(Role.SuperAdmin))
+				clientId = userData.ClientId;
+			if (Guid.TryParse(insId, out var iId))
+				instanceId = iId;
+			var personnel = "";
+			if (User.IsInRole(Role.Clerk))
+			{
+				instanceId = userData.InstanceId;
+				personnel = User.Identity.Name;
+			}
+			var result = await _expenseInterface.AllAsync(clientId, instanceId, dtFrom, dtTo, search, personnel);
 			if (!result.Success)
 				TempData.SetData(AlertLevel.Warning, "Expenses", result.Message);
 			return View(result.Data);
 		}
+
 		public async Task<IActionResult> EditExpense(Guid? id)
 		{
 			if (id == null)
@@ -90,6 +108,7 @@ namespace PosMaster.Controllers
 			var model = new ExpenseViewModel(result.Data);
 			return View(model);
 		}
+
 		[HttpPost]
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> EditExpense(ExpenseViewModel model)

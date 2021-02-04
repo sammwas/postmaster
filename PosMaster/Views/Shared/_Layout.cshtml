@@ -128,7 +128,7 @@
 							<a href="#" class="nav-link">
 								<i class="nav-icon fas fa-users"></i>
 								<p>
-									Users Management
+									Users
 									<i class="right fas fa-angle-left"></i>
 								</p>
 							</a>
@@ -236,9 +236,10 @@
 									</a>
 								</li>
 								<li class="nav-item">
-									<a asp-controller="Products" asp-action="Edit" asp-route-id="" class="nav-link">
+									<a asp-controller="Products" asp-action="PurchaseOrders"
+									   asp-route-dtFrom="@Helpers.FirstDayOfWeek().ToString("dd-MMM-yyyy")" asp-route-dtTo="@DateTime.Now.ToString("dd-MMM-yyyy")" class="nav-link">
 										<i class="far fa-circle nav-icon"></i>
-										<p>Add New</p>
+										<p>Purchase Orders</p>
 									</a>
 								</li>
 								<li class="nav-item">

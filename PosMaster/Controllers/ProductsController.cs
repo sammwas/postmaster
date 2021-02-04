@@ -66,6 +66,7 @@ namespace PosMaster.Controllers
 			var model = new ProductViewModel(result.Data);
 			return View(model);
 		}
+
 		[HttpPost]
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> Edit(ProductViewModel model)
@@ -109,6 +110,7 @@ namespace PosMaster.Controllers
 			};
 			return View(model);
 		}
+
 		[HttpPost]
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> ProductStockAdjustment(ProductStockAdjustmentViewModel model)
@@ -117,8 +119,7 @@ namespace PosMaster.Controllers
 			model.ClientId = userData.ClientId;
 			model.InstanceId = userData.InstanceId;
 			model.Personnel = User.Identity.Name;
-			var option = model.IsEditMode ? "Update" : "Add";
-			var title = $"{option} Product";
+			var title = "Adjust stock";
 			if (!ModelState.IsValid)
 			{
 				var message = "Missing fields";
@@ -130,6 +131,31 @@ namespace PosMaster.Controllers
 			if (!result.Success)
 				return View(model);
 			return RedirectToAction(nameof(All));
+		}
+
+		public async Task<IActionResult> PurchaseOrders(string insId = "", string dtFrom = "", string dtTo = "", string search = "")
+		{
+			ViewData["InstanceId"] = insId;
+			ViewData["DtFrom"] = dtFrom;
+			ViewData["DtTo"] = dtTo;
+			ViewData["Search"] = search;
+			var userData = _cookieService.Read();
+			Guid? clientId = null;
+			Guid? instanceId = null;
+			if (!User.IsInRole(Role.SuperAdmin))
+				clientId = userData.ClientId;
+			if (Guid.TryParse(insId, out var iId))
+				instanceId = iId;
+			var personnel = "";
+			if (User.IsInRole(Role.Clerk))
+			{
+				instanceId = userData.InstanceId;
+				personnel = User.Identity.Name;
+			}
+			var result = await _producutInterface.PurchaseOrdersAsync(clientId, instanceId, dtFrom, dtTo, search, personnel);
+			if (!result.Success)
+				TempData.SetData(AlertLevel.Warning, "Purchase Orders", result.Message);
+			return View(result.Data);
 		}
 	}
 }
