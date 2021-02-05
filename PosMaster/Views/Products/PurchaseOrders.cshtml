@@ -1,9 +1,9 @@
 ﻿@inject IClientInstanceInterface _instanceInterface;
 @inject ICookiesService _cookies;
-@model List<Receipt>
+@model List<PurchaseOrder>
 @{
-	ViewData["Active"] = "POS";
-	ViewData["Title"] = "Receipts";
+	ViewData["Active"] = "Products";
+	ViewData["Title"] = "Purchase Orders";
 	var userData = _cookies.Read();
 	var instancesRes = User.IsInRole(Role.SuperAdmin) ?
 		await _instanceInterface.AllAsync()
@@ -15,13 +15,8 @@
 <div>
 	<div class="card">
 		<div class="row">
-			<div class="col-md-8">
-				<div class="card-header">
-					<h3 class="card-title">@ViewData["Title"] <span class="text-right"><a asp-action="Index" class="btn btn-sm btn-info">Add</a></span></h3>
-				</div>
-			</div>
-			<div class="col-md-4">
-				<p class="text-right"><strong>Total Amount: @Model.Sum(r => r.TotalAmount)</strong></p>
+			<div class="card-header">
+				<h3 class="card-title">@ViewData["Title"] <span class="text-right"><a asp-action="EditPurchaseOrder" asp-route-id="" class="btn btn-sm btn-info">Add</a></span></h3>
 			</div>
 		</div>
 		<div class="card-body">
@@ -71,8 +66,8 @@
 					<tr>
 						<th>Code</th>
 						<th>Date</th>
-						<th>Personnel</th>
-						<th>Amount</th>
+						<th>Supplier</th>
+						<th>Status</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -83,8 +78,8 @@
 							<tr>
 								<td>@item.Code</td>
 								<td>@item.DateCreated</td>
-								<td>@item.Personnel</td>
-								<td>@item.TotalAmount</td>
+								<td>@item.Supplier.Code - @item.Supplier.Name</td>
+								<td>@item.Status</td>
 							</tr>
 						}
 
@@ -94,8 +89,8 @@
 					<tr>
 						<th>Code</th>
 						<th>Date</th>
-						<th>Personnel</th>
-						<th>Amount</th>
+						<th>Supplier</th>
+						<th>Status</th>
 					</tr>
 				</tfoot>
 			</table>

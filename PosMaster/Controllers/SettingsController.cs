@@ -103,5 +103,22 @@ namespace PosMaster.Controllers
 			TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, "Test Email", result.Message);
 			return View(model);
 		}
+
+		public async Task<IActionResult> TermsAndPrivacy()
+		{
+			var tp = await _settingInterface.TermsAndPrivacyAsync();
+			return View(tp.Data);
+		}
+
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		[Authorize(Roles = "SuperAdmin")]
+		public async Task<IActionResult> TermsAndPrivacy(TermsAndPrivacyViewModel model)
+		{
+			var result = await _settingInterface.UpdateTermsAndPrivacyAsync(model, User.Identity.Name);
+			TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, "Terms and Privacy", result.Message);
+			return View(model);
+		}
+
 	}
 }

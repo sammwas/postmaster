@@ -172,6 +172,7 @@ namespace PosMaster.Dal.Interfaces
 				var supplier = new Supplier
 				{
 					Code = model.Code,
+					Name = model.Name,
 					Notes = model.Notes,
 					ClientId = model.ClientId,
 					InstanceId = model.InstanceId,

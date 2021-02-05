@@ -1,0 +1,96 @@
+﻿@inject ISystemSettingInterface _settingsInterface;
+@inject SignInManager<User> _signInManager;
+@{
+	var settingsRes = await _settingsInterface.ReadAsync();
+	var settings = settingsRes.Data;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>@settings.Name | @ViewData["Title"]</title>
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+	<link rel="stylesheet" href="~/plugins/fontawesome-free/css/all.min.css">
+	<link rel="stylesheet" href="~/dist/css/adminlte.min.css">
+</head>
+<body class="hold-transition layout-top-nav">
+	<div class="wrapper">
+		<nav class="main-header navbar navbar-expand navbar-white navbar-light">
+			<ul class="navbar-nav">
+				<li class="nav-item">
+					<a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+				</li>
+				<li class="nav-item d-none d-sm-inline-block">
+					<a asp-controller="Home" asp-action="Index" class="nav-link">Home</a>
+				</li>
+				<li class="nav-item d-none d-sm-inline-block">
+					<a href="#" class="nav-link">Contact</a>
+				</li>
+			</ul>
+			<ul class="navbar-nav ml-auto">
+				@*<li class="nav-item">
+						<a class="nav-link" data-widget="fullscreen" href="#" role="button">
+							<i class="fas fa-expand-arrows-alt"></i>
+						</a>
+					</li>*@
+				@if (!_signInManager.IsSignedIn(User))
+				{
+					<li class="nav-item">
+						<a class="nav-link btn btn-primary" asp-controller="Home"
+						   asp-action="Login" asp-route-returnUrl="@ViewData["ReturnUrl"]" role="button">
+							<i class="fas fa-user"></i>
+							Login to Account
+						</a>
+					</li>
+				}
+				else
+				{
+					<li class="nav-item">
+						<a class="nav-link btn btn-secondary" asp-controller="Home"
+						   asp-action="Logout" role="button">
+							<i class="fas fa fa-lock"></i>
+							Logout
+						</a>
+					</li>
+				}
+			</ul>
+		</nav>
+		<div class="content-wrapper">
+			<section class="content-header">
+				<div class="container-fluid">
+					<div class="row mb-2">
+						<div class="col-sm-6">
+							<h1>@ViewData["Title"]</h1>
+						</div>
+						<div class="col-sm-6">
+							<ol class="breadcrumb float-sm-right">
+								<li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
+								<li class="breadcrumb-item active">@ViewData["Title"]</li>
+							</ol>
+						</div>
+					</div>
+				</div>
+			</section>
+			<section class="content">
+				<div>
+					@RenderBody()
+				</div>
+
+			</section>
+		</div>
+		<footer class="main-footer">
+			<strong>Copyright &copy; @DateTime.Now.Year <a asp-controller="Dashboard" asp-action="Index">@settings.Name</a>.</strong>
+			All rights reserved. &nbsp;
+			<a asp-controller="Home" asp-action="Privacy">Privacy</a> &nbsp; | &nbsp;
+			<a asp-controller="Home" asp-action="Terms">Terms &amp; Conditions </a>
+			<div class="float-right d-none d-sm-inline-block">
+				<b>Version</b> @settings.Version
+			</div>
+		</footer>
+	</div>
+	<script src="~/plugins/jquery/jquery.min.js"></script>
+	<script src="~/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+	<script src="~/dist/js/adminlte.min.js"></script>
+</body>
+</html>

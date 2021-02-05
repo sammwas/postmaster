@@ -1,9 +1,9 @@
 ﻿@inject ISystemSettingInterface _settings;
 @{
 	Layout = "_HomePageLayout";
-	ViewData["Title"] = "Privacy Policy";
+	ViewData["Title"] = "Terms & Conditions";
 	var privacyRes = await _settings.TermsAndPrivacyAsync();
 }
 <div>
-	@Html.Raw(privacyRes.Data.Privacy)
+	@Html.Raw(privacyRes.Data.Terms)
 </div>
