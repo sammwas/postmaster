@@ -42,7 +42,7 @@
 					<div class="col-12">
 						<div class="form-group">
 							<label asp-for="Name"></label>
-							<input asp-for="Name" class="form-control" placeholder="P.O @userData.ClientCode">
+							<input asp-for="Name" class="form-control" placeholder="PO @userData.ClientCode">
 							<span asp-validation-for="Name" class="text-danger"></span>
 						</div>
 					</div>
@@ -53,34 +53,28 @@
 								<option value="">--Select Product--</option>
 								@foreach (var item in products)
 								{
-									<option value="@item" title="@item.Code - @item.Name">@item.Code - @item.Name  (Qty @item.AvailableQuantity)</option>
+									<option data-bp="@item.BuyingPrice" value="@item.Id" title="@item.Code - @item.Name">@item.Code - @item.Name  (Qty @item.AvailableQuantity)</option>
 								}
 							</select>
 						</div>
 					</div>
 					<div class="col-12 table-responsive">
-						<label>P.O Products</label>
+						<label>Purchase Order Products</label>
 						<table class="table table-striped">
 							<thead>
 								<tr>
 									<th>#</th>
 									<th>Product</th>
+									<th>Unit Price</th>
 									<th>Quantity</th>
-									<th>Order Price</th>
-									<th>Notes</th>
+									<th>Option</th>
 								</tr>
 							</thead>
-							<tbody>
+							<tbody id="PoListTable">
 							</tbody>
 						</table>
 						<input asp-for="ProductsItemsListStr" type="hidden">
 						<span asp-validation-for="ProductsItemsListStr" class="text-danger"></span>
-					</div>
-					<div class="col-12">
-						<div class="form-group">
-							<label asp-for="Notes"></label>
-							<textarea asp-for="Notes" class="form-control" rows="3" placeholder="Notes"></textarea>
-						</div>
 					</div>
 				</div>
 				<div class="card-footer">

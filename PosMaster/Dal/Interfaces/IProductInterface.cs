@@ -22,6 +22,7 @@ namespace PosMaster.Dal.Interfaces
 		Task<ReturnData<ProductStockAdjustmentLog>> AdjustProductStockAsync(ProductStockAdjustmentViewModel model);
 		Task<ReturnData<PurchaseOrder>> AddPurchaseOrderAsync(PoViewModel model);
 		Task<ReturnData<List<PurchaseOrder>>> PurchaseOrdersAsync(Guid? clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "", string personnel = "");
+		Task<ReturnData<PurchaseOrder>> PurchaseOrderByIdAsync(Guid id);
 	}
 
 	public class ProductImplementation : IProductInterface
@@ -450,6 +451,11 @@ namespace PosMaster.Dal.Interfaces
 			}
 		}
 
+		public Task<ReturnData<PurchaseOrder>> PurchaseOrderByIdAsync(Guid id)
+		{
+			throw new NotImplementedException();
+		}
+
 		public async Task<ReturnData<List<PurchaseOrder>>> PurchaseOrdersAsync(Guid? clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "", string personnel = "")
 		{
 			var result = new ReturnData<List<PurchaseOrder>> { Data = new List<PurchaseOrder>() };
@@ -459,6 +465,8 @@ namespace PosMaster.Dal.Interfaces
 			{
 				var dataQuery = _context.PurchaseOrders
 					.Include(r => r.Supplier)
+					.Include(r => r.PoGrnProducts)
+					//.ThenInclude(p => p.Product)
 					.AsQueryable();
 				if (clientId != null)
 					dataQuery = dataQuery.Where(r => r.ClientId.Equals(clientId.Value));

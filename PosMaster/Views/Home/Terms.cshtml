@@ -4,8 +4,6 @@
 	ViewData["Title"] = "Terms & Conditions";
 	var privacyRes = await _settings.TermsAndPrivacyAsync();
 }
-<h1>@ViewData["Title"]</h1>
-
 <div>
 	@Html.Raw(privacyRes.Data.Terms)
 </div>

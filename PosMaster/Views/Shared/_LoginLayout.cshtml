@@ -30,7 +30,11 @@
 				</div>
 			</div>
 			<hr />
-			<p class="text-center">&copy; @DateTime.Now.Year @settings.Name . All rights Reserved. <br /> <a asp-controller="Home" asp-action="Privacy" target="_blank">Privacy</a> &nbsp; | &nbsp; <a asp-controller="Home" asp-action="Terms">Terms &amp; Conditions </a>  </p>
+			<p class="text-center">
+				&copy; @DateTime.Now.Year @settings.Name . All rights Reserved. <br />
+				<a asp-controller="Home" asp-action="Privacy">Privacy</a> &nbsp; | &nbsp;
+				<a asp-controller="Home" asp-action="Terms">Terms &amp; Conditions </a>
+			</p>
 		</div>
 	</div>
 	<script src="~/plugins/jquery/jquery.min.js"></script>
