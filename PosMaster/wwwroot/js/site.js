@@ -36,20 +36,26 @@ var addItemToList = function () {
     var taxAmount = 0;
 
     if (productId === "") {
-        $("#issMsg").text("select an item first");
+        $("#issMsg").text("select an item first").css('color', 'red');
         $("#issItemId").focus();
     }
     else if (quantity === "") {
-        $("#issMsg").text("quantity is required");
+        $("#issMsg").text("quantity is required").css('color', 'red');
         $("#quantityBought").focus();
     }
     else if (unitPrice === "") {
-        $("#issMsg").text("price is required");
+        $("#issMsg").text("price is required").css('color', 'red');
         $("#issWarehouseId").focus();
     }
     else if (parseInt(quantity) > parseInt(avQuantity)) {
-        $("#issMsg").text("available quantity is " + avQuantity);
+        $("#issMsg").text("available quantity is " + avQuantity).css('color', 'red');
         $("#quantityBought").focus();
+    }
+    else if (typeof (quantity) !== 'number') {
+        $("#issMsg").text("quantity is not valid").css('color', 'red');
+    }
+    else if (typeof (unitPrice) !== 'number') {
+        $("#issMsg").text("price is not valid").css('color', 'red');
     }
     else {
         $("#issMsg").text("");
@@ -94,14 +100,13 @@ function removeListItem(index) {
     issueListItems.splice(index, 1);
     createIssueListTable();
 };
-
 $('#dateTo').datetimepicker({
     format: 'DD-MMM-yyyy'
 });
 $('#dateFrom').datetimepicker({
     format: 'DD-MMM-yyyy'
 });
-//Timepicker
 $('#timepicker').datetimepicker({
     format: 'LT'
 })
+

@@ -44,7 +44,7 @@ namespace PosMaster.Dal.Interfaces
                     dataQuery = dataQuery.Where(r => r.DateCreated.Date <= dtTo.Date);
                 if (!string.IsNullOrEmpty(search))
                     dataQuery = dataQuery.Where(r => r.Product.Code.ToLower().Contains(search.ToLower()));
-                var data = await dataQuery.OrderBy(r => r.DateCreated).ToListAsync();
+                var data = await dataQuery.OrderByDescending(r => r.DateCreated).ToListAsync();
                 result.Success = data.Any();
                 result.Message = result.Success ? "Found" : "Not Found";
                 var dates = data.Select(a => a.DateCreated.Date).Distinct().ToList();

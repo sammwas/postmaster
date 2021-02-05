@@ -53,62 +53,6 @@
             </form>
 
             <ul class="navbar-nav ml-auto">
-                <li class="nav-item dropdown">
-                    <a class="nav-link" data-toggle="dropdown" href="#">
-                        <i class="far fa-comments"></i>
-                        <span class="badge badge-danger navbar-badge">3</span>
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-                        <a href="#" class="dropdown-item">
-                            <div class="media">
-                                <img src="~/dist/img/user1-128x128.jpg" alt="User Avatar" class="img-size-50 mr-3 img-circle">
-                                <div class="media-body">
-                                    <h3 class="dropdown-item-title">
-                                        Brad Diesel
-                                        <span class="float-right text-sm text-danger"><i class="fas fa-star"></i></span>
-                                    </h3>
-                                    <p class="text-sm">Call me whenever you can...</p>
-                                    <p class="text-sm text-muted"><i class="far fa-clock mr-1"></i> 4 Hours Ago</p>
-                                </div>
-                            </div>
-                            <!-- Message End -->
-                        </a>
-                        <div class="dropdown-divider"></div>
-                        <a href="#" class="dropdown-item">
-                            <!-- Message Start -->
-                            <div class="media">
-                                <img src="~/dist/img/user8-128x128.jpg" alt="User Avatar" class="img-size-50 img-circle mr-3">
-                                <div class="media-body">
-                                    <h3 class="dropdown-item-title">
-                                        John Pierce
-                                        <span class="float-right text-sm text-muted"><i class="fas fa-star"></i></span>
-                                    </h3>
-                                    <p class="text-sm">I got your message bro</p>
-                                    <p class="text-sm text-muted"><i class="far fa-clock mr-1"></i> 4 Hours Ago</p>
-                                </div>
-                            </div>
-                            <!-- Message End -->
-                        </a>
-                        <div class="dropdown-divider"></div>
-                        <a href="#" class="dropdown-item">
-                            <!-- Message Start -->
-                            <div class="media">
-                                <img src="~/dist/img/user3-128x128.jpg" alt="User Avatar" class="img-size-50 img-circle mr-3">
-                                <div class="media-body">
-                                    <h3 class="dropdown-item-title">
-                                        Nora Silvester
-                                        <span class="float-right text-sm text-warning"><i class="fas fa-star"></i></span>
-                                    </h3>
-                                    <p class="text-sm">The subject goes here</p>
-                                    <p class="text-sm text-muted"><i class="far fa-clock mr-1"></i> 4 Hours Ago</p>
-                                </div>
-                            </div>
-                            <!-- Message End -->
-                        </a>
-                        <div class="dropdown-divider"></div>
-                        <a href="#" class="dropdown-item dropdown-footer">See All Messages</a>
-                    </div>
-                </li>
                 <li class="dropdown user user-menu">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                         <div class="image">
@@ -118,9 +62,10 @@
                             }
                             else
                             {
-                                <img src="~/@userData.ImagePath" width="160" height="160" class="img-circle elevation-2" alt="@userData.FirstName">
+                                <img src="~/@userData.ImagePath" width="60" height="60" class="img-circle elevation-2" alt="@userData.FirstName">
                             }
-                        </div>                        <span class="hidden-xs">@userData.FullName</span>
+                        </div>
+                        <span class="hidden-xs">@userData.FullName</span>
                     </a>
                     <ul class="dropdown-menu">
                         <li class="user-header">
@@ -150,6 +95,7 @@
                         </li>
                     </ul>
                 </li>
+
                 <li class="nav-item">
                     <a class="nav-link" data-widget="control-sidebar" data-slide="true" href="#" role="button">
                         <i class="fas fa-th-large"></i>
@@ -188,6 +134,14 @@
                 </div>
                 <nav class="mt-2">
                     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+                        <li class="nav-item">
+                            <a asp-controller="Dashboard" asp-action="Index" class="nav-link">
+                                <i class="nav-icon fas fa-tachometer-alt"></i>
+                                <p>
+                                    Dashboard
+                                </p>
+                            </a>
+                        </li>
                         <li class="nav-item has-treeview">
                             <a href="#" class="nav-link">
                                 <i class="nav-icon fa fa-calculator"></i>
@@ -204,7 +158,7 @@
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a asp-controller="PointOfSale" asp-action="Receipts" class="nav-link">
+                                    <a asp-controller="PointOfSale" asp-action="Receipts" asp-route-dtFrom="@firstDayOfWeek" asp-route-dtTo="@DateTime.Now.ToString("dd-MMM-yyyy")" class="nav-link">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Receipts</p>
                                     </a>
@@ -252,6 +206,35 @@
                                 </li>
                                 <li class="nav-item">
                                     <a asp-controller="Users" asp-action="All" class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Summary</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="nav-item has-treeview">
+                            <a href="#" class="nav-link">
+                                <i class="nav-icon fas fa-table"></i>
+                                <p>
+                                    Instances
+                                    <i class="right fas fa-angle-left"></i>
+                                </p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a asp-controller="ClientInstances" asp-action="All" class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>View All</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a asp-controller="ClientInstances" asp-action="Edit" asp-route-id="" class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Add New</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a asp-controller="ClientInstances" asp-action="All" class="nav-link">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Summary</p>
                                     </a>
@@ -475,7 +458,6 @@
     </div>
     <script src="~/plugins/jquery/jquery.min.js"></script>
     <script src="~/plugins/jquery-ui/jquery-ui.min.js"></script>
-    <script src="~/js/site.js"></script>
     <script>
         $.widget.bridge('uibutton', $.ui.button)
     </script>
@@ -484,6 +466,8 @@
     <script src="~/plugins/sparklines/sparkline.js"></script>
     <script src="~/plugins/moment/moment.min.js"></script>
     <script src="~/plugins/daterangepicker/daterangepicker.js"></script>
+    <script src="~/plugins/bootstrap-colorpicker/js/bootstrap-colorpicker.min.js"></script>
+    <script src="~/plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js"></script>
     <script src="~/plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js"></script>
     <script src="~/lib/toastr/toastr.min.js"></script>
     <script src="~/dist/js/adminlte.js"></script>
@@ -491,6 +475,7 @@
     <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
     <script src="~/plugins/bs-custom-file-input/bs-custom-file-input.min.js"></script>
     <script src="~/plugins/summernote/summernote-bs4.min.js"></script>
+    <script src="~/js/site.js"></script>
 
     <script>
 		$(function () {

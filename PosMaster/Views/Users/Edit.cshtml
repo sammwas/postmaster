@@ -178,7 +178,7 @@
 						<div class="row">
 							@if (!string.IsNullOrEmpty(Model.ImagePath))
 							{
-								<img src="~/@Model.ImagePath" alt="@Model.FirstName" />
+								<img src="~/@Model.ImagePath" alt="@Model.FirstName" height="100" width="100"/>
 							}
 							<div>
 								<form role="form" method="post" autocomplete="off" asp-action="Upload" enctype="multipart/form-data">
