@@ -138,10 +138,13 @@ namespace PosMaster.Controllers
 			var result = await _userManager.CreateAsync(user);
 			if (result.Succeeded)
 				await _userManager.AddToRoleAsync(user, model.Role);
+			else
+				AddErrors(result);
 			var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 			var callbackUrl = Url.EmailConfirmationLink(user.Id, code, Request.Scheme);
 			await _emailService.SendEmailConfirmationAsync(new EmailAddress(user), callbackUrl);
-			return View(model);
+			TempData.SetData(AlertLevel.Success, $"{tag}", $"User {model.FirstName} Added");
+			return RedirectToAction(nameof(All));
 		}
 
 		public async Task<IActionResult> ResendConfirmLink(string id)
@@ -271,7 +274,9 @@ namespace PosMaster.Controllers
 
 			var result = await _userManager.AddPasswordAsync(user, model.Password);
 			if (result.Succeeded)
-				TempData.SetData(AlertLevel.Warning, tag, "Password set");
+				TempData.SetData(AlertLevel.Success, tag, "Password set");
+			else
+				AddErrors(result);
 			return RedirectToAction(nameof(Edit), new { model.Id });
 		}
 
