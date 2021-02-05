@@ -2,7 +2,7 @@
 @{ Layout = "_LoginLayout";
 	ViewData["Title"] = "Login to your Account"; }
 
-<form method="post">
+<form method="post" autocomplete="off" asp-route-returnUrl="@ViewData["ReturnUrl"]">
 	<div asp-validation-summary="All" class="text-danger"></div>
 	<div class="input-group mb-3">
 		<input asp-for="EmailAddress" class="form-control" placeholder="Email">
@@ -34,17 +34,20 @@
 		</div>
 	</div>
 </form>
-@if (Model.IsHttps)
+@if (Model.AuthenticationSchemes.Any())
 {
-	<div class="social-auth-links text-center mb-3">
-		<p>- OR -</p>
-		@*<a href="#" class="btn btn-block btn-primary">
-				<i class="fab fa-facebook mr-2"></i> Sign in using Facebook
-			</a>*@
-		<a href="#" class="btn btn-block btn-danger">
-			<i class="fab fa-google-plus mr-2"></i> Sign in using Google+
-		</a>
-	</div>
+	if (Model.AuthenticationSchemes.Any(a => a.DisplayName.ToLower().Equals("google")))
+	{
+		<div class="social-auth-links text-center mb-3">
+			<p>- OR -</p>
+			<form asp-action="ExternalLogin" asp-route-returnUrl="@ViewData["ReturnUrl"]">
+				<button class="btn btn-block btn-danger"
+						name="provider" value="@Model.AuthenticationSchemes.First().Name">
+					<i class="fab fa-google-plus mr-2"></i> Sign in using Google
+				</button>
+			</form>
+		</div>
+	}
 }
 <p class="mb-1">
 	<a asp-action="ForgotPassword">I forgot my password</a>

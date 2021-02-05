@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -12,6 +14,8 @@ using PosMaster.Services;
 using PosMaster.ViewModels;
 using System;
 using System.Diagnostics;
+using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace PosMaster.Controllers
@@ -51,7 +55,10 @@ namespace PosMaster.Controllers
 			_cookiesService.Remove();
 			ViewData["ReturnUrl"] = returnUrl;
 			_logger.LogInformation($"{nameof(Index)} application started");
-			return View(new LoginViewModel { IsHttps = Request.IsHttps });
+			return View(new LoginViewModel
+			{
+				AuthenticationSchemes = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList()
+			});
 		}
 
 		[HttpPost]
@@ -60,7 +67,6 @@ namespace PosMaster.Controllers
 		public async Task<IActionResult> Login(LoginViewModel model, string returnUrl = null)
 		{
 			ViewData["ReturnUrl"] = returnUrl;
-			model.IsHttps = Request.IsHttps;
 			var log = new UserLoginLog
 			{
 				ReturnUrl = returnUrl,
@@ -114,19 +120,7 @@ namespace PosMaster.Controllers
 						return View(model);
 					}
 
-					var userData = new UserCookieData(user);
-					var instanceResult = await _instanceInterface.ByIdAsync(user.InstanceId);
-					if (instanceResult.Success)
-					{
-						var instance = instanceResult.Data;
-						userData.InstanceCode = instance.Code;
-						userData.InstanceName = instance.Name;
-						var client = instance.Client;
-						userData.ClientCode = client.Code;
-						userData.ClientName = client.Name;
-						userData.ClientLogoPath = client.LogoPath;
-					}
-					_cookiesService.Store(userData);
+
 					var msg_ = "User logged in success";
 					_logger.LogInformation(msg_);
 					TempData.SetData(AlertLevel.Success, "Login Success", msg_);
@@ -428,14 +422,86 @@ namespace PosMaster.Controllers
 			return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
 		}
 
-		#region Helpers
 
+		[HttpPost]
+		[AllowAnonymous]
+		public IActionResult ExternalLogin(string provider, string returnUrl)
+		{
+			var redirectUrl = Url.Action(nameof(ExternalLoginCallback), "Home", new { returnUrl });
+			var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+			return new ChallengeResult(provider, properties);
+		}
+
+		[AllowAnonymous]
+		public async Task<IActionResult> ExternalLoginCallback(string returnUrl = null, string remoteError = null)
+		{
+			var tag = "External Login";
+			ViewData["ReturnUrl"] = returnUrl;
+			var externalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+			var model = new LoginViewModel { AuthenticationSchemes = externalLogins };
+			if (!string.IsNullOrEmpty(remoteError))
+			{
+				TempData.SetData(AlertLevel.Error, tag, "Error occured. Try later");
+				ModelState.AddModelError(string.Empty, $"Error from External provider : {remoteError}");
+				return View("Login", model);
+			}
+			var info = await _signInManager.GetExternalLoginInfoAsync();
+			if (info == null)
+			{
+				TempData.SetData(AlertLevel.Warning, tag, "Failed to get External Info");
+				ModelState.AddModelError(string.Empty, $"Error loading login information");
+				return View("Login", model);
+			}
+
+			var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey,
+				isPersistent: false, bypassTwoFactor: true);
+			var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+			var user = await _userManager.FindByEmailAsync(email);
+			if (result.Succeeded)
+			{
+				await StoreCookiesDataAsync(user);
+				TempData.SetData(AlertLevel.Success, tag, "Success");
+				_logger.LogInformation($"{email} logged in with google - exists");
+				return RedirectToLocal(returnUrl);
+			}
+			if (user == null)
+			{
+				TempData.SetData(AlertLevel.Warning, tag, "Failed to get User");
+				ModelState.AddModelError(string.Empty, $"Provided Email ({email}) is not registered");
+				return View("Login", model);
+			}
+			await _userManager.AddLoginAsync(user, info);
+			await _signInManager.SignInAsync(user, isPersistent: false);
+			await StoreCookiesDataAsync(user);
+			_logger.LogInformation($"{email} logged in with google - added to login");
+			TempData.SetData(AlertLevel.Success, tag, "Success-Added");
+			return RedirectToLocal(returnUrl);
+		}
+
+		#region Helpers 
 		private void AddErrors(IdentityResult result)
 		{
 			foreach (var error in result.Errors)
 			{
 				ModelState.AddModelError(string.Empty, error.Description);
 			}
+		}
+
+		private async Task StoreCookiesDataAsync(User user)
+		{
+			var userData = new UserCookieData(user);
+			var instanceResult = await _instanceInterface.ByIdAsync(user.InstanceId);
+			if (instanceResult.Success)
+			{
+				var instance = instanceResult.Data;
+				userData.InstanceCode = instance.Code;
+				userData.InstanceName = instance.Name;
+				var client = instance.Client;
+				userData.ClientCode = client.Code;
+				userData.ClientName = client.Name;
+				userData.ClientLogoPath = client.LogoPath;
+			}
+			_cookiesService.Store(userData);
 		}
 
 		private IActionResult RedirectToLocal(string returnUrl)
