@@ -120,13 +120,13 @@ namespace PosMaster.Controllers
 						return View(model);
 					}
 
-
 					var msg_ = "User logged in success";
 					_logger.LogInformation(msg_);
 					TempData.SetData(AlertLevel.Success, "Login Success", msg_);
 					log.Success = true;
 					log.Notes = msg_;
 					await _userInterface.AddLoginLogAsync(log);
+					await StoreCookiesDataAsync(user);
 					return RedirectToLocal(returnUrl);
 				}
 
@@ -239,7 +239,7 @@ namespace PosMaster.Controllers
 			await _userInterface.LogOutAsync(personnel);
 			await _signInManager.SignOutAsync();
 			_logger.LogInformation($"User {personnel} logged out.");
-			TempData.SetData(AlertLevel.Success, "Logout", "You have logged out");
+			//TempData.SetData(AlertLevel.Success, "Logout", "You have logged out");
 			return RedirectToAction(nameof(Index));
 		}
 

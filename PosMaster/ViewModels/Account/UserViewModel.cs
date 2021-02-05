@@ -35,7 +35,6 @@ namespace PosMaster.ViewModels
 			IsEditMode = true;
 			DoB = user.DateOfBirth.ToString("dd-MMM-yyyy");
 			FullName = user.FullName;
-			HasPassword = string.IsNullOrEmpty(user.PasswordHash);
 		}
 		[HiddenInput]
 		public string UserId { get; set; }

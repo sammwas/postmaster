@@ -75,9 +75,15 @@ namespace PosMaster.Controllers
 			var user = await _userManager.FindByIdAsync(id);
 			if (user == null)
 			{
+				TempData.SetData(AlertLevel.Warning, "Users", "Provided user not Found");
 				_logger.LogInformation($"edit user : provided user {id} not found");
+				return RedirectToAction(nameof(All));
 			}
-			return View(new UserViewModel(user));
+			var model = new UserViewModel(user)
+			{
+				HasPassword = await _userManager.HasPasswordAsync(user)
+			};
+			return View(model);
 		}
 
 		[HttpPost]
