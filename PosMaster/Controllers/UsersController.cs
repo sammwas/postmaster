@@ -75,9 +75,15 @@ namespace PosMaster.Controllers
 			var user = await _userManager.FindByIdAsync(id);
 			if (user == null)
 			{
+				TempData.SetData(AlertLevel.Warning, "Users", "Provided user not Found");
 				_logger.LogInformation($"edit user : provided user {id} not found");
+				return RedirectToAction(nameof(All));
 			}
-			return View(new UserViewModel(user));
+			var model = new UserViewModel(user)
+			{
+				HasPassword = await _userManager.HasPasswordAsync(user)
+			};
+			return View(model);
 		}
 
 		[HttpPost]
@@ -103,13 +109,11 @@ namespace PosMaster.Controllers
 			model.DoB = hasDob ? dob.ToString() : DateTime.Now.AddYears(-18).ToString();
 			if (model.IsEditMode)
 			{
-
 				var updateRes = await _userInterface.UpdateAsync(model);
 				if (!updateRes.Success)
-				{
 					ModelState.AddModelError(string.Empty, $"Update failed");
-					TempData.SetData(AlertLevel.Warning, $"{tag}", updateRes.Message);
-				}
+				TempData.SetData(updateRes.Success ? AlertLevel.Success : AlertLevel.Warning, $"{tag}", updateRes.Message);
+				return RedirectToAction(nameof(Edit), new { id = model.UserId });
 			}
 			var user = new User
 			{
@@ -138,7 +142,6 @@ namespace PosMaster.Controllers
 			var callbackUrl = Url.EmailConfirmationLink(user.Id, code, Request.Scheme);
 			await _emailService.SendEmailConfirmationAsync(new EmailAddress(user), callbackUrl);
 			return View(model);
-
 		}
 
 		public async Task<IActionResult> ResendConfirmLink(string id)
@@ -241,6 +244,35 @@ namespace PosMaster.Controllers
 			}
 			TempData.SetData(uploadResult.Success ? AlertLevel.Success : AlertLevel.Warning, tag, uploadResult.Message);
 			return RedirectToAction(nameof(Edit), new { id = model.UserId });
+		}
+
+		public IActionResult SetPassword(string id)
+		{
+			return View(new ResetPasswordViewModel { Id = id });
+		}
+
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> SetPassword(ResetPasswordViewModel model)
+		{
+			var tag = "Set Password";
+			if (!ModelState.IsValid)
+			{
+				return View(model);
+			}
+
+			var user = await _userManager.FindByIdAsync(model.Id);
+			if (user == null)
+			{
+				TempData.SetData(AlertLevel.Warning, tag, "User not Found");
+				_logger.LogInformation($"Unable to load user with ID '{model.Id}'.");
+				return View(model);
+			}
+
+			var result = await _userManager.AddPasswordAsync(user, model.Password);
+			if (result.Succeeded)
+				TempData.SetData(AlertLevel.Warning, tag, "Password set");
+			return RedirectToAction(nameof(Edit), new { model.Id });
 		}
 
 		private void AddErrors(IdentityResult result)

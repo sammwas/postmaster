@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Authentication;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace PosMaster.ViewModels
 {
@@ -13,6 +15,6 @@ namespace PosMaster.ViewModels
 		[Display(Name = "Email Address")]
 		[DataType(DataType.EmailAddress)]
 		public string EmailAddress { get; set; }
-		public bool IsHttps { get; set; }
+		public List<AuthenticationScheme> AuthenticationSchemes { get; set; }
 	}
 }

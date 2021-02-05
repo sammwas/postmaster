@@ -451,9 +451,33 @@ namespace PosMaster.Dal.Interfaces
 			}
 		}
 
-		public Task<ReturnData<PurchaseOrder>> PurchaseOrderByIdAsync(Guid id)
+		public async Task<ReturnData<PurchaseOrder>> PurchaseOrderByIdAsync(Guid id)
 		{
-			throw new NotImplementedException();
+			var result = new ReturnData<PurchaseOrder> { Data = new PurchaseOrder() };
+			var tag = nameof(PurchaseOrdersAsync);
+			_logger.LogInformation($"{tag} get purchase orders by id {id}");
+			try
+			{
+				var purchaseOrder = await _context.PurchaseOrders
+					.Include(r => r.Supplier)
+					.Include(r => r.PoGrnProducts)
+					.ThenInclude(p => p.Product)
+					.FirstOrDefaultAsync(p => p.Id.Equals(id));
+				result.Success = purchaseOrder != null;
+				result.Message = result.Success ? "Found" : "Not Found";
+				if (result.Success)
+					result.Data = purchaseOrder;
+				_logger.LogInformation($"{tag} found purchase order {purchaseOrder.Code}");
+				return result;
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex);
+				result.ErrorMessage = ex.Message;
+				result.Message = "Error occured";
+				_logger.LogError($"{tag} {result.Message} : {ex}");
+				return result;
+			}
 		}
 
 		public async Task<ReturnData<List<PurchaseOrder>>> PurchaseOrdersAsync(Guid? clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "", string personnel = "")

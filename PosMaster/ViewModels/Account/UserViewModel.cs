@@ -48,6 +48,7 @@ namespace PosMaster.ViewModels
 		[Required]
 		[Display(Name = "Phone Number")]
 		public string PhoneNumber { get; set; }
+		[Display(Name = "Email Confirmed ")]
 		public bool EmailConfirmed { get; set; }
 		[Required]
 		public string Role { get; set; }
@@ -72,5 +73,6 @@ namespace PosMaster.ViewModels
 		public bool IsNewImage { get; set; }
 		[Display(Name = "Date of Birth")]
 		public string DoB { get; set; }
+		public bool HasPassword { get; set; }
 	}
 }

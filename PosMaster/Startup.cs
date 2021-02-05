@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -88,6 +89,13 @@ namespace PosMaster
 				options.LoginPath = "/Home/Index";
 				options.AccessDeniedPath = "/Home/AccessDenied";
 				options.SlidingExpiration = true;
+			});
+
+			services.AddAuthentication() 
+				.AddGoogle(googleOptions =>
+			{
+				googleOptions.ClientId = Configuration["Google:ClientId"];
+				googleOptions.ClientSecret = Configuration["Google:ClientSecret"]; 
 			});
 
 			services.AddMvc();
