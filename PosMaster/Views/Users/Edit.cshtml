@@ -26,7 +26,6 @@
 				<div asp-validation-summary="All" class="text-danger"></div>
 				<input asp-for="Id" />
 				<input asp-for="UserId" type="hidden" />
-				<input asp-for="EmailConfirmed" type="hidden" />
 				<input asp-for="Code" value="@userData.ClientCode" type="hidden" />
 				<input asp-for="IsEditMode" />
 				<div class="card-body">
@@ -139,6 +138,21 @@
 							</div>
 						</div>
 					</div>
+					@if (!User.IsInRole(Role.Clerk))
+					{
+						<div class="row">
+							<div class="col-md-12">
+								<div class="form-check">
+									<input asp-for="EmailConfirmed" class="form-check-input">
+									<label class="form-check-label" asp-for="EmailConfirmed"></label>
+								</div>
+							</div>
+						</div>
+					}
+					else
+					{
+						<input asp-for="EmailConfirmed" type="hidden" />
+					}
 					<div class="row">
 						<div class="col-md-12">
 							<p><strong>Status</strong></p>
@@ -201,7 +215,15 @@
 							<p><a asp-route-id="@Model.UserId" asp-action="ResetPassword">Change Account Password</a></p>
 							@if (!Model.EmailConfirmed)
 							{
-								<a asp-route-id="@Model.UserId" asp-action="ResendConfirmLink">Resend Email Confirmation Link</a>
+								<p>
+									<a asp-route-id="@Model.UserId" asp-action="ResendConfirmLink">Resend Email Confirmation Link</a>
+								</p>
+							}
+							@if (!Model.HasPassword && !User.IsInRole(Role.Clerk))
+							{
+								<p>
+									<a asp-route-id="@Model.UserId" asp-action="SetPassword">Set Account Password</a>
+								</p>
 							}
 						</div>
 					}

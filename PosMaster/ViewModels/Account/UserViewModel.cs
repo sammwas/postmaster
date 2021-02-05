@@ -49,6 +49,7 @@ namespace PosMaster.ViewModels
 		[Required]
 		[Display(Name = "Phone Number")]
 		public string PhoneNumber { get; set; }
+		[Display(Name = "Email Confirmed ")]
 		public bool EmailConfirmed { get; set; }
 		[Required]
 		public string Role { get; set; }

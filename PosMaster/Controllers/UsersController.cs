@@ -240,6 +240,35 @@ namespace PosMaster.Controllers
 			return RedirectToAction(nameof(Edit), new { id = model.UserId });
 		}
 
+		public IActionResult SetPassword(string id)
+		{
+			return View(new ResetPasswordViewModel { Id = id });
+		}
+
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> SetPassword(ResetPasswordViewModel model)
+		{
+			var tag = "Set Password";
+			if (!ModelState.IsValid)
+			{
+				return View(model);
+			}
+
+			var user = await _userManager.FindByIdAsync(model.Id);
+			if (user == null)
+			{
+				TempData.SetData(AlertLevel.Warning, tag, "User not Found");
+				_logger.LogInformation($"Unable to load user with ID '{model.Id}'.");
+				return View(model);
+			}
+
+			var result = await _userManager.AddPasswordAsync(user, model.Password);
+			if (result.Succeeded)
+				TempData.SetData(AlertLevel.Warning, tag, "Password set");
+			return RedirectToAction(nameof(Edit), new { model.Id });
+		}
+
 		private void AddErrors(IdentityResult result)
 		{
 			foreach (var error in result.Errors)
