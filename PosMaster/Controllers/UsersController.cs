@@ -103,13 +103,11 @@ namespace PosMaster.Controllers
 			model.DoB = hasDob ? dob.ToString() : DateTime.Now.AddYears(-18).ToString();
 			if (model.IsEditMode)
 			{
-
 				var updateRes = await _userInterface.UpdateAsync(model);
 				if (!updateRes.Success)
-				{
 					ModelState.AddModelError(string.Empty, $"Update failed");
-					TempData.SetData(AlertLevel.Warning, $"{tag}", updateRes.Message);
-				}
+				TempData.SetData(updateRes.Success ? AlertLevel.Success : AlertLevel.Warning, $"{tag}", updateRes.Message);
+				return RedirectToAction(nameof(Edit), new { id = model.UserId });
 			}
 			var user = new User
 			{
@@ -138,7 +136,6 @@ namespace PosMaster.Controllers
 			var callbackUrl = Url.EmailConfirmationLink(user.Id, code, Request.Scheme);
 			await _emailService.SendEmailConfirmationAsync(new EmailAddress(user), callbackUrl);
 			return View(model);
-
 		}
 
 		public async Task<IActionResult> ResendConfirmLink(string id)
