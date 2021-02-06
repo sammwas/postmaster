@@ -8,7 +8,9 @@
 	var title = $"Point Of Sale";
 	ViewData["Title"] = title;
 	var userData = _cookies.Read();
-	var products = await _productInterface.ByInstanceIdAsync(userData.InstanceId);
+	var products = User.IsInRole(Role.Clerk) ?
+		await _productInterface.ByInstanceIdAsync(userData.InstanceId) :
+		await _productInterface.ByClientIdAsync(userData.ClientId);
 	var paymentModes = await _masterDataInterface.PaymentModesAsync(userData.ClientId);
 }
 <div class="card card-primary">

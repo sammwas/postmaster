@@ -71,9 +71,6 @@ namespace PosMaster.Controllers
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> Edit(ProductViewModel model)
 		{
-			var userData = _cookieService.Read();
-			model.ClientId = userData.ClientId;
-			model.InstanceId = userData.InstanceId;
 			model.Personnel = User.Identity.Name;
 			var option = model.IsEditMode ? "Update" : "Add";
 			var title = $"{option} Product";
@@ -83,6 +80,10 @@ namespace PosMaster.Controllers
 				TempData.SetData(AlertLevel.Warning, title, message);
 				return View(model);
 			}
+
+			var userData = _cookieService.Read();
+			model.ClientId = userData.ClientId;
+			model.InstanceId = Guid.Parse(model.InstanceIdStr);
 			if (model.File != null)
 			{
 				var uploadResult = await _fileUploadService.UploadAsync(model.ClientId, model.File);

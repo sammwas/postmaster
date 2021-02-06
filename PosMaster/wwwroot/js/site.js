@@ -32,23 +32,24 @@ var addItemToList = function () {
 	var quantity = $("#quantityBought").val();
 	var unitPrice = $("#sellingPrice").val();
 	var avQuantity = $("#productItem option:selected").attr("data-qty");
+	quantity = parseFloat(quantity)
+	avQuantity = parseFloat(avQuantity)
 	var discount = 0;
 	var taxAmount = 0;
-
 	if (productId === "") {
-		$("#issMsg").text("select an item first").css('color', 'red');
+		$("#issMsg").text("select an item first").addClass('text-danger');
 		$("#issItemId").focus();
 	}
 	else if (quantity === "") {
-		$("#issMsg").text("quantity is required").css('color', 'red');
+		$("#issMsg").text("quantity is required").addClass('text-danger');
 		$("#quantityBought").focus();
 	}
 	else if (unitPrice === "") {
-		$("#issMsg").text("price is required").css('color', 'red');
+		$("#issMsg").text("price is required").addClass('text-danger');
 		$("#issWarehouseId").focus();
 	}
 	else if (quantity > avQuantity) {
-		$("#issMsg").text("available quantity is " + avQuantity).css('color', 'red');
+		$("#issMsg").text("available quantity is " + avQuantity).addClass('text-danger');
 		$("#quantityBought").focus();
 	}
 	//else if (typeof (quantity) !== 'number') {
