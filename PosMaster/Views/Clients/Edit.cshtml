@@ -20,12 +20,14 @@
 					<div class="form-group">
 						<label asp-for="Code"></label>
 						<input asp-for="Code" class="form-control" placeholder="Code">
+						<span asp-validation-for="Code" class="text-danger"></span>
 					</div>
 				</div>
 				<div class="col-md-6">
 					<div class="form-group">
 						<label asp-for="Name"></label>
 						<input asp-for="Name" class="form-control" placeholder="Name">
+						<span asp-validation-for="Name" class="text-danger"></span>
 					</div>
 				</div>
 			</div>
@@ -34,12 +36,14 @@
 					<div class="form-group">
 						<label asp-for="EmailAddress"></label>
 						<input asp-for="EmailAddress" class="form-control" placeholder="abc@example.com">
+						<span asp-validation-for="EmailAddress" class="text-danger"></span>
 					</div>
 				</div>
 				<div class="col-md-6">
 					<div class="form-group">
 						<label asp-for="PostalAddress"></label>
 						<input asp-for="PostalAddress" class="form-control" placeholder="Postal Address">
+						<span asp-validation-for="PostalAddress" class="text-danger"></span>
 					</div>
 				</div>
 			</div>
@@ -48,12 +52,14 @@
 					<div class="form-group">
 						<label asp-for="Town"></label>
 						<input asp-for="Town" class="form-control" placeholder="Nairobi">
+						<span asp-validation-for="Town" class="text-danger"></span>
 					</div>
 				</div>
 				<div class="col-md-6">
 					<div class="form-group">
 						<label asp-for="Slogan"></label>
 						<input asp-for="Slogan" class="form-control" placeholder="Slogan">
+						<span asp-validation-for="Slogan" class="text-danger"></span>
 					</div>
 				</div>
 			</div>
@@ -62,12 +68,14 @@
 					<div class="form-group">
 						<label asp-for="PrimaryTelephone"></label>
 						<input asp-for="PrimaryTelephone" class="form-control" placeholder="07XXXXXXXX">
+						<span asp-validation-for="PrimaryTelephone" class="text-danger"></span>
 					</div>
 				</div>
 				<div class="col-md-6">
 					<div class="form-group">
 						<label asp-for="SecondaryTelephone"></label>
 						<input asp-for="SecondaryTelephone" class="form-control" placeholder="07XXXXXXXX">
+						<span asp-validation-for="SecondaryTelephone" class="text-danger"></span>
 					</div>
 				</div>
 			</div>
@@ -75,13 +83,15 @@
 				<div class="col-md-6">
 					<div class="form-group">
 						<label asp-for="CurrencyShort"></label>
-						<input asp-for="CurrencyShort" class="form-control" placeholder="abc@example.com">
+						<input asp-for="CurrencyShort" class="form-control" placeholder="KES">
+						<span asp-validation-for="CurrencyShort" class="text-danger"></span>
 					</div>
 				</div>
 				<div class="col-md-6">
 					<div class="form-group">
 						<label asp-for="CurrencyFull"></label>
-						<input asp-for="CurrencyFull" class="form-control" placeholder="Postal Address">
+						<input asp-for="CurrencyFull" class="form-control" placeholder="Kenya Shillings">
+						<span asp-validation-for="CurrencyFull" class="text-danger"></span>
 					</div>
 				</div>
 			</div>
@@ -89,13 +99,15 @@
 				<div class="col-md-6">
 					<div class="form-group">
 						<label asp-for="CountryShort"></label>
-						<input asp-for="CountryShort" class="form-control" placeholder="abc@example.com">
+						<input asp-for="CountryShort" class="form-control" placeholder="KE">
+						<span asp-validation-for="CountryShort" class="text-danger"></span>
 					</div>
 				</div>
 				<div class="col-md-6">
 					<div class="form-group">
 						<label asp-for="CountryFull"></label>
-						<input asp-for="CountryFull" class="form-control" placeholder="Postal Address">
+						<input asp-for="CountryFull" class="form-control" placeholder="Kenya">
+						<span asp-validation-for="CountryFull" class="text-danger"></span>
 					</div>
 				</div>
 			</div>
@@ -108,13 +120,13 @@
 				</div>
 			</div>
 			@*<div class="row">
-				<div class="col-md-12">
-					<div class="form-check">
-						<input asp-for="EnforcePassword" class="form-check-input">
-						<label class="form-check-label" asp-for="EnforcePassword"></label>
+					<div class="col-md-12">
+						<div class="form-check">
+							<input asp-for="EnforcePassword" class="form-check-input">
+							<label class="form-check-label" asp-for="EnforcePassword"></label>
+						</div>
 					</div>
-				</div>
-			</div>*@
+				</div>*@
 			<div class="row">
 				<div class="col-md-12">
 					<div class="form-check">

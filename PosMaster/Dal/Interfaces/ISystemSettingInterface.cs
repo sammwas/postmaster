@@ -78,7 +78,8 @@ namespace PosMaster.Dal.Interfaces
 					.Select(s => new TermsAndPrivacyViewModel
 					{
 						Terms = s.TermsAndConditions,
-						Privacy = s.Privacy
+						Privacy = s.Privacy,
+						Notes = s.Notes
 					})
 					.FirstOrDefaultAsync();
 				result.Success = tp != null;
@@ -105,7 +106,8 @@ namespace PosMaster.Dal.Interfaces
 			_logger.LogInformation($"{tag} update system settings");
 			try
 			{
-				var settings = await _context.SystemSettings.Take(1).FirstAsync();
+				var settings = await _context.SystemSettings.FirstAsync();
+				settings.Code = model.Code;
 				settings.Name = model.Name;
 				settings.Tagline = model.Tagline;
 				settings.Description = model.Description;
@@ -152,6 +154,7 @@ namespace PosMaster.Dal.Interfaces
 
 				setting.TermsAndConditions = model.Terms;
 				setting.Privacy = model.Privacy;
+				setting.Notes = model.Notes;
 				setting.LastModifiedBy = personnel;
 				setting.DateLastModified = DateTime.Now;
 				await _context.SaveChangesAsync();
