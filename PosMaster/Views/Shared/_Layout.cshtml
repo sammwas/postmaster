@@ -117,21 +117,21 @@
 				<span class="brand-text font-weight-light">@userData.ClientCode</span>
 			</a>
 			<div class="sidebar">
-				<div class="user-panel mt-3 pb-3 mb-3 d-flex">
-					<div class="image">
-						@if (string.IsNullOrEmpty(userData.ImagePath))
-						{
-							<span class="i-circle">@firstChar</span>
-						}
-						else
-						{
-							<img src="~/@userData.ImagePath" width="160" height="160" class="img-circle elevation-2" alt="@userData.FirstName">
-						}
-					</div>
-					<div class="info">
-						<a asp-controller="Users" asp-action="Edit" asp-route-id="@userData.UserId" class="d-block">@userData.FullName</a>
-					</div>
-				</div>
+				@*<div class="user-panel mt-3 pb-3 mb-3 d-flex">
+						<div class="image">
+							@if (string.IsNullOrEmpty(userData.ImagePath))
+							{
+								<span class="i-circle">@firstChar</span>
+							}
+							else
+							{
+								<img src="~/@userData.ImagePath" width="160" height="160" class="img-circle elevation-2" alt="@userData.FirstName">
+							}
+						</div>
+						<div class="info">
+							<a asp-controller="Users" asp-action="Edit" asp-route-id="@userData.UserId" class="d-block">@userData.FullName</a>
+						</div>
+					</div>*@
 				<nav class="mt-2">
 					<ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
 						<li class="nav-item">
@@ -212,35 +212,38 @@
 								</li>
 							</ul>
 						</li>
-						<li class="nav-item has-treeview">
-							<a href="#" class="nav-link">
-								<i class="nav-icon fas fa-table"></i>
-								<p>
-									Instances
-									<i class="right fas fa-angle-left"></i>
-								</p>
-							</a>
-							<ul class="nav nav-treeview">
-								<li class="nav-item">
-									<a asp-controller="ClientInstances" asp-action="All" class="nav-link">
-										<i class="far fa-circle nav-icon"></i>
-										<p>View All</p>
-									</a>
-								</li>
-								<li class="nav-item">
-									<a asp-controller="ClientInstances" asp-action="Edit" asp-route-id="" class="nav-link">
-										<i class="far fa-circle nav-icon"></i>
-										<p>Add New</p>
-									</a>
-								</li>
-								<li class="nav-item">
-									<a asp-controller="ClientInstances" asp-action="All" class="nav-link">
-										<i class="far fa-circle nav-icon"></i>
-										<p>Summary</p>
-									</a>
-								</li>
-							</ul>
-						</li>
+						@if (User.IsInRole(Role.Manager))
+						{
+							<li class="nav-item has-treeview">
+								<a href="#" class="nav-link">
+									<i class="nav-icon fas fa-table"></i>
+									<p>
+										Instances
+										<i class="right fas fa-angle-left"></i>
+									</p>
+								</a>
+								<ul class="nav nav-treeview">
+									<li class="nav-item">
+										<a asp-controller="ClientInstances" asp-action="All" class="nav-link">
+											<i class="far fa-circle nav-icon"></i>
+											<p>View All</p>
+										</a>
+									</li>
+									<li class="nav-item">
+										<a asp-controller="ClientInstances" asp-action="Edit" asp-route-clientId="@userData.ClientId" asp-route-id="" class="nav-link">
+											<i class="far fa-circle nav-icon"></i>
+											<p>Add New</p>
+										</a>
+									</li>
+									<li class="nav-item">
+										<a asp-controller="ClientInstances" asp-action="All" class="nav-link">
+											<i class="far fa-circle nav-icon"></i>
+											<p>Summary</p>
+										</a>
+									</li>
+								</ul>
+							</li>
+						}
 						@if (User.IsInRole(Role.SuperAdmin))
 						{
 							<li class="nav-item has-treeview">
@@ -420,6 +423,14 @@
 									</li>
 								}
 							</ul>
+						</li>
+						<li class="nav-item">
+							<a asp-controller="Home" asp-action="Logout" class="nav-link">
+								<i class="nav-icon fas fa-lock"></i>
+								<p>
+									Logout
+								</p>
+							</a>
 						</li>
 					</ul>
 				</nav>

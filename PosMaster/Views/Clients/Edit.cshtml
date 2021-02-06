@@ -10,24 +10,39 @@
 	<div class="card-header">
 		<h3 class="card-title">@ViewData["Title"]</h3>
 	</div>
-	<form role="form" method="post" autocomplete="off">
+	<form role="form" method="post" autocomplete="off" enctype="multipart/form-data">
 		<div asp-validation-summary="All"></div>
 		<input asp-for="Id" />
 		<input asp-for="IsEditMode" />
 		<div class="card-body">
 			<div class="row">
 				<div class="col-md-6">
-					<div class="form-group">
-						<label asp-for="Code"></label>
-						<input asp-for="Code" class="form-control" placeholder="Code">
-						<span asp-validation-for="Code" class="text-danger"></span>
+					<div class="row">
+						<div class="col-md-4">
+							<div class="form-group">
+								<label asp-for="Code"></label>
+								<input asp-for="Code" class="form-control" placeholder="Code">
+								<span asp-validation-for="Code" class="text-danger"></span>
+							</div>
+						</div>
+						<div class="col-md-8">
+							<div class="form-group">
+								<label asp-for="Name"></label>
+								<input asp-for="Name" class="form-control" placeholder="Name">
+								<span asp-validation-for="Name" class="text-danger"></span>
+							</div>
+						</div>
 					</div>
 				</div>
 				<div class="col-md-6">
 					<div class="form-group">
-						<label asp-for="Name"></label>
-						<input asp-for="Name" class="form-control" placeholder="Name">
-						<span asp-validation-for="Name" class="text-danger"></span>
+						<label asp-for="File"></label>@if (!string.IsNullOrEmpty(Model.LogoPath))
+						{
+							<span><img width="40" class="img-thumbnail" src="~/@Model.LogoPath" /></span>
+						}
+						<input asp-for="File" class="form-control" accept="image/*">
+						<input asp-for="LogoPath" type="hidden">
+						<span asp-validation-for="File" class="text-danger"></span>
 					</div>
 				</div>
 			</div>
@@ -115,7 +130,7 @@
 				<div class="col-md-12">
 					<div class="form-group">
 						<label asp-for="Notes"></label>
-						<textarea asp-for="Notes" class="form-control" rows="3" placeholder="Notes"></textarea>
+						<textarea asp-for="Notes" class="rich-text" rows="3" placeholder="Notes"></textarea>
 					</div>
 				</div>
 			</div>

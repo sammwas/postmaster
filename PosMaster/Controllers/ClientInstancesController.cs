@@ -6,6 +6,7 @@ using PosMaster.Extensions;
 using PosMaster.ViewModels;
 using System;
 using System.Threading.Tasks;
+using PosMaster.Services;
 
 namespace PosMaster.Controllers
 {
@@ -13,17 +14,23 @@ namespace PosMaster.Controllers
 	public class ClientInstancesController : Controller
 	{
 		private readonly IClientInstanceInterface _clientInstanceInterface;
-		public ClientInstancesController(IClientInstanceInterface clientInstanceInterface)
+		private readonly ICookiesService _cookiesService;
+		public ClientInstancesController(IClientInstanceInterface clientInstanceInterface, ICookiesService cookiesService)
 		{
 			_clientInstanceInterface = clientInstanceInterface;
+			_cookiesService = cookiesService;
 		}
 		public async Task<IActionResult> All()
 		{
-			var result = await _clientInstanceInterface.AllAsync();
+			var userData = _cookiesService.Read();
+			var result = User.IsInRole(Role.SuperAdmin) ?
+				await _clientInstanceInterface.AllAsync() :
+				await _clientInstanceInterface.ByClientIdAsync(userData.ClientId);
 			if (!result.Success)
 				TempData.SetData(AlertLevel.Warning, "Client Instances", result.Message);
 			return View(result.Data);
 		}
+
 		public async Task<IActionResult> Edit(Guid clientId, Guid? id)
 		{
 			if (id == null)

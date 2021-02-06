@@ -67,6 +67,7 @@ namespace PosMaster.Controllers
 		public async Task<IActionResult> Login(LoginViewModel model, string returnUrl = null)
 		{
 			ViewData["ReturnUrl"] = returnUrl;
+			model.AuthenticationSchemes = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 			var log = new UserLoginLog
 			{
 				ReturnUrl = returnUrl,
@@ -104,7 +105,7 @@ namespace PosMaster.Controllers
 						TempData.SetData(AlertLevel.Warning, "Login Failed", msg);
 						log.Notes = msg;
 						await _userInterface.AddLoginLogAsync(log);
-						ModelState.AddModelError(string.Empty, $"{msg} Kindly check your inbox for the confirmation link.");
+						ModelState.AddModelError(string.Empty, $"{msg} Check your inbox or contact admin.");
 						await _signInManager.SignOutAsync();
 						return View(model);
 					}
@@ -437,45 +438,115 @@ namespace PosMaster.Controllers
 		{
 			var tag = "External Login";
 			ViewData["ReturnUrl"] = returnUrl;
+			var log = new UserLoginLog
+			{
+				ReturnUrl = returnUrl,
+			};
 			var externalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 			var model = new LoginViewModel { AuthenticationSchemes = externalLogins };
-			if (!string.IsNullOrEmpty(remoteError))
+			try
 			{
-				TempData.SetData(AlertLevel.Error, tag, "Error occured. Try later");
-				ModelState.AddModelError(string.Empty, $"Error from External provider : {remoteError}");
-				return View("Login", model);
-			}
-			var info = await _signInManager.GetExternalLoginInfoAsync();
-			if (info == null)
-			{
-				TempData.SetData(AlertLevel.Warning, tag, "Failed to get External Info");
-				ModelState.AddModelError(string.Empty, $"Error loading login information");
-				return View("Login", model);
-			}
+				log.Source = DataSource.Web;
+				log.Agent = Request.Headers[HeaderNames.UserAgent];
+				log.IsHttps = Request.IsHttps;
+				log.IpAddress = Request.HttpContext.Connection.RemoteIpAddress.ToString();
+				log.RefererUrl = Request.Headers[HeaderNames.Referer];
 
-			var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey,
-				isPersistent: false, bypassTwoFactor: true);
-			var email = info.Principal.FindFirstValue(ClaimTypes.Email);
-			var user = await _userManager.FindByEmailAsync(email);
-			if (result.Succeeded)
-			{
+				if (!string.IsNullOrEmpty(remoteError))
+				{
+					TempData.SetData(AlertLevel.Error, tag, "Error occured. Try later");
+					var eMsg = $"Error from External provider : {remoteError}";
+					ModelState.AddModelError(string.Empty, eMsg);
+					_logger.LogError($"{tag} . Error occured :- {remoteError}");
+					log.Notes = eMsg;
+					await _userInterface.AddLoginLogAsync(log);
+					return View("Login", model);
+				}
+				var info = await _signInManager.GetExternalLoginInfoAsync();
+				if (info == null)
+				{
+					TempData.SetData(AlertLevel.Warning, tag, "Failed to get External Info");
+					var iMsg = $"Error loading login information";
+					ModelState.AddModelError(string.Empty, iMsg);
+					_logger.LogWarning($"{tag} . Error occured :- {iMsg}");
+					log.Notes = iMsg;
+					await _userInterface.AddLoginLogAsync(log);
+					return View("Login", model);
+				}
+
+				var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+				log.UserName = email;
+				var user = await _userManager.FindByEmailAsync(email);
+				if (user == null)
+				{
+					var uMsg = $"Provided Email ({email}) is not registered";
+					TempData.SetData(AlertLevel.Warning, tag, "Failed to get User");
+					ModelState.AddModelError(string.Empty, uMsg);
+					_logger.LogWarning($"{tag} . Error occured :- {uMsg}");
+					log.Notes = uMsg;
+					await _userInterface.AddLoginLogAsync(log);
+					return View("Login", model);
+				}
+				log.UserRole = user.Role;
+				log.Personnel = user.UserName;
+				log.ClientId = user.ClientId;
+				log.InstanceId = user.InstanceId;
+				if (!user.EmailConfirmed)
+				{
+					var cMsg = $"Email not Confirmed";
+					TempData.SetData(AlertLevel.Warning, tag, cMsg);
+					ModelState.AddModelError(string.Empty, cMsg);
+					_logger.LogWarning($"{tag} . Error occured :- {cMsg}");
+					log.Notes = cMsg;
+					await _userInterface.AddLoginLogAsync(log);
+					return View("Login", model);
+				}
+
+				if (!user.Status.Equals(EntityStatus.Active))
+				{
+					var msg = $"Account is not Active - {user.Status} .";
+					TempData.SetData(AlertLevel.Warning, "Login Failed", msg);
+					log.Notes = msg;
+					await _userInterface.AddLoginLogAsync(log);
+					ModelState.AddModelError(string.Empty, $"{msg} contact admin.");
+					return View("Login", model);
+				}
+
+				var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey,
+					isPersistent: false, bypassTwoFactor: true);
+				if (result.Succeeded)
+				{
+					await StoreCookiesDataAsync(user);
+					TempData.SetData(AlertLevel.Success, tag, "Success");
+					_logger.LogInformation($"{email} logged in with google - exists");
+					log.Success = true;
+					log.Notes = $"{tag} :- google login sucess -exists";
+					await _userInterface.AddLoginLogAsync(log);
+					return RedirectToLocal(returnUrl);
+				}
+
+				await _userManager.AddLoginAsync(user, info);
+				await _signInManager.SignInAsync(user, isPersistent: false);
 				await StoreCookiesDataAsync(user);
-				TempData.SetData(AlertLevel.Success, tag, "Success");
-				_logger.LogInformation($"{email} logged in with google - exists");
+				_logger.LogInformation($"{email} logged in with google - added to login");
+				var aMsg = "Success-Added";
+				TempData.SetData(AlertLevel.Success, tag, aMsg);
+				log.Success = true;
+				log.Notes = $"{tag} :- {aMsg}";
+				await _userInterface.AddLoginLogAsync(log);
 				return RedirectToLocal(returnUrl);
 			}
-			if (user == null)
+			catch (Exception e)
 			{
-				TempData.SetData(AlertLevel.Warning, tag, "Failed to get User");
-				ModelState.AddModelError(string.Empty, $"Provided Email ({email}) is not registered");
+				Console.WriteLine(e);
+				_logger.LogError($"Error during external log in :- {e.Message}");
+				var eMsg = "Unexpected error occured. Try later.";
+				ModelState.AddModelError(string.Empty, eMsg);
+				TempData.SetData(AlertLevel.Error, "Login", eMsg);
+				log.Notes = eMsg;
+				await _userInterface.AddLoginLogAsync(log);
 				return View("Login", model);
 			}
-			await _userManager.AddLoginAsync(user, info);
-			await _signInManager.SignInAsync(user, isPersistent: false);
-			await StoreCookiesDataAsync(user);
-			_logger.LogInformation($"{email} logged in with google - added to login");
-			TempData.SetData(AlertLevel.Success, tag, "Success-Added");
-			return RedirectToLocal(returnUrl);
 		}
 
 		#region Helpers 

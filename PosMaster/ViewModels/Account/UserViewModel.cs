@@ -50,6 +50,7 @@ namespace PosMaster.ViewModels
 		public string PhoneNumber { get; set; }
 		[Display(Name = "Email Confirmed ")]
 		public bool EmailConfirmed { get; set; }
+		public string EmailConfirmedStr => EmailConfirmed ? "YES" : "NO";
 		[Required]
 		public string Role { get; set; }
 		public DateTime DateCreated { get; set; }

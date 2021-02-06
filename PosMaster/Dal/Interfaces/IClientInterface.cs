@@ -161,7 +161,7 @@ namespace PosMaster.Dal.Interfaces
 				}
 				var client = new Client
 				{
-					Id = Guid.NewGuid(),
+					Id = model.Id,
 					Code = model.Code,
 					Name = model.Name,
 					Slogan = model.Slogan,

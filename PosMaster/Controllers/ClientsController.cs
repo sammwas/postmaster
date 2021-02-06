@@ -3,10 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using PosMaster.Dal;
 using PosMaster.Dal.Interfaces;
 using PosMaster.Extensions;
+using PosMaster.Services;
 using PosMaster.ViewModels;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace PosMaster.Controllers
@@ -15,9 +14,11 @@ namespace PosMaster.Controllers
 	public class ClientsController : Controller
 	{
 		private readonly IClientInterface _clientInterface;
-		public ClientsController(IClientInterface clientInterface)
+		private readonly FileUploadService _fileUploadService;
+		public ClientsController(IClientInterface clientInterface, FileUploadService fileUploadService)
 		{
 			_clientInterface = clientInterface;
+			_fileUploadService = fileUploadService;
 		}
 		public async Task<IActionResult> Edit(Guid? id)
 		{
@@ -44,7 +45,21 @@ namespace PosMaster.Controllers
 				TempData.SetData(AlertLevel.Warning, title, message);
 				return View(model);
 			}
-
+			var clientId = model.IsEditMode ? model.Id : Guid.NewGuid();
+			if (model.File != null)
+			{
+				var upResult = await _fileUploadService.UploadAsync(clientId, model.File);
+				if (!upResult.Success)
+				{
+					ModelState.AddModelError("File", $"File not Uploaded : {upResult.Message}");
+					TempData.SetData(AlertLevel.Warning, "Upload", upResult.Message);
+					return View(model);
+				}
+				_fileUploadService.Delete(model.LogoPath);
+				model.LogoPath = upResult.PathUrl;
+				model.IsNewImage = true;
+			}
+			model.Id = clientId;
 			var result = await _clientInterface.EditAsync(model);
 			TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, title, result.Message);
 			if (!result.Success)
