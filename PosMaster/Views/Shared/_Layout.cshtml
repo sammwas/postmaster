@@ -53,7 +53,16 @@
 			</form>
 
 			<ul class="navbar-nav ml-auto">
-				<li class="dropdown user user-menu">
+				<li class="nav-item d-none d-sm-inline-block">
+					<a href="#" class="nav-link">
+						@userData.ClientName
+						@if (User.IsInRole(Role.Clerk))
+						{
+							<span>(@userData.InstanceName)</span>
+						}
+					</a>
+				</li>
+				<li class="dropdown user user-menu nav-item  d-sm-inline-block">
 					<a href="#" class="dropdown-toggle" data-toggle="dropdown">
 						<div class="image">
 							@if (string.IsNullOrEmpty(userData.ImagePath))
@@ -79,27 +88,21 @@
 									<img src="~/@userData.ImagePath" width="160" height="160" class="img-circle elevation-2" alt="@userData.FirstName">
 								}
 							</div>
-
 							<p>
 								@userData.FullName - @userData.Role
 								<small>Added On : @userData.DateCreated</small>
 							</p>
 						</li>
-						<li class="user-footer">
-							<div class="pull-left">
-								<a asp-controller="Users" asp-action="Edit" asp-route-id="@userData.UserId" class="btn btn-default btn-flat">Profile</a>
+						<li class="card-footer form-inline">
+							<div>
+								<a asp-controller="Users" asp-action="Edit" asp-route-id="@userData.UserId" class="btn btn-primary btn-flat">Profile</a>
 							</div>
-							<div class="pull-right">
-								<a asp-controller="Home" asp-action="Logout" class="btn btn-default btn-flat">Sign out</a>
+							<span>&nbsp;</span>
+							<div class="mr-0">
+								<a asp-controller="Home" asp-action="Logout" class="btn btn-danger btn-flat">Sign out</a>
 							</div>
 						</li>
 					</ul>
-				</li>
-
-				<li class="nav-item">
-					<a class="nav-link" data-widget="control-sidebar" data-slide="true" href="#" role="button">
-						<i class="fas fa-th-large"></i>
-					</a>
 				</li>
 			</ul>
 		</nav>
