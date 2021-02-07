@@ -12,7 +12,7 @@
 	<div class="card-body">
 		<h3>@defaultClient.Name &nbsp; <span class="badge badge-success">@defaultClient.Status</span></h3>
 		<div>
-			<p>@defaultClient.Notes</p>
+			<p>@Html.Raw(defaultClient.Notes)</p>
 		</div>
 		<div class="row">
 			@foreach (var item in instances)

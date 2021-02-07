@@ -54,7 +54,8 @@
 
 			<ul class="navbar-nav ml-auto">
 				<li class="nav-item d-none d-sm-inline-block">
-					<a href="#" class="nav-link">
+					<a asp-controller="Dashboard" asp-action="Index" class="nav-link">
+						<i class="fa fa-home"></i>&nbsp;
 						@userData.ClientName
 						@if (User.IsInRole(Role.Clerk))
 						{
@@ -251,7 +252,7 @@
 						{
 							<li class="nav-item has-treeview">
 								<a href="#" class="nav-link">
-									<i class="nav-icon fas fa-chart-pie"></i>
+									<i class="nav-icon fas fa-list"></i>
 									<p>
 										Clients
 										<i class="right fas fa-angle-left"></i>
@@ -354,7 +355,7 @@
 						{
 							<li class="nav-item has-treeview">
 								<a href="#" class="nav-link">
-									<i class="nav-icon fas fa-file"></i>
+									<i class="nav-icon fa fa-chart-pie"></i>
 									<p>
 										Reports
 										<i class="right fas fa-angle-left"></i>
@@ -362,13 +363,15 @@
 								</a>
 								<ul class="nav nav-treeview">
 									<li class="nav-item">
-										<a asp-controller="Reports" asp-action="SalesReport" asp-route-dtFrom="@firstDayOfWeek" asp-route-dtTo="@DateTime.Now.ToString("dd-MMM-yyyy")" class="nav-link">
+										<a asp-controller="Reports" asp-action="SalesReport" asp-route-dtFrom="@firstDayOfWeek"
+										   asp-route-dtTo="@DateTime.Now.ToString("dd-MMM-yyyy")" asp-route-option="Weekly" class="nav-link">
 											<i class="far fa-circle nav-icon"></i>
 											<p>Weekly Report</p>
 										</a>
 									</li>
 									<li class="nav-item">
-										<a asp-controller="Reports" asp-action="SalesReport" asp-route-dtFrom="@Helpers.firstDayOfMonth.ToString("dd-MMM-yyyy")" asp-route-dtTo="@Helpers.lastDayOfMonth.ToString("dd-MMM-yyyy")" class="nav-link">
+										<a asp-controller="Reports" asp-action="SalesReport" asp-route-dtFrom="@Helpers.firstDayOfMonth.ToString("dd-MMM-yyyy")"
+										   asp-route-dtTo="@Helpers.lastDayOfMonth.ToString("dd-MMM-yyyy")" asp-route-option="Monthly" class="nav-link">
 											<i class="far fa-circle nav-icon"></i>
 											<p>Monthly Report</p>
 										</a>
