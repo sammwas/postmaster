@@ -1,0 +1,39 @@
+﻿@inject IClientInstanceInterface _clientInstanceInterface;
+@inject ICookiesService _cookies;
+@{
+	ViewData["Active"] = "Dashboard";
+	ViewData["Title"] = "Home";
+	var user = _cookies.Read();
+	var instancesRes = await _clientInstanceInterface.ByClientIdAsync(user.ClientId);
+	var instances = instancesRes.Data;
+	var defaultClient = instances.First().Client;
+}
+<div class="card">
+	<div class="card-body">
+		<h3>@defaultClient.Name &nbsp; <span class="badge badge-success">@defaultClient.Status</span></h3>
+		<div>
+			<p>@defaultClient.Notes</p>
+		</div>
+		<div class="row">
+			@foreach (var item in instances)
+			{
+				<div class="col-md-6">
+					<div class="card-body">
+						<h4>@item.Name</h4>
+						<p>@item.Notes</p>
+						<hr />
+						<p>
+							<label>Phone Number</label> : @item.PrimaryTelephone @if (!string.IsNullOrEmpty(item.SecondaryTelephone))
+							{
+								<span>or @item.SecondaryTelephone</span>
+							}
+						</p>
+						@*<p><label>Postal Address</label> : @item.PostalAddress </p>*@
+						<p><label>Town</label> : @item.Town</p>
+						<p><label>Location</label> : @item.Location</p>
+					</div>
+				</div>
+			}
+		</div>
+	</div>
+</div>

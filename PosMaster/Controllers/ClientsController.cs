@@ -33,6 +33,7 @@ namespace PosMaster.Controllers
 			var model = result.Success ? new ClientViewModel(result.Data) : new ClientViewModel();
 			return View(model);
 		}
+
 		[HttpPost]
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> Edit(ClientViewModel model)
@@ -65,7 +66,8 @@ namespace PosMaster.Controllers
 			if (!result.Success)
 				return View(model);
 
-			return RedirectToAction(nameof(All));
+			return User.IsInRole(Role.SuperAdmin) ? RedirectToAction(nameof(All))
+				: RedirectToAction(nameof(Edit), new { id = clientId });
 		}
 
 		[Authorize(Roles = "SuperAdmin")]

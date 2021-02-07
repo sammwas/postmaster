@@ -57,5 +57,15 @@ namespace PosMaster.Controllers
 			var model = result.Success ? result.Data : new ClerkDashboardViewModel();
 			return View(model);
 		}
+
+		public IActionResult Home()
+		{
+			return View();
+		}
+
+		public IActionResult Contact()
+		{
+			return View();
+		}
 	}
 }
