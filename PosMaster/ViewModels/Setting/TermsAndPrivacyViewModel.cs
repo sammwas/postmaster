@@ -8,5 +8,8 @@ namespace PosMaster.ViewModels
 		public string Terms { get; set; }
 		[Required]
 		public string Privacy { get; set; }
+		[Required]
+		[Display(Name = "Home")]
+		public string Notes { get; set; }
 	}
 }

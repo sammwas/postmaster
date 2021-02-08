@@ -1,4 +1,5 @@
 ﻿@inject IMasterDataInterface _masterDataInterface;
+@inject IClientInstanceInterface _instanceInterface;
 @inject ICookiesService _cookies;
 @model ProductViewModel
 @{
@@ -10,86 +11,133 @@
 	var userData = _cookies.Read();
 	var productCategories = await _masterDataInterface.ProductCategoriesAsync(userData.ClientId);
 	var unitsOfMeasure = await _masterDataInterface.UnitOfMeasuresAsync(userData.ClientId);
+	var instancesRes = User.IsInRole(Role.SuperAdmin) ?
+		await _instanceInterface.AllAsync()
+		: await _instanceInterface.ByClientIdAsync(userData.ClientId);
+	var instances = instancesRes.Data;
 }
 <div class="card card-primary">
 	<div class="card-header">
 		<h3 class="card-title">@ViewData["Title"]</h3>
 	</div>
-
-	<form role="form" method="post" autocomplete="off">
+	<form role="form" method="post" autocomplete="off" enctype="multipart/form-data">
 		<div asp-validation-summary="All" class="text-danger"></div>
 		<input asp-for="Id" />
 		<input asp-for="IsEditMode" />
 		<div class="card-body">
 			<div class="row">
+
 				<div class="col-md-6">
 					<div class="form-group">
-						<label asp-for="Code"></label>
-						<input asp-for="Code" class="form-control" placeholder="Code">
-						<span asp-validation-for="Code" class="text-danger"></span>
-					</div>
-				</div>
-				<div class="col-md-6">
-					<div class="form-group">
-						<label asp-for="Name"></label>
-						<input asp-for="Name" class="form-control" placeholder="Name">
-						<span asp-validation-for="Name" class="text-danger"></span>
-					</div>
-				</div>
-			</div>
-			<div class="row">
-				<div class="col-md-6">
-					<div class="form-group">
-						<label asp-for="BuyingPrice"></label>
-						<input asp-for="BuyingPrice" class="form-control">
-						<span asp-validation-for="BuyingPrice" class="text-danger"></span>
-					</div>
-				</div>
-				<div class="col-md-6">
-					<div class="form-group">
-						<label asp-for="SellingPrice"></label>
-						<input asp-for="SellingPrice" class="form-control">
-						<span asp-validation-for="SellingPrice" class="text-danger"></span>
-					</div>
-				</div>
-			</div>
-			<div class="row">
-				<div class="col-md-6">
-					<div class="form-group">
-						<label asp-for="AvailableQuantity"></label>
-						<input asp-for="AvailableQuantity" class="form-control">
-					</div>
-				</div>
-				<div class="col-md-6">
-					<div class="form-group">
-						<label asp-for="ReorderLevel"></label>
-						<input asp-for="ReorderLevel" class="form-control">
-					</div>
-				</div>
-			</div>
-			<div class="row">
-				<div class="col-md-6">
-					<div class="form-group">
-						<label asp-for="UnitOfMeasure"></label>
-						<select class="form-control select2" asp-for="UnitOfMeasure" style="width: 100%;">
-							<option value="">--Select Unit of Measure--</option>
-							@foreach (var item in unitsOfMeasure.Data)
+						<label asp-for="InstanceIdStr"></label>
+						<select class="form-control select2" asp-for="InstanceIdStr" style="width: 100%;">
+							<option value="">--Select Instance--</option>
+							@foreach (var item in instances)
 							{
-								<option value="@item.Name" title="@item.Notes">@item.Code - @item.Name</option>
+								<option value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
 							}
 						</select>
+						<span asp-validation-for="InstanceIdStr" class="text-danger"></span>
+					</div>
+				</div>
+				<div class="col-md-6">
+					<div class="row">
+						<div class="col-md-6">
+							<div class="form-group">
+								<label asp-for="Code"></label>
+								<input asp-for="Code" class="form-control" placeholder="Code">
+								<span asp-validation-for="Code" class="text-danger"></span>
+							</div>
+						</div>
+						<div class="col-md-6">
+							<div class="form-group">
+								<label asp-for="Name"></label>
+								<input asp-for="Name" class="form-control" placeholder="Name">
+								<span asp-validation-for="Name" class="text-danger"></span>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-6">
+					<div class="row">
+						<div class="col-md-6">
+							<div class="form-group">
+								<label asp-for="BuyingPrice"></label>
+								<input asp-for="BuyingPrice" class="form-control numbers-only">
+								<span asp-validation-for="BuyingPrice" class="text-danger"></span>
+							</div>
+						</div>
+						<div class="col-md-6">
+							<div class="form-group">
+								<label asp-for="SellingPrice"></label>
+								<input asp-for="SellingPrice" class="form-control numbers-only">
+								<span asp-validation-for="SellingPrice" class="text-danger"></span>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-6">
+					<div class="row">
+						<div class="col-md-6">
+							<div class="form-group">
+								<label asp-for="AvailableQuantity"></label>
+								<input asp-for="AvailableQuantity" class="form-control numbers-only">								<span asp-validation-for="SellingPrice" class="text-danger"></span>
+								<span asp-validation-for="AvailableQuantity" class="text-danger"></span>
+							</div>
+						</div>
+						<div class="col-md-6">
+							<div class="form-group">
+								<label asp-for="ReorderLevel"></label>
+								<input asp-for="ReorderLevel" class="form-control numbers-only">
+								<span asp-validation-for="ReorderLevel" class="text-danger"></span>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col-md-6">
+					<div class="row">
+						<div class="col-md-6">
+							<div class="form-group">
+								<label asp-for="UnitOfMeasure"></label>
+								<select class="form-control select2" asp-for="UnitOfMeasure" style="width: 100%;">
+									<option value="">--Select Unit of Measure--</option>
+									@foreach (var item in unitsOfMeasure.Data)
+									{
+										<option value="@item.Name" title="@item.Notes">@item.Code - @item.Name</option>
+									}
+								</select>
+								<span asp-validation-for="UnitOfMeasure" class="text-danger"></span>
+							</div>
+						</div>
+						<div class="col-md-6">
+							<div class="form-group">
+								<label asp-for="ProductCategoryId"></label>
+								<select class="form-control select2" asp-for="ProductCategoryId" style="width: 100%;">
+									<option value="">--Select Category--</option>
+									@foreach (var item in productCategories.Data)
+									{
+										<option value="@item.Id" title="@item.Notes">@item.Code - @item.Name</option>
+									}
+								</select>
+								<span asp-validation-for="ProductCategoryId" class="text-danger"></span>
+							</div>
+						</div>
 					</div>
 				</div>
 				<div class="col-md-6">
 					<div class="form-group">
-						<label asp-for="ProductCategoryId"></label>
-						<select class="form-control select2" asp-for="ProductCategoryId" style="width: 100%;">
-							<option value="">--Select Category--</option>
-							@foreach (var item in productCategories.Data)
-							{
-								<option value="@item.Id" title="@item.Notes">@item.Code - @item.Name</option>
-							}
-						</select>
+						<label asp-for="File"></label>@if (!string.IsNullOrEmpty(Model.ImagePath))
+						{
+							<span><img width="40" class="img-thumbnail" src="~/@Model.ImagePath" /></span>
+						}
+						<input asp-for="File" class="form-control" accept="image/*">
+						<input asp-for="ImagePath" type="hidden">
+						<span asp-validation-for="File" class="text-danger"></span>
 					</div>
 				</div>
 			</div>

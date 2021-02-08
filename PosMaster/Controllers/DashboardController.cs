@@ -51,11 +51,21 @@ namespace PosMaster.Controllers
 		public async Task<IActionResult> Clerk()
 		{
 			var userData = _cookiesService.Read();
-			var result = await _dashboardInterface.ClerkDashboardAsync(userData.ClientId, User.Identity.Name);
+			var result = await _dashboardInterface.ClerkDashboardAsync(userData.InstanceId, User.Identity.Name);
 			if (!result.Success)
 				TempData.SetData(AlertLevel.Warning, _tag, result.Message);
 			var model = result.Success ? result.Data : new ClerkDashboardViewModel();
 			return View(model);
+		}
+
+		public IActionResult Home()
+		{
+			return View();
+		}
+
+		public IActionResult Contact()
+		{
+			return View();
 		}
 	}
 }

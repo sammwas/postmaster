@@ -1,4 +1,5 @@
-﻿using PosMaster.Dal;
+﻿using Microsoft.AspNetCore.Http;
+using PosMaster.Dal;
 using System.ComponentModel.DataAnnotations;
 
 namespace PosMaster.ViewModels
@@ -82,5 +83,6 @@ namespace PosMaster.ViewModels
 		[Display(Name = "Display Product Buying Price")]
 		public bool DisplayBuyingPrice { get; set; }
 		public bool IsNewImage { get; set; }
+		public IFormFile File { get; set; }
 	}
 }

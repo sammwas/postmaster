@@ -1,80 +1,70 @@
 ﻿@model List<ClientInstance>
 @{
-    ViewData["Active"] = "Client Instances";
-    ViewData["Title"] = "Clients Instances";
+	ViewData["Active"] = "Client Instances";
+	ViewData["Title"] = "Clients Instances";
 }
 <div>
-    <!-- /.card -->
-
-    <div class="card">
-        <div class="card-header">
-            <h3 class="card-title">Client Instances</h3>
-        </div>
-        <!-- /.card-header -->
-        <div class="card-body">
-            <table id="example1" class="table table-bordered table-striped">
-                <thead>
-                    <tr>
-                        <th>Code</th>
-                        <th>Name</th>
-                        <th>Phone Numbers</th>
-                        <th>Postal Address</th>
-                        <th>Location</th>
-                        <th>Town</th>
-                        <th>Options</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model)
-                    {
-                        <tr>
-                            <td>@item.Code</td>
-                            <td>@item.Name</td>
-                            <td>
-                                @item.PrimaryTelephone <span>
-                                @if (!string.IsNullOrEmpty(item.SecondaryTelephone))
-                                {
-                                    <span> or @item.SecondaryTelephone</span>
-                                }
-                            </span>
-                        </td>
-                        <td>@item.PostalAddress</td>
-                        <td>@item.Location</td>
-                        <td>@item.Town</td>
-                        <td class="project-actions text-right">
-                            <a asp-action="ById" asp-route-id="@item.Id" class="btn btn-primary btn-sm">
-                                <i class="fas fa-folder">
-                                </i>
-                                View More
-                            </a>
-                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-info btn-sm">
-                                <i class="fas fa-pencil-alt">
-                                </i>
-                                Edit
-                            </a>
-                            <a asp-action="ById" asp-route-id="@item.Id" class="btn btn-danger btn-sm">
-                                <i class="fas fa-trash">
-                                </i>
-                                Delete
-                            </a>
-                        </td>
-                    </tr>
-                }
-                </tbody>
-                <tfoot>
-                    <tr>
-                        <th>Code</th>
-                        <th>Name</th>
-                        <th>Phone Numbers</th>
-                        <th>Postal Address</th>
-                        <th>Location</th>
-                        <th>Town</th>
-                        <th>Options</th>
-                    </tr>
-                </tfoot>
-            </table>
-        </div>
-        <!-- /.card-body -->
-    </div>
-    <!-- /.card -->
+	<div class="card">
+		<div class="card-header">
+			<h3 class="card-title">Client Instances</h3>
+		</div>
+		<div class="card-body">
+			<table id="example1" class="table table-bordered table-striped">
+				<thead>
+					<tr>
+						<th>Code</th>
+						<th>Name</th>
+						<th>Phone Numbers</th>
+						@*<th>Postal Address</th>*@
+						<th>Location</th>
+						<th>Town</th>
+						<th>Options</th>
+					</tr>
+				</thead>
+				<tbody>
+					@foreach (var item in Model)
+					{
+						<tr>
+							<td> <a asp-action="ById" asp-route-id="@item.Id">@item.Code</a> </td>
+							<td>@item.Name</td>
+							<td>
+								@item.PrimaryTelephone <span>
+									@if (!string.IsNullOrEmpty(item.SecondaryTelephone))
+									{
+										<span> or @item.SecondaryTelephone</span>
+									}
+								</span>
+							</td>
+							@*<td>@item.PostalAddress</td>*@
+							<td>@item.Location</td>
+							<td>@item.Town</td>
+							<td class="project-actions text-right">
+								<a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-info btn-sm">
+									<i class="fas fa-pencil-alt">
+									</i>
+									Edit
+								</a>
+								<a asp-action="ById" asp-route-id="@item.Id" class="btn btn-danger btn-sm">
+									<i class="fas fa-trash">
+									</i>
+									Delete
+								</a>
+							</td>
+						</tr>
+					}
+				</tbody>
+				<tfoot>
+					<tr>
+						<th>Code</th>
+						<th>Name</th>
+						<th>Phone Numbers</th>
+						@*<th>Postal Address</th>*@
+						<th>Location</th>
+						<th>Town</th>
+						<th>Options</th>
+					</tr>
+				</tfoot>
+			</table>
+		</div>
+	</div>
 </div>

@@ -1,0 +1,35 @@
+﻿@inject IClientInterface _clientInterface;
+@inject ICookiesService _cookies;
+@{
+	ViewData["Active"] = "Dashboard";
+	ViewData["Title"] = "Contact";
+	var user = _cookies.Read();
+	var clientRes = await _clientInterface.ByIdAsync(user.ClientId);
+	var client = clientRes.Data;
+}
+<div class="card">
+	<div class="card-body">
+		<h3>@client.Name  </h3>
+		@*<div>
+			<p>@Html.Raw(client.Notes)</p>
+		</div>*@
+		<p>
+			<label>Phone Number</label> : @client.PrimaryTelephone @if (!string.IsNullOrEmpty(client.SecondaryTelephone))
+			{
+				<span>or @client.SecondaryTelephone</span>
+			}
+		</p>
+		<p>
+			<label>Email Address</label> : @client.EmailAddress
+		</p>
+		<p>
+			<label>Postal Address</label> : @client.PostalAddress
+		</p>
+		<p>
+			<label>Town</label> : @client.Town
+		</p>
+		<p>
+			<label>Country</label> : @client.CountryFull
+		</p>
+	</div>
+</div>

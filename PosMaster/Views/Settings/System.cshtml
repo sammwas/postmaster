@@ -1,0 +1,106 @@
+﻿@model SystemSettingMiniViewModel
+@{
+	ViewData["Active"] = "Settings";
+	var title = $"System Settings";
+	ViewData["Title"] = title;
+}
+<div class="card card-primary">
+	<div class="card-header">
+		<h3 class="card-title">@ViewData["Title"]</h3>
+	</div>
+	<form role="form" method="post" autocomplete="off" enctype="multipart/form-data">
+		<div asp-validation-summary="All"></div>
+		<div class="card-body">
+			<div class="row">
+				<div class="col-md-6">
+					<div class="form-group">
+						<label asp-for="Name"></label>
+						<input asp-for="Name" class="form-control" placeholder="Name">
+						<span asp-validation-for="Name" class="text-danger"></span>
+					</div>
+				</div>
+				<div class="col-md-6">
+					<div class="row">
+						<div class="col-md-6">
+							<div class="form-group">
+								<label asp-for="Code"></label>
+								<input asp-for="Code" class="form-control" placeholder="Code">						<span asp-validation-for="Name" class="text-danger"></span>
+								<span asp-validation-for="Code" class="text-danger"></span>
+							</div>
+						</div>
+						<div class="col-md-6">
+							<div class="form-group">
+								<label asp-for="Version"></label>
+								<input asp-for="Version" class="form-control" placeholder="Version">
+								<span asp-validation-for="Version" class="text-danger"></span>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-6">
+					<div class="form-group">
+						<label asp-for="EmailAddress"></label>
+						<input asp-for="EmailAddress" class="form-control" placeholder="abc@example.com">
+						<span asp-validation-for="EmailAddress" class="text-danger"></span>
+					</div>
+				</div>
+				<div class="col-md-6">
+					<div class="form-group">
+						<label asp-for="PostalAddress"></label>
+						<input asp-for="PostalAddress" class="form-control" placeholder="Postal Address">
+						<span asp-validation-for="PostalAddress" class="text-danger"></span>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-6">
+					<div class="form-group">
+						<label asp-for="Town"></label>
+						<input asp-for="Town" class="form-control" placeholder="Nairobi">
+						<span asp-validation-for="Town" class="text-danger"></span>
+					</div>
+				</div>
+				<div class="col-md-6">
+					<div class="form-group">
+						<label asp-for="Tagline"></label>
+						<input asp-for="Tagline" class="form-control" placeholder="Slogan">
+						<span asp-validation-for="Tagline" class="text-danger"></span>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-6">
+					<div class="form-group">
+						<label asp-for="PhoneNumber"></label>
+						<input asp-for="PhoneNumber" class="form-control numbers-only" placeholder="07XXXXXXXX">
+						<span asp-validation-for="PhoneNumber" class="text-danger"></span>
+					</div>
+				</div>
+				<div class="col-md-6">
+					<div class="form-group">
+						<label asp-for="File"></label>@if (!string.IsNullOrEmpty(Model.LogoPath))
+						{
+							<span><img width="40" class="img-thumbnail" src="~/@Model.LogoPath" /></span>
+						}
+						<input asp-for="File" class="form-control" accept="image/*">
+						<input asp-for="LogoPath" type="hidden">
+						<span asp-validation-for="File" class="text-danger"></span>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12">
+					<div class="form-group">
+						<label asp-for="Description"></label>
+						<textarea asp-for="Description" class="form-control" rows="3" placeholder="Description"></textarea>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="card-footer">
+			<button type="submit" class="btn btn-primary">Submit</button>
+		</div>
+	</form>
+</div>

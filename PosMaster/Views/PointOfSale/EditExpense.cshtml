@@ -2,78 +2,71 @@
 @inject IMasterDataInterface _masterDataInterface;
 @inject ICookiesService _cookies;
 @{
-    ViewData["Active"] = "Expenses";
-    var statuses = Helpers.Statuses();
-    var option = Model.IsEditMode ? "Update" : "Add";
-    var title = $"{option} Expense";
-    ViewData["Title"] = title;
-    var userData = _cookies.Read();
-    var expenseTypes = await _masterDataInterface.ExpenseTypesAsync(userData.ClientId);
+	ViewData["Active"] = "Expenses";
+	var statuses = Helpers.Statuses();
+	var option = Model.IsEditMode ? "Update" : "Add";
+	var title = $"{option} Expense";
+	ViewData["Title"] = title;
+	var userData = _cookies.Read();
+	var expenseTypes = await _masterDataInterface.ExpenseTypesAsync(userData.ClientId);
 }
 <div class="card card-primary">
-    <div class="card-header">
-        <h3 class="card-title">@ViewData["Title"]</h3>
-    </div>
-    <form role="form" method="post" autocomplete="off">
-        <div asp-validation-summary="All"></div>
-        <input asp-for="Id" />
-        <input asp-for="IsEditMode" />
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label asp-for="Code"></label>
-                        <input asp-for="Code" class="form-control" placeholder="Code">
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label>Expense Type</label>
-                        <select class="form-control select2" asp-for="ExpenseTypeId" style="width: 100%;" id="selectedProduct">
-                            <option value="">--Select Expense Type--</option>
-                            @foreach (var item in expenseTypes.Data)
-                            {
-                                <option value="@item.Id" title="@item.Notes" data-pcode="@item.Code">@item.Code - @item.Name</option>
-                            }
-                        </select>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label asp-for="Amount"></label>
-                        <input asp-for="Amount" class="form-control">
-                    </div>
-                </div>
-                <div class="col-md-6">
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="form-group">
-                        <label asp-for="Notes"></label>
-                        <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Notes"></textarea>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-12">
-                    <p><strong>Status</strong></p>
-                </div>
-                @foreach (var item in statuses)
-                {
-                    <div class="col-md-3">
-                        <div class="form-check">
-                            <input class="form-check-input" id="@item.Id" type="radio" asp-for="Status" value="@item.Id">
-                            <label class="form-check-label" for="@item.Id">@item.Text</label>
-                        </div>
-                    </div>
-                }
-            </div>
-        </div>
-        <div class="card-footer">
-            <button type="submit" class="btn btn-primary">Submit</button>
-        </div>
-    </form>
+	<div class="card-header">
+		<h3 class="card-title">@ViewData["Title"]</h3>
+	</div>
+	<form role="form" method="post" autocomplete="off">
+		<div asp-validation-summary="All"></div>
+		<input asp-for="Id" />
+		<input asp-for="IsEditMode" />
+		<input asp-for="Code" type="hidden" value="@userData.InstanceCode - @DateTime.Now" />
+		<div class="card-body">
+			<div class="row">
+				<div class="col-md-6">
+					<div class="form-group">
+						<label>Expense Type</label>
+						<select class="form-control select2" asp-for="ExpenseTypeId" style="width: 100%;" id="selectedProduct">
+							<option value="">--Select Expense Type--</option>
+							@foreach (var item in expenseTypes.Data)
+							{
+								<option value="@item.Id" title="@item.Notes" data-pcode="@item.Code">@item.Code - @item.Name</option>
+							}
+						</select>
+						<span asp-validation-for="ExpenseTypeId" class="text-danger"></span>
+					</div>
+				</div>
+				<div class="col-md-6">
+					<div class="form-group">
+						<label asp-for="Amount"></label>
+						<input asp-for="Amount" class="form-control numbers-only">
+						<span asp-validation-for="Amount" class="text-danger"></span>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12">
+					<div class="form-group">
+						<label asp-for="Notes"></label>
+						<textarea asp-for="Notes" class="form-control" rows="3" placeholder="Notes"></textarea>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12">
+					<p><strong>Status</strong></p>
+				</div>
+				@foreach (var item in statuses)
+				{
+					<div class="col-md-3">
+						<div class="form-check">
+							<input class="form-check-input" id="@item.Id" type="radio" asp-for="Status" value="@item.Id">
+							<label class="form-check-label" for="@item.Id">@item.Text</label>
+						</div>
+					</div>
+				}
+			</div>
+		</div>
+		<div class="card-footer">
+			<button type="submit" class="btn btn-primary">Submit</button>
+		</div>
+	</form>
 </div>
