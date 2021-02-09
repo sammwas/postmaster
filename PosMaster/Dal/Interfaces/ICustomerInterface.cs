@@ -106,8 +106,8 @@ namespace PosMaster.Dal.Interfaces
 			}
 		}
 
-        public async Task<ReturnData<List<Customer>>> ByInstanceIdAsync(Guid instanceId)
-        {
+		public async Task<ReturnData<List<Customer>>> ByInstanceIdAsync(Guid instanceId)
+		{
 			var result = new ReturnData<List<Customer>> { Data = new List<Customer>() };
 			var tag = nameof(ByInstanceIdAsync);
 			_logger.LogInformation($"{tag} get all instance {instanceId} customers");
@@ -134,7 +134,7 @@ namespace PosMaster.Dal.Interfaces
 			}
 		}
 
-        public async Task<ReturnData<Customer>> EditAsync(CustomerViewModel model)
+		public async Task<ReturnData<Customer>> EditAsync(CustomerViewModel model)
 		{
 			var result = new ReturnData<Customer> { Data = new Customer() };
 			var tag = nameof(EditAsync);
@@ -165,6 +165,7 @@ namespace PosMaster.Dal.Interfaces
 					dbCustomer.Notes = model.Notes;
 					dbCustomer.Status = model.Status;
 					dbCustomer.CreditLimit = model.CreditLimit;
+					dbCustomer.Gender = model.Gender;
 					await _context.SaveChangesAsync();
 					result.Success = true;
 					result.Message = "Updated";
@@ -188,7 +189,8 @@ namespace PosMaster.Dal.Interfaces
 					Website = model.Website,
 					FirstName = model.FirstName,
 					LastName = model.LastName,
-					CreditLimit = model.CreditLimit
+					CreditLimit = model.CreditLimit,
+					Gender = model.Gender
 				};
 				_context.Customers.Add(Customer);
 				await _context.SaveChangesAsync();
@@ -207,5 +209,5 @@ namespace PosMaster.Dal.Interfaces
 				return result;
 			}
 		}
-    }
+	}
 }

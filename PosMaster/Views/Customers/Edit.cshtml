@@ -1,4 +1,5 @@
 ﻿@inject ICookiesService _cookies;
+@inject IProductInterface _productInterface;
 @model CustomerViewModel
 @{
 	ViewData["Active"] = "POS";
@@ -7,7 +8,8 @@
 	ViewData["Title"] = title;
 	var userData = _cookies.Read();
 	var statuses = Helpers.Statuses();
-	var code = Model.Code ?? "";
+	if (!Model.IsEditMode)
+		Model.Code = _productInterface.DocumentRefNumber(Document.Customer, userData.ClientId);
 }
 <div class="card card-primary">
 	<div class="card-header">
@@ -24,7 +26,7 @@
 						<div class="col-md-6">
 							<div class="form-group">
 								<label asp-for="Code"></label>
-								@if (code.Equals(Constants.WalkInCustomerCode))
+								@if (Model.Code.Equals(Constants.WalkInCustomerCode))
 								{
 									<input asp-for="Code" class="form-control" readonly>
 								}
@@ -33,6 +35,22 @@
 									<input asp-for="Code" class="form-control" placeholder="C001">
 								}
 								<span asp-validation-for="Code" class="text-danger"></span>
+							</div>
+						</div>
+						<div class="col-md-6">
+							<div class="form-group">
+								<label asp-for="FirstName"></label>
+								<input asp-for="FirstName" class="form-control" placeholder="John">
+								<span asp-validation-for="FirstName" class="text-danger"></span>
+							</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-6">
+							<div class="form-group">
+								<label asp-for="LastName"></label>
+								<input asp-for="LastName" class="form-control" placeholder="Doe">
+								<span asp-validation-for="LastName" class="text-danger"></span>
 							</div>
 						</div>
 						<div class="col-md-6">
@@ -46,20 +64,24 @@
 					<div class="row">
 						<div class="col-md-6">
 							<div class="form-group">
-								<label asp-for="FirstName"></label>
-								<input asp-for="FirstName" class="form-control" placeholder="John">
-								<span asp-validation-for="FirstName" class="text-danger"></span>
+								<label asp-for="Gender"></label>
+								<div class="row">
+									<div class="col-md-6">
+										<div class="form-check">
+											<input class="form-check-input" id="rdMale" type="radio" asp-for="Gender" value="Male">
+											<label class="form-check-label" for="rdMale">Male</label>
+										</div>
+									</div>
+									<div class="col-md-6">
+										<div class="form-check">
+											<input class="form-check-input" id="rdFemale" type="radio" asp-for="Gender" value="Female">
+											<label class="form-check-label" for="rdFemale">Female</label>
+										</div>
+									</div>
+								</div>
+								<span asp-validation-for="Gender" class="text-danger"></span>
 							</div>
 						</div>
-						<div class="col-md-6">
-							<div class="form-group">
-								<label asp-for="LastName"></label>
-								<input asp-for="LastName" class="form-control" placeholder="Doe">
-								<span asp-validation-for="LastName" class="text-danger"></span>
-							</div>
-						</div>
-					</div>
-					<div class="row">
 						<div class="col-md-6">
 							<div class="form-group">
 								<label asp-for="Town"></label>
@@ -67,13 +89,13 @@
 								<span asp-validation-for="Town" class="text-danger"></span>
 							</div>
 						</div>
-						<div class="col-md-6">
-							<div class="form-group">
-								<label asp-for="Location"></label>
-								<input asp-for="Location" class="form-control" placeholder="Westlands">
-								<span asp-validation-for="Location" class="text-danger"></span>
-							</div>
-						</div>
+						@*<div class="col-md-6">
+								<div class="form-group">
+									<label asp-for="Location"></label>
+									<input asp-for="Location" class="form-control" placeholder="Westlands">
+									<span asp-validation-for="Location" class="text-danger"></span>
+								</div>
+							</div>*@
 					</div>
 					<div class="row">
 						<div class="col-md-6">
@@ -85,28 +107,29 @@
 						</div>
 						<div class="col-md-6">
 							<div class="form-group">
-								<label asp-for="PostalAddress"></label>
-								<input asp-for="PostalAddress" class="form-control" placeholder="123 Nairobi">
-								<span asp-validation-for="PostalAddress" class="text-danger"></span>
-							</div>
-						</div>
-					</div>
-					<div class="row">
-						<div class="col-md-6">
-							<div class="form-group">
 								<label asp-for="CreditLimit"></label>
 								<input asp-for="CreditLimit" class="form-control numbers-only">
 								<span asp-validation-for="CreditLimit" class="text-danger"></span>
 							</div>
 						</div>
-						<div class="col-md-6">
-							<div class="form-group">
-								<label asp-for="Website"></label>
-								<input asp-for="Website" class="form-control" placeholder="www.example.com">
-								<span asp-validation-for="Website" class="text-danger"></span>
-							</div>
-						</div>
+
 					</div>
+					@*<div class="row">
+							<div class="col-md-6">
+									<div class="form-group">
+										<label asp-for="PostalAddress"></label>
+										<input asp-for="PostalAddress" class="form-control" placeholder="123 Nairobi">
+										<span asp-validation-for="PostalAddress" class="text-danger"></span>
+									</div>
+								</div>
+							<div class="col-md-6">
+									<div class="form-group">
+										<label asp-for="Website"></label>
+										<input asp-for="Website" class="form-control" placeholder="www.example.com">
+										<span asp-validation-for="Website" class="text-danger"></span>
+									</div>
+								</div>
+						</div>*@
 					<div class="row">
 						<div class="col-md-12">
 							<p><strong>Status</strong></p>

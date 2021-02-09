@@ -27,12 +27,15 @@ namespace PosMaster.ViewModels
 			Status = customer.Status;
 			IsEditMode = true;
 			CreditLimit = customer.CreditLimit;
+			Gender = customer.Gender;
 		}
 
 		[Required]
+		[Display(Name = "First Name")]
 		public string FirstName { get; set; }
-        public string LastName { get; set; }
-        [Display(Name = "Primary Telephone")]
+		[Display(Name = "Last Name")]
+		public string LastName { get; set; }
+		[Display(Name = "Phone Number")]
 		public string PhoneNumber { get; set; }
 		[Display(Name = "Postal Address")]
 		public string PostalAddress { get; set; }
@@ -41,6 +44,8 @@ namespace PosMaster.ViewModels
 		[Display(Name = "Email Address")]
 		public string EmailAddress { get; set; }
 		public string Website { get; set; }
+		public string Gender { get; set; }
+		[Display(Name = "Credit Limit")]
 		public decimal CreditLimit { get; set; }
 
 	}

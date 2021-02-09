@@ -31,6 +31,7 @@
 		Receipt,
 		Grn,
 		Po,
-		Invoice
+		Invoice,
+		Customer
 	}
 }

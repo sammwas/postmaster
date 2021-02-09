@@ -109,16 +109,18 @@
 						<div class="col-md-6">
 							<div class="form-group">
 								<label asp-for="Gender"></label>
-								<div class="col-md-3">
-									<div class="form-check">
-										<input class="form-check-input" id="rdMale" type="radio" asp-for="Gender" value="Male">
-										<label class="form-check-label" for="rdMale">Male</label>
+								<div class="row">
+									<div class="col-md-6">
+										<div class="form-check">
+											<input class="form-check-input" id="rdMale" type="radio" asp-for="Gender" value="Male">
+											<label class="form-check-label" for="rdMale">Male</label>
+										</div>
 									</div>
-								</div>
-								<div class="col-md-3">
-									<div class="form-check">
-										<input class="form-check-input" id="rdFemale" type="radio" asp-for="Gender" value="Female">
-										<label class="form-check-label" for="rdFemale">Female</label>
+									<div class="col-md-6">
+										<div class="form-check">
+											<input class="form-check-input" id="rdFemale" type="radio" asp-for="Gender" value="Female">
+											<label class="form-check-label" for="rdFemale">Female</label>
+										</div>
 									</div>
 								</div>
 								<span asp-validation-for="Gender" class="text-danger"></span>

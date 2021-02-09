@@ -11,7 +11,8 @@
 		public string PostalAddress { get; set; }
 		public string Town { get; set; }
 		public decimal CreditLimit { get; set; }
-        public string EmailAddress { get; set; }
-        public string Website { get; set; }
-    }
+		public string EmailAddress { get; set; }
+		public string Website { get; set; }
+		public string FullName => $"{FirstName} {LastName}";
+	}
 }

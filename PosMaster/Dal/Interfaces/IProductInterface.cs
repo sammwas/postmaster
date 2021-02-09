@@ -23,6 +23,7 @@ namespace PosMaster.Dal.Interfaces
 		Task<ReturnData<PurchaseOrder>> AddPurchaseOrderAsync(PoViewModel model);
 		Task<ReturnData<List<PurchaseOrder>>> PurchaseOrdersAsync(Guid? clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "", string personnel = "");
 		Task<ReturnData<PurchaseOrder>> PurchaseOrderByIdAsync(Guid id);
+		string DocumentRefNumber(Document document, Guid clientId);
 	}
 
 	public class ProductImplementation : IProductInterface
@@ -590,7 +591,7 @@ namespace PosMaster.Dal.Interfaces
 			return invRef;
 		}
 
-		private string DocumentRefNumber(Document document, Guid clientId)
+		public string DocumentRefNumber(Document document, Guid clientId)
 		{
 			try
 			{
@@ -637,6 +638,16 @@ namespace PosMaster.Dal.Interfaces
 							var nextCount = _context.GoodReceivedNotes.Where(p => p.ClientId.Equals(clientId)).Count() + 1;
 							nextRef = prefix + (nextCount + i).ToString("D4");
 							exists = _context.GoodReceivedNotes.Any(a => a.Code.Equals(nextRef) && a.ClientId.Equals(clientId));
+							i++;
+						}
+						break;
+					case Document.Customer:
+						prefix = "CUST";
+						while (exists)
+						{
+							var nextCount = _context.Customers.Where(p => p.ClientId.Equals(clientId)).Count() + 1;
+							nextRef = prefix + (nextCount + i).ToString("D4");
+							exists = _context.Customers.Any(a => a.Code.Equals(nextRef) && a.ClientId.Equals(clientId));
 							i++;
 						}
 						break;
