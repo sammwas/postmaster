@@ -139,7 +139,8 @@ namespace PosMaster.Dal.Interfaces
 					TotalActualProfit = await _context.ReceiptLineItems.SumAsync(r => (r.UnitPrice * r.Quantity) - (r.BuyingPrice * r.Quantity)),
 					TotalExpectedProfit = await _context.ReceiptLineItems.SumAsync(r =>
 					(r.SellingPrice * r.Quantity) - (r.BuyingPrice * r.Quantity)),
-					TotalReceiptsAmount = await _context.ReceiptLineItems.SumAsync(r => r.Quantity * r.UnitPrice)
+					TotalReceiptsAmount = await _context.ReceiptLineItems.SumAsync(r => r.Quantity * r.UnitPrice),
+					DailySalesList = await _context.ReceiptLineItems.OrderBy(s => s.DateCreated).GroupBy(r => r.DateCreated.Date, (d, t) => new ChartData { Day = d.ToString("dddd"), Amount = t.Sum(r => r.Quantity * r.UnitPrice) }).ToListAsync()
 				};
 				result.Success = true;
 				result.Message = "Found";
