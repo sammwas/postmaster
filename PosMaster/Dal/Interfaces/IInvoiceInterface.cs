@@ -9,8 +9,7 @@ namespace PosMaster.Dal.Interfaces
 {
 	public interface IInvoiceInterface
 	{
-		Task<ReturnData<List<Invoice>>> ByClientIdAsync(Guid clientId);
-		Task<ReturnData<List<Invoice>>> ByInstanceIdAsync(Guid instanceId);
+		Task<ReturnData<List<Invoice>>> GetAsync(Guid? clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "");
 		Task<ReturnData<Invoice>> ByIdAsync(Guid id);
 		Task<ReturnData<Invoice>> PayAsync(Guid id, string personnel);
 	}
@@ -85,24 +84,36 @@ namespace PosMaster.Dal.Interfaces
 			}
 		}
 
-		public async Task<ReturnData<List<Invoice>>> ByInstanceIdAsync(Guid instanceId)
+		public async Task<ReturnData<List<Invoice>>> GetAsync(Guid? clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "")
 		{
 			var result = new ReturnData<List<Invoice>> { Data = new List<Invoice>() };
-			var tag = nameof(ByInstanceIdAsync);
-			_logger.LogInformation($"{tag} get all instance {instanceId} invoices");
+			var tag = nameof(GetAsync);
+			_logger.LogInformation($"{tag} get invoices: clientId {clientId}, instanceId {instanceId}, duration {dateFrom}-{dateTo}, search {search}");
 			try
 			{
-				var data = await _context.Invoices
+				var dataQuery = _context.Invoices
 					.Include(c => c.Receipt)
 					.ThenInclude(c => c.ReceiptLineItems)
-					.Where(c => c.InstanceId.Equals(instanceId))
-					.OrderByDescending(c => c.DateCreated)
+					.AsQueryable();
+				if (clientId != null)
+					dataQuery = dataQuery.Where(r => r.ClientId.Equals(clientId.Value));
+				if (instanceId != null)
+					dataQuery = dataQuery.Where(r => r.InstanceId.Equals(instanceId.Value));
+				var hasFromDate = DateTime.TryParse(dateFrom, out var dtFrom);
+				var hasToDate = DateTime.TryParse(dateTo, out var dtTo);
+				if (hasFromDate)
+					dataQuery = dataQuery.Where(r => r.DateCreated.Date >= dtFrom.Date);
+				if (hasToDate)
+					dataQuery = dataQuery.Where(r => r.DateCreated.Date <= dtTo.Date);
+				if (!string.IsNullOrEmpty(search))
+					dataQuery = dataQuery.Where(r => r.Code.ToLower().Contains(search.ToLower()));
+				var data = await dataQuery.OrderByDescending(r => r.DateCreated)
 					.ToListAsync();
 				result.Success = data.Any();
 				result.Message = result.Success ? "Found" : "Not Found";
 				if (result.Success)
 					result.Data = data;
-				_logger.LogInformation($"{tag} found {data.Count} instance invoices");
+				_logger.LogInformation($"{tag} found {data.Count} invoices");
 				return result;
 			}
 			catch (Exception ex)

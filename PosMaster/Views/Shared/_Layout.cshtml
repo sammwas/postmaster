@@ -168,6 +168,12 @@
 									</a>
 								</li>
 								<li class="nav-item">
+									<a asp-controller="PointOfSale" asp-action="Invoices" asp-route-dtFrom="@firstDayOfWeek" asp-route-dtTo="@DateTime.Now.ToString("dd-MMM-yyyy")" class="nav-link">
+										<i class="far fa-circle nav-icon"></i>
+										<p>Invoices</p>
+									</a>
+								</li>
+								<li class="nav-item">
 									<a asp-controller="PointOfSale" asp-action="Expenses" class="nav-link">
 										<i class="far fa-circle nav-icon"></i>
 										<p>Expenses</p>

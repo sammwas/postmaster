@@ -16,11 +16,14 @@ namespace PosMaster.Controllers
 		private readonly IProductInterface _productInterface;
 		private readonly ICookiesService _cookieService;
 		private readonly IExpenseInterface _expenseInterface;
-		public PointOfSaleController(IProductInterface productInterface, ICookiesService cookieService, IExpenseInterface expenseInterface)
+		private readonly IInvoiceInterface _invoiceInterface;
+		public PointOfSaleController(IProductInterface productInterface, ICookiesService cookieService,
+			IExpenseInterface expenseInterface, IInvoiceInterface invoiceInterface)
 		{
 			_productInterface = productInterface;
 			_cookieService = cookieService;
 			_expenseInterface = expenseInterface;
+			_invoiceInterface = invoiceInterface;
 		}
 		public IActionResult Index()
 		{
@@ -67,6 +70,28 @@ namespace PosMaster.Controllers
 				TempData.SetData(AlertLevel.Warning, "Receipts", result.Message);
 			return View(result.Data);
 		}
+
+		public async Task<IActionResult> Invoices(string insId = "", string dtFrom = "", string dtTo = "", string search = "")
+		{
+			ViewData["InstanceId"] = insId;
+			ViewData["DtFrom"] = dtFrom;
+			ViewData["DtTo"] = dtTo;
+			ViewData["Search"] = search;
+			var userData = _cookieService.Read();
+			Guid? clientId = null;
+			Guid? instanceId = null;
+			if (!User.IsInRole(Role.SuperAdmin))
+				clientId = userData.ClientId;
+			if (Guid.TryParse(insId, out var iId))
+				instanceId = iId;
+			if (User.IsInRole(Role.Clerk))
+				instanceId = userData.InstanceId;
+			var result = await _invoiceInterface.GetAsync(clientId, instanceId, dtFrom, dtTo, search);
+			if (!result.Success)
+				TempData.SetData(AlertLevel.Warning, "Invoices", result.Message);
+			return View(result.Data);
+		}
+
 		public async Task<IActionResult> Expenses(string insId = "", string dtFrom = "", string dtTo = "", string search = "")
 		{
 			ViewData["InstanceId"] = insId;

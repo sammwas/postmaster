@@ -582,7 +582,6 @@ namespace PosMaster.Dal.Interfaces
 				ReceiptId = receipt.Id,
 				InstanceId = receipt.InstanceId,
 				Personnel = receipt.Personnel,
-				CustomerId = receipt.CustomerId,
 				ReceiptNo = receipt.Code
 			};
 			_context.Invoices.Add(invoice);
