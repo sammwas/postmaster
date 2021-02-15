@@ -45,6 +45,7 @@ namespace PosMaster
 			services.AddScoped<IDashboardInterface, DashboardImplementation>();
 			services.AddScoped<IReportingInterface, ReportingImplementation>();
 			services.AddScoped<IMasterDataInterface, MasterDataImplementation>();
+			services.AddScoped<IInvoiceInterface, InvoiceImplementation>();
 
 			var server = Configuration["Database:Server"];
 			var port = Configuration["Database:Port"];
@@ -91,11 +92,11 @@ namespace PosMaster
 				options.SlidingExpiration = true;
 			});
 
-			services.AddAuthentication() 
+			services.AddAuthentication()
 				.AddGoogle(googleOptions =>
 			{
 				googleOptions.ClientId = Configuration["Google:ClientId"];
-				googleOptions.ClientSecret = Configuration["Google:ClientSecret"]; 
+				googleOptions.ClientSecret = Configuration["Google:ClientSecret"];
 			});
 
 			services.AddMvc();
