@@ -99,6 +99,12 @@ namespace PosMaster
 				googleOptions.ClientSecret = Configuration["Google:ClientSecret"];
 			});
 
+			services.Configure<CookiePolicyOptions>(options =>
+			{
+				options.CheckConsentNeeded = context => true;
+				options.MinimumSameSitePolicy = Microsoft.AspNetCore.Http.SameSiteMode.None;
+			});
+
 			services.AddMvc();
 			services.AddMemoryCache();
 			services.AddControllers();
@@ -123,6 +129,8 @@ namespace PosMaster
 						"public,max-age=" + durationInSeconds;
 				}
 			});
+
+			app.UseCookiePolicy();
 			app.UseAuthentication();
 			app.UseRouting();
 			app.UseAuthorization();

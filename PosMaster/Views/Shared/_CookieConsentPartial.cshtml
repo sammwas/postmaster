@@ -1,41 +1,33 @@
 ﻿@using Microsoft.AspNetCore.Http.Features
 
 @{
-    var consentFeature = Context.Features.Get<ITrackingConsentFeature>();
-    var showBanner = !consentFeature?.CanTrack ?? false;
-    var cookieString = consentFeature?.CreateConsentCookie();
+	var consentFeature = Context.Features.Get<ITrackingConsentFeature>();
+	var showBanner = !consentFeature?.CanTrack ?? false;
+	var cookieString = consentFeature?.CreateConsentCookie();
 }
 
 @if (showBanner)
 {
-    <nav id="cookieConsent" class="navbar navbar-default navbar-fixed-top" role="alert">
-        <div class="container">
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#cookieConsent .navbar-collapse">
-                    <span class="sr-only">Toggle cookie consent banner</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                <span class="navbar-brand"><span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span></span>
-            </div>
-            <div class="collapse navbar-collapse">
-                <p class="navbar-text">
-                    Use this space to summarize your privacy and cookie use policy.
-                </p>
-                <div class="navbar-right">
-                    <a asp-controller="Home" asp-action="Privacy" class="btn btn-info navbar-btn">Learn More</a>
-                    <button type="button" class="btn btn-default navbar-btn" data-cookie-string="@cookieString">Accept</button>
-                </div>
-            </div>
-        </div>
-    </nav>
-    <script>
-        (function () {
-            document.querySelector("#cookieConsent button[data-cookie-string]").addEventListener("click", function (el) {
-                document.cookie = el.target.dataset.cookieString;
-                document.querySelector("#cookieConsent").classList.add("hidden");
-            }, false);
-        })();
-    </script>
+	<nav id="cookieConsent" class="navbar navbar-expand navbar-white navbar-light" role="alert">
+		<div class="container">
+			<div class="collapse navbar-collapse alert alert-info">
+				<i class="fa fa-info-circle fa-2x"></i>
+				<p class="navbar-text">
+					The platform uses cookies to  improve your experience on our site, manage and facilitate operations.
+				</p>
+				<div class="navbar-right">
+					<a asp-controller="Home" asp-action="Privacy" class="btn btn-info navbar-btn btn-sm">Learn More</a>
+					<button type="button" class="btn btn-default navbar-btn btn-sm" data-cookie-string="@cookieString"><i class="fa fa-check-circle"></i> Accept</button>
+				</div>
+			</div>
+		</div>
+	</nav>
+	<script>
+		(function () {
+			document.querySelector("#cookieConsent button[data-cookie-string]").addEventListener("click", function (el) {
+				document.cookie = el.target.dataset.cookieString;
+				document.querySelector("#cookieConsent").style.display = "none";
+			}, false);
+		})();
+	</script>
 }
