@@ -76,9 +76,10 @@
                     </div>
                 </div>
 			</form>
-			<table id="dataTable" class="table table-bordered table-striped">
+			<table id="receiptsdt" class="table table-bordered table-striped" style="width:100%">
 				<thead>
 					<tr>
+						<th></th>
 						<th>Code</th>
 						<th>Date</th>
 						<th>Personnel</th>
@@ -89,8 +90,10 @@
 					@if (Model.Any())
 					{
 						@foreach (var item in Model)
-						{
-							<tr>
+                        {
+                            var receiptItems = Newtonsoft.Json.JsonConvert.SerializeObject(item.ReceiptLineItems);
+							<tr data-items="@receiptItems">
+								<td class="details-control"></td>
 								<td>@item.Code</td>
 								<td>@item.DateCreated</td>
 								<td>@item.Personnel</td>
@@ -101,12 +104,13 @@
 					}
 				</tbody>
 				<tfoot>
-					<tr>
-						<th>Code</th>
-						<th>Date</th>
-						<th>Personnel</th>
-						<th>Amount</th>
-					</tr>
+                    <tr>
+                        <th></th>
+                        <th>Code</th>
+                        <th>Date</th>
+                        <th>Personnel</th>
+                        <th>Amount</th>
+                    </tr>
 				</tfoot>
 			</table>
 		</div>

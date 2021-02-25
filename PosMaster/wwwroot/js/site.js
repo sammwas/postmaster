@@ -52,12 +52,6 @@ var addItemToList = function () {
 		$("#issMsg").text("available quantity is " + avQuantity).addClass('text-danger');
 		$("#quantityBought").focus();
 	}
-	//else if (typeof (quantity) !== 'number') {
-	//    $("#issMsg").text("quantity is not valid").css('color', 'red');
-	//}
-	//else if (typeof (unitPrice) !== 'number') {
-	//    $("#issMsg").text("price is not valid").css('color', 'red');
-	//}
 	else {
 		$("#issMsg").text("");
 		var listItem = {
@@ -115,4 +109,72 @@ $('.select2bs4').select2({
 	theme: 'bootstrap4'
 })
 
+var table = $('#receiptsdt').DataTable({
+	"paging": true,
+	"lengthChange": false,
+	"searching": false,
+	"ordering": true,
+	"info": true,
+	"autoWidth": false,
+	"responsive": true,
+});
+function createRow(item) {
+	return '<tr>' +
+		'<td>' + item.Product.Name + '</td>' +
+		'<td>' + item.Quantity + '</td>' +
+		'<td>' + item.SellingPrice + '</td>' +
+		'<td>' + item.Amount + '</td>'
+		+ '</tr>';
+}
+function appendTtRow(items) {
+	let total = 0;
+	for (let item of items) 
+		total += (item.Quantity * item.SellingPrice)
 
+	return '<tr>' +
+		'<td></td>' +
+		'<td></td>' +
+		'<td>Total:</td>' +
+		'<td>' + total + '</td>'
+		+ '</tr>';
+}
+function format() {
+	return '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">' +
+		'<thead>' +
+		'<tr>' +
+		'<th>Product</th>' +
+		'<th>Quantity</th>' +
+		'<th>Price</th>' +
+		'<th>Amount</th>' +
+		'</tr>' +
+		'</thead>' +
+		'<tbody class="receipt-items">'+
+		'<tr>' +
+		'<td></td>' +
+		'<td></td>' +
+		'<td></td>' +
+		'<td></td>' +
+		'</tr>' +
+		'</tbody>'+
+		'</table>';
+}
+
+$('#receiptsdt tbody').on('click', 'td.details-control', function () {
+	var tr = $(this).closest('tr');
+	var row = table.row(tr);
+	if (row.child.isShown()) {
+		row.child.hide();
+		tr.removeClass('shown');
+	}
+	else {
+		var items = tr.data()['items'];
+		var totalRow = appendTtRow(items);
+		row.child(format()).show();
+		for (let item of items) {
+			var tableRow = createRow(item);
+			$("table .receipt-items").append(tableRow);
+		}
+		$("table .receipt-items").append(totalRow);
+		tr.addClass('shown');
+	}
+});

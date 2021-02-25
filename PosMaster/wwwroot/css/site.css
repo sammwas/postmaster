@@ -6,3 +6,14 @@
 	font-size: 1rem;
 	font-weight: 400;
 }
+td.details-control {
+	background: url('../img/open-button.png') no-repeat center center;
+	width: 10px;
+	background-size: 20px 20px;
+}
+
+tr.shown td.details-control {
+	background: url('../img/close-button.png') no-repeat center center;
+	width: 10px;
+	background-size: 20px 20px;
+}
