@@ -54,7 +54,7 @@ namespace PosMaster.Controllers
 			await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
 			_cookiesService.Remove();
 			ViewData["ReturnUrl"] = returnUrl;
-			_logger.LogInformation($"{nameof(Index)} application started");
+			_logger.LogInformation($"{nameof(Index)} application started {DateTime.Now}");
 			return View(new LoginViewModel
 			{
 				AuthenticationSchemes = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList()
@@ -67,7 +67,6 @@ namespace PosMaster.Controllers
 		public async Task<IActionResult> Login(LoginViewModel model, string returnUrl = null)
 		{
 			ViewData["ReturnUrl"] = returnUrl;
-			model.AuthenticationSchemes = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 			var log = new UserLoginLog
 			{
 				ReturnUrl = returnUrl,
@@ -75,6 +74,8 @@ namespace PosMaster.Controllers
 			};
 			try
 			{
+				var schemes = await _signInManager.GetExternalAuthenticationSchemesAsync();
+				model.AuthenticationSchemes = schemes.ToList();
 				log.Source = DataSource.Web;
 				log.Agent = Request.Headers[HeaderNames.UserAgent];
 				log.IsHttps = Request.IsHttps;
