@@ -17,3 +17,12 @@ tr.shown td.details-control {
 	width: 10px;
 	background-size: 20px 20px;
 }
+.customer-list {
+	display: flex;
+}
+.customer-list strong {
+	margin-right: 10px;
+}
+.sales-type input {
+	margin-right: 10px;
+}

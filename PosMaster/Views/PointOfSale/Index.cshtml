@@ -3,129 +3,143 @@
 @inject ICookiesService _cookies;
 @model ProductSaleViewModel
 @{
-	ViewData["Active"] = "Point Of Sale";
-	var statuses = Helpers.Statuses();
-	var title = $"Point Of Sale";
-	ViewData["Title"] = title;
-	var userData = _cookies.Read();
-	var products = User.IsInRole(Role.Clerk) ?
-		await _productInterface.ByInstanceIdAsync(userData.InstanceId) :
-		await _productInterface.ByClientIdAsync(userData.ClientId);
-	var paymentModes = await _masterDataInterface.PaymentModesAsync(userData.ClientId);
+    ViewData["Active"] = "Point Of Sale";
+    var title = $"Point Of Sale";
+    ViewData["Title"] = title;
+    var userData = _cookies.Read();
+    var products = User.IsInRole(Role.Clerk) ?
+        await _productInterface.ByInstanceIdAsync(userData.InstanceId) :
+        await _productInterface.ByClientIdAsync(userData.ClientId);
+    var paymentModes = await _masterDataInterface.PaymentModesAsync(userData.ClientId);
 }
 <div class="card card-primary">
-	<div class="card-header">
-		<h3 class="card-title">@ViewData["Title"]</h3>
-	</div>
-	<div class="row">
-		<div class="col-md-4">
-			<div class="receipt-line-item">
-				<form role="form" autocomplete="off" id="productListForm">
-					<div asp-validation-summary="All" class="text-danger"></div>
-					<div class="card-body">
-						<div class="row">
-							<div class="col-md-12">
-								<div class="form-group">
-									<label>Product</label>
-									<select class="form-control select2" style="width: 100%;" id="productItem">
-										<option value="">--Select Product--</option>
-										@foreach (var item in products.Data)
-										{
-											<option data-qty="@item.AvailableQuantity" value="@item.Id" title="@item.Notes" data-uom="@item.UnitOfMeasure" data-price="@item.SellingPrice">@item.Name @item.UnitOfMeasure (Qty @item.AvailableQuantity)</option>
-										}
-									</select>
-								</div>
-							</div>
-						</div>
-						<div class="row">
-							<div class="col-md-6">
-								<div class="form-group">
-									<label>Quantity</label>
-									<input class="form-control numbers-only" value="" id="quantityBought" placeholder="0.00">
-									<span class="text-danger" id="quantity-validate"></span>
-								</div>
-							</div>
-							<div class="col-md-6">
-								<div class="form-group">
-									<label>Selling Price</label>
-									<input class="form-control numbers-only" id="sellingPrice" placeholder="0.00">
-								</div>
-							</div>
-						</div>
-					</div>
-					<div class="row">
-						<div class="col-md-6">
-							<br />
-							<p id="issMsg"></p>
-						</div>
-					</div>
-					<div class="card-footer">
-						<span class="text-right"><button type="submit" class="btn btn-primary" id="issBtnAdd">Add</button></span>
-					</div>
-				</form>
-			</div>
-		</div>
-		<div class="col-md-8">
-			<div class="receipt-items">
-				<table id="datataTable" class="table table-bordered table-striped">
-					<thead>
-						<tr>
-							<th>Item</th>
-							<th>Quantity</th>
-							<th>Price</th>
-							<th>Total</th>
-							<th>Option</th>
-						</tr>
-					</thead>
-					<tbody id="IssueListTable">
-					</tbody>
-					<tfoot>
-						<tr>
-							<th>Item</th>
-							<th>Quantity</th>
-							<th>Price</th>
-							<th>Total</th>
-							<th>Option</th>
-						</tr>
-					</tfoot>
-				</table>
-				<p>
-					<strong>Total Value : <span id="issTotal">0</span>  </strong>
-				</p>
-				<br />
-				<form method="post" autocomplete="off">
-					<div class="row">
-						<div class="col-md-6">
-							<div class="input-group">
-								<div class="form-group">
-									<label>Payment Mode</label>
-									<select asp-for="PaymentMode" class="form-control select2" style="width: 100%;" id="paymentMode">
-										<option value="">--Select Payment Mode--</option>
-										@foreach (var item in paymentModes.Data)
-										{
-											<option value="@item.Id" title="@item.Notes">@item.Name</option>
-										}
-									</select>
-									<span asp-validation-for="PaymentMode" class="text-danger"></span>
-								</div>
-							</div>
-						</div>
-						<div class="col-md-4">
-							<div class="form-group" id="refNo">
-								<label>Reference No</label>
-								<input asp-for="ExternalRef" class="form-control" id="refNoVal" placeholder="Ref No">
-								<span asp-validation-for="ExternalRef" class="text-danger"></span>
-							</div>
-						</div>
-					</div>
-					<input asp-for="LineItemListStr" id="issListRecords" type="hidden" />
-					<input asp-for="Code" type="hidden" value="@userData.InstanceCode" />
-					<input asp-for="InstanceId" type="hidden" value="@userData.InstanceId" />
-					<input asp-for="ClientId" type="hidden" value="@userData.ClientId" />
-					<input asp-for="CustomerId" value="@Constants.WalkInCustomerCode" type="hidden" />
-					<button disabled class="btn btn-primary" type="submit" id="btnSumbitIss"> <i class="fa fa-save"></i> Submit</button>
-				</form>
-			</div>
-		</div>
-	</div>
+    <div class="card-header">
+        <h3 class="card-title">@ViewData["Title"]</h3>
+    </div>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="receipt-line-item">
+                <form role="form" autocomplete="off" id="productListForm">
+                    <div asp-validation-summary="All" class="text-danger"></div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>Product</label>
+                                    <select class="form-control select2" style="width: 100%;" id="productItem">
+                                        <option value="">--Select Product--</option>
+                                        @foreach (var item in products.Data)
+                                        {
+                                            <option data-qty="@item.AvailableQuantity" value="@item.Id" title="@item.Notes" data-uom="@item.UnitOfMeasure" data-price="@item.SellingPrice">@item.Name @item.UnitOfMeasure (Qty @item.AvailableQuantity)</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Quantity</label>
+                                    <input class="form-control numbers-only" value="" id="quantityBought" placeholder="0.00">
+                                    <span class="text-danger" id="quantity-validate"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Selling Price</label>
+                                    <input class="form-control numbers-only" id="sellingPrice" placeholder="0.00">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <br />
+                            <p id="issMsg"></p>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <span class="text-right"><button type="submit" class="btn btn-primary" id="issBtnAdd">Add</button></span>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="receipt-items">
+                <table id="datataTable" class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                            <th>Total</th>
+                            <th>Option</th>
+                        </tr>
+                    </thead>
+                    <tbody id="IssueListTable">
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th>Item</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                            <th>Total</th>
+                            <th>Option</th>
+                        </tr>
+                    </tfoot>
+                </table>
+                <p>
+                    <strong>Total Value : <span id="issTotal">0</span>  </strong>
+                </p>
+                <br />
+                <div class="row sales-type">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <input type="checkbox" id="credit-sale" value="credit"/>
+                            <label>Is Credit Sale?</label>
+                        </div>
+                    </div>
+                    <div class="col-md-9 customer-list">
+                        <strong>Customer</strong>
+                        <select class="form-control select2" style="width: 50%;" id="customer-select">
+                            <option value="">Select Customer</option>
+                        </select>
+                    </div>
+                </div>
+                <br />
+                <form method="post" autocomplete="off">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <div class="form-group">
+                                    <label>Payment Mode</label>
+                                    <select asp-for="PaymentMode" class="form-control select2" style="width: 100%;" id="paymentMode">
+                                        <option value="">--Select Payment Mode--</option>
+                                        @foreach (var item in paymentModes.Data)
+                                        {
+                                            <option value="@item.Id" title="@item.Notes">@item.Name</option>
+                                        }
+                                    </select>
+                                    <span asp-validation-for="PaymentMode" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group" id="refNo">
+                                <label>Reference No</label>
+                                <input asp-for="ExternalRef" class="form-control" id="refNoVal" placeholder="Ref No">
+                                <span asp-validation-for="ExternalRef" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <input asp-for="LineItemListStr" id="issListRecords" type="hidden" />
+                    <input asp-for="Code" type="hidden" value="@userData.InstanceCode" />
+                    <input asp-for="InstanceId" type="hidden" value="@userData.InstanceId" />
+                    <input asp-for="ClientId" type="hidden" value="@userData.ClientId" />
+                    <input asp-for="CustomerId" value="@Constants.WalkInCustomerCode" type="hidden" />
+                    <button disabled class="btn btn-primary" type="submit" id="btnSumbitIss"> <i class="fa fa-save"></i> Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
