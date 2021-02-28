@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using PosMaster.Services;
 using PosMaster.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -15,6 +16,8 @@ namespace PosMaster.Dal.Interfaces
 		Task<ReturnData<List<Customer>>> ByClientIdAsync(Guid clientId);
 		Task<ReturnData<List<Customer>>> ByInstanceIdAsync(Guid instanceId);
 		Task<ReturnData<Customer>> ByIdAsync(Guid id);
+		Task<ReturnData<FormSelectViewModel>> DefaultClientCustomerAsync(Guid clientId);
+		Task<ReturnData<List<FormSelectViewModel>>> SearchClientCustomerAsync(Guid clientId, string term, int limit = 25);
 	}
 
 	public class CustomerImplementation : ICustomerInterface
@@ -134,6 +137,32 @@ namespace PosMaster.Dal.Interfaces
 			}
 		}
 
+		public async Task<ReturnData<FormSelectViewModel>> DefaultClientCustomerAsync(Guid clientId)
+		{
+			var result = new ReturnData<FormSelectViewModel> { Data = new FormSelectViewModel() };
+			var tag = nameof(DefaultClientCustomerAsync);
+			_logger.LogInformation($"{tag} get Customer by id - {clientId}");
+			try
+			{
+				var data = await _context.Customers
+					.FirstOrDefaultAsync(c => c.Code.Equals(Constants.WalkInCustomerCode) && c.ClientId.Equals(clientId));
+				result.Success = data != null;
+				result.Message = result.Success ? "Found" : "Not Found";
+				if (result.Success)
+					result.Data = new FormSelectViewModel(data);
+				_logger.LogInformation($"{tag} Customer for {clientId} {result.Message}");
+				return result;
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex);
+				result.ErrorMessage = ex.Message;
+				result.Message = "Error occured";
+				_logger.LogError($"{tag} {result.Message} : {ex}");
+				return result;
+			}
+		}
+
 		public async Task<ReturnData<Customer>> EditAsync(CustomerViewModel model)
 		{
 			var result = new ReturnData<Customer> { Data = new Customer() };
@@ -198,6 +227,45 @@ namespace PosMaster.Dal.Interfaces
 				result.Message = "Added";
 				result.Data = Customer;
 				_logger.LogInformation($"{tag} added {Customer.FirstName} {Customer.Code}  {Customer.Id} : {result.Message}");
+				return result;
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex);
+				result.ErrorMessage = ex.Message;
+				result.Message = "Error occured";
+				_logger.LogError($"{tag} {result.Message} : {ex}");
+				return result;
+			}
+		}
+
+		public async Task<ReturnData<List<FormSelectViewModel>>> SearchClientCustomerAsync(Guid clientId, string term, int limit = 25)
+		{
+			var result = new ReturnData<List<FormSelectViewModel>> { Data = new List<FormSelectViewModel>() };
+			var tag = nameof(SearchClientCustomerAsync);
+			_logger.LogInformation($"{tag} get Customers for client - {clientId} search -{term}");
+			try
+			{
+				var dataQry = _context.Customers
+					.Where(c => c.ClientId.Equals(clientId))
+					.OrderByDescending(c => c.DateLastModified)
+					.AsQueryable();
+				if (string.IsNullOrEmpty(term))
+				{
+					result.Message = "Term is required";
+					return result;
+				}
+
+				var data = await dataQry.Where(c => Helpers.StringContains(c.Code, term) ||
+				 Helpers.StringContains(c.FirstName, term) || Helpers.StringContains(c.LastName, term) ||
+				 Helpers.StringContains(c.PhoneNumber, term) || Helpers.StringContains(c.IdNumber, term))
+					.Select(c => new FormSelectViewModel(c))
+					.Take(limit).ToListAsync();
+				result.Success = data.Any();
+				result.Message = result.Success ? "Found" : "Not Found";
+				if (result.Success)
+					result.Data = data;
+				_logger.LogInformation($"{tag} Customer {clientId} {result.Message} -{data.Count} records");
 				return result;
 			}
 			catch (Exception ex)

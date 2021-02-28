@@ -112,5 +112,12 @@ namespace PosMaster.Services
 				iterator = iterator.AddMonths(1);
 			}
 		}
+
+		public static bool StringContains(string main, string search)
+		{
+			if (string.IsNullOrEmpty(main))
+				return false;
+			return main.ToLower().Contains(search.ToLower());
+		}
 	}
 }
