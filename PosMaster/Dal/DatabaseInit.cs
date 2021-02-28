@@ -21,8 +21,8 @@ namespace PosMaster.Dal
 
 		private static async Task SeedDataAsync(IServiceProvider serviceProvider)
 		{
-			var clientId = Guid.Parse("bb0a26bc-1e0a-4b60-a5a4-7ffb43c060c6");
-			var instanceId = Guid.Parse("f1781e2d-577d-4db6-9565-e7718b86cc7f");
+			var clientId = Guid.NewGuid();
+			var instanceId = Guid.NewGuid();
 			var context = serviceProvider.GetService<DatabaseContext>();
 			Console.WriteLine("Applying migrations ...");
 			context.Database.Migrate();

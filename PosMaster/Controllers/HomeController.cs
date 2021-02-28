@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -90,6 +89,16 @@ namespace PosMaster.Controllers
 					return View(model);
 				}
 
+				var consentFeature = HttpContext.Features.Get<ITrackingConsentFeature>();
+				var showBanner = !consentFeature?.CanTrack ?? false;
+				if (showBanner)
+				{
+					var bMsg = "Accept our Cookie policy to login";
+					TempData.SetData(AlertLevel.Warning, "Login Failed", bMsg);
+					log.Notes = bMsg;
+					await _userInterface.AddLoginLogAsync(log);
+					return View(model);
+				}
 				var result = await _signInManager
 					.PasswordSignInAsync(model.EmailAddress, model.Password, model.RememberMe,
 					lockoutOnFailure: true);
