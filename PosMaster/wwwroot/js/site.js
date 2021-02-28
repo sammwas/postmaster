@@ -181,18 +181,37 @@ $('#receiptsdt tbody').on('click', 'td.details-control', function () {
 
 $("input[value='credit']").prop('checked', false);
 populateSelect(false);
-$("#credit-sale").on("click", function () {
-	let checked = $("input[value='credit']").is(':checked')? true : false;
-	populateSelect(checked);
-});
-function populateSelect(checked) {
-	console.log(checked);
-	if (!checked) {
-		$('#customer-select')
-			.empty()
-			.append('<option selected="selected" value="walkIn">WALK-IN</option>');
-	} else {
-		$('#customer-select')
-			.empty();
-	}
+//$("#credit-sale").on("click", function () {
+//	let checked = $("input[value='credit']").is(':checked')? true : false;
+//	populateSelect(checked);
+//});
+function populateSelect(checked) { 
+	//if (!checked) {
+	//	$('#customer-select')
+	//		.empty()
+	//		.append('<option selected="selected" value="walkIn">WALK-IN</option>');
+	//} else {
+	//	$('#customer-select')
+	//		.empty();
+	//}
 }
+
+
+$('#customer-select').select2({
+	ajax: {
+		dataType: 'json',
+		delay: 250,
+		url: function (params) {
+			return '/Customers/Search?term=' + params.term+'&cId='+$("#clientId").val();
+		},
+		processResults: function (data, params) {
+			return {
+				results: data.data
+			};
+		},
+		cache: true
+	},
+
+	placeholder: 'Search by name, Id number or phone number',
+	minimumInputLength: 1
+});

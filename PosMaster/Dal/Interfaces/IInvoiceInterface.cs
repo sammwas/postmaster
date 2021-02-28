@@ -93,7 +93,8 @@ namespace PosMaster.Dal.Interfaces
 			{
 				var dataQuery = _context.Invoices
 					.Include(c => c.Receipt)
-					.ThenInclude(c => c.ReceiptLineItems)
+					.ThenInclude(u => u.Customer)
+					.Include(c => c.Receipt).ThenInclude(r => r.ReceiptLineItems)
 					.AsQueryable();
 				if (clientId != null)
 					dataQuery = dataQuery.Where(r => r.ClientId.Equals(clientId.Value));

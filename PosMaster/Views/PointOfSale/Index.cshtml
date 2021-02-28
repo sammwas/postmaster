@@ -1,6 +1,7 @@
 ﻿@inject IProductInterface _productInterface;
 @inject IMasterDataInterface _masterDataInterface;
 @inject ICookiesService _cookies;
+@inject ICustomerInterface  _customerInterface;
 @model ProductSaleViewModel
 @{
     ViewData["Active"] = "Point Of Sale";
@@ -11,6 +12,7 @@
         await _productInterface.ByInstanceIdAsync(userData.InstanceId) :
         await _productInterface.ByClientIdAsync(userData.ClientId);
     var paymentModes = await _masterDataInterface.PaymentModesAsync(userData.ClientId);
+    var walkIn = await _customerInterface.DefaultClientCustomerAsync(userData.ClientId);
 }
 <div class="card card-primary">
     <div class="card-header">
@@ -92,22 +94,24 @@
                     <strong>Total Value : <span id="issTotal">0</span>  </strong>
                 </p>
                 <br />
-                <div class="row sales-type">
-                    <div class="col-md-3">
-                        <div class="form-group">
-                            <input type="checkbox" id="credit-sale" value="credit"/>
-                            <label>Is Credit Sale?</label>
+                <form method="post" autocomplete="off">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <input asp-for="IsCredit" type="checkbox" id="credit-sale"/>
+                                <label>Is Credit Sale ?</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="CustomerId"></label>
+                                <select asp-for="CustomerId" class="form-control select2" style="width: 50%;" id="customer-select">
+                                    <option value="@walkIn.Data.Id">@walkIn.Data.Text</option>
+                                </select>
+                                <span asp-validation-for="CustomerId" class="text-danger"></span>
+                            </div>
                         </div>
                     </div>
-                    <div class="col-md-9 customer-list">
-                        <strong>Customer</strong>
-                        <select class="form-control select2" style="width: 50%;" id="customer-select">
-                            <option value="">Select Customer</option>
-                        </select>
-                    </div>
-                </div>
-                <br />
-                <form method="post" autocomplete="off">
                     <div class="row">
                         <div class="col-md-6">
                             <div class="input-group">
@@ -135,8 +139,7 @@
                     <input asp-for="LineItemListStr" id="issListRecords" type="hidden" />
                     <input asp-for="Code" type="hidden" value="@userData.InstanceCode" />
                     <input asp-for="InstanceId" type="hidden" value="@userData.InstanceId" />
-                    <input asp-for="ClientId" type="hidden" value="@userData.ClientId" />
-                    <input asp-for="CustomerId" value="@Constants.WalkInCustomerCode" type="hidden" />
+                    <input asp-for="ClientId" id="clientId" type="hidden" value="@userData.ClientId" />
                     <button disabled class="btn btn-primary" type="submit" id="btnSumbitIss"> <i class="fa fa-save"></i> Submit</button>
                 </form>
             </div>

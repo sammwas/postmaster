@@ -256,9 +256,10 @@ namespace PosMaster.Dal.Interfaces
 					return result;
 				}
 
-				var data = await dataQry.Where(c => Helpers.StringContains(c.Code, term) ||
-				 Helpers.StringContains(c.FirstName, term) || Helpers.StringContains(c.LastName, term) ||
-				 Helpers.StringContains(c.PhoneNumber, term) || Helpers.StringContains(c.IdNumber, term))
+				var data = await dataQry
+					//.Where(c => Helpers.StringContains(c.Code, term) ||
+				 //Helpers.StringContains(c.FirstName, term) || Helpers.StringContains(c.LastName, term) ||
+				 //Helpers.StringContains(c.PhoneNumber, term) || Helpers.StringContains(c.IdNumber, term))
 					.Select(c => new FormSelectViewModel(c))
 					.Take(limit).ToListAsync();
 				result.Success = data.Any();

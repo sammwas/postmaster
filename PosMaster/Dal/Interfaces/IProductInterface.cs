@@ -353,10 +353,7 @@ namespace PosMaster.Dal.Interfaces
 			_logger.LogInformation($"{tag} sell : credit {model.IsCredit} , walkin {model.IsWalkIn}");
 			try
 			{
-				var customer = model.IsWalkIn ?
-					await _context.Customers.FirstOrDefaultAsync(c => c.Code.Equals(Constants.WalkInCustomerCode) && c.ClientId.Equals(model.ClientId))
-					: await _context.Customers.FirstOrDefaultAsync(c => c.Id.Equals(Guid.Parse(model.CustomerId)));
-
+				var customer =  await _context.Customers.FirstOrDefaultAsync(c => c.Id.Equals(Guid.Parse(model.CustomerId)));
 				var lineItems = string.IsNullOrEmpty(model.LineItemListStr) ?
 					new List<ReceiptLineItemMiniViewModel>()
 					: JsonConvert.DeserializeObject<List<ReceiptLineItemMiniViewModel>>(model.LineItemListStr);
@@ -367,7 +364,7 @@ namespace PosMaster.Dal.Interfaces
 					_logger.LogWarning($"{tag} sale failed {model.CustomerId} : {result.Message}");
 					return result;
 				}
-
+				model.IsWalkIn = customer.Code.Equals(Constants.WalkInCustomerCode);
 				if (!lineItems.Any())
 				{
 					result.Message = "No line items found";
