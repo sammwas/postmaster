@@ -13,7 +13,7 @@ namespace PosMaster.Services
 
 	public class CookiesService : ICookiesService
 	{
-		private readonly string _key = "USER_DATA";
+		private readonly string _key = ".PosMaster.User";
 		private readonly IHttpContextAccessor _httpContextAccessor;
 		public CookiesService(IHttpContextAccessor httpContextAccessor)
 		{
@@ -31,6 +31,10 @@ namespace PosMaster.Services
 		public void Remove()
 		{
 			_httpContextAccessor.HttpContext.Response.Cookies.Delete(_key);
+			//foreach (var cookie in _httpContextAccessor.HttpContext.Request.Cookies)
+			//{
+			//	_httpContextAccessor.HttpContext.Response.Cookies.Delete(cookie.Key);
+			//}
 		}
 
 		public UserCookieData Store(UserCookieData data)
@@ -39,7 +43,8 @@ namespace PosMaster.Services
 			{
 				//Expires = DateTime.Now.AddSeconds(10)
 				SameSite = SameSiteMode.Strict,
-				HttpOnly = true
+				HttpOnly = true,
+				//Secure = true
 			};
 			var rawData = EncypterService.Encrypt(JsonConvert.SerializeObject(data));
 			_httpContextAccessor.HttpContext.Response.Cookies.Append(_key, Helpers.Base64Encode(rawData), options);

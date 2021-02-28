@@ -4,7 +4,7 @@
     var settingRes = await _sysSettings.ReadAsync();
     var settings = settingRes.Data;
     var userData = _cookies.Read();
-    var firstChar = userData.FirstName.ElementAtOrDefault(0);
+    var firstChar = userData.FirstName?.ElementAtOrDefault(0);
     var firstDayOfWeek = Helpers.FirstDayOfWeek().ToString("dd-MMM-yyyy");
 }
 <!DOCTYPE html>
@@ -116,7 +116,7 @@
             <a asp-controller="Dashboard" asp-action="Index" class="brand-link">
                 @if (string.IsNullOrEmpty(userData.ClientLogoPath))
                 {
-                    <span class="i-circle">@userData.ClientName.ElementAtOrDefault(0)</span>
+                    <span class="i-circle">@userData.ClientName?.ElementAtOrDefault(0)</span>
                 }
                 else
                 {
