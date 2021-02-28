@@ -35,5 +35,19 @@ namespace PosMaster.Controllers
 				TempData.SetData(AlertLevel.Warning, $"{option} Report", result.Message);
 			return View(result.Data);
 		}
+
+		public async Task<JsonResult> MonthlySalesReport(string instanceId = "", string dtFrom = "", string dtTo = "")
+		{
+			ViewData["dtTo"] = dtTo;
+			ViewData["dtFrom"] = dtFrom;
+			ViewData["instanceId"] = instanceId;
+			var userData = _cookiesService.Read();
+			Guid? clientId;
+			if (!User.IsInRole(Role.SuperAdmin))
+				clientId = userData.ClientId;
+			else clientId = null;
+			var result = await _reportingInterface.MonthlySalesReportAsync(clientId, instanceId, dtFrom, dtTo);
+			return Json(result);
+		}
 	}
 }
