@@ -353,7 +353,7 @@ namespace PosMaster.Dal.Interfaces
 			_logger.LogInformation($"{tag} sell : credit {model.IsCredit} , walkin {model.IsWalkIn}");
 			try
 			{
-				var customer =  await _context.Customers.FirstOrDefaultAsync(c => c.Id.Equals(Guid.Parse(model.CustomerId)));
+				var customer = await _context.Customers.FirstOrDefaultAsync(c => c.Id.Equals(Guid.Parse(model.CustomerId)));
 				var lineItems = string.IsNullOrEmpty(model.LineItemListStr) ?
 					new List<ReceiptLineItemMiniViewModel>()
 					: JsonConvert.DeserializeObject<List<ReceiptLineItemMiniViewModel>>(model.LineItemListStr);
@@ -365,6 +365,12 @@ namespace PosMaster.Dal.Interfaces
 					return result;
 				}
 				model.IsWalkIn = customer.Code.Equals(Constants.WalkInCustomerCode);
+				if (model.IsCredit && model.IsWalkIn)
+				{
+					result.Message = $"Credit Sale for {Constants.WalkInCustomerCode} not Allowed";
+					_logger.LogWarning($"{tag} sale failed {model.CustomerId} : {result.Message}");
+					return result;
+				}
 				if (!lineItems.Any())
 				{
 					result.Message = "No line items found";
@@ -427,6 +433,14 @@ namespace PosMaster.Dal.Interfaces
 					product.DateLastModified = DateTime.Now;
 					product.LastModifiedBy = model.Personnel;
 				}
+
+				if (receipt.ReceiptLineItems.Sum(r => r.Amount) > customer.CreditLimit)
+				{
+					result.Message = $"{customer.Code} Limit is {customer.CreditLimit}";
+					_logger.LogWarning($"{tag} sale failed {model.CustomerId} : {result.Message}");
+					return result;
+				}
+
 				_context.Receipts.Add(receipt);
 				await _context.SaveChangesAsync();
 

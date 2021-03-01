@@ -98,15 +98,21 @@ namespace PosMaster.Dal.Interfaces
 				{
 					var firstDay = DateTime.Parse($"01-{tuple.Item1}-{tuple.Item2}");
 					var lastDay = DateTime.Parse($"{tuple.Item3}-{tuple.Item1}-{tuple.Item2}");
-					var monthSales = await dataQuery.Where(d => d.DateCreated.Date >= firstDay.Date
+					var totalSales = await dataQuery.Where(d => d.DateCreated.Date >= firstDay.Date
 							&& d.DateCreated <= lastDay.Date)
-						.ToListAsync();
+						   .SumAsync(c => c.UnitPrice * c.Quantity);
+					var expectedProfit = await dataQuery.Where(d => d.DateCreated.Date >= firstDay.Date
+							&& d.DateCreated <= lastDay.Date)
+						   .SumAsync(r => (r.SellingPrice * r.Quantity) - (r.BuyingPrice * r.Quantity));
+					var actualProfit = await dataQuery.Where(d => d.DateCreated.Date >= firstDay.Date
+						&& d.DateCreated <= lastDay.Date)
+					   .SumAsync(r => (r.UnitPrice * r.Quantity) - (r.BuyingPrice * r.Quantity));
 					var sales = new MonthSaleViewModel
 					{
 						Month = tuple.Item1,
-						TotalSales = monthSales.Sum(d => d.Amount),
-						ExpectedProfit = monthSales.Sum(d => d.ExpectedProfit),
-						ActualProfit = monthSales.Sum(d => d.ActualProfit)
+						TotalSales = totalSales,
+						ExpectedProfit = expectedProfit,
+						ActualProfit = actualProfit
 					};
 					result.Data.Add(sales);
 				}

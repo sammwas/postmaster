@@ -38,6 +38,12 @@ namespace PosMaster.Dal.Interfaces
 			_logger.LogInformation($"{tag} add login log for {log.UserName}");
 			try
 			{
+				if (log.UserRole.Equals(Role.SuperAdmin))
+				{
+					result.Success = true;
+					result.Message = "SuperAdmin";
+					return result;
+				}
 				await _context.UserLoginLogs.AddAsync(log);
 				await _context.SaveChangesAsync();
 				result.Success = true;
