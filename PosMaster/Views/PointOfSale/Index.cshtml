@@ -4,7 +4,7 @@
 @inject ICustomerInterface  _customerInterface;
 @model ProductSaleViewModel
 @{
-    ViewData["Active"] = "Point Of Sale";
+    ViewData["Active"] = "POS";
     var title = $"Point Of Sale";
     ViewData["Title"] = title;
     var userData = _cookies.Read();

@@ -19,7 +19,6 @@
 				<div class="card-header">
 					<h3 class="card-title">
 						@ViewData["Title"]
-						@*<span class="text-right"><a asp-action="Index" class="btn btn-sm btn-info">Add</a></span>*@
 					</h3>
 				</div>
 			</div>
@@ -96,11 +95,25 @@
 						@foreach (var item in Model)
 						{
 							<tr>
-								<td>@item.Code</td>
+								<td><a asp-action="Invoice" asp-route-id="@item.Id">@item.Code</a></td>
 								<td>@item.Receipt.Customer.FullName</td>
 								<td>@item.DateCreated</td>
 								<td>@item.Personnel</td>
-								<td>@item.Status</td>
+								<td>
+									@if (item.Status.Equals(EntityStatus.Active))
+									{
+										<span class="badge badge-danger"><i class="fa fa-times-circle"></i> Not Paid</span>
+										<br />
+										<form method="post" asp-action="PayInvoice">
+											<input type="hidden" value="@item.Id" name="Id" />
+											<button type="submit" class="btn btn-info btn-xs" onclick="return confirm('Are you sure you want to pay ?')">Pay Now</button>
+										</form>
+									}
+									else
+									{
+										<span class="badge badge-success"><i class="fa fa-check-circle"></i> Paid</span>
+									}
+								</td>
 								<td>@item.TotalAmount</td>
 							</tr>
 						}

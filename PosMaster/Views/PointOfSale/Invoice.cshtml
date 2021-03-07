@@ -1,0 +1,127 @@
+﻿@inject ICookiesService _cookies;
+@inject IClientInstanceInterface _instanceInterface;
+@inject IMasterDataInterface _masterDataInterface;
+@model Invoice
+@{
+	ViewData["Active"] = "POS";
+	ViewData["Title"] = "Invoice";
+	var user = _cookies.Read();
+	var instanceRes = await _instanceInterface.ByIdAsync(user.InstanceId);
+	var paymentModes = await _masterDataInterface.PaymentModesAsync(user.ClientId);
+	var instance = instanceRes.Data;
+	var customer = Model.Receipt.Customer;
+}
+<div class="invoice p-3 mb-3">
+	<div class="row">
+		<div class="col-12">
+			<h4>
+				@if (!string.IsNullOrEmpty(user.ClientLogoPath))
+				{
+					<img width="50px" src="~/@user.ClientLogoPath" alt="@user.ClientCode" />
+				} @user.ClientName
+				<small class="float-right">Date: @DateTime.Now.ToString("dd-MMM-yyyy")</small>
+			</h4>
+		</div>
+	</div>
+	<div class="row invoice-info">
+		<div class="col-sm-4 invoice-col">
+			From
+			<address>
+				<strong>@instance.Name</strong><br>
+				@instance.Town, @instance.Location<br>
+				Phone: @instance.PrimaryTelephone OR @instance.SecondaryTelephone<br>
+				Email: @instance.PostalAddress
+			</address>
+		</div>
+		<div class="col-sm-4 invoice-col">
+			To
+			<address>
+				<strong>@customer.FullName</strong><br>
+				@customer.Town<br>
+				Phone: @customer.PhoneNumber<br>
+				Email: @customer.EmailAddress
+			</address>
+		</div>
+		<div class="col-sm-4 invoice-col">
+			<b>Invoice #@Model.Code</b><br>
+			<br>
+			<b>Status:</b> @Model.Status<br>
+			<b>Payment Due:</b> @Model.DateCreated<br>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-12 table-responsive">
+			<table class="table table-striped">
+				<thead>
+					<tr>
+						<th>#</th>
+						<th>Code</th>
+						<th>Name</th>
+						<th>Qty</th>
+						<th>Price</th>
+						<th>Subtotal</th>
+					</tr>
+				</thead>
+				<tbody>
+					@{ var i = 0;}
+					@foreach (var item in Model.Receipt.ReceiptLineItems)
+					{
+						i++;
+						<tr>
+							<td>@i</td>
+							<td>@item.Product.Code</td>
+							<td>@item.Product.Name</td>
+							<td>@item.Quantity</td>
+							<td>@item.SellingPrice</td>
+							<td>@item.Amount</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-6">
+			<p class="lead">Payment Modes:</p>
+			<ul>
+				@foreach (var item in paymentModes.Data)
+				{
+					<li>@item.Code - @item.Name</li>
+				}
+			</ul>
+			<p class="text-muted well well-sm shadow-none" style="margin-top: 10px;">
+				@instance.Client.InvoiceTerms
+			</p>
+		</div>
+		<div class="col-6">
+			<p class="lead">Amount Due @Model.DateCreated</p>
+
+			<div class="table-responsive">
+				<table class="table">
+					<tbody>
+						<tr>
+							<th style="width:50%">Subtotal:</th>
+							<td>@Model.TotalAmount</td>
+						</tr>
+						<tr>
+							<th>Tax (0%)</th>
+							<td>@Model.TaxAmount</td>
+						</tr>
+						<tr>
+							<th>Total:</th>
+							<td>@(Model.TotalAmount+Model.TaxAmount)</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+	<div class="row no-print">
+		<div class="col-12">
+			<a href="invoice-print.html" rel="noopener" target="_blank" class="btn btn-default"><i class="fas fa-print"></i> Print</a>
+			<button type="button" class="btn btn-success float-right">
+				<i class="far fa-credit-card"></i> Submit Payment
+			</button>
+		</div>
+	</div>
+</div>

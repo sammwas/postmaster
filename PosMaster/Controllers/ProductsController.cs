@@ -24,7 +24,7 @@ namespace PosMaster.Controllers
 			_cookieService = cookiesService;
 			_fileUploadService = fileUploadService;
 		}
-		public async Task<IActionResult> All()
+		public async Task<IActionResult> Index()
 		{
 			var user = _cookieService.Read();
 			if (User.IsInRole(Role.SuperAdmin))
@@ -60,7 +60,7 @@ namespace PosMaster.Controllers
 			if (!result.Success)
 			{
 				TempData.SetData(AlertLevel.Warning, "Products", result.Message);
-				return RedirectToAction(nameof(All));
+				return RedirectToAction(nameof(Index));
 			}
 
 			var model = new ProductViewModel(result.Data);
@@ -100,7 +100,7 @@ namespace PosMaster.Controllers
 			TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, title, result.Message);
 			if (!result.Success)
 				return View(model);
-			return RedirectToAction(nameof(All));
+			return RedirectToAction(nameof(Index));
 		}
 		public async Task<IActionResult> ProductStockAdjustment(Guid? clientId)
 		{
@@ -131,7 +131,7 @@ namespace PosMaster.Controllers
 			TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, title, result.Message);
 			if (!result.Success)
 				return View(model);
-			return RedirectToAction(nameof(All));
+			return RedirectToAction(nameof(Index));
 		}
 
 		public async Task<IActionResult> PurchaseOrders(string insId = "", string dtFrom = "", string dtTo = "", string search = "")

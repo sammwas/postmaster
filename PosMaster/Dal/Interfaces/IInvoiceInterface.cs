@@ -67,7 +67,14 @@ namespace PosMaster.Dal.Interfaces
 					.Include(r => r.Receipt)
 					.ThenInclude(r => r.ReceiptLineItems)
 					.FirstOrDefaultAsync(c => c.Id.Equals(id));
-				result.Success = invoice != null;
+				if (invoice != null)
+				{
+					result.Success = true;
+					invoice.Receipt.ReceiptLineItems.ForEach(l =>
+					{
+						l.Product = _context.Products.FirstOrDefault(p => p.Id.Equals(l.ProductId));
+					});
+				}
 				result.Message = result.Success ? "Found" : "Not Found";
 				if (result.Success)
 					result.Data = invoice;

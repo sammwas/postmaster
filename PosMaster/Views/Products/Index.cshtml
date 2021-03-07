@@ -1,12 +1,21 @@
-﻿@model List<Product>
+﻿@inject ICookiesService cookieService;
+@model List<Product>
 @{
 	ViewData["Active"] = "Products";
 	ViewData["Title"] = "Products";
+	var user = cookieService.Read();
 }
 <div>
 	<div class="card">
 		<div class="card-header">
-			<h3 class="card-title">@ViewData["Title"] <span class="text-right"><a asp-action="Edit" asp-route-id="" class="btn btn-sm btn-info">Add New</a></span></h3>
+			<h3 class="card-title">
+				@ViewData["Title"]
+				@if (!User.IsInRole(Role.Clerk))
+				{
+					<span class="text-right"><a asp-action="Edit" asp-route-id="" class="btn btn-sm btn-info">Add New</a></span>
+
+				}
+			</h3>
 		</div>
 		<div class="card-body">
 			<table id="example1" class="table table-bordered table-striped">
@@ -15,7 +24,10 @@
 						<th>Code</th>
 						<th>Name</th>
 						<th>Category</th>
-						<th>Buying</th>
+						@if (user.ShowBuyingPrice)
+						{
+							<th>Buying</th>
+						}
 						<th>Selling</th>
 						<th>Quantity</th>
 						<th>Reorder</th>
@@ -30,17 +42,23 @@
 							<td>@item.Code</td>
 							<td>@item.Name</td>
 							<td>@item.ProductCategory.Name</td>
-							<td>@item.BuyingPrice</td>
+							@if (user.ShowBuyingPrice)
+							{
+								<td>@item.BuyingPrice</td>
+							}
 							<td>@item.SellingPrice</td>
 							<td>@item.AvailableQuantity</td>
 							<td>@item.ReorderLevel</td>
 							<td>@item.UnitOfMeasure</td>
 							<td class="project-actions text-right">
-								<a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-info btn-xs">
-									<i class="fas fa-pencil-alt">
-									</i>
-									Edit
-								</a>
+								@if (!User.IsInRole(Role.Clerk))
+								{
+									<a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-info btn-xs">
+										<i class="fas fa-pencil-alt">
+										</i>
+										Edit
+									</a>
+								}
 								<a asp-action="ById" asp-route-id="@item.Id" class="btn btn-danger btn-xs">
 									<i class="fas fa-trash">
 									</i>
@@ -55,7 +73,10 @@
 						<th>Code</th>
 						<th>Name</th>
 						<th>Category</th>
-						<th>Buying</th>
+						@if (user.ShowBuyingPrice)
+						{
+							<th>Buying</th>
+						}
 						<th>Selling</th>
 						<th>Quantity</th>
 						<th>Reorder</th>
