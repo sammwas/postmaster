@@ -29,6 +29,7 @@ namespace PosMaster.ViewModels
 			IsEditMode = true;
 			Code = instance.Code;
 			Status = instance.Status;
+			EmailAddress = instance.EmailAddress;
 		}
 
 		[Display(Name = "Opening Time")]
@@ -47,5 +48,8 @@ namespace PosMaster.ViewModels
 		public string PrimaryTelephone { get; set; }
 		[Display(Name = "Secondary Telephone")]
 		public string SecondaryTelephone { get; set; }
+		[Display(Name = "Email Address")]
+		[DataType(DataType.EmailAddress)]
+		public string EmailAddress { get; set; }
 	}
 }

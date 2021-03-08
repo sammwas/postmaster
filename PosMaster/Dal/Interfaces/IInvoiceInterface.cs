@@ -152,7 +152,7 @@ namespace PosMaster.Dal.Interfaces
 				}
 				invoice.Receipt.DateLastModified = DateTime.Now;
 				invoice.Receipt.LastModifiedBy = personnel;
-				invoice.Receipt.IsCredit = false;
+				invoice.Receipt.IsPaid = true;
 				invoice.Status = EntityStatus.Closed;
 				invoice.LastModifiedBy = personnel;
 				invoice.DateLastModified = DateTime.Now;

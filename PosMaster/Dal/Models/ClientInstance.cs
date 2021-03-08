@@ -15,5 +15,6 @@ namespace PosMaster.Dal
 		public string Location { get; set; }
 		public string PrimaryTelephone { get; set; }
 		public string SecondaryTelephone { get; set; }
+		public string EmailAddress { get; set; }
 	}
 }

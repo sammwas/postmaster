@@ -17,7 +17,7 @@
 			<h4>
 				@if (!string.IsNullOrEmpty(user.ClientLogoPath))
 				{
-					<img width="50px" src="~/@user.ClientLogoPath" alt="@user.ClientCode" />
+					<img width="50" src="~/@user.ClientLogoPath" alt="@user.ClientCode" />
 				} @user.ClientName
 				<small class="float-right">Date: @DateTime.Now.ToString("dd-MMM-yyyy")</small>
 			</h4>
@@ -30,7 +30,7 @@
 				<strong>@instance.Name</strong><br>
 				@instance.Town, @instance.Location<br>
 				Phone: @instance.PrimaryTelephone OR @instance.SecondaryTelephone<br>
-				Email: @instance.PostalAddress
+				Email: @instance.EmailAddress
 			</address>
 		</div>
 		<div class="col-sm-4 invoice-col">
@@ -46,7 +46,7 @@
 			<b>Invoice #@Model.Code</b><br>
 			<br>
 			<b>Status:</b> @Model.Status<br>
-			<b>Payment Due:</b> @Model.DateCreated<br>
+			<b>Payment Due:</b> @Model.DueDate<br>
 		</div>
 	</div>
 	<div class="row">
@@ -94,8 +94,7 @@
 			</p>
 		</div>
 		<div class="col-6">
-			<p class="lead">Amount Due @Model.DateCreated</p>
-
+			<p class="lead">Amount Due @Model.DueDate</p>
 			<div class="table-responsive">
 				<table class="table">
 					<tbody>
@@ -118,10 +117,17 @@
 	</div>
 	<div class="row no-print">
 		<div class="col-12">
-			<a href="invoice-print.html" rel="noopener" target="_blank" class="btn btn-default"><i class="fas fa-print"></i> Print</a>
-			<button type="button" class="btn btn-success float-right">
-				<i class="far fa-credit-card"></i> Submit Payment
-			</button>
+			<a href="#" class="btn btn-default"><i class="fas fa-print"></i> Print</a>
+			@if (Model.Status.Equals(EntityStatus.Active))
+			{
+				<form method="post" asp-action="PayInvoice">
+					<input type="hidden" value="@Model.Id" name="Id" />
+					<button type="submit" class="btn btn-success float-right" onclick="return confirm('Are you sure you want to pay ?')">
+						<i class="far fa-credit-card"></i> Submit Payment
+					</button>
+				</form>
+			}
+
 		</div>
 	</div>
 </div>

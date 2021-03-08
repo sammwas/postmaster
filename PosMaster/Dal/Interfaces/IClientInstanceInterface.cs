@@ -132,6 +132,7 @@ namespace PosMaster.Dal.Interfaces
 					dbInstance.Name = model.Name;
 					dbInstance.Code = model.Code;
 					dbInstance.PostalAddress = model.PostalAddress;
+					dbInstance.EmailAddress = model.EmailAddress;
 					dbInstance.Town = model.Town;
 					dbInstance.Location = model.Location;
 					dbInstance.PrimaryTelephone = model.PrimaryTelephone;
@@ -166,7 +167,8 @@ namespace PosMaster.Dal.Interfaces
 					ClientId = model.ClientId,
 					Personnel = model.Personnel,
 					Status = model.Status,
-					Code = model.Code
+					Code = model.Code,
+					EmailAddress = model.EmailAddress
 				};
 				instance.InstanceId = instance.Id;
 				_context.ClientInstances.Add(instance);

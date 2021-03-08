@@ -33,5 +33,9 @@ namespace PosMaster.Dal
 		public DbSet<Invoice> Invoices { get; set; }
 		public DbSet<ReceiptLineItem> ReceiptLineItems { get; set; }
 		public DbSet<GoodReturnedNote> GoodReturnedNotes { get; set; }
+		public DbSet<Order> Orders { get; set; }
+		public DbSet<OrderLineItem> OrderLineItems { get; set; }
+		public DbSet<EmployeeSalary> EmployeeSalaries { get; set; }
+		public DbSet<EmployeeMonthPayment> EmployeeMonthPayments { get; set; }
 	}
 }
