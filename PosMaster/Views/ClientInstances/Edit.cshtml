@@ -90,8 +90,11 @@
 				</div>
 			</div>
 		</div>
-		<div class="card-footer">
-			<button type="submit" class="btn btn-primary">Submit</button>
-		</div>
+		@if (!User.IsInRole(Role.Clerk))
+		{
+			<div class="card-footer">
+				<button type="submit" class="btn btn-primary">Submit</button>
+			</div>
+		}
 	</form>
 </div>

@@ -255,11 +255,11 @@ namespace PosMaster.Dal.Interfaces
 					result.Message = "Term is required";
 					return result;
 				}
-
+				term = term.ToLower();
 				var data = await dataQry
-					//.Where(c => Helpers.StringContains(c.Code, term) ||
-				 //Helpers.StringContains(c.FirstName, term) || Helpers.StringContains(c.LastName, term) ||
-				 //Helpers.StringContains(c.PhoneNumber, term) || Helpers.StringContains(c.IdNumber, term))
+					.Where(c => c.Code.ToLower().Contains(term) ||
+					 c.FirstName.ToLower().Contains(term) || c.LastName.ToLower().Contains(term) ||
+					 c.PhoneNumber.Contains(term) || c.IdNumber.Contains(term))
 					.Select(c => new FormSelectViewModel(c))
 					.Take(limit).ToListAsync();
 				result.Success = data.Any();

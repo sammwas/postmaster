@@ -10,6 +10,7 @@
 	var paymentModes = await _masterDataInterface.PaymentModesAsync(user.ClientId);
 	var instance = instanceRes.Data;
 	var customer = Model.Receipt.Customer;
+	var isActive = Model.Status.Equals(EntityStatus.Active);
 }
 <div class="invoice p-3 mb-3">
 	<div class="row">
@@ -27,7 +28,7 @@
 		<div class="col-sm-4 invoice-col">
 			From
 			<address>
-				<strong>@instance.Name</strong><br>
+				<strong>@instance.Name </strong><br>
 				@instance.Town, @instance.Location<br>
 				Phone: @instance.PrimaryTelephone OR @instance.SecondaryTelephone<br>
 				Email: @instance.EmailAddress
@@ -36,7 +37,7 @@
 		<div class="col-sm-4 invoice-col">
 			To
 			<address>
-				<strong>@customer.FullName</strong><br>
+				<strong>@customer.FullName <span>[@customer.Code]</span></strong><br>
 				@customer.Town<br>
 				Phone: @customer.PhoneNumber<br>
 				Email: @customer.EmailAddress
@@ -46,7 +47,10 @@
 			<b>Invoice #@Model.Code</b><br>
 			<br>
 			<b>Status:</b> @Model.Status<br>
-			<b>Payment Due:</b> @Model.DueDate<br>
+			@if (isActive)
+			{
+				<b>Payment Due:</b> @Model.DueDate<br>
+			}
 		</div>
 	</div>
 	<div class="row">
@@ -94,7 +98,12 @@
 			</p>
 		</div>
 		<div class="col-6">
-			<p class="lead">Amount Due @Model.DueDate</p>
+			<p class="lead">
+				Amount @if (isActive)
+				{
+					<span>Due @Model.DueDate</span>
+				}
+			</p>
 			<div class="table-responsive">
 				<table class="table">
 					<tbody>
@@ -118,7 +127,7 @@
 	<div class="row no-print">
 		<div class="col-12">
 			<a href="#" class="btn btn-default"><i class="fas fa-print"></i> Print</a>
-			@if (Model.Status.Equals(EntityStatus.Active))
+			@if (isActive)
 			{
 				<form method="post" asp-action="PayInvoice">
 					<input type="hidden" value="@Model.Id" name="Id" />

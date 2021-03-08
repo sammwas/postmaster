@@ -12,7 +12,7 @@ namespace PosMaster.ViewModels
 		public FormSelectViewModel(Customer customer)
 		{
 			Id = customer.Id.ToString();
-			Text = $"{customer.Code} {customer.FullName} : {customer.PhoneNumber} : {customer.IdNumber}";
+			Text = $"{customer.FullName} : {customer.PhoneNumber} : {customer.IdNumber}";
 		}
 
 		public string Id { get; set; }
