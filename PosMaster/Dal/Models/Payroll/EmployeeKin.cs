@@ -14,5 +14,6 @@
 		public string EmailAddress { get; set; }
 		public string PhoneNumber { get; set; }
 		public string AltPhoneNumber { get; set; }
+		public string Relationship { get; set; }
 	}
 }

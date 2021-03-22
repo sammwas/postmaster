@@ -324,6 +324,48 @@ namespace PosMaster.Dal.Interfaces
 				_context.SmsSettings.Add(setting);
 				_context.SaveChanges();
 			}
+
+			if (!_context.Banks.Any(c => c.ClientId.Equals(clientId)))
+			{
+				var bank = new Bank
+				{
+					ClientId = clientId,
+					InstanceId = instanceId,
+					Code = "000",
+					Name = "DEFAULT",
+					Personnel = Constants.SuperAdminEmail
+				};
+				_context.Banks.Add(bank);
+				_context.SaveChanges();
+			}
+
+			if (!_context.Counties.Any(c => c.ClientId.Equals(clientId)))
+			{
+				var county = new County
+				{
+					ClientId = clientId,
+					InstanceId = instanceId,
+					Code = "000",
+					Name = "DEFAULT",
+					Personnel = Constants.SuperAdminEmail
+				};
+				_context.Counties.Add(county);
+				_context.SaveChanges();
+			}
+
+			if (!_context.EmployeeKinRelationships.Any(c => c.ClientId.Equals(clientId)))
+			{
+				var relationship = new EmployeeKinRelationship
+				{
+					ClientId = clientId,
+					InstanceId = instanceId,
+					Code = "000",
+					Name = "FATHER",
+					Personnel = Constants.SuperAdminEmail
+				};
+				_context.EmployeeKinRelationships.Add(relationship);
+				_context.SaveChanges();
+			}
 		}
 
 		public async Task<ReturnData<EmailSetting>> UpdateEmailSettingAsync(EmailSettingViewModel model)

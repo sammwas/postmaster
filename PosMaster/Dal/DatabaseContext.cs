@@ -43,6 +43,7 @@ namespace PosMaster.Dal
 		public DbSet<EmployeeLeaveApplication> EmployeeLeaveApplications { get; set; }
 		public DbSet<EmployeeLeaveCategory> EmployeeLeaveCategories { get; set; }
 		public DbSet<EmployeeLeaveEntitlement> EmployeeLeaveEntitlements { get; set; }
+		public DbSet<EmployeeKinRelationship> EmployeeKinRelationships { get; set; }
 		public DbSet<EmployeeSalaryLog> EmployeeSalaryLogs { get; set; }
 	}
 }
