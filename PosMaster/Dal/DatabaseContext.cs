@@ -35,7 +35,14 @@ namespace PosMaster.Dal
 		public DbSet<GoodReturnedNote> GoodReturnedNotes { get; set; }
 		public DbSet<Order> Orders { get; set; }
 		public DbSet<OrderLineItem> OrderLineItems { get; set; }
+		public DbSet<Bank> Banks { get; set; }
+		public DbSet<County> Counties { get; set; }
 		public DbSet<EmployeeSalary> EmployeeSalaries { get; set; }
 		public DbSet<EmployeeMonthPayment> EmployeeMonthPayments { get; set; }
+		public DbSet<EmployeeKin> EmployeeKins { get; set; }
+		public DbSet<EmployeeLeaveApplication> EmployeeLeaveApplications { get; set; }
+		public DbSet<EmployeeLeaveCategory> EmployeeLeaveCategories { get; set; }
+		public DbSet<EmployeeLeaveEntitlement> EmployeeLeaveEntitlements { get; set; }
+		public DbSet<EmployeeSalaryLog> EmployeeSalaryLogs { get; set; }
 	}
 }

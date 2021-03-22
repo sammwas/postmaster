@@ -395,9 +395,7 @@ namespace PosMaster.Dal.Interfaces
 					Notes = model.Notes,
 					Personnel = model.Personnel
 				};
-				if (!model.IsCredit)
-					receipt.IsPaid = true;
-
+				receipt.IsPaid = !model.IsCredit;
 				var i = 0;
 				foreach (var item in lineItems)
 				{

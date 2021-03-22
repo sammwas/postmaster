@@ -26,6 +26,10 @@ namespace PosMaster.Dal
 		public string MiddleName { get; set; }
 		public string LastName { get; set; }
 		public string MaritalStatus { get; set; }
+		public string AltPhoneNumber { get; set; }
+		public string PostalAddress { get; set; }
+		public string Town { get; set; }
+		public string County { get; set; }
 		public EntityStatus Status { get; set; }
 		public DateTime? PasswordChangeDate { get; set; }
 		public DateTime DateOfBirth { get; set; }
