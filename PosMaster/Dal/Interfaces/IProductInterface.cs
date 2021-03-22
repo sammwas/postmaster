@@ -395,6 +395,9 @@ namespace PosMaster.Dal.Interfaces
 					Notes = model.Notes,
 					Personnel = model.Personnel
 				};
+				if (!model.IsCredit)
+					receipt.IsPaid = true;
+
 				var i = 0;
 				foreach (var item in lineItems)
 				{
@@ -434,7 +437,7 @@ namespace PosMaster.Dal.Interfaces
 					product.LastModifiedBy = model.Personnel;
 				}
 
-				if (receipt.ReceiptLineItems.Sum(r => r.Amount) > customer.CreditLimit)
+				if (model.IsCredit && receipt.ReceiptLineItems.Sum(r => r.Amount) > customer.CreditLimit)
 				{
 					result.Message = $"{customer.Code} Limit is {customer.CreditLimit}";
 					_logger.LogWarning($"{tag} sale failed {model.CustomerId} : {result.Message}");

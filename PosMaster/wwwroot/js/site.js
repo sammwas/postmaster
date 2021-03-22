@@ -215,3 +215,93 @@ $('#customer-select').select2({
 	placeholder: 'Search by name, Id number or phone number',
 	minimumInputLength: 1
 });
+
+var salesChartCanvas = document.getElementById('revenue-chart-canvas').getContext('2d')
+$.get('/Reports/MonthlySalesReport').done(function (data) {
+	let sales = new Object();
+	sales = getSales(data);
+	plot(sales);
+});
+
+function getSales(response) {
+	let sales = response['data'];
+	let months = [];
+	let totalSales = [];
+	let expProfits = [];
+	let actualProfits = [];
+	for (let sale of sales) {
+		months.push(sale['month']);
+		totalSales.push(sale['totalSales']);
+		expProfits.push(sale['expectedProfit']);
+		actualProfits.push(sale['actualProfit']);
+	}
+
+	let salesObj = {
+		months: months, totalSales: totalSales, expProfits: expProfits, actualProfits: actualProfits
+	};
+	return salesObj;
+}
+
+function plot(sales) {
+	var salesChartData = {
+		labels: sales['months'],
+		datasets: [
+			{
+				label: 'Total Sales',
+				backgroundColor: 'rgba(60,141,188,0.9)',
+				borderColor: 'rgba(60,141,188,0.8)',
+				pointRadius: false,
+				pointColor: '#3b8bba',
+				pointStrokeColor: 'rgba(60,141,188,1)',
+				pointHighlightFill: '#fff',
+				pointHighlightStroke: 'rgba(60,141,188,1)',
+				data: sales['totalSales']
+			},
+			{
+				label: 'Expected Profit',
+				backgroundColor: 'rgba(210, 214, 222, 1)',
+				borderColor: 'rgba(210, 214, 222, 1)',
+				pointRadius: false,
+				pointColor: 'rgba(210, 214, 222, 1)',
+				pointStrokeColor: '#c1c7d1',
+				pointHighlightFill: '#fff',
+				pointHighlightStroke: 'rgba(220,220,220,1)',
+				data: sales['expProfits']
+			}
+		]
+	}
+
+	var salesChartOptions = {
+		maintainAspectRatio: false,
+		responsive: true,
+		legend: {
+			display: false
+		},
+		scales: {
+			xAxes: [{
+				gridLines: {
+					display: false
+				}
+			}],
+			yAxes: [{
+				gridLines: {
+					display: false
+				}
+			}]
+		}
+	}
+
+	var salesChart = new Chart(salesChartCanvas, {
+		type: 'line',
+		data: salesChartData,
+		options: salesChartOptions
+	})
+}
+
+$('#calendar').datetimepicker({
+	format: 'L',
+	inline: true
+})
+
+
+

@@ -3,6 +3,8 @@
     Layout = "_HomePageLayout";
     ViewData["Title"] = "Home";
     var homeRes = await _settings.TermsAndPrivacyAsync();
+    var settingsRes = await _settings.ReadAsync();
+    var settings = settingsRes.Data;
 }
 <header class="masthead text-white text-center">
     <div class="overlay"></div>
