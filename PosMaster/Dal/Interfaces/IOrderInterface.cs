@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using PosMaster.ViewModels;
-using PosMaster.ViewModels.Product;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,24 +9,24 @@ using System.Threading.Tasks;
 
 namespace PosMaster.Dal.Interfaces
 {
-    public interface IOrderInterface
-    {
-        Task<ReturnData<List<Order>>> OrdersAsync(Guid? clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "");
-        Task<ReturnData<Order>> PlaceOrderAsync(OrderViewModel model);
+	public interface IOrderInterface
+	{
+		Task<ReturnData<List<Order>>> OrdersAsync(Guid? clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "");
+		Task<ReturnData<Order>> PlaceOrderAsync(OrderViewModel model);
 		Task<ReturnData<Order>> OrderByIdAsync(Guid id);
 		Task<ReturnData<Order>> EditAsync(OrderViewModel model);
 	}
-    public class OrdersImplementation : IOrderInterface
-    {
+	public class OrdersImplementation : IOrderInterface
+	{
 		private readonly DatabaseContext _context;
 		private readonly ILogger<OrdersImplementation> _logger;
-        public OrdersImplementation(DatabaseContext context, ILogger<OrdersImplementation> logger)
-        {
+		public OrdersImplementation(DatabaseContext context, ILogger<OrdersImplementation> logger)
+		{
 			_context = context;
 			_logger = logger;
 		}
 		public async Task<ReturnData<List<Order>>> OrdersAsync(Guid? clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "")
-        {
+		{
 			var result = new ReturnData<List<Order>> { Data = new List<Order>() };
 			var tag = nameof(OrdersAsync);
 			_logger.LogInformation($"{tag} get orders: clientId {clientId}, instanceId {instanceId}, duration {dateFrom}-{dateTo}, search {search}");
@@ -71,8 +70,8 @@ namespace PosMaster.Dal.Interfaces
 			}
 		}
 
-        public async Task<ReturnData<Order>> PlaceOrderAsync(OrderViewModel model)
-        {
+		public async Task<ReturnData<Order>> PlaceOrderAsync(OrderViewModel model)
+		{
 			var result = new ReturnData<Order> { Data = new Order() };
 			var tag = nameof(PlaceOrderAsync);
 			_logger.LogInformation($"{tag} create purchase order for instance {model.InstanceId}");
@@ -239,8 +238,8 @@ namespace PosMaster.Dal.Interfaces
 			}
 		}
 
-        public async Task<ReturnData<Order>> OrderByIdAsync(Guid id)
-        {
+		public async Task<ReturnData<Order>> OrderByIdAsync(Guid id)
+		{
 			var result = new ReturnData<Order> { Data = new Order() };
 			var tag = nameof(OrderByIdAsync);
 			_logger.LogInformation($"{tag} get orders by id {id}");
@@ -267,33 +266,33 @@ namespace PosMaster.Dal.Interfaces
 				return result;
 			}
 		}
-        public async Task<ReturnData<Order>> EditAsync(OrderViewModel model)
-        {
-            var result = new ReturnData<Order> { Data = new Order() };
-            var tag = nameof(EditAsync);
-            _logger.LogInformation($"{tag} edit order");
-            try
-            {
-                var dbOrder = await _context.Orders.Include(o => o.OrderLineItems)
-                    .FirstOrDefaultAsync(c => c.Id.Equals(model.Id));
-                if (dbOrder == null)
-                {
-                    result.Message = "Not Found";
-                    _logger.LogWarning($"{tag} update failed {model.Id} : {result.Message}");
-                    return result;
-                }
-                var lineItems = string.IsNullOrEmpty(model.LineItemListStr) ?
-                    new List<OrderLineItemMiniViewModel>()
-                    : JsonConvert.DeserializeObject<List<OrderLineItemMiniViewModel>>(model.LineItemListStr);
-                if (!lineItems.Any())
-                {
-                    result.Message = "No line items found";
-                    _logger.LogWarning($"{tag} order failed  {model.InstanceId} : {result.Message}");
-                    return result;
-                }
-                   
-                foreach (var item in lineItems)
-                {
+		public async Task<ReturnData<Order>> EditAsync(OrderViewModel model)
+		{
+			var result = new ReturnData<Order> { Data = new Order() };
+			var tag = nameof(EditAsync);
+			_logger.LogInformation($"{tag} edit order");
+			try
+			{
+				var dbOrder = await _context.Orders.Include(o => o.OrderLineItems)
+					.FirstOrDefaultAsync(c => c.Id.Equals(model.Id));
+				if (dbOrder == null)
+				{
+					result.Message = "Not Found";
+					_logger.LogWarning($"{tag} update failed {model.Id} : {result.Message}");
+					return result;
+				}
+				var lineItems = string.IsNullOrEmpty(model.LineItemListStr) ?
+					new List<OrderLineItemMiniViewModel>()
+					: JsonConvert.DeserializeObject<List<OrderLineItemMiniViewModel>>(model.LineItemListStr);
+				if (!lineItems.Any())
+				{
+					result.Message = "No line items found";
+					_logger.LogWarning($"{tag} order failed  {model.InstanceId} : {result.Message}");
+					return result;
+				}
+
+				foreach (var item in lineItems)
+				{
 					var rmItem = dbOrder.OrderLineItems.FirstOrDefault(o => o.ProductId == item.ProductId);
 					dbOrder.OrderLineItems.Remove(rmItem);
 
@@ -340,15 +339,15 @@ namespace PosMaster.Dal.Interfaces
 				_logger.LogInformation($"{tag} updated {lineItems.Count} products: {result.Message}");
 				return result;
 
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-                result.ErrorMessage = ex.Message;
-                result.Message = "Error occured";
-                _logger.LogError($"{tag} {result.Message} : {ex}");
-                return result;
-            }
-        }
-    }
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex);
+				result.ErrorMessage = ex.Message;
+				result.Message = "Error occured";
+				_logger.LogError($"{tag} {result.Message} : {ex}");
+				return result;
+			}
+		}
+	}
 }

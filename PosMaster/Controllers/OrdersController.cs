@@ -3,15 +3,13 @@ using PosMaster.Dal;
 using PosMaster.Dal.Interfaces;
 using PosMaster.Extensions;
 using PosMaster.Services;
-using PosMaster.ViewModels.Product;
+using PosMaster.ViewModels;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace PosMaster.Controllers
 {
-    public class OrdersController : Controller
+	public class OrdersController : Controller
     {
         private readonly ICookiesService _cookieService;
         private readonly IOrderInterface _orderInterface;

@@ -683,6 +683,8 @@ namespace PosMaster.Dal.Interfaces
 							var nextCount = _context.EmployeeLeaveApplications.Where(p => p.ClientId.Equals(clientId)).Count() + 1;
 							nextRef = prefix + (nextCount + i).ToString("D4");
 							exists = _context.EmployeeLeaveApplications.Any(a => a.Code.Equals(nextRef) && a.ClientId.Equals(clientId));
+						}
+						break;
 					case Document.Order:
 						prefix = "ORD";
 						while (exists)

@@ -33,7 +33,7 @@
 		Po,
 		Invoice,
 		Customer,
-		Leave
+		Leave,
 		Order
 	}
 
