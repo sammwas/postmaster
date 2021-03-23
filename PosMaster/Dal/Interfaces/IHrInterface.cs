@@ -17,8 +17,10 @@ namespace PosMaster.Dal.Interfaces
 		Task<ReturnData<EmployeeLeaveCategory>> LeaveCategoryByIdAsync(Guid id);
 		Task<ReturnData<List<EmployeeLeaveCategory>>> LeaveCategoriesAsync(Guid clientId);
 		Task<ReturnData<EmployeeSalary>> EditEmployeeSalaryAsync(EmployeeSalaryViewModel model);
-		Task<ReturnData<EmployeeSalary>> EmployeeSalaryByIdAsync(string userId);
+		Task<ReturnData<EmployeeSalary>> EmployeeSalaryByUserIdAsync(string userId);
 		Task<ReturnData<List<EmployeeSalary>>> EmployeeSalariesAsync(Guid clientId);
+		Task<ReturnData<EmployeeKin>> EditEmployeeKinAsync(EmployeeKinViewModel model);
+		Task<ReturnData<EmployeeKin>> EmployeeKinByUserIdAsync(string userId);
 	}
 
 	public class HrImplementation : IHrInterface
@@ -141,6 +143,85 @@ namespace PosMaster.Dal.Interfaces
 				result.Message = "Added";
 				result.Data = bank;
 				_logger.LogInformation($"{tag} added {bank.Name}  {bank.Id} : {result.Message}");
+				return result;
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex);
+				result.ErrorMessage = ex.Message;
+				result.Message = "Error occured";
+				_logger.LogError($"{tag} {result.Message} : {ex}");
+				return result;
+			}
+		}
+
+		public async Task<ReturnData<EmployeeKin>> EditEmployeeKinAsync(EmployeeKinViewModel model)
+		{
+			var result = new ReturnData<EmployeeKin> { Data = new EmployeeKin() };
+			var tag = nameof(EditEmployeeKinAsync);
+			_logger.LogInformation($"{tag} edit user {model.UserId} next of kin");
+			try
+			{
+				if (model.IsEditMode)
+				{
+					var dbKin = await _context.EmployeeKins
+						.FirstOrDefaultAsync(c => c.UserId.Equals(model.UserId));
+					if (dbKin == null)
+					{
+						result.Message = "Not Found";
+						_logger.LogInformation($"{tag} update failed {model.Id} : {result.Message}");
+						return result;
+					}
+					dbKin.FirstName = model.FirstName;
+					dbKin.MiddleName = model.MiddleName;
+					dbKin.LastName = model.LastName;
+					dbKin.Code = model.Code;
+					dbKin.EmailAddress = model.EmailAddress;
+					dbKin.PhoneNumber = model.PhoneNumber;
+					dbKin.AltPhoneNumber = model.AltPhoneNumber;
+					dbKin.PostalAddress = model.PostalAddress;
+					dbKin.Town = model.Town;
+					dbKin.Title = model.Title;
+					dbKin.Gender = model.Gender;
+					dbKin.Relationship = model.Relationship;
+					dbKin.LastModifiedBy = model.Personnel;
+					dbKin.DateLastModified = DateTime.Now;
+					dbKin.Notes = model.Notes;
+					dbKin.Status = model.Status;
+					await _context.SaveChangesAsync();
+					result.Success = true;
+					result.Message = "Updated";
+					result.Data = dbKin;
+					_logger.LogInformation($"{tag} updated {dbKin.FirstName} {model.Id} : {result.Message}");
+					return result;
+				}
+
+				var kin = new EmployeeKin
+				{
+					FirstName = model.FirstName,
+					MiddleName = model.MiddleName,
+					LastName = model.LastName,
+					AltPhoneNumber = model.AltPhoneNumber,
+					PhoneNumber = model.PhoneNumber,
+					Notes = model.Notes,
+					ClientId = model.ClientId,
+					Personnel = model.Personnel,
+					Status = model.Status,
+					Code = model.Code,
+					EmailAddress = model.EmailAddress,
+					Title = model.Title,
+					Relationship = model.Relationship,
+					Gender = model.Gender,
+					InstanceId = model.InstanceId,
+					PostalAddress = model.PostalAddress,
+					Town = model.Town
+				};
+				_context.EmployeeKins.Add(kin);
+				await _context.SaveChangesAsync();
+				result.Success = true;
+				result.Message = "Added";
+				result.Data = kin;
+				_logger.LogInformation($"{tag} added {kin.FirstName}  {kin.Id} : {result.Message}");
 				return result;
 			}
 			catch (Exception ex)
@@ -290,6 +371,32 @@ namespace PosMaster.Dal.Interfaces
 			}
 		}
 
+		public async Task<ReturnData<EmployeeKin>> EmployeeKinByUserIdAsync(string userId)
+		{
+			var result = new ReturnData<EmployeeKin> { Data = new EmployeeKin() };
+			var tag = nameof(EmployeeKinByUserIdAsync);
+			_logger.LogInformation($"{tag} get employee {userId} kin");
+			try
+			{
+				var salary = await _context.EmployeeKins.Include(u => u.User)
+					.FirstOrDefaultAsync(c => c.UserId.Equals(userId));
+				result.Success = salary != null;
+				result.Message = result.Success ? "Found" : "Not Found";
+				if (result.Success)
+					result.Data = salary;
+				_logger.LogInformation($"{tag} kin for {userId} {result.Message}");
+				return result;
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex);
+				result.ErrorMessage = ex.Message;
+				result.Message = "Error occured";
+				_logger.LogError($"{tag} {result.Message} : {ex}");
+				return result;
+			}
+		}
+
 		public async Task<ReturnData<List<EmployeeSalary>>> EmployeeSalariesAsync(Guid clientId)
 		{
 			var result = new ReturnData<List<EmployeeSalary>> { Data = new List<EmployeeSalary>() };
@@ -318,10 +425,10 @@ namespace PosMaster.Dal.Interfaces
 			}
 		}
 
-		public async Task<ReturnData<EmployeeSalary>> EmployeeSalaryByIdAsync(string userId)
+		public async Task<ReturnData<EmployeeSalary>> EmployeeSalaryByUserIdAsync(string userId)
 		{
 			var result = new ReturnData<EmployeeSalary> { Data = new EmployeeSalary() };
-			var tag = nameof(EmployeeSalaryByIdAsync);
+			var tag = nameof(EmployeeSalaryByUserIdAsync);
 			_logger.LogInformation($"{tag} get employee {userId} salary");
 			try
 			{
