@@ -32,7 +32,8 @@
 		Grn,
 		Po,
 		Invoice,
-		Customer
+		Customer,
+		Order
 	}
 
 	public enum ApplicationStatus

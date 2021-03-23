@@ -661,6 +661,16 @@ namespace PosMaster.Dal.Interfaces
 							i++;
 						}
 						break;
+					case Document.Order:
+						prefix = "ORD";
+						while (exists)
+						{
+							var nextCount = _context.Orders.Where(p => p.ClientId.Equals(clientId)).Count() + 1;
+							nextRef = prefix + (nextCount + i).ToString("D4");
+							exists = _context.Orders.Any(a => a.Code.Equals(nextRef) && a.ClientId.Equals(clientId));
+							i++;
+						}
+						break;
 					default:
 						break;
 				}

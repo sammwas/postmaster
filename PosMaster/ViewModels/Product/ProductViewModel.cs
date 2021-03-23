@@ -1,10 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
-using PosMaster.Dal;
 using System.ComponentModel.DataAnnotations;
 
 namespace PosMaster.ViewModels
 {
-	public class ProductViewModel : BaseViewModel
+    public class ProductViewModel : BaseViewModel
 	{
 		public ProductViewModel()
 		{
