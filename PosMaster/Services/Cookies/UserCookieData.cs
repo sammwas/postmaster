@@ -21,6 +21,7 @@ namespace PosMaster.Services
 			ImagePath = user.ImagePath;
 			DateCreated = user.DateCreated;
 			EmailAddress = user.Email;
+			Gender = user.Gender;
 		}
 		public string UserId { get; set; }
 		public string FirstName { get; set; }
@@ -37,5 +38,6 @@ namespace PosMaster.Services
 		public DateTime DateCreated { get; set; }
 		public string EmailAddress { get; set; }
 		public bool ShowBuyingPrice { get; set; }
+		public string Gender { get; set; }
 	}
 }

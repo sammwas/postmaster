@@ -21,18 +21,22 @@ namespace PosMaster.Dal.Interfaces
 		Task<ReturnData<List<EmployeeSalary>>> EmployeeSalariesAsync(Guid clientId);
 		Task<ReturnData<EmployeeKin>> EditEmployeeKinAsync(EmployeeKinViewModel model);
 		Task<ReturnData<EmployeeKin>> EmployeeKinByUserIdAsync(string userId);
+		Task<ReturnData<List<EmployeeLeaveCategory>>> EmployeeLeaveBalancesAsync(Guid clientId, string userId, string gender, Guid? categoryId);
+		Task<ReturnData<EmployeeLeaveApplication>> EditLeaveApplicationAsync(LeaveApplicationViewModel model);
+		Task<ReturnData<List<EmployeeLeaveApplication>>> LeaveApplicationsAsync(Guid? clientId, Guid? instanceId, string userId = "", string dtFrom = "", string dtTo = "");
 	}
 
 	public class HrImplementation : IHrInterface
 	{
 		private readonly DatabaseContext _context;
+		private readonly IProductInterface _productInterface;
 		private readonly ILogger<HrImplementation> _logger;
-		public HrImplementation(DatabaseContext context, ILogger<HrImplementation> logger)
+		public HrImplementation(DatabaseContext context, ILogger<HrImplementation> logger, IProductInterface productInterface)
 		{
 			_context = context;
 			_logger = logger;
+			_productInterface = productInterface;
 		}
-
 
 		public async Task<ReturnData<Bank>> BankByIdAsync(Guid id)
 		{
@@ -308,6 +312,108 @@ namespace PosMaster.Dal.Interfaces
 			}
 		}
 
+		public async Task<ReturnData<EmployeeLeaveApplication>> EditLeaveApplicationAsync(LeaveApplicationViewModel model)
+		{
+			var result = new ReturnData<EmployeeLeaveApplication> { Data = new EmployeeLeaveApplication() };
+			var tag = nameof(EditLeaveApplicationAsync);
+			_logger.LogInformation($"{tag} edit leave application");
+			try
+			{
+				var cId = Guid.Parse(model.EmployeeLeaveCategoryId);
+				var balancesRes = await EmployeeLeaveBalancesAsync(model.ClientId, model.UserId, model.Gender, cId);
+				if (!balancesRes.Success)
+				{
+					result.Message = balancesRes.Message;
+					result.ErrorMessage = balancesRes.ErrorMessage;
+					_logger.LogInformation($"{tag} - {result.Message}");
+					return result;
+				}
+
+				var category = balancesRes.Data.FirstOrDefault(c => c.Id.Equals(cId));
+				if (category == null)
+				{
+					result.Message = "Provided category not found";
+					_logger.LogInformation($"{tag} - {result.Message}");
+					return result;
+
+				}
+
+				if (model.Days > category.MaxDays)
+				{
+					result.Message = $"Max {category.MaxDays} days for {category.Title}";
+					_logger.LogInformation($"{tag} - {result.Message}");
+					return result;
+				}
+
+				var dtFrom = DateTime.Parse(model.DateFrom);
+				var dtTo = DateTime.Parse(model.DateTo);
+				if (dtFrom > dtTo)
+				{
+					result.Message = $"Date to should be greater";
+					_logger.LogInformation($"{tag} - {result.Message}");
+					return result;
+				}
+
+				if (model.IsEditMode)
+				{
+					var dbLeave = await _context.EmployeeLeaveApplications
+						.FirstOrDefaultAsync(c => c.Id.Equals(model.Id));
+					if (dbLeave == null)
+					{
+						result.Message = "Not Found";
+						_logger.LogInformation($"{tag} update failed {model.Id} : {result.Message}");
+						return result;
+					}
+					dbLeave.EmployeeLeaveCategory = category;
+					dbLeave.EmployeeLeaveCategoryId = cId;
+					dbLeave.Code = model.Code;
+					dbLeave.DateFrom = dtFrom;
+					dbLeave.DateTo = dtTo;
+					dbLeave.Days = model.Days;
+					dbLeave.LastModifiedBy = model.Personnel;
+					dbLeave.DateLastModified = DateTime.Now;
+					dbLeave.Notes = model.Notes;
+					dbLeave.Status = model.Status;
+					await _context.SaveChangesAsync();
+					result.Success = true;
+					result.Message = "Updated";
+					result.Data = dbLeave;
+					_logger.LogInformation($"{tag} updated {dbLeave.Code} {model.Id} : {result.Message}");
+					return result;
+				}
+				model.Code = _productInterface.DocumentRefNumber(Document.Leave, model.ClientId);
+				var leaveApplication = new EmployeeLeaveApplication
+				{
+					EmployeeLeaveCategory = category,
+					EmployeeLeaveCategoryId = cId,
+					DateTo = dtTo,
+					DateFrom = dtFrom,
+					Notes = model.Notes,
+					ClientId = model.ClientId,
+					Personnel = model.Personnel,
+					Status = model.Status,
+					Code = model.Code,
+					Days = model.Days,
+					InstanceId = model.InstanceId
+				};
+				_context.EmployeeLeaveApplications.Add(leaveApplication);
+				await _context.SaveChangesAsync();
+				result.Success = true;
+				result.Message = "Added";
+				result.Data = leaveApplication;
+				_logger.LogInformation($"{tag} added {category.Title} for user {model.UserId} : {result.Message}");
+				return result;
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex);
+				result.ErrorMessage = ex.Message;
+				result.Message = "Error occured";
+				_logger.LogError($"{tag} {result.Message} : {ex}");
+				return result;
+			}
+		}
+
 		public async Task<ReturnData<EmployeeLeaveCategory>> EditLeaveCategoryAsync(EmployeeLeaveCategoryViewModel model)
 		{
 			var result = new ReturnData<EmployeeLeaveCategory> { Data = new EmployeeLeaveCategory() };
@@ -397,6 +503,50 @@ namespace PosMaster.Dal.Interfaces
 			}
 		}
 
+		public async Task<ReturnData<List<EmployeeLeaveCategory>>> EmployeeLeaveBalancesAsync(Guid clientId, string userId, string gender, Guid? categoryId)
+		{
+			var result = new ReturnData<List<EmployeeLeaveCategory>> { Data = new List<EmployeeLeaveCategory>() };
+			var tag = nameof(EmployeeLeaveBalancesAsync);
+			_logger.LogInformation($"{tag} get employee {userId} leave balances per category");
+			try
+			{
+				var categoriesQry = _context.EmployeeLeaveCategories
+					.Where(c => c.ClientId.Equals(clientId))
+					.AsQueryable();
+				if (categoryId.HasValue)
+					categoriesQry = categoriesQry.Where(c => c.Id.Equals(categoryId.Value));
+				var categories = await categoriesQry.OrderByDescending(c => c.Title).ToListAsync();
+				foreach (var category in categories)
+				{
+					if (!string.IsNullOrEmpty(category.AllowedGender))
+					{
+						if (!category.AllowedGender.Equals(gender))
+							continue;
+					}
+					var days = _context.EmployeeLeaveApplications
+						.Where(a => a.EmployeeLeaveCategoryId.Equals(category.Id)
+						&& a.ApplicationStatus.Equals(ApplicationStatus.Approved)
+						&& a.UserId.Equals(userId) && a.DateCreated.Year.Equals(DateTime.Now.Year))
+						.Sum(a => a.Days);
+					category.MaxDays -= days;
+					if (category.MaxDays > 0)
+						result.Data.Add(category);
+				}
+				result.Success = result.Data.Any();
+				result.Message = result.Success ? "Found" : "Not Found";
+				_logger.LogInformation($"{tag} found {result.Data.Count} employee leave categories");
+				return result;
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex);
+				result.ErrorMessage = ex.Message;
+				result.Message = "Error occured";
+				_logger.LogError($"{tag} {result.Message} : {ex}");
+				return result;
+			}
+		}
+
 		public async Task<ReturnData<List<EmployeeSalary>>> EmployeeSalariesAsync(Guid clientId)
 		{
 			var result = new ReturnData<List<EmployeeSalary>> { Data = new List<EmployeeSalary>() };
@@ -449,6 +599,11 @@ namespace PosMaster.Dal.Interfaces
 				_logger.LogError($"{tag} {result.Message} : {ex}");
 				return result;
 			}
+		}
+
+		public Task<ReturnData<List<EmployeeLeaveApplication>>> LeaveApplicationsAsync(Guid? clientId, Guid? instanceId, string userId = "", string dtFrom = "", string dtTo = "")
+		{
+			throw new NotImplementedException();
 		}
 
 		public async Task<ReturnData<List<EmployeeLeaveCategory>>> LeaveCategoriesAsync(Guid clientId)
