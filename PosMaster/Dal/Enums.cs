@@ -34,6 +34,7 @@
 		Invoice,
 		Customer,
 		Leave
+		Order
 	}
 
 	public enum ApplicationStatus
