@@ -274,6 +274,20 @@ namespace PosMaster.Dal.Interfaces
 						_logger.LogWarning($"{tag} update failed {model.Id} : {result.Message}");
 						return result;
 					}
+					if (model.AvailableQuantity != dbProduct.AvailableQuantity)
+					{
+						var adjustLog = new ProductStockAdjustmentLog
+						{
+							ClientId = dbProduct.ClientId,
+							InstanceId = dbProduct.InstanceId,
+							ProductId = dbProduct.Id,
+							QuantityFrom = dbProduct.AvailableQuantity,
+							QuantityTo = model.AvailableQuantity,
+							Personnel = model.Personnel,
+							Notes = "Product Edit"
+						};
+						_context.ProductStockAdjustmentLogs.Add(adjustLog);
+					}
 					dbProduct.Code = model.Code;
 					dbProduct.ProductCategoryId = Guid.Parse(model.ProductCategoryId);
 					dbProduct.Name = model.Name;
@@ -289,6 +303,7 @@ namespace PosMaster.Dal.Interfaces
 					dbProduct.Status = model.Status;
 					if (model.IsNewImage)
 						dbProduct.ImagePath = model.ImagePath;
+
 					await _context.SaveChangesAsync();
 					result.Success = true;
 					result.Message = "Updated";
