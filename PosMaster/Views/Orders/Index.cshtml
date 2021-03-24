@@ -83,7 +83,9 @@
                         <th>Code</th>
                         <th>Date</th>
                         <th>Personnel</th>
+                        <th>Status</th>
                         <th>Amount</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -97,7 +99,18 @@
                                 <td>@item.Code</td>
                                 <td>@item.DateCreated</td>
                                 <td>@item.Personnel</td>
+                                <td>
+                                    @if (item.Status.Equals(EntityStatus.Active))
+                                    {
+                                        <span class="badge badge-danger"><i class="fa fa-times-circle"></i> Not Paid</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-success"><i class="fa fa-check-circle"></i> Closed</span>
+                                    }
+                                </td>
                                 <td>@item.TotalAmount</td>
+                                <td>Actions</td>
                             </tr>
                         }
 
@@ -109,7 +122,9 @@
                         <th>Code</th>
                         <th>Date</th>
                         <th>Personnel</th>
+                        <th>Status</th>
                         <th>Amount</th>
+                        <th>Actions</th>
                     </tr>
                 </tfoot>
             </table>

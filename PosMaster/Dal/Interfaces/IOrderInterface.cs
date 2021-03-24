@@ -97,7 +97,8 @@ namespace PosMaster.Dal.Interfaces
 					Code = orderRef,
 					Name = model.Name,
 					Notes = model.Notes,
-					Personnel = model.Personnel
+					Personnel = model.Personnel,
+					CustomerId = Guid.Parse(model.CustomerId)
 				};
 
 				var i = 0;
@@ -134,10 +135,10 @@ namespace PosMaster.Dal.Interfaces
 						BuyingPrice = product.BuyingPrice
 					};
 					order.OrderLineItems.Add(lineItem);
-					order.DateLastModified = DateTime.Now;
-					order.LastModifiedBy = model.Personnel;
 				}
 
+				order.DateLastModified = DateTime.Now;
+				order.LastModifiedBy = model.Personnel;
 				_context.Orders.Add(order);
 				await _context.SaveChangesAsync();
 				result.Success = true;

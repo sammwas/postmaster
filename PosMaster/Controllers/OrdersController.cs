@@ -36,7 +36,7 @@ namespace PosMaster.Controllers
 			ViewData["InstanceId"] = instanceId;
 			var result = await _orderInterface.OrdersAsync(clientId, instanceId, dtFrom, dtTo, search);
 			if (!result.Success)
-				TempData.SetData(AlertLevel.Warning, "Receipts", result.Message);
+				TempData.SetData(AlertLevel.Warning, "Customer Orders", result.Message);
 			return View(result.Data);
 		}
 		public async Task<IActionResult> Edit(Guid id) 

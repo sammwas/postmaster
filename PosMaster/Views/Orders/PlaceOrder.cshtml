@@ -1,0 +1,122 @@
+﻿@inject IProductInterface _productInterface;
+@inject IMasterDataInterface _masterDataInterface;
+@inject ICookiesService _cookies;
+@inject ICustomerInterface  _customerInterface;
+@model OrderViewModel
+@{
+    ViewData["Active"] = "POS";
+    var title = $"Customer Orders";
+    ViewData["Title"] = title;
+    var userData = _cookies.Read();
+    var products = User.IsInRole(Role.Clerk) ?
+        await _productInterface.ByInstanceIdAsync(userData.InstanceId) :
+        await _productInterface.ByClientIdAsync(userData.ClientId);
+    var customers = await _customerInterface.ByClientIdAsync(userData.ClientId);
+}
+<div class="card card-primary">
+    <div class="card-header">
+        <h3 class="card-title">@ViewData["Title"]</h3>
+    </div>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="order-line-item">
+                <form role="form" autocomplete="off" id="productListForm">
+                    <div asp-validation-summary="All" class="text-danger"></div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>Customer</label>
+                                    <select class="form-control select2" style="width: 100%;" id="customerId">
+                                        <option value="">--Select Customer--</option>
+                                        @foreach (var item in customers.Data)
+                                        {
+                                            <option data-crd="@item.CreditLimit" value="@item.Id" title="@item.Notes" data-customer="@item.Id">@item.FullName</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>Product</label>
+                                    <select class="form-control select2" style="width: 100%;" id="productItem">
+                                        <option value="">--Select Product--</option>
+                                        @foreach (var item in products.Data)
+                                        {
+                                            <option data-qty="@item.AvailableQuantity" value="@item.Id" title="@item.Notes" data-uom="@item.UnitOfMeasure" data-price="@item.SellingPrice">@item.Name @item.UnitOfMeasure (Qty @item.AvailableQuantity)</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Quantity</label>
+                                    <input class="form-control numbers-only" value="" id="quantityBought" placeholder="0.00">
+                                    <span class="text-danger" id="quantity-validate"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Selling Price</label>
+                                    <input class="form-control numbers-only" id="sellingPrice" placeholder="0.00">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <br />
+                            <p id="issMsg"></p>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <span class="text-right"><button type="submit" class="btn btn-primary" id="issBtnAdd">Add</button></span>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="receipt-items">
+                <table id="datataTable" class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                            <th>Total</th>
+                            <th>Option</th>
+                        </tr>
+                    </thead>
+                    <tbody id="IssueListTable">
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th>Item</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                            <th>Total</th>
+                            <th>Option</th>
+                        </tr>
+                    </tfoot>
+                </table>
+                <p>
+                    <strong>Total Value : <span id="issTotal">0</span>  </strong>
+                </p>
+                <br />
+                <form method="post" autocomplete="off">
+                    <input asp-for="Name" type="hidden" id="order-name" value="@DateTime.Now.ToString("dd-MMM-yyyy hh:mm tt")"/>
+                    <input asp-for="CustomerId" type="hidden" id="order-customer" />
+                    <input asp-for="LineItemListStr" id="issListRecords" type="hidden" />
+                    <input asp-for="Code" type="hidden" value="@userData.InstanceCode" />
+                    <input asp-for="InstanceId" type="hidden" value="@userData.InstanceId" />
+                    <input asp-for="ClientId" id="clientId" type="hidden" value="@userData.ClientId" />
+                    <button disabled class="btn btn-primary" type="submit" id="btnSumbitIss"> <i class="fa fa-save"></i> Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,6 +1,6 @@
 ﻿var issueListItems = [];
 let currentQty;
-let productCode
+let productCode;
 $("#selectedProduct").change(function () {
 	currentQty = $('option:selected', this).attr('data-qty');
 	productCode = $('option:selected', this).attr('data-pcode')
@@ -95,6 +95,13 @@ function removeListItem(index) {
 	issueListItems.splice(index, 1);
 	createIssueListTable();
 };
+
+let customerId;
+$('#customerId').change(function () {
+	customerId = $('option:selected', this).attr('data-customer');
+	$('#order-customer').val(customerId);
+});
+
 $('#dateTo').datetimepicker({
 	format: 'DD-MMM-yyyy'
 });
