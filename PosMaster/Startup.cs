@@ -46,8 +46,8 @@ namespace PosMaster
 			services.AddScoped<IReportingInterface, ReportingImplementation>();
 			services.AddScoped<IMasterDataInterface, MasterDataImplementation>();
 			services.AddScoped<IInvoiceInterface, InvoiceImplementation>();
-			services.AddScoped<IOrderInterface, OrdersImplementation>();
-			services.AddScoped<IHrInterface, HrImplementation>();
+			services.AddScoped<IOrderInterface, OrdersImplementation>(); 
+			services.AddScoped<IHumanResourceInterface, HumanResourceImplementation>();
 
 			var server = Configuration["Database:Server"];
 			var port = Configuration["Database:Port"];

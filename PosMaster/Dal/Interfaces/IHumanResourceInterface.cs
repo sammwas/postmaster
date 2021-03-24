@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace PosMaster.Dal.Interfaces
 {
-	public interface IHrInterface
+	public interface IHumanResourceInterface
 	{
 		Task<ReturnData<Bank>> EditBankAsync(BankViewModel model);
 		Task<ReturnData<Bank>> BankByIdAsync(Guid id);
@@ -23,19 +23,122 @@ namespace PosMaster.Dal.Interfaces
 		Task<ReturnData<EmployeeKin>> EmployeeKinByUserIdAsync(string userId);
 		Task<ReturnData<List<EmployeeLeaveCategory>>> EmployeeLeaveBalancesAsync(Guid clientId, string userId, string gender, Guid? categoryId);
 		Task<ReturnData<EmployeeLeaveApplication>> EditLeaveApplicationAsync(LeaveApplicationViewModel model);
-		Task<ReturnData<List<EmployeeLeaveApplication>>> LeaveApplicationsAsync(Guid? clientId, Guid? instanceId, string userId = "", string dtFrom = "", string dtTo = "");
+		Task<ReturnData<List<EmployeeLeaveApplication>>> LeaveApplicationsAsync(Guid? clientId, Guid? instanceId, string userId = "", string dtFrom = "",
+			string dtTo = "", string search = "");
+		Task<ReturnData<EmployeeLeaveApplication>> LeaveApplicationByIdAsync(Guid id);
+		Task<ReturnData<Guid>> ApproveLeaveApplicationAsync(ApproveLeaveViewModel model);
+		Task<ReturnData<List<MonthlyPayViewModel>>> MonthlyPaymentsAsync(int month, int year, Guid? clientId, Guid? instanceId);
+		Task<ReturnData<string>> ApproveMonthPaymentAsync(ApproveMonthlyPaymentViewModel model);
 	}
 
-	public class HrImplementation : IHrInterface
+	public class HumanResourceImplementation : IHumanResourceInterface
 	{
 		private readonly DatabaseContext _context;
 		private readonly IProductInterface _productInterface;
-		private readonly ILogger<HrImplementation> _logger;
-		public HrImplementation(DatabaseContext context, ILogger<HrImplementation> logger, IProductInterface productInterface)
+		private readonly ILogger<HumanResourceImplementation> _logger;
+		public HumanResourceImplementation(DatabaseContext context, ILogger<HumanResourceImplementation> logger, IProductInterface productInterface)
 		{
 			_context = context;
 			_logger = logger;
 			_productInterface = productInterface;
+		}
+
+		public async Task<ReturnData<Guid>> ApproveLeaveApplicationAsync(ApproveLeaveViewModel model)
+		{
+			var result = new ReturnData<Guid> { Data = model.Id };
+			var tag = nameof(ApproveLeaveApplicationAsync);
+			_logger.LogInformation($"{tag} approve leave application {model.Id}");
+			try
+			{
+				var application = await _context.EmployeeLeaveApplications
+					.FirstOrDefaultAsync(c => c.Id.Equals(model.Id));
+				if (application == null)
+				{
+					result.Message = "Application not Found";
+					_logger.LogInformation($"{tag} {result.Message}");
+					return result;
+				}
+				application.LastModifiedBy = model.Personnel;
+				application.DateLastModified = DateTime.Now;
+				application.ApplicationStatus = model.Status;
+				application.Comments = model.Comment;
+				await _context.SaveChangesAsync();
+				result.Success = true;
+				result.Message = $"Leave {application.Code} {model.Status}";
+				_logger.LogInformation($"{tag} {result.Message}");
+				return result;
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex);
+				result.ErrorMessage = ex.Message;
+				result.Message = "Error occured";
+				_logger.LogError($"{tag} {result.Message} : {ex}");
+				return result;
+			}
+		}
+
+		public async Task<ReturnData<string>> ApproveMonthPaymentAsync(ApproveMonthlyPaymentViewModel model)
+		{
+			var result = new ReturnData<string>();
+			var tag = nameof(ApproveMonthPaymentAsync);
+			_logger.LogInformation($"{tag} approve monthly payments for clientId {model.ClientId}, instanceId {model.InstanceId}, month {model.Month} and year {model.Year}");
+			try
+			{
+				var sPaymentsQry = _context.EmployeeSalaries.AsQueryable();
+				if (model.ClientId != null)
+					sPaymentsQry = sPaymentsQry.Where(p => p.ClientId.Equals(model.ClientId.Value));
+				if (model.InstanceId != null)
+					sPaymentsQry = sPaymentsQry.Where(p => p.InstanceId.Equals(model.InstanceId.Value));
+				var sData = await sPaymentsQry.ToListAsync();
+				if (!sData.Any())
+				{
+					result.Message = "No records found";
+					_logger.LogInformation($"{tag} not approved: {result.Message}");
+					return result;
+				}
+				foreach (var salary in sData)
+				{
+					var approved = _context.EmployeeMonthPayments
+						.FirstOrDefault(p => p.UserId.Equals(salary.UserId)
+						&& p.Month.Equals(model.Month) && p.Year.Equals(model.Year));
+					if (approved == null)
+					{
+						var mPayment = new EmployeeMonthPayment
+						{
+							ClientId = salary.ClientId,
+							InstanceId = salary.InstanceId,
+							UserId = salary.UserId,
+							BasicPay = salary.BasicPay,
+							Allowance = salary.Allowance,
+							Deduction = salary.Deduction,
+							Month = model.Month,
+							Year = model.Year,
+							Personnel = model.Personnel,
+							Code = $"{salary.UserId}_{model.Month}{model.Year}"
+						};
+						_context.EmployeeMonthPayments.Add(mPayment);
+					}
+					approved.BasicPay = salary.BasicPay;
+					approved.Allowance = salary.Allowance;
+					approved.Deduction = salary.Deduction;
+					approved.LastModifiedBy = model.Personnel;
+					approved.DateLastModified = DateTime.Now;
+					await _context.SaveChangesAsync();
+				}
+				result.Success = true;
+				result.Message = "Approved";
+				_logger.LogInformation($"{tag} approved {sData.Count} monthly salaries");
+				return result;
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex);
+				result.ErrorMessage = ex.Message;
+				result.Message = "Error occured";
+				_logger.LogError($"{tag} {result.Message} : {ex}");
+				return result;
+			}
 		}
 
 		public async Task<ReturnData<Bank>> BankByIdAsync(Guid id)
@@ -364,6 +467,13 @@ namespace PosMaster.Dal.Interfaces
 						_logger.LogInformation($"{tag} update failed {model.Id} : {result.Message}");
 						return result;
 					}
+
+					if (dbLeave.ApplicationStatus.Equals(ApplicationStatus.Pending))
+					{
+						result.Message = $"{dbLeave.Code} already {dbLeave.ApplicationStatus}";
+						_logger.LogInformation($"{tag} update failed {model.Id} : {result.Message}");
+						return result;
+					}
 					dbLeave.EmployeeLeaveCategory = category;
 					dbLeave.EmployeeLeaveCategoryId = cId;
 					dbLeave.Code = model.Code;
@@ -601,9 +711,74 @@ namespace PosMaster.Dal.Interfaces
 			}
 		}
 
-		public Task<ReturnData<List<EmployeeLeaveApplication>>> LeaveApplicationsAsync(Guid? clientId, Guid? instanceId, string userId = "", string dtFrom = "", string dtTo = "")
+		public async Task<ReturnData<EmployeeLeaveApplication>> LeaveApplicationByIdAsync(Guid id)
 		{
-			throw new NotImplementedException();
+			var result = new ReturnData<EmployeeLeaveApplication> { Data = new EmployeeLeaveApplication() };
+			var tag = nameof(LeaveApplicationByIdAsync);
+			_logger.LogInformation($"{tag} get bank by id - {id}");
+			try
+			{
+				var application = await _context.EmployeeLeaveApplications
+					.Include(a => a.EmployeeLeaveCategory)
+					.Include(a => a.User)
+					.FirstOrDefaultAsync(a => a.Id.Equals(id));
+				result.Success = application != null;
+				result.Message = result.Success ? "Found" : "Not Found";
+				if (result.Success)
+					result.Data = application;
+				_logger.LogInformation($"{tag} leave application {id} {result.Message}");
+				return result;
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex);
+				result.ErrorMessage = ex.Message;
+				result.Message = "Error occured";
+				_logger.LogError($"{tag} {result.Message} : {ex}");
+				return result;
+			}
+		}
+
+		public async Task<ReturnData<List<EmployeeLeaveApplication>>> LeaveApplicationsAsync(Guid? clientId, Guid? instanceId, string userId = "", string dateFrom = "",
+			string dateTo = "", string search = "")
+		{
+			var result = new ReturnData<List<EmployeeLeaveApplication>> { Data = new List<EmployeeLeaveApplication>() };
+			var tag = nameof(LeaveApplicationsAsync);
+			_logger.LogInformation($"{tag} get leave applications: clientId {clientId}, instanceId {instanceId}, duration {dateFrom}-{dateTo}, search {search}");
+			try
+			{
+				var dataQuery = _context.EmployeeLeaveApplications
+					.Include(l => l.EmployeeLeaveCategory)
+					.AsQueryable();
+				if (clientId != null)
+					dataQuery = dataQuery.Where(r => r.ClientId.Equals(clientId.Value));
+				if (instanceId != null)
+					dataQuery = dataQuery.Where(r => r.InstanceId.Equals(instanceId.Value));
+				var hasFromDate = DateTime.TryParse(dateFrom, out var dtFrom);
+				var hasToDate = DateTime.TryParse(dateTo, out var dtTo);
+				if (hasFromDate)
+					dataQuery = dataQuery.Where(r => r.DateCreated.Date >= dtFrom.Date);
+				if (hasToDate)
+					dataQuery = dataQuery.Where(r => r.DateCreated.Date <= dtTo.Date);
+				if (!string.IsNullOrEmpty(search))
+					dataQuery = dataQuery.Where(r => r.Code.ToLower().Contains(search.ToLower()));
+				var data = await dataQuery.OrderByDescending(r => r.DateCreated)
+					.ToListAsync();
+				result.Success = data.Any();
+				result.Message = result.Success ? "Found" : "Not Found";
+				if (result.Success)
+					result.Data = data;
+				_logger.LogInformation($"{tag} found {data.Count} leave applications");
+				return result;
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex);
+				result.ErrorMessage = ex.Message;
+				result.Message = "Error occured";
+				_logger.LogError($"{tag} {result.Message} : {ex}");
+				return result;
+			}
 		}
 
 		public async Task<ReturnData<List<EmployeeLeaveCategory>>> LeaveCategoriesAsync(Guid clientId)
@@ -648,6 +823,74 @@ namespace PosMaster.Dal.Interfaces
 				if (result.Success)
 					result.Data = category;
 				_logger.LogInformation($"{tag} leave category {id} {result.Message}");
+				return result;
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex);
+				result.ErrorMessage = ex.Message;
+				result.Message = "Error occured";
+				_logger.LogError($"{tag} {result.Message} : {ex}");
+				return result;
+			}
+		}
+
+		public async Task<ReturnData<List<MonthlyPayViewModel>>> MonthlyPaymentsAsync(int month, int year, Guid? clientId, Guid? instanceId)
+		{
+			var result = new ReturnData<List<MonthlyPayViewModel>> { Data = new List<MonthlyPayViewModel>() };
+			var tag = nameof(MonthlyPaymentsAsync);
+			_logger.LogInformation($"{tag} get monthly payments for clientId {clientId}, instanceId {instanceId}, month {month} and year {year}");
+			try
+			{
+				var approved = _context.EmployeeMonthPayments
+					.Any(p => p.Month.Equals(month) && p.Year.Equals(year));
+				if (approved)
+				{
+					var mPaymentsQry = _context.EmployeeMonthPayments
+						.Include(p => p.User)
+						.Where(p => p.Month.Equals(month) && p.Year.Equals(year));
+					if (clientId != null)
+						mPaymentsQry = mPaymentsQry.Where(p => p.ClientId.Equals(clientId.Value));
+					if (instanceId != null)
+						mPaymentsQry = mPaymentsQry.Where(p => p.InstanceId.Equals(instanceId.Value));
+					var mData = await mPaymentsQry.OrderByDescending(p => p.BasicPay)
+						.Select(p => new MonthlyPayViewModel(p))
+						.ToListAsync();
+					result.Success = mData.Any();
+					result.Message = result.Success ? "Found" : "Not Found";
+					if (result.Success)
+						result.Data = mData;
+					_logger.LogInformation($"{tag} found {mData.Count} monthly payments");
+					return result;
+				}
+
+				var cMonth = DateTime.Now.Month;
+				var cYear = DateTime.Now.Year;
+				var cDays = DateTime.DaysInMonth(cYear, cMonth);
+				var cMaxDate = DateTime.Parse($"{cDays}-{cMonth}-{cYear}");
+				var iDays = DateTime.DaysInMonth(year, month);
+				var iMaxDate = DateTime.Parse($"{iDays}-{month}-{year}");
+				if (iMaxDate > cMaxDate)
+				{
+					result.Message = $"Future months not allowed";
+					_logger.LogInformation($"{tag} {result.Message}");
+					return result;
+				}
+
+				var sPaymentsQry = _context.EmployeeSalaries
+						.Include(p => p.User).AsQueryable();
+				if (clientId != null)
+					sPaymentsQry = sPaymentsQry.Where(p => p.ClientId.Equals(clientId.Value));
+				if (instanceId != null)
+					sPaymentsQry = sPaymentsQry.Where(p => p.InstanceId.Equals(instanceId.Value));
+				var sData = await sPaymentsQry.OrderByDescending(p => p.BasicPay)
+					.Select(p => new MonthlyPayViewModel(p) { Month = month, Year = year })
+					.ToListAsync();
+				result.Success = sData.Any();
+				result.Message = result.Success ? "Found" : "Not Found";
+				if (result.Success)
+					result.Data = sData;
+				_logger.LogInformation($"{tag} found {sData.Count} monthly salaries");
 				return result;
 			}
 			catch (Exception ex)
