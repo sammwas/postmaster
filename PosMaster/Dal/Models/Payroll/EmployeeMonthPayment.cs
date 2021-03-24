@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace PosMaster.Dal
+﻿namespace PosMaster.Dal
 {
 	public class EmployeeMonthPayment : BaseEntity
 	{
@@ -11,6 +9,5 @@ namespace PosMaster.Dal
 		public decimal Deduction { get; set; }
 		public int Year { get; set; }
 		public int Month { get; set; }
-		public DateTime? DateApproved { get; set; }
 	}
 }
