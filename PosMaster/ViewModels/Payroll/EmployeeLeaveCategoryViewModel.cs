@@ -23,7 +23,7 @@ namespace PosMaster.ViewModels
 		}
 
 		public string Title { get; set; }
-		public int MaxDays { get; set; }
+		public decimal MaxDays { get; set; }
 		public bool FemaleOnly { get; set; }
 	}
 }

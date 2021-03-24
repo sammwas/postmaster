@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace PosMaster.Dal.Interfaces
 {
-	public interface IHrInterface
+	public interface IHumanResourceInterface
 	{
 		Task<ReturnData<Bank>> EditBankAsync(BankViewModel model);
 		Task<ReturnData<Bank>> BankByIdAsync(Guid id);
@@ -31,12 +31,12 @@ namespace PosMaster.Dal.Interfaces
 		Task<ReturnData<string>> ApproveMonthPaymentAsync(ApproveMonthlyPaymentViewModel model);
 	}
 
-	public class HrImplementation : IHrInterface
+	public class HumanResourceImplementation : IHumanResourceInterface
 	{
 		private readonly DatabaseContext _context;
 		private readonly IProductInterface _productInterface;
-		private readonly ILogger<HrImplementation> _logger;
-		public HrImplementation(DatabaseContext context, ILogger<HrImplementation> logger, IProductInterface productInterface)
+		private readonly ILogger<HumanResourceImplementation> _logger;
+		public HumanResourceImplementation(DatabaseContext context, ILogger<HumanResourceImplementation> logger, IProductInterface productInterface)
 		{
 			_context = context;
 			_logger = logger;
@@ -61,6 +61,7 @@ namespace PosMaster.Dal.Interfaces
 				application.LastModifiedBy = model.Personnel;
 				application.DateLastModified = DateTime.Now;
 				application.ApplicationStatus = model.Status;
+				application.Comments = model.Comment;
 				await _context.SaveChangesAsync();
 				result.Success = true;
 				result.Message = $"Leave {application.Code} {model.Status}";
@@ -80,7 +81,7 @@ namespace PosMaster.Dal.Interfaces
 		public async Task<ReturnData<string>> ApproveMonthPaymentAsync(ApproveMonthlyPaymentViewModel model)
 		{
 			var result = new ReturnData<string>();
-			var tag = nameof(MonthlyPaymentsAsync);
+			var tag = nameof(ApproveMonthPaymentAsync);
 			_logger.LogInformation($"{tag} approve monthly payments for clientId {model.ClientId}, instanceId {model.InstanceId}, month {model.Month} and year {model.Year}");
 			try
 			{

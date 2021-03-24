@@ -11,6 +11,7 @@ namespace PosMaster.Dal
 		public DateTime DateTo { get; set; }
 		public EmployeeLeaveCategory EmployeeLeaveCategory { get; set; }
 		public Guid EmployeeLeaveCategoryId { get; set; }
-		public int Days { get; set; }
+		public decimal Days { get; set; }
+		public string Comments { get; set; }
 	}
 }

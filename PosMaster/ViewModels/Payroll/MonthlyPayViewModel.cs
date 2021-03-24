@@ -19,8 +19,7 @@ namespace PosMaster.ViewModels
 			Allowance = payment.Allowance;
 			Year = payment.Year;
 			Month = payment.Month;
-			Approved = true;
-			DateApproved = payment.DateApproved;
+			Approved = true; 
 		}
 
 		public MonthlyPayViewModel(EmployeeSalary salary)
@@ -38,8 +37,7 @@ namespace PosMaster.ViewModels
 		public decimal Allowance { get; set; }
 		public int Year { get; set; }
 		public int Month { get; set; }
-		public bool Approved { get; set; }
-		public DateTime? DateApproved { get; set; }
+		public bool Approved { get; set; } 
 		public decimal NetAmount => BasicPay + Allowance - Deduction;
 	}
 }
