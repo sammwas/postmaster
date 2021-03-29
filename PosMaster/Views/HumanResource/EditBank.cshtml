@@ -1,0 +1,103 @@
+﻿@inject ICookiesService _cookies;
+@model BankViewModel
+@{
+    ViewData["Active"] = "HR";
+    var option = Model.IsEditMode ? "Update" : "Add";
+    var title = $"{option} Bank";
+    ViewData["Title"] = title;
+    var userData = _cookies.Read();
+    var statuses = Helpers.Statuses();
+}
+<div class="card card-primary">
+    <div class="card-header">
+        <h3 class="card-title">@ViewData["Title"]</h3>
+    </div>
+    <form role="form" method="post" autocomplete="off">
+        <div asp-validation-summary="All" class="text-danger"></div>
+        <input asp-for="Id" />
+        <input asp-for="IsEditMode" />
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="Code"></label>
+                                <input asp-for="Code" class="form-control" placeholder="BNK">
+                                <span asp-validation-for="Code" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="Name"></label>
+                                <input asp-for="Name" class="form-control" placeholder="Bank Name">
+                                <span asp-validation-for="Name" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="ContactPerson"></label>
+                                <input asp-for="ContactPerson" class="form-control" placeholder="Doe">
+                                <span asp-validation-for="ContactPerson" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="PhoneNumber"></label>
+                                <input asp-for="PhoneNumber" class="form-control numbers-only" placeholder="07XXXXXXXX">
+                                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="EmailAddress"></label>
+                                <input asp-for="EmailAddress" class="form-control" placeholder="john@doe.com">
+                                <span asp-validation-for="EmailAddress" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="Website"></label>
+                                <input asp-for="Website" class="form-control" placeholder="www.bank.com">
+                                <span asp-validation-for="Website" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <p><strong>Status</strong></p>
+                        </div>
+                        @foreach (var item in statuses)
+                        {
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" id="@item.Id" type="radio" asp-for="Status" value="@item.Id">
+                                    <label class="form-check-label" for="@item.Id">@item.Text</label>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h4>Options</h4>
+                        <div>
+                            <p class="alert alert-info">
+                                <i class="fa fa-info-circle fa-2x"></i><br /> Provide bank details for user bank details.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
