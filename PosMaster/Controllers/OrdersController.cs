@@ -13,12 +13,13 @@ namespace PosMaster.Controllers
     {
         private readonly ICookiesService _cookieService;
         private readonly IOrderInterface _orderInterface;
-
-        public OrdersController(ICookiesService cookiesService, IOrderInterface orderInterface)
+		private readonly string firstDayOfWeek;
+		public OrdersController(ICookiesService cookiesService, IOrderInterface orderInterface)
         {
             _cookieService = cookiesService;
             _orderInterface = orderInterface;
-        }
+			firstDayOfWeek = Helpers.FirstDayOfWeek().ToString("dd-MMM-yyyy");
+		}
 		public async Task<IActionResult> Index(string insId = "", string dtFrom = "", string dtTo = "", string search = "")
 		{
 			ViewData["DtFrom"] = dtFrom;
@@ -69,7 +70,7 @@ namespace PosMaster.Controllers
 			TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, title, result.Message);
 			if (!result.Success)
 				return View(model);
-			return RedirectToAction(nameof(PlaceOrder));
+			return RedirectToAction(nameof(Index), new {dtFrom = Helpers.FirstDayOfWeek().ToString("dd-MMM-yyyy"), dtTo = DateTime.Now.ToString("dd-MMM-yyyy") });
 		}
 		[HttpPost]
 		[ValidateAntiForgeryToken]
