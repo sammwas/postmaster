@@ -39,18 +39,21 @@ namespace PosMaster.Controllers
 				TempData.SetData(AlertLevel.Warning, "Customer Orders", result.Message);
 			return View(result.Data);
 		}
-		public async Task<IActionResult> Edit(Guid id) 
-		{
-			var result = await _orderInterface.OrderByIdAsync(id);
-			if (!result.Success)
-				TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, "Customer Order", result.Message);
-			return View(result.Data);
-		}
-		public IActionResult PlaceOrder() 
-		{
-			return View();
-		}
-		[HttpPost]
+        public async Task<IActionResult> PlaceOrder(Guid? id)
+        {
+            if (id == null)
+                return View(new OrderViewModel { Status = EntityStatus.Active });
+            var result = await _orderInterface.OrderByIdAsync(id.Value);
+            if (!result.Success)
+                TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, "Customer Order", result.Message);
+            var model = new OrderViewModel(result.Data);
+            return View(model);
+        }
+        //public IActionResult PlaceOrder()
+        //{
+        //    return View();
+        //}
+        [HttpPost]
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> PlaceOrder(OrderViewModel model) 
 		{
@@ -62,7 +65,7 @@ namespace PosMaster.Controllers
 				return View(model);
 			}
 			model.Personnel = User.Identity.Name;
-			var result = await _orderInterface.PlaceOrderAsync(model);
+			var result = model.IsEditMode ? await _orderInterface.EditAsync(model) : await _orderInterface.PlaceOrderAsync(model);
 			TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, title, result.Message);
 			if (!result.Success)
 				return View(model);

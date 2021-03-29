@@ -108,7 +108,9 @@
                 </p>
                 <br />
                 <form method="post" autocomplete="off">
-                    <input asp-for="Name" type="hidden" id="order-name" value="@DateTime.Now.ToString("dd-MMM-yyyy hh:mm tt")"/>
+                    <input asp-for="Id" />
+                    <input asp-for="IsEditMode" />
+                    <input asp-for="Name" type="hidden" id="order-name" value="ORD -@DateTime.Now.ToString("dd-MMM-yyyy hh:mm tt")" />
                     <input asp-for="CustomerId" type="hidden" id="order-customer" />
                     <input asp-for="LineItemListStr" id="issListRecords" type="hidden" />
                     <input asp-for="Code" type="hidden" value="@userData.InstanceCode" />

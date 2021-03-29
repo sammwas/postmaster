@@ -110,7 +110,7 @@
                                     }
                                 </td>
                                 <td>@item.TotalAmount</td>
-                                <td>Actions</td>
+                                <td><a asp-controller="Orders" asp-action="PlaceOrder" asp-route-id="@item.Id" class=""><i class="fa fa-edit"></i></a></td>
                             </tr>
                         }
 

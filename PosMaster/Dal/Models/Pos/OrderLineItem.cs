@@ -16,5 +16,6 @@ namespace PosMaster.Dal
 		public decimal ActualProfit => (UnitPrice * Quantity) - (BuyingPrice * Quantity);
 		public decimal ExpectedProfit => (SellingPrice * Quantity) - (BuyingPrice * Quantity);
 		public decimal BuyingPrice { get; set; }
+		public string ItemName => $"{Product.Name} {Product.UnitOfMeasure} (Qty {Product.AvailableQuantity})";
 	}
 }

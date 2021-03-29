@@ -94,6 +94,7 @@ if (list) {
 function removeListItem(index) {
 	issueListItems.splice(index, 1);
 	createIssueListTable();
+	$("#issListRecords").val(JSON.stringify(issueListItems));
 };
 
 let customerId;
