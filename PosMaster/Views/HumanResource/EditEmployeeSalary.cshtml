@@ -1,0 +1,98 @@
+﻿@inject ICookiesService _cookies;
+@inject IHumanResourceInterface _hrInterface;
+@model EmployeeSalaryViewModel
+@{
+    ViewData["Active"] = "HR";
+    var option = Model.IsEditMode ? "Update" : "Add";
+    var title = $"{option} Salary";
+    ViewData["Title"] = title;
+    var userData = _cookies.Read();
+    var bankRes = await _hrInterface.BanksAsync(userData.ClientId);
+}
+<div class="card card-primary">
+    <div class="card-header">
+        <h3 class="card-title">@ViewData["Title"]</h3>
+    </div>
+    <form role="form" method="post" autocomplete="off">
+        <div asp-validation-summary="All" class="text-danger"></div>
+        <input asp-for="Id" />
+        <input asp-for="UserId" type="hidden" />
+        <input asp-for="Code" type="hidden" value="@DateTime.Now" />
+        <input asp-for="IsEditMode" />
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="Bank"></label>
+                                <select class="form-control select2" asp-for="Bank" style="width: 100%;">
+                                    <option value="">--Select Bank--</option>
+                                    @foreach (var item in bankRes.Data)
+                                    {
+                                        <option value="@item.Name" title="@item.Notes">@item.Code - @item.Name </option>
+                                    }
+                                </select>
+                                <span asp-validation-for="Bank" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="BankAccount"></label>
+                                <input asp-for="BankAccount" class="form-control" placeholder="Account Number">
+                                <span asp-validation-for="BankAccount" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="BasicPay"></label>
+                                <input asp-for="BasicPay" class="form-control numbers-only" placeholder="Basic Pay">
+                                <span asp-validation-for="BasicPay" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="Allowance"></label>
+                                <input asp-for="Allowance" class="form-control numbers-only" placeholder="Allowance">
+                                <span asp-validation-for="Allowance" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="Deduction"></label>
+                                <input asp-for="Deduction" class="form-control numbers-only" placeholder="Deduction">
+                                <span asp-validation-for="Deduction" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="Notes"></label>
+                                <input asp-for="Notes" class="form-control" placeholder="Notes">
+                                <span asp-validation-for="Notes" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h4>Options</h4>
+                        <div>
+                            <p class="alert alert-info">
+                                <i class="fa fa-info-circle fa-2x"></i><br /> This will be used for salary processing.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>

@@ -1,0 +1,105 @@
+﻿@inject ICookiesService _cookies;
+@inject IHumanResourceInterface _hrInterface;
+@model LeaveApplicationViewModel
+@{
+    ViewData["Active"] = "HR";
+    var option = Model.IsEditMode ? "Update" : "Add";
+    var title = $"{option} Leave";
+    ViewData["Title"] = title;
+    var userData = _cookies.Read();
+    var returnData = await _hrInterface.EmployeeLeaveBalancesAsync(userData.ClientId, userData.UserId, userData.Gender, null);
+    var dateToday = DateTime.Now.ToString("dd-MMM-yyyy");
+}
+<div class="card card-primary">
+    <div class="card-header">
+        <h3 class="card-title">@ViewData["Title"]</h3>
+    </div>
+    <form role="form" method="post" autocomplete="off">
+        <div asp-validation-summary="All" class="text-danger"></div>
+        <input asp-for="Id" />
+        <input asp-for="UserId" type="hidden" />
+        @if (Model.IsEditMode)
+        {
+            <input asp-for="Code" type="hidden" />
+        }
+        else
+        {
+            <input asp-for="Code" value="@dateToday" type="hidden" />
+        }
+        <input asp-for="IsEditMode" />
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="EmployeeLeaveCategoryId"></label>
+                                <select class="form-control select2" asp-for="EmployeeLeaveCategoryId" style="width: 100%;">
+                                    <option value="">--Select Category--</option>
+                                    @foreach (var item in returnData.Data)
+                                    {
+                                        <option value="@item.Id" title="@item.Notes">@item.Code - @item.Title [@item.MaxDays]</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="EmployeeLeaveCategoryId" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="Days"></label>
+                                <input asp-for="Days" class="form-control" placeholder="Days">
+                                <span asp-validation-for="Days" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="DateFrom"></label>
+                                <div class="input-group date" id="dateFrom" data-target-input="nearest">
+                                    <input type="text" class="form-control datetimepicker-input" data-target="#dateFrom" asp-for="DateFrom" placeholder="Date From (@dateToday)" />
+                                    <div class="input-group-append" data-target="#dateFrom" data-toggle="datetimepicker">
+                                        <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="DateTo"></label>
+                                <div class="input-group date" id="dateTo" data-target-input="nearest">
+                                    <input type="text" class="form-control datetimepicker-input" data-target="#dateTo" asp-for="DateTo" placeholder="Date To (@dateToday)" />
+                                    <div class="input-group-append" data-target="#dateTo" data-toggle="datetimepicker">
+                                        <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>  <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label asp-for="Notes"></label>
+                                <textarea asp-for="Notes" class="rich-text" rows="3" placeholder="Notes"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h4>Options</h4>
+                        <div>
+                            <p class="alert alert-info">
+                                <i class="fa fa-info-circle fa-2x"></i><br /> Confirm the leave days before application.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>

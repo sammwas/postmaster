@@ -55,6 +55,67 @@ namespace PosMaster.Controllers
             return View(model);
         }
 
+        public async Task<IActionResult> EditEmployeeKin(string userId)
+        {
+
+            var result = await _humanResourceInterface.EmployeeKinByUserIdAsync(userId);
+            var model = result.Success ? new EmployeeKinViewModel(result.Data)
+                : new EmployeeKinViewModel { UserId = userId };
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditEmployeeKin(EmployeeKinViewModel model)
+        {
+            var userData = _cookiesService.Read();
+            model.ClientId = userData.ClientId;
+            model.InstanceId = userData.InstanceId;
+            model.Personnel = User.Identity.Name;
+            var option = model.IsEditMode ? "Update" : "Add";
+            var title = $"{option} Kin";
+            if (!ModelState.IsValid)
+            {
+                var message = "Missing fields";
+                TempData.SetData(AlertLevel.Warning, title, message);
+                return View(model);
+            }
+
+            var result = await _humanResourceInterface.EditEmployeeKinAsync(model);
+            TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, title, result.Message);
+            return View(model);
+        }
+
+        public async Task<IActionResult> EditEmployeeSalary(string userId)
+        {
+
+            var result = await _humanResourceInterface.EmployeeSalaryByUserIdAsync(userId);
+            var model = result.Success ? new EmployeeSalaryViewModel(result.Data)
+                : new EmployeeSalaryViewModel { UserId = userId };
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditEmployeeSalary(EmployeeSalaryViewModel model)
+        {
+            var userData = _cookiesService.Read();
+            model.ClientId = userData.ClientId;
+            model.InstanceId = userData.InstanceId;
+            model.Personnel = User.Identity.Name;
+            var option = model.IsEditMode ? "Update" : "Add";
+            var title = $"{option} Salary";
+            if (!ModelState.IsValid)
+            {
+                var message = "Missing fields";
+                TempData.SetData(AlertLevel.Warning, title, message);
+                return View(model);
+            }
+
+            var result = await _humanResourceInterface.EditEmployeeSalaryAsync(model);
+            TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, title, result.Message);
+            return View(model);
+        }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -119,5 +180,77 @@ namespace PosMaster.Controllers
                 TempData.SetData(AlertLevel.Warning, "Leave Categories", result.Message);
             return View(result.Data);
         }
+
+        public async Task<IActionResult> EditLeaveApplication(Guid? id)
+        {
+            var userData = _cookiesService.Read();
+            if (id == null)
+                return View(new LeaveApplicationViewModel
+                {
+                    Status = EntityStatus.Active,
+                    UserId = userData.UserId
+                });
+
+            var result = await _humanResourceInterface.LeaveApplicationByIdAsync(id.Value);
+            if (!result.Success)
+            {
+                TempData.SetData(AlertLevel.Warning, "Leave", result.Message);
+                return RedirectToAction(nameof(MyApplications), new { dtFrom = Helpers.firstDayOfYear.ToString("dd-MMM-yyyy") });
+            }
+
+            var model = new LeaveApplicationViewModel(result.Data);
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditLeaveApplication(LeaveApplicationViewModel model)
+        {
+            var userData = _cookiesService.Read();
+            model.ClientId = userData.ClientId;
+            model.InstanceId = userData.InstanceId;
+            model.Personnel = User.Identity.Name;
+            model.UserId = userData.UserId;
+            model.Gender = userData.Gender;
+            var option = model.IsEditMode ? "Update" : "Add";
+            var title = $"{option} Leave";
+            if (!ModelState.IsValid)
+            {
+                var message = "Missing fields";
+                TempData.SetData(AlertLevel.Warning, title, message);
+                return View(model);
+            }
+
+            var result = await _humanResourceInterface.EditLeaveApplicationAsync(model);
+            TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, title, result.Message);
+            if (!result.Success)
+                return View(model);
+            var _From = result.Success ? result.Data.DateCreated : Helpers.firstDayOfYear;
+            return RedirectToAction(nameof(MyApplications), new { dtFrom = _From.ToString("dd-MMM-yyyy") });
+        }
+
+        public async Task<IActionResult> MyApplications(string dtFrom = "", string dtTo = "")
+        {
+            ViewData["dtTo"] = dtTo;
+            ViewData["dtFrom"] = dtFrom;
+            var userData = _cookiesService.Read();
+            var result = await _humanResourceInterface.LeaveApplicationsAsync(userData.ClientId, userData.InstanceId, userData.UserId, dtFrom, dtTo);
+            if (!result.Success)
+                TempData.SetData(AlertLevel.Warning, "My Applications", result.Message);
+            return View(result.Data);
+        }
+
+        public async Task<IActionResult> LeaveApplications(Guid? clientId, Guid? instanceId, string userId = "", string dtFrom = "",
+            string dtTo = "", string search = "")
+        {
+            ViewData["dtTo"] = dtTo;
+            ViewData["dtFrom"] = dtFrom;
+            ViewData["instanceId"] = instanceId;
+            var result = await _humanResourceInterface.LeaveApplicationsAsync(clientId, instanceId, userId, dtFrom, dtTo, search);
+            if (!result.Success)
+                TempData.SetData(AlertLevel.Warning, "Leave Applications", result.Message);
+            return View(result.Data);
+        }
+
     }
 }

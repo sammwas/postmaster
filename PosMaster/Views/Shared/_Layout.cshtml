@@ -222,34 +222,11 @@
                                 </li>
                             </ul>
                         </li>
-                        <li class="nav-item has-treeview">
-                            <a href="#" class="nav-link">
-                                <i class="nav-icon fas fa-users"></i>
-                                <p>
-                                    Users
-                                    <i class="right fas fa-angle-left"></i>
-                                </p>
-                            </a>
-                            <ul class="nav nav-treeview">
-                                <li class="nav-item">
-                                    <a asp-controller="Users" asp-action="All" class="nav-link">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>View All</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a asp-controller="Users" asp-action="Edit" asp-route-id="" class="nav-link">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Add New</p>
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
                         @if (!userData.Role.Equals(Role.Clerk))
                         {
                             <li class="nav-item has-treeview">
                                 <a href="#" class="nav-link">
-                                    <i class="nav-icon fas fa-folder-open"></i>
+                                    <i class="nav-icon fas fa-users"></i>
                                     <p>
                                         Human Resource
                                         <i class="right fas fa-angle-left"></i>
@@ -269,7 +246,7 @@
                                         </a>
                                     </li>
                                     <li class="nav-item">
-                                        <a asp-controller="Users" asp-action="All" class="nav-link">
+                                        <a asp-controller="HumanResource" asp-action="LeaveApplications" asp-route-clientId="@userData.ClientId" asp-route-dtFrom="@Helpers.firstDayOfYear.ToString("dd-MMM-yyyy")" class="nav-link">
                                             <i class="far fa-circle nav-icon"></i>
                                             <p>Leave Applications</p>
                                         </a>

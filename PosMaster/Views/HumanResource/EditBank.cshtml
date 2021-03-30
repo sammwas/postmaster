@@ -1,11 +1,9 @@
-﻿@inject ICookiesService _cookies;
-@model BankViewModel
+﻿@model BankViewModel
 @{
     ViewData["Active"] = "HR";
     var option = Model.IsEditMode ? "Update" : "Add";
     var title = $"{option} Bank";
     ViewData["Title"] = title;
-    var userData = _cookies.Read();
     var statuses = Helpers.Statuses();
 }
 <div class="card card-primary">
