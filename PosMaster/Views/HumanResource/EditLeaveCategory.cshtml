@@ -1,0 +1,79 @@
+﻿@model EmployeeLeaveCategoryViewModel
+@{
+    ViewData["Active"] = "HR";
+    var statuses = Helpers.Statuses();
+    var option = Model.IsEditMode ? "Update" : "Add";
+    var title = $"{option} Leave Category";
+    ViewData["Title"] = title;
+}
+<div class="card card-primary">
+    <div class="card-header">
+        <h3 class="card-title">@ViewData["Title"]</h3>
+    </div>
+    <form role="form" method="post" autocomplete="off" enctype="multipart/form-data">
+        <div asp-validation-summary="All"></div>
+        <input asp-for="Id" />
+        <input asp-for="IsEditMode" />
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="Code"></label>
+                        <input asp-for="Code" class="form-control" placeholder="Code">
+                        <span asp-validation-for="Code" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="Title"></label>
+                        <input asp-for="Title" class="form-control" placeholder="Title">
+                        <span asp-validation-for="Title" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-check">
+                        <input class="form-check-input" asp-for="FemaleOnly">
+                        <label class="form-check-label" asp-for="FemaleOnly"></label>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="MaxDays"></label>
+                        <input asp-for="MaxDays" class="form-control" min="1" placeholder="Max Days">
+                        <span asp-validation-for="MaxDays" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label asp-for="Notes"></label>
+                        <textarea asp-for="Notes" class="rich-text" rows="3" placeholder="Notes"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <p><strong>Status</strong></p>
+                </div>
+                @foreach (var item in statuses)
+                {
+                    <div class="col-md-3">
+                        <div class="form-check">
+                            <input class="form-check-input" id="@item.Id" type="radio" asp-for="Status" value="@item.Id">
+                            <label class="form-check-label" for="@item.Id">@item.Text</label>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+        @if (!User.IsInRole(Role.Clerk))
+        {
+            <div class="card-footer">
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </div>
+        }
+    </form>
+</div>
