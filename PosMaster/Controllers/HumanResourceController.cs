@@ -284,5 +284,39 @@ namespace PosMaster.Controllers
                 dtFrom = Helpers.firstDayOfYear.ToString("dd-MMM-yyyy")
             });
         }
+
+        public IActionResult ApproveMonthlyPayment()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ApproveMonthlyPayment(ApproveMonthlyPaymentViewModel model)
+        {
+            var result = await _humanResourceInterface.ApproveMonthPaymentAsync(model);
+            if (!result.Success)
+                TempData.SetData(AlertLevel.Warning, "Approve Payments", result.Message);
+            var userData = _cookiesService.Read();
+            return RedirectToAction(nameof(MonthlyPayments), new
+            {
+                userData.ClientId,
+                model.Year,
+                model.Month,
+                model.InstanceId
+            });
+        }
+
+        public async Task<IActionResult> MonthlyPayments(Guid clientId, Guid? instanceId, int year, int month)
+        {
+            ViewData["InstanceId"] = instanceId;
+            ViewData["ClientId"] = clientId;
+            ViewData["Year"] = year;
+            ViewData["Month"] = month;
+            var result = await _humanResourceInterface.MonthlyPaymentsAsync(month, year, clientId, instanceId);
+            if (!result.Success)
+                TempData.SetData(AlertLevel.Warning, "Monthly Payments", result.Message);
+            return View(result.Data);
+        }
     }
 }

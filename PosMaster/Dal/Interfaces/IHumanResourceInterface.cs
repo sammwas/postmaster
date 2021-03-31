@@ -27,7 +27,7 @@ namespace PosMaster.Dal.Interfaces
             string dtTo = "", string search = "");
         Task<ReturnData<EmployeeLeaveApplication>> LeaveApplicationByIdAsync(Guid id);
         Task<ReturnData<Guid>> ApproveLeaveApplicationAsync(ApproveLeaveViewModel model);
-        Task<ReturnData<List<MonthlyPayViewModel>>> MonthlyPaymentsAsync(int month, int year, Guid? clientId, Guid? instanceId);
+        Task<ReturnData<List<MonthlyPayViewModel>>> MonthlyPaymentsAsync(int month, int year, Guid clientId, Guid? instanceId);
         Task<ReturnData<string>> ApproveMonthPaymentAsync(ApproveMonthlyPaymentViewModel model);
     }
 
@@ -85,9 +85,8 @@ namespace PosMaster.Dal.Interfaces
             _logger.LogInformation($"{tag} approve monthly payments for clientId {model.ClientId}, instanceId {model.InstanceId}, month {model.Month} and year {model.Year}");
             try
             {
-                var sPaymentsQry = _context.EmployeeSalaries.AsQueryable();
-                if (model.ClientId != null)
-                    sPaymentsQry = sPaymentsQry.Where(p => p.ClientId.Equals(model.ClientId.Value));
+                var sPaymentsQry = _context.EmployeeSalaries
+                    .Where(s => s.ClientId.Equals(model.ClientId)).AsQueryable();
                 if (model.InstanceId != null)
                     sPaymentsQry = sPaymentsQry.Where(p => p.InstanceId.Equals(model.InstanceId.Value));
                 var sData = await sPaymentsQry.ToListAsync();
@@ -119,11 +118,14 @@ namespace PosMaster.Dal.Interfaces
                         };
                         _context.EmployeeMonthPayments.Add(mPayment);
                     }
-                    approved.BasicPay = salary.BasicPay;
-                    approved.Allowance = salary.Allowance;
-                    approved.Deduction = salary.Deduction;
-                    approved.LastModifiedBy = model.Personnel;
-                    approved.DateLastModified = DateTime.Now;
+                    else
+                    {
+                        approved.BasicPay = salary.BasicPay;
+                        approved.Allowance = salary.Allowance;
+                        approved.Deduction = salary.Deduction;
+                        approved.LastModifiedBy = model.Personnel;
+                        approved.DateLastModified = DateTime.Now;
+                    }
                     await _context.SaveChangesAsync();
                 }
                 result.Success = true;
@@ -368,6 +370,16 @@ namespace PosMaster.Dal.Interfaces
                         Status = model.Status,
                         Notes = model.Notes
                     };
+                    var salaryLog = new EmployeeSalaryLog
+                    {
+                        ClientId = model.ClientId,
+                        InstanceId = model.InstanceId,
+                        UserId = model.UserId,
+                        Personnel = model.Personnel,
+                        SalaryFrom = 0,
+                        SalaryTo = empSalary.NetAmount
+                    };
+                    _context.EmployeeSalaryLogs.Add(salaryLog);
                     _context.EmployeeSalaries.Add(empSalary);
                     await _context.SaveChangesAsync();
                     result.Success = true;
@@ -848,7 +860,7 @@ namespace PosMaster.Dal.Interfaces
             }
         }
 
-        public async Task<ReturnData<List<MonthlyPayViewModel>>> MonthlyPaymentsAsync(int month, int year, Guid? clientId, Guid? instanceId)
+        public async Task<ReturnData<List<MonthlyPayViewModel>>> MonthlyPaymentsAsync(int month, int year, Guid clientId, Guid? instanceId)
         {
             var result = new ReturnData<List<MonthlyPayViewModel>> { Data = new List<MonthlyPayViewModel>() };
             var tag = nameof(MonthlyPaymentsAsync);
@@ -856,14 +868,12 @@ namespace PosMaster.Dal.Interfaces
             try
             {
                 var approved = _context.EmployeeMonthPayments
-                    .Any(p => p.Month.Equals(month) && p.Year.Equals(year));
+                    .Any(p => p.Month.Equals(month) && p.Year.Equals(year) && p.ClientId.Equals(clientId));
                 if (approved)
                 {
                     var mPaymentsQry = _context.EmployeeMonthPayments
                         .Include(p => p.User)
-                        .Where(p => p.Month.Equals(month) && p.Year.Equals(year));
-                    if (clientId != null)
-                        mPaymentsQry = mPaymentsQry.Where(p => p.ClientId.Equals(clientId.Value));
+                        .Where(p => p.Month.Equals(month) && p.Year.Equals(year) && p.ClientId.Equals(clientId));
                     if (instanceId != null)
                         mPaymentsQry = mPaymentsQry.Where(p => p.InstanceId.Equals(instanceId.Value));
                     var mData = await mPaymentsQry.OrderByDescending(p => p.BasicPay)
@@ -891,9 +901,8 @@ namespace PosMaster.Dal.Interfaces
                 }
 
                 var sPaymentsQry = _context.EmployeeSalaries
-                        .Include(p => p.User).AsQueryable();
-                if (clientId != null)
-                    sPaymentsQry = sPaymentsQry.Where(p => p.ClientId.Equals(clientId.Value));
+                        .Include(p => p.User)
+                        .Where(p => p.ClientId.Equals(clientId)).AsQueryable();
                 if (instanceId != null)
                     sPaymentsQry = sPaymentsQry.Where(p => p.InstanceId.Equals(instanceId.Value));
                 var sData = await sPaymentsQry.OrderByDescending(p => p.BasicPay)

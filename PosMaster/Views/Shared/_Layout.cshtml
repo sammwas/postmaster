@@ -257,6 +257,13 @@
                                             <p>Leave Categories</p>
                                         </a>
                                     </li>
+                                    <li class="nav-item">
+                                        <a asp-controller="HumanResource" asp-action="MonthlyPayments" asp-route-clientId="@userData.ClientId" asp-route-year="@DateTime.Now.Year"
+                                           asp-route-month="@DateTime.Now.Month" class="nav-link">
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>Monthly Payments</p>
+                                        </a>
+                                    </li>
                                 </ul>
                             </li>
                         }
@@ -326,7 +333,7 @@
                         }
                         <li class="nav-item has-treeview">
                             <a href="#" class="nav-link">
-                                <i class="nav-icon far fa-plus-square"></i>
+                                <i class="nav-icon fa fa-database"></i>
                                 <p>
                                     Master Data
                                     <i class="right fas fa-angle-left"></i>
