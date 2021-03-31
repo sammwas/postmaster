@@ -1,0 +1,97 @@
+﻿@inject IClientInstanceInterface _instanceInterface;
+@inject ICookiesService _cookies;
+@model List<EmployeeSalary>
+@{
+    ViewData["Active"] = "HR";
+    ViewData["Title"] = "Salaries";
+    var userData = _cookies.Read();
+    var instancesRes = User.IsInRole(Role.SuperAdmin) ?
+        await _instanceInterface.AllAsync()
+        : await _instanceInterface.ByClientIdAsync(userData.ClientId);
+    var instances = instancesRes.Data;
+    var instanceId = ViewData["instanceId"]?.ToString();
+}
+<div>
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">
+                @ViewData["Title"]
+            </h3>
+        </div>
+
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label>Instance</label>
+                        <select class="form-control select2" name="InstanceId" style="width: 100%;">
+                            <option value="">--Select Instance--</option>
+                            @foreach (var item in instances)
+                            {
+                                if (!string.IsNullOrEmpty(instanceId) && item.Id.ToString().Equals(instanceId))
+                                {
+                                    <option selected="selected" value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
+                                }
+                                else
+                                {
+                                    <option value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <br />
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                </div>
+            </div>
+
+            <table id="dataTable" class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>Employee</th>
+                        <th>Phone Number</th>
+                        <th>Basic Pay</th>
+                        <th>Allowances</th>
+                        <th>Deductions</th>
+                        <th>Net Pay</th>
+                        <th>Options</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td><a asp-action="EditEmployeeSalary" asp-route-userId="@item.UserId">@item.User.FullName</a></td>
+                            <td>@item.User.PhoneNumber</td>
+                            <td>@Helpers.FormatAmount(item.BasicPay, 2)</td>
+                            <td>@Helpers.FormatAmount(item.Allowance, 2)</td>
+                            <td>@Helpers.FormatAmount(item.Deduction, 2)</td>
+                            <td>@Helpers.FormatAmount(item.NetAmount, 2)</td>
+                            <td class="project-actions text-right">
+                                <a asp-action="EditEmployeeSalary" asp-route-userId="@item.UserId" class="btn btn-info btn-xs">
+                                    <i class="fas fa-pencil-alt">
+                                    </i>
+                                    Edit
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th>Employee</th>
+                        <th>Phone Number</th>
+                        <th>Basic Pay</th>
+                        <th>Allowances</th>
+                        <th>Deductions</th>
+                        <th>Net Pay</th>
+                        <th>Options</th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>

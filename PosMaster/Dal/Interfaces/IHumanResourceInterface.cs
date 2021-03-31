@@ -18,7 +18,7 @@ namespace PosMaster.Dal.Interfaces
         Task<ReturnData<List<EmployeeLeaveCategory>>> LeaveCategoriesAsync(Guid clientId);
         Task<ReturnData<EmployeeSalary>> EditEmployeeSalaryAsync(EmployeeSalaryViewModel model);
         Task<ReturnData<EmployeeSalary>> EmployeeSalaryByUserIdAsync(string userId);
-        Task<ReturnData<List<EmployeeSalary>>> EmployeeSalariesAsync(Guid clientId);
+        Task<ReturnData<List<EmployeeSalary>>> EmployeeSalariesAsync(Guid clientId, Guid? instanceId);
         Task<ReturnData<EmployeeKin>> EditEmployeeKinAsync(EmployeeKinViewModel model);
         Task<ReturnData<EmployeeKin>> EmployeeKinByUserIdAsync(string userId);
         Task<ReturnData<List<EmployeeLeaveCategory>>> EmployeeLeaveBalancesAsync(Guid clientId, string userId, string gender, Guid? categoryId);
@@ -659,17 +659,19 @@ namespace PosMaster.Dal.Interfaces
             }
         }
 
-        public async Task<ReturnData<List<EmployeeSalary>>> EmployeeSalariesAsync(Guid clientId)
+        public async Task<ReturnData<List<EmployeeSalary>>> EmployeeSalariesAsync(Guid clientId, Guid? instanceId)
         {
             var result = new ReturnData<List<EmployeeSalary>> { Data = new List<EmployeeSalary>() };
             var tag = nameof(EmployeeSalariesAsync);
-            _logger.LogInformation($"{tag} get client employee salaries");
+            _logger.LogInformation($"{tag} get client {clientId} employee salaries {instanceId}");
             try
             {
-                var data = await _context.EmployeeSalaries.Include(s => s.User)
-                    .Where(b => b.ClientId.Equals(clientId))
-                    .OrderByDescending(c => c.DateCreated)
-                    .ToListAsync();
+                var dataQry = _context.EmployeeSalaries.Include(s => s.User)
+                    .Where(b => b.ClientId.Equals(clientId)).AsQueryable();
+                if (instanceId != null)
+                    dataQry = dataQry.Where(d => d.InstanceId.Equals(instanceId.Value));
+                var data = await dataQry.OrderByDescending(c => c.DateCreated)
+                   .ToListAsync();
                 result.Success = data.Any();
                 result.Message = result.Success ? "Found" : "Not Found";
                 if (result.Success)

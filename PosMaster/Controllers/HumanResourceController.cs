@@ -252,5 +252,14 @@ namespace PosMaster.Controllers
             return View(result.Data);
         }
 
+        public async Task<IActionResult> EmployeeSalaries(Guid? instanceId)
+        {
+            ViewData["InstanceId"] = instanceId;
+            var userData = _cookiesService.Read();
+            var result = await _humanResourceInterface.EmployeeSalariesAsync(userData.ClientId, instanceId);
+            if (!result.Success)
+                TempData.SetData(AlertLevel.Warning, "Salaries", result.Message);
+            return View(result.Data);
+        }
     }
 }

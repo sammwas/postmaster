@@ -240,7 +240,7 @@
                                         </a>
                                     </li>
                                     <li class="nav-item">
-                                        <a asp-controller="Users" asp-action="All" class="nav-link">
+                                        <a asp-controller="HumanResource" asp-action="EmployeeSalaries" class="nav-link">
                                             <i class="far fa-circle nav-icon"></i>
                                             <p>Employee Salaries</p>
                                         </a>
@@ -255,12 +255,6 @@
                                         <a asp-controller="HumanResource" asp-action="LeaveCategories" asp-route-clientId="@userData.ClientId" class="nav-link">
                                             <i class="far fa-circle nav-icon"></i>
                                             <p>Leave Categories</p>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a asp-controller="HumanResource" asp-action="Banks" asp-route-clientId="@userData.ClientId" class="nav-link">
-                                            <i class="far fa-circle nav-icon"></i>
-                                            <p>Banks</p>
                                         </a>
                                     </li>
                                 </ul>
@@ -361,6 +355,12 @@
                                     <a asp-controller="MasterData" asp-action="PaymentModes" asp-route-clientId="@userData.ClientId" class="nav-link">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Payment Modes</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a asp-controller="HumanResource" asp-action="Banks" asp-route-clientId="@userData.ClientId" class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Banks</p>
                                     </a>
                                 </li>
                             </ul>
