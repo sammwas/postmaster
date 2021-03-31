@@ -492,6 +492,14 @@ namespace PosMaster.Dal.Interfaces
                     _logger.LogInformation($"{tag} updated {dbLeave.Code} {model.Id} : {result.Message}");
                     return result;
                 }
+                var anyPending = _context.EmployeeLeaveApplications.Any(a => a.UserId.Equals(model.UserId)
+                 && a.EmployeeLeaveCategoryId.Equals(cId) && a.ApplicationStatus.Equals(ApplicationStatus.Pending));
+                if (anyPending)
+                {
+                    result.Message = "Already has a Pending application";
+                    _logger.LogInformation($"{tag} adding failed for user {model.UserId} : {result.Message}");
+                    return result;
+                }
                 model.Code = _productInterface.DocumentRefNumber(Document.Leave, model.ClientId);
                 var leaveApplication = new EmployeeLeaveApplication
                 {

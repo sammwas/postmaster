@@ -225,8 +225,7 @@ namespace PosMaster.Controllers
             TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, title, result.Message);
             if (!result.Success)
                 return View(model);
-            var _From = result.Success ? result.Data.DateCreated : Helpers.firstDayOfYear;
-            return RedirectToAction(nameof(MyApplications), new { dtFrom = _From.ToString("dd-MMM-yyyy") });
+            return RedirectToAction(nameof(MyApplications), new { dtFrom = Helpers.firstDayOfYear.ToString("dd-MMM-yyyy") });
         }
 
         public async Task<IActionResult> MyApplications(string dtFrom = "", string dtTo = "")

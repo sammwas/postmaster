@@ -20,34 +20,35 @@
         </div>
 
         <div class="card-body">
-            <div class="row">
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label>Instance</label>
-                        <select class="form-control select2" name="InstanceId" style="width: 100%;">
-                            <option value="">--Select Instance--</option>
-                            @foreach (var item in instances)
-                            {
-                                if (!string.IsNullOrEmpty(instanceId) && item.Id.ToString().Equals(instanceId))
+            <form method="get" autocomplete="off">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Instance</label>
+                            <select class="form-control select2" name="InstanceId" style="width: 100%;">
+                                <option value="">--Select Instance--</option>
+                                @foreach (var item in instances)
                                 {
-                                    <option selected="selected" value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
+                                    if (!string.IsNullOrEmpty(instanceId) && item.Id.ToString().Equals(instanceId))
+                                    {
+                                        <option selected="selected" value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
+                                    }
                                 }
-                                else
-                                {
-                                    <option value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
-                                }
-                            }
-                        </select>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <br />
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </div>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <br />
-                        <button type="submit" class="btn btn-primary">Submit</button>
-                    </div>
-                </div>
-            </div>
-
+            </form>
             <table id="dataTable" class="table table-bordered table-striped">
                 <thead>
                     <tr>
