@@ -260,5 +260,29 @@ namespace PosMaster.Controllers
                 TempData.SetData(AlertLevel.Warning, "Salaries", result.Message);
             return View(result.Data);
         }
+
+        public async Task<IActionResult> ViewLeave(Guid id)
+        {
+            var result = await _humanResourceInterface.LeaveApplicationByIdAsync(id);
+            if (!result.Success)
+                TempData.SetData(AlertLevel.Warning, "Leave", result.Message);
+            return View(result.Data);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ApproveRejectLeave(ApproveLeaveViewModel model, ApplicationStatus status)
+        {
+            model.Status = status;
+            var result = await _humanResourceInterface.ApproveLeaveApplicationAsync(model);
+            if (!result.Success)
+                TempData.SetData(AlertLevel.Warning, "Leave", result.Message);
+            var userData = _cookiesService.Read();
+            return RedirectToAction(nameof(LeaveApplications), new
+            {
+                userData.ClientId,
+                dtFrom = Helpers.firstDayOfYear.ToString("dd-MMM-yyyy")
+            });
+        }
     }
 }
