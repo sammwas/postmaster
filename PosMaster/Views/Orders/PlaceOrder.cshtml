@@ -12,6 +12,7 @@
         await _productInterface.ByInstanceIdAsync(userData.InstanceId) :
         await _productInterface.ByClientIdAsync(userData.ClientId);
     var customers = await _customerInterface.ByClientIdAsync(userData.ClientId);
+    var customerName = Model.IsEditMode ? customers.Data.FirstOrDefault(c => c.Id == Guid.Parse(Model.CustomerId)).FullName : "";
 }
 <div class="card card-primary">
     <div class="card-header">
@@ -27,13 +28,20 @@
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label>Customer</label>
-                                    <select class="form-control select2" style="width: 100%;" id="customerId">
-                                        <option value="">--Select Customer--</option>
-                                        @foreach (var item in customers.Data)
-                                        {
-                                            <option data-crd="@item.CreditLimit" value="@item.Id" title="@item.Notes" data-customer="@item.Id">@item.FullName</option>
-                                        }
-                                    </select>
+                                    @if (Model.IsEditMode)
+                                    {
+                                        <input class="form-control" value="@customerName" disabled>
+                                    }
+                                    else
+                                    {
+                                        <select class="form-control select2" style="width: 100%;" id="customerId">
+                                            <option value="">--Select Customer--</option>
+                                            @foreach (var item in customers.Data)
+                                            {
+                                                <option data-crd="@item.CreditLimit" value="@item.Id" title="@item.Notes" data-customer="@item.Id">@item.FullName</option>
+                                            }
+                                        </select>
+                                    }
                                 </div>
                             </div>
                         </div>

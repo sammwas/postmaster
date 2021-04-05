@@ -15,15 +15,18 @@ namespace PosMaster.Dal.Interfaces
 		Task<ReturnData<Order>> PlaceOrderAsync(OrderViewModel model);
 		Task<ReturnData<Order>> OrderByIdAsync(Guid id);
 		Task<ReturnData<Order>> EditAsync(OrderViewModel model);
+		Task<ReturnData<Receipt>> FulfillOrder(Guid id);
 	}
 	public class OrdersImplementation : IOrderInterface
 	{
+		private readonly IProductInterface _productInterface;
 		private readonly DatabaseContext _context;
 		private readonly ILogger<OrdersImplementation> _logger;
-		public OrdersImplementation(DatabaseContext context, ILogger<OrdersImplementation> logger)
+		public OrdersImplementation(DatabaseContext context, ILogger<OrdersImplementation> logger, IProductInterface productInterface)
 		{
 			_context = context;
 			_logger = logger;
+			_productInterface = productInterface;
 		}
 		public async Task<ReturnData<List<Order>>> OrdersAsync(Guid? clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "")
 		{
@@ -98,7 +101,7 @@ namespace PosMaster.Dal.Interfaces
 					Name = model.Name,
 					Notes = model.Notes,
 					Personnel = model.Personnel,
-					CustomerId = Guid.Parse(model.CustomerId)
+					CustomerId = Guid.Parse(model.CustomerId),
 				};
 
 				var i = 0;
@@ -132,7 +135,8 @@ namespace PosMaster.Dal.Interfaces
 						Personnel = order.Personnel,
 						ClientId = order.ClientId,
 						InstanceId = order.InstanceId,
-						BuyingPrice = product.BuyingPrice
+						BuyingPrice = product.BuyingPrice,
+						LastModifiedBy = model.Personnel
 					};
 					order.OrderLineItems.Add(lineItem);
 				}
@@ -324,7 +328,8 @@ namespace PosMaster.Dal.Interfaces
 						Personnel = model.Personnel,
 						ClientId = model.ClientId,
 						InstanceId = dbOrder.InstanceId,
-						BuyingPrice = product.BuyingPrice
+						BuyingPrice = product.BuyingPrice,
+						LastModifiedBy = model.Personnel
 					};
 					dbOrder.OrderLineItems.Add(lineItem);
 				}
@@ -350,5 +355,64 @@ namespace PosMaster.Dal.Interfaces
 				return result;
 			}
 		}
-	}
+
+        public async Task<ReturnData<Receipt>> FulfillOrder(Guid id)
+        {
+			var result = new ReturnData<Receipt> { Data = new Receipt() };
+			var tag = nameof(FulfillOrder);
+			_logger.LogInformation($"{tag} fulfil order");
+            try
+            {
+				var order = await _context.Orders
+							.Include(o => o.OrderLineItems)
+							.ThenInclude(o => o.Product)
+							.FirstOrDefaultAsync(o => o.Id == id);
+				if (order == null) 
+				{
+					result.Message = "Order was not found";
+					_logger.LogWarning($"{tag} failed: {result.Message}");
+					return result;
+				}
+				var model = new OrderViewModel(order);
+				if (string.IsNullOrEmpty(model.LineItemListStr))
+				{
+					result.Message = "No line items found";
+					_logger.LogWarning($"{tag} order failed  {model.InstanceId} : {result.Message}");
+					return result;
+				}
+				var saleObj = new ProductSaleViewModel
+				{ 
+					ClientId = model.ClientId,
+					Code = model.Code,
+					InstanceId = model.InstanceId,
+					CustomerId = model.CustomerId,
+					Personnel = model.Personnel,
+					LineItemListStr = model.LineItemListStr,
+					PaymentMode = "CASH"
+				};
+				var receipt = await _productInterface.ProductsSaleAsync(saleObj);
+				if (!receipt.Success) 
+				{
+					result.Success = false;
+					result.Message = receipt.Message;
+					_logger.LogError($"{tag} {result.Message}");
+					return result;
+				}
+
+				order.Status = EntityStatus.Closed;
+				order.DateLastModified = DateTime.Now; 
+				await _context.SaveChangesAsync();
+				result = receipt;
+				return result;
+			}
+            catch (Exception ex)
+            {
+				Console.WriteLine(ex);
+				result.ErrorMessage = ex.Message;
+				result.Message = "Error occured";
+				_logger.LogError($"{tag} {result.Message} : {ex}");
+				return result;
+			}
+        }
+    }
 }

@@ -50,10 +50,6 @@ namespace PosMaster.Controllers
             var model = new OrderViewModel(result.Data);
             return View(model);
         }
-        //public IActionResult PlaceOrder()
-        //{
-        //    return View();
-        //}
         [HttpPost]
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> PlaceOrder(OrderViewModel model) 
@@ -72,28 +68,28 @@ namespace PosMaster.Controllers
 				return View(model);
 			return RedirectToAction(nameof(Index), new {dtFrom = Helpers.FirstDayOfWeek().ToString("dd-MMM-yyyy"), dtTo = DateTime.Now.ToString("dd-MMM-yyyy") });
 		}
+
 		[HttpPost]
-		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> Edit(OrderViewModel model)
+		public async Task<JsonResult> FulFilOrder(Guid id)
 		{
-			var userData = _cookieService.Read();
-			model.ClientId = userData.ClientId;
-			model.InstanceId = userData.InstanceId;
-			model.Personnel = User.Identity.Name;
-			var option = model.IsEditMode ? "Update" : "Add";
-			var title = $"{option} Expense";
+			var title = "Fulfil order";
+			var orderExists = Guid.TryParse(id.ToString(), out var orderId);
+			if (!orderExists)
+			{
+				var message = "Order does not exist";
+				TempData.SetData(AlertLevel.Warning, title, message);
+				return Json(new Receipt());
+			}
 			if (!ModelState.IsValid)
 			{
 				var message = "Missing fields";
 				TempData.SetData(AlertLevel.Warning, title, message);
-				return View(model);
+				return Json(new Receipt());
 			}
 
-			var result = await _orderInterface.EditAsync(model);
-			TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, title, result.Message);
-			if (!result.Success)
-				return View(model);
-			return RedirectToAction(nameof(Edit), new { result.Data.Id });
+			var result = await _orderInterface.FulfillOrder(orderId);
+			TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, "Customer Order", result.Message);
+			return Json(result);
 		}
 	} 
 }

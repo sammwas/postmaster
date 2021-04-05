@@ -224,6 +224,20 @@ $('#customer-select').select2({
 	minimumInputLength: 1
 });
 
+let orderId;
+$('.launch-modal').click(function (event) {
+	event.preventDefault();
+	let modalTitle = $(this).attr('data-order-name');
+	orderId = $(this).attr('data-order-id');
+	$('#modal-default .modal-title').text(modalTitle);
+})
+$("#fulfil-order").click(function () {
+	console.log(orderId);
+	$.post('/Orders/FulFilOrder', { id: orderId }, function (result) {
+		console.log(result);
+	});
+	$('#modal-default').modal('hide');
+});
 var salesChartCanvas = document.getElementById('revenue-chart-canvas').getContext('2d')
 $.get('/Reports/MonthlySalesReport').done(function (data) {
 	let sales = new Object();

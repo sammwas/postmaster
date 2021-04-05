@@ -38,25 +38,5 @@ namespace PosMaster.ViewModels
 		[Display(Name = "Customer")]
 		public string CustomerId { get; set; }
 		public string LineItemListStr { get; set; }
-
-		//private string ParseOrderLineItemMv(Order order) 
-		//{
-  //          var lineItems = string.Empty;
-
-  //          if (order == null)
-  //              return lineItems;
-  //          if (order.OrderLineItems.Any())
-  //          {
-  //              var strList = new List<string>();
-  //              foreach (var item in order.OrderLineItems)
-  //              {
-  //                  var lineItem = $"{{'productId': {item.ProductId}, 'quantity': {item.Quantity}, 'unitPrice': {item.UnitPrice}, 'discount': {item.Discount}, 'taxAmount': 0, 'itemName': {item.Product.Name} (Qty {item.Product.AvailableQuantity}) }}";
-  //                  strList.Add(lineItem);
-  //              }
-  //              var lineArr = string.Join(",", strList);
-  //              lineItems = $"[{lineArr}]";
-  //          }
-  //          return lineItems;
-  //      }
 	}
 }
