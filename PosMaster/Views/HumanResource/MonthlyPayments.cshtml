@@ -1,0 +1,137 @@
+﻿@inject IClientInstanceInterface _instanceInterface;
+@inject ICookiesService _cookies;
+@model List<MonthlyPayViewModel>
+@{
+    ViewData["Active"] = "HR";
+    ViewData["Title"] = "Monthly Payments";
+    var userData = _cookies.Read();
+    var instancesRes = User.IsInRole(Role.SuperAdmin) ?
+        await _instanceInterface.AllAsync()
+        : await _instanceInterface.ByClientIdAsync(userData.ClientId);
+    var instances = instancesRes.Data;
+    var instanceId = ViewData["InstanceId"]?.ToString();
+    var year = ViewData["Year"]?.ToString();
+    var month = ViewData["Month"]?.ToString();
+}
+<div>
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">
+                @ViewData["Title"]
+            </h3>
+        </div>
+        <div class="card-body">
+            <form method="get" autocomplete="off">
+                <input type="hidden" name="ClientId" value="@ViewData["ClientId"]" />
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Instance</label>
+                            <select class="form-control select2" name="InstanceId" style="width: 100%;">
+                                <option value="">--Select Instance--</option>
+                                @foreach (var item in instances)
+                                {
+                                    if (!string.IsNullOrEmpty(instanceId) && item.Id.ToString().Equals(instanceId))
+                                    {
+                                        <option selected="selected" value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Year</label>
+                            <select class="form-control select2" name="year" style="width: 100%;">
+                                <option value="">--Select Year--</option>
+                                @for (int i = 0; i < 5; i++)
+                                {
+                                    var yr = DateTime.Now.Year - i;
+                                    @if (yr.Equals(int.Parse(year)))
+                                    {
+                                        <option selected="selected" value="@yr">@yr</option>
+                                    }
+                                    <option value="@yr">@yr</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Month</label>
+                            <select class="form-control select2" name="Month" style="width: 100%;">
+                                <option value="">--Select Month--</option>
+                                @for (int i = 0; i < 12; i++)
+                                {
+                                    var monDt = DateTime.Now.AddMonths(i * -1);
+                                    @if (monDt.Month.Equals(int.Parse(month)))
+                                    {
+                                        <option selected="selected" value="@monDt.Month">@monDt.ToString("MMMM")</option>
+                                    }
+                                    <option value="@monDt.Month">@monDt.ToString("MMMM")</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <br />
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <table id="dataTable" class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>Employee</th>
+                        <th>Phone Number</th>
+                        <th>Basic Pay</th>
+                        <th>Allowances</th>
+                        <th>Deductions</th>
+                        <th>Net Pay</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td><a asp-action="EditEmployeeSalary" asp-route-userId="@item.User.Id">@item.User.FullName</a></td>
+                            <td>@item.User.PhoneNumber</td>
+                            <td>@Helpers.FormatAmount(item.BasicPay, 2)</td>
+                            <td>@Helpers.FormatAmount(item.Allowance, 2)</td>
+                            <td>@Helpers.FormatAmount(item.Deduction, 2)</td>
+                            <td>@Helpers.FormatAmount(item.NetAmount, 2)</td>
+                            <td>
+                                @if (item.Approved)
+                                {
+                                    <span class="badge badge-success"><i class="fa fa-check-circle"></i> Approved</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-info"><i class="fa fa-info-circle"></i> Not Approved</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th>Employee</th>
+                        <th>Phone Number</th>
+                        <th>Basic Pay</th>
+                        <th>Allowances</th>
+                        <th>Deductions</th>
+                        <th>Net Pay</th>
+                        <th>Status</th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>

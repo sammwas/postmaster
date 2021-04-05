@@ -1,0 +1,88 @@
+﻿@inject ICookiesService _cookies;
+@inject IClientInstanceInterface _instanceInterface;
+@model ApproveMonthlyPaymentViewModel
+@{
+    ViewData["Active"] = "HR";
+    var title = $"Approve Payment";
+    ViewData["Title"] = title;
+    var userData = _cookies.Read();
+    var returnData = await _instanceInterface.ByClientIdAsync(userData.ClientId);
+    var instances = returnData.Data;
+}
+<div class="card card-primary">
+    <div class="card-header">
+        <h3 class="card-title">@ViewData["Title"]</h3>
+    </div>
+    <form role="form" method="post" autocomplete="off">
+        <div asp-validation-summary="All" class="text-danger"></div>
+        <input type="hidden" value="@userData.ClientId" asp-for="ClientId" />
+        <input type="hidden" value="@User.Identity.Name" asp-for="Personnel" />
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="InstanceId"></label>
+                                <select class="form-control select2" asp-for="InstanceId" style="width: 100%;">
+                                    <option value="">--All Instances--</option>
+                                    @foreach (var item in instances)
+                                    {
+                                        <option value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="InstanceId" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="Year"></label>
+                                <select class="form-control select2" asp-for="Year" style="width: 100%;">
+                                    @for (int i = 0; i < 5; i++)
+                                    {
+                                        var yr = DateTime.Now.Year - i;
+                                        <option value="@yr">@yr</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="Year" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="Month"></label>
+                                <select class="form-control select2" asp-for="Month" style="width: 100%;">
+                                    @for (int i = 0; i < 12; i++)
+                                    {
+                                        var monDt = DateTime.Now.AddMonths(i * -1);
+                                        <option value="@monDt.Month">@monDt.ToString("MMMM")</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="Year" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h4>Options</h4>
+                        <div>
+                            <p class="alert alert-info">
+                                <i class="fa fa-info-circle fa-2x"></i><br /> Approve monthly payments.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>

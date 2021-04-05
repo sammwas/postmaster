@@ -1,0 +1,125 @@
+﻿@model EmployeeKinViewModel
+@{
+    ViewData["Active"] = "HR";
+    var option = Model.IsEditMode ? "Update" : "Add";
+    var title = $"{option} Kin";
+    ViewData["Title"] = title;
+    var statuses = Helpers.Statuses();
+}
+<div class="card card-primary">
+    <div class="card-header">
+        <h3 class="card-title">@ViewData["Title"]</h3>
+    </div>
+    <form role="form" method="post" autocomplete="off">
+        <div asp-validation-summary="All" class="text-danger"></div>
+        <input asp-for="Id" />
+        <input asp-for="IsEditMode" />
+        <input asp-for="UserId" type="hidden" />
+        <input asp-for="Code" type="hidden" value="@DateTime.Now" />
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="Title"></label>
+                                <select class="form-control select2" asp-for="Title" style="width: 100%;">
+                                    <option value="">--Select Title--</option>
+                                    @foreach (var item in Helpers.userTitles)
+                                    {
+                                        <option value="@item" title="@item">@item</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="Title" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="FirstName"></label>
+                                <input asp-for="FirstName" class="form-control" placeholder="John">
+                                <span asp-validation-for="FirstName" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="MiddleName"></label>
+                                <input asp-for="MiddleName" class="form-control" placeholder="Doe">
+                                <span asp-validation-for="MiddleName" class="text-danger"></span>
+                            </div>
+                        </div><div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="LastName"></label>
+                                <input asp-for="LastName" class="form-control" placeholder="Doe">
+                                <span asp-validation-for="LastName" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="Gender"></label>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input" id="rdMale" type="radio" asp-for="Gender" value="Male">
+                                            <label class="form-check-label" for="rdMale">Male</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input" id="rdFemale" type="radio" asp-for="Gender" value="Female">
+                                            <label class="form-check-label" for="rdFemale">Female</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <span asp-validation-for="Gender" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="PhoneNumber"></label>
+                                <input asp-for="PhoneNumber" class="form-control numbers-only" placeholder="07XXXXXXXX">
+                                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="EmailAddress"></label>
+                                <input asp-for="EmailAddress" class="form-control" placeholder="john@doe.com">
+                                <span asp-validation-for="EmailAddress" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="Relationship"></label>
+                                <input asp-for="Relationship" class="form-control" placeholder="Father">
+                                <span asp-validation-for="Relationship" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h4>Options</h4>
+                        <div>
+                            <p class="alert alert-info">
+                                <i class="fa fa-info-circle fa-2x"></i><br /> Provide employee next of kin details.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>

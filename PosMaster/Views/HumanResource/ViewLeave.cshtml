@@ -1,0 +1,97 @@
+﻿@model EmployeeLeaveApplication
+@{
+    ViewData["Active"] = "HR";
+    var title = $"Leave {Model.Code}";
+    ViewData["Title"] = title;
+}
+<div class="card card-primary">
+    <div class="card-header">
+        <h3 class="card-title">@ViewData["Title"]</h3>
+    </div>
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card-body">
+
+                <h3 class="timeline-header">
+                    <span class="text-primary">@Model.Code</span> @Model.EmployeeLeaveCategory.Title
+                    &nbsp; <small class="time" style="font-size:small"><i class="fas fa-clock"></i> @Helpers.RelativeTime(Model.DateCreated)</small>
+                </h3>
+                <div class="timeline-body">
+                    <label>Employee</label>
+                    <div>
+                        <label>Name</label> :<span>@Model.User.FullName</span>
+                    </div>
+                    <div>
+                        <label>Phone</label> :<span>@Model.User.PhoneNumber</span>
+                    </div>
+                    <div>
+                        <label>Email Address</label> :<span>@Model.User.Email</span>
+                    </div>
+                    <div>
+                        <label>Gender</label> :<span>@Model.User.Gender</span>
+                    </div>
+                    <div>
+                        <label>Role</label> :<span>@Model.User.Role</span>
+                    </div>
+                    <br />
+                    <label>Period [@Model.ApplicationStatus]</label>
+                    <div>
+                        <label>From</label> :<span>@Model.DateFromStr</span>
+                    </div>
+                    <div>
+                        <label>To</label> :<span>@Model.DateToStr</span>
+                    </div>
+                    <div>
+                        <label>Days</label> :<span>@Model.Days</span>
+                    </div>
+                    <label>Notes</label>
+                    <p>@Html.Raw(Model.Notes)</p>
+                    @if (!Model.ApplicationStatus.Equals(ApplicationStatus.Pending))
+                    {
+                        <label>Comments</label>
+                        <p>@Html.Raw(Model.Comments)</p>
+                    }
+                </div>
+                <div class="timeline-footer">
+                    @if (Model.ApplicationStatus.Equals(ApplicationStatus.Pending))
+                    {
+                        <label>Approve/Reject Application</label>
+                        <form method="post" autocomplete="off" asp-action="ApproveRejectLeave">
+                            <input type="hidden" name="id" value="@Model.Id" />
+                            <input type="hidden" name="personnel" value="@User.Identity.Name" />
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label>Comments</label>
+                                        <textarea name="Comment" class="form-control" placeholder="Comments"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="col-md-6"> </div>
+                                    <div class="col-md-6">
+                                        <button type="submit" class="btn btn-success" name="status" value="@ApplicationStatus.Approved"><i class="fa fa-check-circle"></i> Approve</button>
+                                        <button type="submit" class="btn btn-danger" name="status" value="@ApplicationStatus.Rejected"><i class="fa fa-times-circle"></i> Rejact</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h4>Options</h4>
+                    <div>
+                        <p class="alert alert-info">
+                            <i class="fa fa-info-circle fa-2x"></i><br /> Confirm application leave days for action.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
