@@ -10,5 +10,6 @@
 		public decimal TotalReceiptsAmount { get; set; }
 		public decimal TotalExpectedProfit { get; set; }
 		public decimal TotalActualProfit { get; set; }
-	}
+        public int TotalUsers { get; set; }
+    }
 }

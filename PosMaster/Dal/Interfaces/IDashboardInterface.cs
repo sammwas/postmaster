@@ -103,7 +103,8 @@ namespace PosMaster.Dal.Interfaces
 					TotalExpectedProfit = await _context.ReceiptLineItems.Where(c => c.ClientId.Equals(clientId))
 					.SumAsync(r => (r.SellingPrice * r.Quantity) - (r.BuyingPrice * r.Quantity)),
 					TotalReceiptsAmount = await _context.ReceiptLineItems.Where(c => c.ClientId.Equals(clientId))
-					.SumAsync(r => r.UnitPrice * r.Quantity)
+					.SumAsync(r => r.UnitPrice * r.Quantity),
+					TotalUsers = await _context.Users.Where(u => u.ClientId == clientId).CountAsync()
 				};
 				result.Success = true;
 				result.Message = "Found";
