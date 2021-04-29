@@ -1,18 +1,19 @@
-version: "1.0"
+#version: "1.0"
    
 services:
-  pg-database:
+  pos-pg-database:
     image: postgres
     environment:
       - POSTGRES_DB=test_db
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=12345678
     ports: 
-      - "2345:5432"
-  dotnetcore-api:
+      - "2346:5432"
+  pos-dotnetcore-app:
     build: .
     environment:
-    - DBServer=pg-database
-    - DBPort=5432
+    - Database:Server=pos-pg-database
+    - Database:Port=5432
+    - Database:Password=12345678
     ports: 
-      - "8080:80" 
+      - "8081:80" 
