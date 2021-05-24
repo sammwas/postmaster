@@ -16,135 +16,138 @@ using System;
 
 namespace PosMaster
 {
-	public class Startup
-	{
-		public Startup(IConfiguration configuration, IWebHostEnvironment webHostEnvironment)
-		{
-			Configuration = configuration;
-			WebHostEnvironment = webHostEnvironment;
-		}
+    public class Startup
+    {
+        public Startup(IConfiguration configuration, IWebHostEnvironment webHostEnvironment)
+        {
+            Configuration = configuration;
+            WebHostEnvironment = webHostEnvironment;
+        }
 
-		private IConfiguration Configuration { get; }
-		private IWebHostEnvironment WebHostEnvironment { get; }
+        private IConfiguration Configuration { get; }
+        private IWebHostEnvironment WebHostEnvironment { get; }
 
-		public void ConfigureServices(IServiceCollection services)
-		{
-			services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-			services.AddTransient(m => new FileUploadService(WebHostEnvironment));
-			services.AddScoped<ICookiesService, CookiesService>();
+        public void ConfigureServices(IServiceCollection services)
+        {
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddTransient(m => new FileUploadService(WebHostEnvironment));
+            services.AddScoped<ICookiesService, CookiesService>();
 
-			services.AddScoped<IEmailService, EmailService>();
-			services.AddScoped<IUserInterface, UserInterface>();
-			services.AddScoped<IClientInterface, ClientImplementation>();
-			services.AddScoped<IClientInstanceInterface, ClientInstanceImplementation>();
-			services.AddScoped<ISystemSettingInterface, SystemSettingImplementation>();
-			services.AddScoped<IProductInterface, ProductImplementation>();
-			services.AddScoped<IExpenseInterface, ExpenseImplementation>();
-			services.AddScoped<ICustomerInterface, CustomerImplementation>();
-			services.AddScoped<ISupplierInterface, SupplierImplementation>();
-			services.AddScoped<IDashboardInterface, DashboardImplementation>();
-			services.AddScoped<IReportingInterface, ReportingImplementation>();
-			services.AddScoped<IMasterDataInterface, MasterDataImplementation>();
-			services.AddScoped<IInvoiceInterface, InvoiceImplementation>();
-			services.AddScoped<IOrderInterface, OrdersImplementation>(); 
-			services.AddScoped<IHumanResourceInterface, HumanResourceImplementation>();
+            services.AddScoped<IEmailService, EmailService>();
+            services.AddScoped<IUserInterface, UserInterface>();
+            services.AddScoped<IClientInterface, ClientImplementation>();
+            services.AddScoped<IClientInstanceInterface, ClientInstanceImplementation>();
+            services.AddScoped<ISystemSettingInterface, SystemSettingImplementation>();
+            services.AddScoped<IProductInterface, ProductImplementation>();
+            services.AddScoped<IExpenseInterface, ExpenseImplementation>();
+            services.AddScoped<ICustomerInterface, CustomerImplementation>();
+            services.AddScoped<ISupplierInterface, SupplierImplementation>();
+            services.AddScoped<IDashboardInterface, DashboardImplementation>();
+            services.AddScoped<IReportingInterface, ReportingImplementation>();
+            services.AddScoped<IMasterDataInterface, MasterDataImplementation>();
+            services.AddScoped<IInvoiceInterface, InvoiceImplementation>();
+            services.AddScoped<IOrderInterface, OrdersImplementation>();
+            services.AddScoped<IHumanResourceInterface, HumanResourceImplementation>();
 
-			var server = Configuration["Database:Server"];
-			var port = Configuration["Database:Port"];
-			var user = Configuration["Database:UserName"];
-			var password = Configuration["Database:Password"];
-			var database = Configuration["Database:Name"];
-			var conString = $"Host={server};Port={int.Parse(port)};" +
-				$"Database={database};User Id={user};Password={password}";
-			Console.WriteLine($"DbConnection string :- {conString}");
-			var os = Environment.Is64BitOperatingSystem ? "64" : "32";
-			Console.WriteLine($"PosMaster Running. OS:{os} BIT -{Environment.OSVersion.VersionString} {Environment.MachineName}");
+            var server = Configuration["Database:Server"] ?? "localhost";
+            var port = Configuration["Database:Port"] ?? "5432";
+            var user = Configuration["Database:UserName"] ?? "postgres";
+            var password = Configuration["Database:Password"] ?? "123456";
+            var database = Configuration["Database:Name"] ?? "posmater_db";
+            var from = string.IsNullOrEmpty(Configuration["Database:Name"]) ? "Hard-Coded" : "Config-File";
 
-			services.AddDbContext<DatabaseContext>(options =>
-			options.UseNpgsql(conString));
+            var conString = $"Host={server};Port={int.Parse(port)};" +
+                $"Database={database};User Id={user};Password={password}";
+            Console.WriteLine($"DbConnection String : Src {from}  :- {conString}");
+            var os = Environment.Is64BitOperatingSystem ? "64" : "32";
+            Console.WriteLine($"PosMaster Running. OS:{os} BIT -{Environment.OSVersion.VersionString} {Environment.MachineName}");
 
-			services.AddIdentity<User, IdentityRole>()
-				.AddEntityFrameworkStores<DatabaseContext>()
-				.AddDefaultTokenProviders();
+            services.AddDbContext<DatabaseContext>(options =>
+            options.UseNpgsql(conString));
 
-			services.Configure<IdentityOptions>(options =>
-			{
-				options.Password.RequireDigit = true;
-				options.Password.RequireLowercase = false;
-				options.Password.RequireNonAlphanumeric = false;
-				options.Password.RequireUppercase = false;
-				options.Password.RequiredLength = 6;
-				options.Password.RequiredUniqueChars = 1;
+            services.AddIdentity<User, IdentityRole>()
+                .AddEntityFrameworkStores<DatabaseContext>()
+                .AddDefaultTokenProviders();
 
-				options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(10);
-				options.Lockout.MaxFailedAccessAttempts = 5;
-				options.Lockout.AllowedForNewUsers = true;
+            services.Configure<IdentityOptions>(options =>
+            {
+                options.Password.RequireDigit = true;
+                options.Password.RequireLowercase = false;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequiredLength = 6;
+                options.Password.RequiredUniqueChars = 1;
 
-				options.User.AllowedUserNameCharacters =
-					"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.@";
-				options.User.RequireUniqueEmail = true;
-			});
-			services.ConfigureApplicationCookie(options =>
-			{
-				options.Cookie.HttpOnly = true;
-				options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(10);
+                options.Lockout.MaxFailedAccessAttempts = 5;
+                options.Lockout.AllowedForNewUsers = true;
 
-				options.LoginPath = "/Home/Index";
-				options.AccessDeniedPath = "/Home/AccessDenied";
-				options.SlidingExpiration = true;
-			});
+                options.User.AllowedUserNameCharacters =
+                    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.@";
+                options.User.RequireUniqueEmail = true;
+            });
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.Cookie.HttpOnly = true;
+                options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
 
-			services.AddAuthentication()
-				.AddGoogle(googleOptions =>
-			{
-				googleOptions.ClientId = Configuration["Google:ClientId"];
-				googleOptions.ClientSecret = Configuration["Google:ClientSecret"];
-			});
+                options.LoginPath = "/Home/Index";
+                options.AccessDeniedPath = "/Home/AccessDenied";
+                options.SlidingExpiration = true;
+            });
 
-			services.Configure<CookiePolicyOptions>(options =>
-			{
-				options.CheckConsentNeeded = context => true;
-				options.MinimumSameSitePolicy = Microsoft.AspNetCore.Http.SameSiteMode.None;
-			});
+            services.AddAuthentication()
+                .AddGoogle(googleOptions =>
+            {
+                googleOptions.ClientId = Configuration["Google:ClientId"];
+                googleOptions.ClientSecret = Configuration["Google:ClientSecret"];
+            });
 
-			services.AddMvc();
-			services.AddMemoryCache();
-			services.AddControllers();
-			services.AddDistributedMemoryCache();
-			services.AddControllersWithViews();
-		}
+            services.Configure<CookiePolicyOptions>(options =>
+            {
+                options.CheckConsentNeeded = context => false;
+                //options.CheckConsentNeeded = context => true;
+                options.MinimumSameSitePolicy = Microsoft.AspNetCore.Http.SameSiteMode.None;
+            });
 
-		public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
-		{
-			if (WebHostEnvironment.IsDevelopment())
-				app.UseDeveloperExceptionPage();
-			else
-				app.UseExceptionHandler("/Home/Error");
+            services.AddMvc();
+            services.AddMemoryCache();
+            services.AddControllers();
+            services.AddDistributedMemoryCache();
+            services.AddControllersWithViews();
+        }
 
-			loggerFactory.AddFile("Logs/PosMaster-{Date}.txt");
-			app.UseStaticFiles(new StaticFileOptions
-			{
-				OnPrepareResponse = ctx =>
-				{
-					const int durationInSeconds = 60 * 60 * 24;
-					ctx.Context.Response.Headers[HeaderNames.CacheControl] =
-						"public,max-age=" + durationInSeconds;
-				}
-			});
+        public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
+        {
+            if (WebHostEnvironment.IsDevelopment())
+                app.UseDeveloperExceptionPage();
+            else
+                app.UseExceptionHandler("/Home/Error");
 
-			app.UseCookiePolicy();
-			app.UseAuthentication();
-			app.UseRouting();
-			app.UseAuthorization();
+            //loggerFactory.AddFile("Logs/PosMaster-{Date}.txt");
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                OnPrepareResponse = ctx =>
+                {
+                    const int durationInSeconds = 60 * 60 * 24;
+                    ctx.Context.Response.Headers[HeaderNames.CacheControl] =
+                        "public,max-age=" + durationInSeconds;
+                }
+            });
 
-			app.UseEndpoints(endpoints =>
-			{
-				endpoints.MapControllerRoute(
-					name: "default",
-					pattern: "{controller=Home}/{action=Index}/{id?}");
-			});
+            app.UseCookiePolicy();
+            app.UseAuthentication();
+            app.UseRouting();
+            app.UseAuthorization();
 
-			DatabaseInit.Seed(app);
-		}
-	}
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllerRoute(
+                    name: "default",
+                    pattern: "{controller=Home}/{action=Index}/{id?}");
+            });
+
+            DatabaseInit.Seed(app);
+        }
+    }
 }
