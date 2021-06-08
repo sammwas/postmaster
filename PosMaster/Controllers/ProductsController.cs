@@ -175,14 +175,14 @@ namespace PosMaster.Controllers
             return Json(data);
         }
 
-        public async Task<IActionResult> TopSellingVolume()
+        public async Task<IActionResult> TopSellingByVolume()
         {
             var userData = _cookieService.Read();
             var clientId = userData.ClientId;
             Guid? instanceId = null;
             if (User.IsInRole(Role.Clerk))
                 instanceId = userData.InstanceId;
-            var data = await _producutInterface.TopSellingProductsByVolumeAsync(clientId, instanceId);
+            var data = await _producutInterface.TopSellingProductsByVolumeAsync(clientId, instanceId, 5);
             return Json(data);
         }
     }

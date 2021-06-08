@@ -226,17 +226,17 @@ $('#customer-select').select2({
 
 let orderId;
 $('.launch-modal').click(function (event) {
-	event.preventDefault();
-	let modalTitle = $(this).attr('data-order-name');
-	orderId = $(this).attr('data-order-id');
-	$('#modal-default .modal-title').text(modalTitle);
+    event.preventDefault();
+    let modalTitle = $(this).attr('data-order-name');
+    orderId = $(this).attr('data-order-id');
+    $('#modal-default .modal-title').text(modalTitle);
 })
 $("#fulfil-order").click(function () {
-	console.log(orderId);
-	$.post('/Orders/FulFilOrder', { id: orderId }, function (result) {
-		console.log(result);
-	});
-	$('#modal-default').modal('hide');
+    console.log(orderId);
+    $.post('/Orders/FulFilOrder', { id: orderId }, function (result) {
+        console.log(result);
+    });
+    $('#modal-default').modal('hide');
 });
 // var salesChartCanvas = document.getElementById('revenue-chart-canvas').getContext('2d')
 // $.get('/Reports/MonthlySalesReport').done(function (data) {
@@ -353,4 +353,40 @@ if (x) {
             });
         }
     });
+}
+
+if (x) {
+    var labels = [];
+    var donutData = [];
+    $.get('/Products/TopSellingByVolume').done(function (data) {
+        if (data.success) {
+            data.data.forEach(element => {
+                labels.push(element.product.code + '-' + element.product.name + ' [' + element.product.productCategory.name + ']');
+                donutData.push(element.volume);
+            });
+            plotDoughnut(labels, donutData);
+        }
+    });
+
+}
+function plotDoughnut(labels, data) {
+    var donutChartCanvas = $('#donutChart').get(0).getContext('2d')
+    var donutData = {
+        labels: labels,
+        datasets: [
+            {
+                data: data,
+                backgroundColor: ['#f56954', '#00a65a', '#f39c12', '#00c0ef', '#3c8dbc', '#d2d6de'],
+            }
+        ]
+    }
+    var donutOptions = {
+        maintainAspectRatio: false,
+        responsive: true,
+    }
+    var donutChart = new Chart(donutChartCanvas, {
+        type: 'doughnut',
+        data: donutData,
+        options: donutOptions
+    })
 }

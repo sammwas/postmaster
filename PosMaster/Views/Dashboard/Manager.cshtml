@@ -110,14 +110,6 @@
                             Sales
                         </h3>
                         <div class="card-tools">
-                            <ul class="nav nav-pills ml-auto">
-                                <li class="nav-item">
-                                    <a class="nav-link active" href="#revenue-chart" data-toggle="tab">Area</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" href="#sales-chart" data-toggle="tab">Donut</a>
-                                </li>
-                            </ul>
                         </div>
                     </div>
                     <div class="card-body">
@@ -146,6 +138,23 @@
                 </div>
             </section>
             <section class="col-lg-5 connectedSortable">
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">Top sales by volume</h3>
+
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <button type="button" class="btn btn-tool" data-card-widget="remove">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="donutChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                    </div>
+                </div>
                 <div class="card bg-gradient-success">
                     <div class="card-header border-0">
                         <h3 class="card-title">
@@ -153,17 +162,6 @@
                             Calendar
                         </h3>
                         <div class="card-tools">
-                            @*<div class="btn-group">
-                                    <button type="button" class="btn btn-success btn-sm dropdown-toggle" data-toggle="dropdown" data-offset="-52">
-                                        <i class="fas fa-bars"></i>
-                                    </button>
-                                    <div class="dropdown-menu" role="menu">
-                                        <a href="#" class="dropdown-item">Add new event</a>
-                                        <a href="#" class="dropdown-item">Clear events</a>
-                                        <div class="dropdown-divider"></div>
-                                        <a href="#" class="dropdown-item">View calendar</a>
-                                    </div>
-                                </div>*@
                             <button type="button" class="btn btn-success btn-sm" data-card-widget="collapse">
                                 <i class="fas fa-minus"></i>
                             </button>
