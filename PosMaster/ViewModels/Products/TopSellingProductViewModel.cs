@@ -10,5 +10,6 @@ namespace PosMaster.ViewModels
         public int Volume { get; set; }
         public decimal Amount { get; set; }
         public Guid InstanceId { get; set; }
+        public Guid ClientId { get; set; }
     }
 }

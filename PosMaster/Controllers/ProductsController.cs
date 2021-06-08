@@ -167,18 +167,22 @@ namespace PosMaster.Controllers
         public async Task<IActionResult> LowStockProducts()
         {
             var userData = _cookieService.Read();
-            var clientId = userData.ClientId;
+            Guid? clientId = null;
+            if (!User.IsInRole(Role.SuperAdmin))
+                clientId = userData.ClientId;
             Guid? instanceId = null;
             if (User.IsInRole(Role.Clerk))
                 instanceId = userData.InstanceId;
-            var data = await _producutInterface.LowStockProductsAsync(clientId, instanceId);
+            var data = await _producutInterface.LowStockProductsAsync(clientId, instanceId, 5);
             return Json(data);
         }
 
         public async Task<IActionResult> TopSellingByVolume()
         {
             var userData = _cookieService.Read();
-            var clientId = userData.ClientId;
+            Guid? clientId = null;
+            if (!User.IsInRole(Role.SuperAdmin))
+                clientId = userData.ClientId;
             Guid? instanceId = null;
             if (User.IsInRole(Role.Clerk))
                 instanceId = userData.InstanceId;

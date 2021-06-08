@@ -24,8 +24,8 @@ namespace PosMaster.Dal.Interfaces
         Task<ReturnData<List<PurchaseOrder>>> PurchaseOrdersAsync(Guid? clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "", string personnel = "");
         Task<ReturnData<PurchaseOrder>> PurchaseOrderByIdAsync(Guid id);
         string DocumentRefNumber(Document document, Guid clientId);
-        Task<ReturnData<List<Product>>> LowStockProductsAsync(Guid clientId, Guid? instanceId, int limit = 10);
-        Task<ReturnData<List<TopSellingProductViewModel>>> TopSellingProductsByVolumeAsync(Guid clientId, Guid? instanceId, int limit = 10);
+        Task<ReturnData<List<Product>>> LowStockProductsAsync(Guid? clientId, Guid? instanceId, int limit = 10);
+        Task<ReturnData<List<TopSellingProductViewModel>>> TopSellingProductsByVolumeAsync(Guid? clientId, Guid? instanceId, int limit = 10);
     }
 
     public class ProductImplementation : IProductInterface
@@ -710,7 +710,7 @@ namespace PosMaster.Dal.Interfaces
             }
         }
 
-        public async Task<ReturnData<List<Product>>> LowStockProductsAsync(Guid clientId, Guid? instanceId, int limit = 10)
+        public async Task<ReturnData<List<Product>>> LowStockProductsAsync(Guid? clientId, Guid? instanceId, int limit = 10)
         {
             var result = new ReturnData<List<Product>> { Data = new List<Product>() };
             var tag = nameof(LowStockProductsAsync);
@@ -719,8 +719,10 @@ namespace PosMaster.Dal.Interfaces
             {
                 var dataQry = _context.Products
                     .Include(c => c.ProductCategory)
-                    .Where(p => p.ClientId.Equals(clientId) && p.AvailableQuantity <= p.ReorderLevel)
+                    .Where(p => p.AvailableQuantity <= p.ReorderLevel)
                     .AsQueryable();
+                if (clientId != null)
+                    dataQry = dataQry.Where(d => d.ClientId.Equals(clientId));
                 if (instanceId != null)
                     dataQry = dataQry.Where(p => p.InstanceId.Equals(instanceId));
                 var data = await dataQry.OrderBy(p => p.AvailableQuantity)
@@ -730,8 +732,9 @@ namespace PosMaster.Dal.Interfaces
                 {
                     var dataQry_ = _context.Products
                     .Include(c => c.ProductCategory)
-                    .Where(p => p.ClientId.Equals(clientId))
                     .AsQueryable();
+                    if (clientId != null)
+                        dataQry = dataQry.Where(d => d.ClientId.Equals(clientId));
                     if (instanceId != null)
                         dataQry_ = dataQry_.Where(p => p.InstanceId.Equals(instanceId));
                     data = await dataQry_.OrderBy(p => p.AvailableQuantity)
@@ -755,7 +758,7 @@ namespace PosMaster.Dal.Interfaces
             }
         }
 
-        public async Task<ReturnData<List<TopSellingProductViewModel>>> TopSellingProductsByVolumeAsync(Guid clientId, Guid? instanceId, int limit = 10)
+        public async Task<ReturnData<List<TopSellingProductViewModel>>> TopSellingProductsByVolumeAsync(Guid? clientId, Guid? instanceId, int limit = 10)
         {
             var result = new ReturnData<List<TopSellingProductViewModel>> { Data = new List<TopSellingProductViewModel>() };
             var tag = nameof(TopSellingProductsByVolumeAsync);
@@ -769,16 +772,18 @@ namespace PosMaster.Dal.Interfaces
                         ProductId = tp.Key,
                         Volume = tp.Count()
                     })
-                    .Join(_context.Products.Include(p => p.ProductCategory)
-                    .Where(p => p.ClientId.Equals(clientId)),
+                    .Join(_context.Products.Include(p => p.ProductCategory),
                     tp => tp.ProductId, p => p.Id, (tp, p) => new TopSellingProductViewModel
                     {
                         Product = p,
                         ProductId = tp.ProductId,
                         Volume = tp.Volume,
-                        InstanceId = p.InstanceId
+                        InstanceId = p.InstanceId,
+                        ClientId = p.ClientId
                     })
                     .AsQueryable();
+                if (clientId != null)
+                    dataQry = dataQry.Where(p => p.ClientId.Equals(clientId));
                 if (instanceId != null)
                     dataQry = dataQry.Where(p => p.InstanceId.Equals(instanceId));
                 var data = await dataQry.OrderByDescending(p => p.Volume)
