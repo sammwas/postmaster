@@ -390,3 +390,10 @@ function plotDoughnut(labels, data) {
         options: donutOptions
     })
 }
+$('#credit-sale').change(function () {
+    if (this.checked) {
+        $('#payment-mode').hide();
+    } else { 
+        $('#payment-mode').show();
+    }
+});
