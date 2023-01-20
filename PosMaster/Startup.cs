@@ -16,135 +16,164 @@ using System;
 
 namespace PosMaster
 {
-	public class Startup
-	{
-		public Startup(IConfiguration configuration, IWebHostEnvironment webHostEnvironment)
-		{
-			Configuration = configuration;
-			WebHostEnvironment = webHostEnvironment;
-		}
+    public class Startup
+    {
+        public Startup(IConfiguration configuration, IWebHostEnvironment webHostEnvironment)
+        {
+            Configuration = configuration;
+            WebHostEnvironment = webHostEnvironment;
+        }
 
-		private IConfiguration Configuration { get; }
-		private IWebHostEnvironment WebHostEnvironment { get; }
+        private IConfiguration Configuration { get; }
+        private IWebHostEnvironment WebHostEnvironment { get; }
 
-		public void ConfigureServices(IServiceCollection services)
-		{
-			services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-			services.AddTransient(m => new FileUploadService(WebHostEnvironment));
-			services.AddScoped<ICookiesService, CookiesService>();
+        public void ConfigureServices(IServiceCollection services)
+        {
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddTransient(m => new FileUploadService(WebHostEnvironment));
+            services.AddScoped<ICookiesService, CookiesService>();
 
-			services.AddScoped<IEmailService, EmailService>();
-			services.AddScoped<IUserInterface, UserInterface>();
-			services.AddScoped<IClientInterface, ClientImplementation>();
-			services.AddScoped<IClientInstanceInterface, ClientInstanceImplementation>();
-			services.AddScoped<ISystemSettingInterface, SystemSettingImplementation>();
-			services.AddScoped<IProductInterface, ProductImplementation>();
-			services.AddScoped<IExpenseInterface, ExpenseImplementation>();
-			services.AddScoped<ICustomerInterface, CustomerImplementation>();
-			services.AddScoped<ISupplierInterface, SupplierImplementation>();
-			services.AddScoped<IDashboardInterface, DashboardImplementation>();
-			services.AddScoped<IReportingInterface, ReportingImplementation>();
-			services.AddScoped<IMasterDataInterface, MasterDataImplementation>();
-			services.AddScoped<IInvoiceInterface, InvoiceImplementation>();
-			services.AddScoped<IOrderInterface, OrdersImplementation>(); 
-			services.AddScoped<IHumanResourceInterface, HumanResourceImplementation>();
+            services.AddScoped<IEmailService, EmailService>();
+            services.AddScoped<IUserInterface, UserInterface>();
+            services.AddScoped<IClientInterface, ClientImplementation>();
+            services.AddScoped<IClientInstanceInterface, ClientInstanceImplementation>();
+            services.AddScoped<ISystemSettingInterface, SystemSettingImplementation>();
+            services.AddScoped<IProductInterface, ProductImplementation>();
+            services.AddScoped<IExpenseInterface, ExpenseImplementation>();
+            services.AddScoped<ICustomerInterface, CustomerImplementation>();
+            services.AddScoped<ISupplierInterface, SupplierImplementation>();
+            services.AddScoped<IDashboardInterface, DashboardImplementation>();
+            services.AddScoped<IReportingInterface, ReportingImplementation>();
+            services.AddScoped<IMasterDataInterface, MasterDataImplementation>();
+            services.AddScoped<IInvoiceInterface, InvoiceImplementation>();
+            services.AddScoped<IOrderInterface, OrdersImplementation>();
+            services.AddScoped<IHumanResourceInterface, HumanResourceImplementation>();
 
-			var server = Configuration["Database:Server"];
-			var port = Configuration["Database:Port"];
-			var user = Configuration["Database:UserName"];
-			var password = Configuration["Database:Password"];
-			var database = Configuration["Database:Name"];
-			var conString = $"Host={server};Port={int.Parse(port)};" +
-				$"Database={database};User Id={user};Password={password}";
-			Console.WriteLine($"DbConnection string :- {conString}");
-			var os = Environment.Is64BitOperatingSystem ? "64" : "32";
-			Console.WriteLine($"PosMaster Running. OS:{os} BIT -{Environment.OSVersion.VersionString} {Environment.MachineName}");
+            var server = Configuration["Database:Server"] ?? "localhost";
+            var port = Configuration["Database:Port"] ?? "5432";
+            var user = Configuration["Database:UserName"] ?? "postgres";
+            var password = Configuration["Database:Password"] ?? "123456";
+            var database = Configuration["Database:Name"] ?? "posmater_db";
+            var from = string.IsNullOrEmpty(Configuration["Database:Name"]) ? "Hard-Coded" : "Config-File";
 
-			services.AddDbContext<DatabaseContext>(options =>
-			options.UseNpgsql(conString));
+            var conString = $"Host={server};Port={int.Parse(port)};" +
+                $"Database={database};User Id={user};Password={password}";
+            Console.WriteLine($"DbConnection String : Src {from}  :- {conString}");
+            var os = Environment.Is64BitOperatingSystem ? "64" : "32";
+            Console.WriteLine($"PosMaster Running. OS:{os} BIT -{Environment.OSVersion.VersionString} {Environment.MachineName}");
 
-			services.AddIdentity<User, IdentityRole>()
-				.AddEntityFrameworkStores<DatabaseContext>()
-				.AddDefaultTokenProviders();
+            services.AddDbContext<DatabaseContext>(options =>
+            {
+                var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 
-			services.Configure<IdentityOptions>(options =>
-			{
-				options.Password.RequireDigit = true;
-				options.Password.RequireLowercase = false;
-				options.Password.RequireNonAlphanumeric = false;
-				options.Password.RequireUppercase = false;
-				options.Password.RequiredLength = 6;
-				options.Password.RequiredUniqueChars = 1;
+                // string connStr;
+                // if (env == "Development")
+                // {
+                //     connStr = conString;
+                // }
+                // else 
+                // {
+                //     var connUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
 
-				options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(10);
-				options.Lockout.MaxFailedAccessAttempts = 5;
-				options.Lockout.AllowedForNewUsers = true;
+                //     // Parse connection URL to connection string for Npgsql
+                //     connUrl = connUrl.Replace("postgres://", string.Empty);
+                //     var pgUserPass = connUrl.Split("@")[0];
+                //     var pgHostPortDb = connUrl.Split("@")[1];
+                //     var pgHostPort = pgHostPortDb.Split("/")[0];
+                //     var pgDb = pgHostPortDb.Split("/")[1];
+                //     var pgUser = pgUserPass.Split(":")[0];
+                //     var pgPass = pgUserPass.Split(":")[1];
+                //     var pgHost = pgHostPort.Split(":")[0];
+                //     var pgPort = pgHostPort.Split(":")[1];
 
-				options.User.AllowedUserNameCharacters =
-					"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.@";
-				options.User.RequireUniqueEmail = true;
-			});
-			services.ConfigureApplicationCookie(options =>
-			{
-				options.Cookie.HttpOnly = true;
-				options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
+                //     connStr = $"Server={pgHost};Port={pgPort};User Id={pgUser};Password={pgPass};Database={pgDb};SSL Mode=Require;TrustServerCertificate=True";
+                // }
+                options.UseNpgsql(conString);
+            });
 
-				options.LoginPath = "/Home/Index";
-				options.AccessDeniedPath = "/Home/AccessDenied";
-				options.SlidingExpiration = true;
-			});
+            services.AddIdentity<User, IdentityRole>()
+                .AddEntityFrameworkStores<DatabaseContext>()
+                .AddDefaultTokenProviders();
 
-			services.AddAuthentication()
-				.AddGoogle(googleOptions =>
-			{
-				googleOptions.ClientId = Configuration["Google:ClientId"];
-				googleOptions.ClientSecret = Configuration["Google:ClientSecret"];
-			});
+            services.Configure<IdentityOptions>(options =>
+            {
+                options.Password.RequireDigit = true;
+                options.Password.RequireLowercase = false;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequiredLength = 6;
+                options.Password.RequiredUniqueChars = 1;
 
-			services.Configure<CookiePolicyOptions>(options =>
-			{
-				options.CheckConsentNeeded = context => true;
-				options.MinimumSameSitePolicy = Microsoft.AspNetCore.Http.SameSiteMode.None;
-			});
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(10);
+                options.Lockout.MaxFailedAccessAttempts = 5;
+                options.Lockout.AllowedForNewUsers = true;
 
-			services.AddMvc();
-			services.AddMemoryCache();
-			services.AddControllers();
-			services.AddDistributedMemoryCache();
-			services.AddControllersWithViews();
-		}
+                options.User.AllowedUserNameCharacters =
+                    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.@";
+                options.User.RequireUniqueEmail = true;
+            });
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.Cookie.HttpOnly = true;
+                options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
 
-		public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
-		{
-			if (WebHostEnvironment.IsDevelopment())
-				app.UseDeveloperExceptionPage();
-			else
-				app.UseExceptionHandler("/Home/Error");
+                options.LoginPath = "/Home/Index";
+                options.AccessDeniedPath = "/Home/AccessDenied";
+                options.SlidingExpiration = true;
+            });
 
-			loggerFactory.AddFile("Logs/PosMaster-{Date}.txt");
-			app.UseStaticFiles(new StaticFileOptions
-			{
-				OnPrepareResponse = ctx =>
-				{
-					const int durationInSeconds = 60 * 60 * 24;
-					ctx.Context.Response.Headers[HeaderNames.CacheControl] =
-						"public,max-age=" + durationInSeconds;
-				}
-			});
+            services.AddAuthentication()
+                .AddGoogle(googleOptions =>
+            {
+                googleOptions.ClientId = Configuration["Google:ClientId"];
+                googleOptions.ClientSecret = Configuration["Google:ClientSecret"];
+            });
 
-			app.UseCookiePolicy();
-			app.UseAuthentication();
-			app.UseRouting();
-			app.UseAuthorization();
+            services.Configure<CookiePolicyOptions>(options =>
+            {
+                options.CheckConsentNeeded = context => false;
+                //options.CheckConsentNeeded = context => true;
+                options.MinimumSameSitePolicy = Microsoft.AspNetCore.Http.SameSiteMode.None;
+            });
 
-			app.UseEndpoints(endpoints =>
-			{
-				endpoints.MapControllerRoute(
-					name: "default",
-					pattern: "{controller=Home}/{action=Index}/{id?}");
-			});
+            services.AddMvc();
+            services.AddMemoryCache();
+            services.AddControllers();
+            services.AddDistributedMemoryCache();
+            services.AddControllersWithViews();
+        }
 
-			DatabaseInit.Seed(app);
-		}
-	}
+        public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
+        {
+            if (WebHostEnvironment.IsDevelopment())
+                app.UseDeveloperExceptionPage();
+            else
+                app.UseExceptionHandler("/Home/Error");
+
+            //loggerFactory.AddFile("Logs/PosMaster-{Date}.txt");
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                OnPrepareResponse = ctx =>
+                {
+                    const int durationInSeconds = 60 * 60 * 24;
+                    ctx.Context.Response.Headers[HeaderNames.CacheControl] =
+                        "public,max-age=" + durationInSeconds;
+                }
+            });
+
+            app.UseCookiePolicy();
+            app.UseAuthentication();
+            app.UseRouting();
+            app.UseAuthorization();
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllerRoute(
+                    name: "default",
+                    pattern: "{controller=Home}/{action=Index}/{id?}");
+            });
+
+            DatabaseInit.Seed(app);
+        }
+    }
 }

@@ -890,9 +890,9 @@ namespace PosMaster.Dal.Interfaces
                 var cMonth = DateTime.Now.Month;
                 var cYear = DateTime.Now.Year;
                 var cDays = DateTime.DaysInMonth(cYear, cMonth);
-                var cMaxDate = DateTime.Parse($"{cDays}-{cMonth}-{cYear}");
+                var cMaxDate = new DateTime(cYear, cMonth, cDays);
                 var iDays = DateTime.DaysInMonth(year, month);
-                var iMaxDate = DateTime.Parse($"{iDays}-{month}-{year}");
+                var iMaxDate = new DateTime(year, month, iDays);
                 if (iMaxDate > cMaxDate)
                 {
                     result.Message = $"Future months not allowed";

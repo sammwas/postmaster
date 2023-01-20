@@ -91,5 +91,15 @@ namespace PosMaster.Controllers
 			TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, "Customer Order", result.Message);
 			return Json(result);
 		}
+		public async Task<IActionResult> FulfilOrder(Guid? id) 
+		{
+			if (id == null)
+				return View(new OrderViewModel { Status = EntityStatus.Active });
+			var result = await _orderInterface.OrderByIdAsync(id.Value);
+			if (!result.Success)
+				TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, "Customer Order", result.Message);
+			var model = new OrderViewModel(result.Data);
+			return View(model);
+		}
 	} 
 }

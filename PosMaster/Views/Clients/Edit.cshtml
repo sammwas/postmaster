@@ -36,7 +36,7 @@
 				</div>
 				<div class="col-md-6">
 					<div class="form-group">
-						<label asp-for="File"></label>@if (!string.IsNullOrEmpty(Model.LogoPath))
+						<label>Logo</label>@if (!string.IsNullOrEmpty(Model.LogoPath))
 						{
 							<span><img width="40" class="img-thumbnail" src="~/@Model.LogoPath" /></span>
 						}
@@ -135,12 +135,12 @@
 				</div>
 			</div>
 			@*<div class="row">
-					<div class="col-md-12">
-						<div class="form-check">
-							<input asp-for="EnforcePassword" class="form-check-input">
-							<label class="form-check-label" asp-for="EnforcePassword"></label>
-						</div>
-					</div>
+				<div class="col-md-12">
+				<div class="form-check">
+				<input asp-for="EnforcePassword" class="form-check-input">
+				<label class="form-check-label" asp-for="EnforcePassword"></label>
+				</div>
+				</div>
 				</div>*@
 			<div class="row">
 				<div class="col-md-12">
