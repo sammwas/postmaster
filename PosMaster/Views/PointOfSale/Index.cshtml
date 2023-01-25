@@ -9,8 +9,8 @@
     ViewData["Title"] = title;
     var userData = _cookies.Read();
     var products = User.IsInRole(Role.Clerk) ?
-    await _productInterface.ByInstanceIdAsync(userData.InstanceId) :
-    await _productInterface.ByClientIdAsync(userData.ClientId);
+    await _productInterface.ByInstanceIdAsync(userData.ClientId, userData.InstanceId, true) :
+    await _productInterface.ByInstanceIdAsync(userData.ClientId, (Guid?)null, true);
     var paymentModes = await _masterDataInterface.PaymentModesAsync(userData.ClientId);
     var walkIn = await _customerInterface.DefaultClientCustomerAsync(userData.ClientId);
 }
@@ -146,7 +146,7 @@
                     <input asp-for="Code" type="hidden" value="@userData.InstanceCode" />
                     <input asp-for="InstanceId" type="hidden" value="@userData.InstanceId" />
                     <input asp-for="ClientId" id="clientId" type="hidden" value="@userData.ClientId" />
-                    <button disabled class="btn btn-primary" type="submit" id="btnSumbitIss"> <i class="fa fa-save"></i>
+                    <button disabled class="btn btn-primary" type="submit" id="btnSumbitIss"><i class="fa fa-save"></i>
                         Submit</button>
                 </form>
             </div>

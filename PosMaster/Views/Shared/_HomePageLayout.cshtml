@@ -7,6 +7,7 @@
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -16,8 +17,9 @@
     <link href="~/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link href="~/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
     <link href="~/vendor/simple-line-icons/css/simple-line-icons.css" rel="stylesheet" type="text/css">
-    <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic,700italic" rel="stylesheet" type="text/css">
-    <link href="~/css/landing-page.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic,700italic" rel="stylesheet"
+        type="text/css">
+    <link href="~/css/landing-page.css" rel="stylesheet">
 </head>
 
 <body>
@@ -26,13 +28,12 @@
             <a class="navbar-brand" asp-controller="Home" asp-action="Index"><strong>@settings.Name</strong></a>
             @if (!_signInManager.IsSignedIn(User))
             {
-                <a asp-controller="Home"
-                   asp-action="Login" asp-route-returnUrl="@ViewData["ReturnUrl"]" class="btn btn-primary">Log In</a>
+                <a asp-controller="Home" asp-action="Login" asp-route-returnUrl="@ViewData["ReturnUrl"]"
+                class="btn btn-primary">Log In</a>
             }
             else
             {
-                <a asp-controller="Home"
-                   asp-action="Logout" class="btn btn-secondary">Log out</a>
+                <a asp-controller="Home" asp-action="Logout" class="btn btn-secondary">Log out</a>
             }
         </div>
     </nav>
@@ -44,17 +45,11 @@
         <div class="container">
             <div class="row">
                 <div class="col-lg-6 h-100 text-center text-lg-left my-auto">
-                    <ul class="list-inline mb-2">
-                        <li class="list-inline-item">
-                            <a asp-controller="Home" asp-action="Terms">Terms of Use</a>
-                        </li>
-                        <li class="list-inline-item">&sdot;</li>
-                        <li class="list-inline-item">
-                            <a asp-controller="Home" asp-action="Privacy">Privacy Policy</a>
-                        </li>
-                    </ul>
+                    <span><a asp-controller="Home" asp-action="Terms">Terms of Use</a></span>&sdot;
+                    <span><a asp-controller="Home" asp-action="Privacy">Privacy Policy</a></span>
                     <p class="text-muted small mb-4 mb-lg-0">
-                        <strong>Copyright &copy; @DateTime.Now.Year <a asp-controller="Home" asp-action="Index">@settings.Name</a>.</strong>
+                        <strong>Copyright &copy; @DateTime.Now.Year <a asp-controller="Home"
+                                asp-action="Index">@settings.Name</a>.</strong>
                         All rights reserved. &nbsp; Version @settings.Version
                     </p>
                 </div>
@@ -65,5 +60,5 @@
     <script src="~/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="~/dist/js/adminlte.min.js"></script>
 </body>
-</html>
 
+</html>

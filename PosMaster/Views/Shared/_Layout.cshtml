@@ -133,23 +133,6 @@
         <span class="brand-text font-weight-light">@userData.ClientCode</span>
       </a>
       <div class="sidebar">
-        @*<div class="user-panel mt-3 pb-3 mb-3 d-flex">
-          <div class="image">
-          @if (string.IsNullOrEmpty(userData.ImagePath))
-          {
-          <span class="i-circle">@firstChar</span>
-          }
-          else
-          {
-          <img src="~/@userData.ImagePath" width="160" height="160" class="img-circle elevation-2"
-          alt="@userData.FirstName">
-          }
-          </div>
-          <div class="info">
-          <a asp-controller="Users" asp-action="Edit" asp-route-id="@userData.UserId"
-          class="d-block">@userData.FullName</a>
-          </div>
-          </div>*@
         <nav class="mt-2">
           <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
             <li class="nav-item">
@@ -363,6 +346,12 @@
                   </a>
                 </li>
                 <li class="nav-item">
+                  <a asp-controller="Products" asp-action="ProductPrice" class="nav-link">
+                    <i class="far fa-circle nav-icon"></i>
+                    <p>Product Price</p>
+                  </a>
+                </li>
+                <li class="nav-item">
                   <a asp-controller="Products" asp-action="PurchaseOrders" asp-route-dtFrom="@firstDayOfWeek"
                     asp-route-dtTo="@DateTime.Now.ToString("dd-MMM-yyyy")" class="nav-link">
                     <i class="far fa-circle nav-icon"></i>
@@ -420,6 +409,13 @@
                     class="nav-link">
                     <i class="far fa-circle nav-icon"></i>
                     <p>Payment Modes</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a asp-controller="MasterData" asp-action="TaxTypes" asp-route-clientId="@userData.ClientId"
+                    class="nav-link">
+                    <i class="far fa-circle nav-icon"></i>
+                    <p>Tax Types</p>
                   </a>
                 </li>
                 <li class="nav-item">

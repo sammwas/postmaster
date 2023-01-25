@@ -17,12 +17,13 @@ namespace PosMaster.Controllers
         private readonly IProductInterface _producutInterface;
         private readonly ICookiesService _cookieService;
         private readonly FileUploadService _fileUploadService;
-
+        private readonly UserCookieData _userData;
         public ProductsController(IProductInterface productInterface, ICookiesService cookiesService, FileUploadService fileUploadService)
         {
             _producutInterface = productInterface;
             _cookieService = cookiesService;
             _fileUploadService = fileUploadService;
+            _userData = _cookieService.Read();
         }
         public async Task<IActionResult> Index()
         {
@@ -36,7 +37,7 @@ namespace PosMaster.Controllers
             }
             if (User.IsInRole(Role.Manager) || User.IsInRole(Role.Admin))
             {
-                var result = await _producutInterface.ByClientIdAsync(user.ClientId);
+                var result = await _producutInterface.ByInstanceIdAsync(user.ClientId, (Guid?)null);
                 if (!result.Success)
                     TempData.SetData(AlertLevel.Warning, "Products", result.Message);
                 return View(result.Data);
@@ -44,7 +45,7 @@ namespace PosMaster.Controllers
 
             if (User.IsInRole(Role.Clerk))
             {
-                var result = await _producutInterface.ByInstanceIdAsync(user.InstanceId);
+                var result = await _producutInterface.ByInstanceIdAsync(user.ClientId, user.InstanceId);
                 if (!result.Success)
                     TempData.SetData(AlertLevel.Warning, "Products", result.Message);
                 return View(result.Data);
@@ -102,9 +103,12 @@ namespace PosMaster.Controllers
                 return View(model);
             return RedirectToAction(nameof(Index));
         }
-        public async Task<IActionResult> ProductStockAdjustment(Guid? clientId)
+        public async Task<IActionResult> ProductStockAdjustment()
         {
-            var result = await _producutInterface.ByClientIdAsync(clientId.Value);
+            var userData = _cookieService.Read();
+            var result = userData.Role.Equals(Role.Clerk) ?
+             await _producutInterface.ByInstanceIdAsync(userData.ClientId, userData.InstanceId) :
+             await _producutInterface.ByInstanceIdAsync(userData.ClientId);
             var model = new ProductStockAdjustmentViewModel
             {
                 Products = result.Data
@@ -188,6 +192,15 @@ namespace PosMaster.Controllers
                 instanceId = userData.InstanceId;
             var data = await _producutInterface.TopSellingProductsByVolumeAsync(clientId, instanceId, 5);
             return Json(data);
+        }
+        public IActionResult ProductPrice()
+        {
+            return View();
+        }
+        public async Task<JsonResult> GetInstanceProducts(Guid id)
+        {
+            var result = await _producutInterface.ByInstanceIdAsync(_userData.ClientId, id);
+            return Json(result);
         }
     }
 }

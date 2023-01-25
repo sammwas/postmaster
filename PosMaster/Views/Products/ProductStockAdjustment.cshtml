@@ -7,7 +7,9 @@
 	var title = $"Product Stock Adjustment";
 	ViewData["Title"] = title;
 	var userData = _cookies.Read();
-	var products = await _productInterface.ByClientIdAsync(userData.ClientId);
+	var products = User.IsInRole(Role.Clerk) ?
+	await _productInterface.ByInstanceIdAsync(userData.ClientId, userData.InstanceId)
+	: await _productInterface.ByInstanceIdAsync(userData.ClientId, (Guid?)null);
 }
 <div class="card card-primary">
 	<div class="card-header">

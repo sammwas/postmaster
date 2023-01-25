@@ -9,8 +9,8 @@
 	var suppliersRes = await _supplierInterface.ByClientIdAsync(userData.ClientId);
 	var suppliers = suppliersRes.Data;
 	var productsRes = User.IsInRole(Role.Clerk) ?
-		await _productInterface.ByInstanceIdAsync(userData.InstanceId)
-		: await _productInterface.ByClientIdAsync(userData.ClientId);
+		await _productInterface.ByInstanceIdAsync(userData.ClientId,userData.InstanceId)
+		: await _productInterface.ByInstanceIdAsync(userData.ClientId,(Guid?)null);
 	var products = productsRes.Data;
 }
 <div class="card card-primary">

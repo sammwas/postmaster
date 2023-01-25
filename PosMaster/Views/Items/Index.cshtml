@@ -1,8 +1,8 @@
 ﻿@inject ICookiesService cookieService;
-@model List<Product>
+@model List<Item>
 @{
-	ViewData["Active"] = "Products";
-	ViewData["Title"] = "Products";
+	ViewData["Active"] = "Items";
+	ViewData["Title"] = "Items";
 	var user = cookieService.Read();
 }
 <div>
@@ -12,7 +12,8 @@
 				@ViewData["Title"]
 				@if (!User.IsInRole(Role.Clerk))
 				{
-					<span class="text-right"><a asp-action="Edit" asp-route-id="" class="btn btn-sm btn-info">Add New</a></span>
+					<span class="text-right"><a asp-action="Edit" asp-route-id="" class="btn btn-sm btn-info">Add
+							New</a></span>
 
 				}
 			</h3>
@@ -23,10 +24,10 @@
 					<tr>
 						<th>Code</th>
 						<th>Name</th>
+						<th>Item Type</th>
 						<th>Category</th>
 						<th>Reorder</th>
 						<th>Unit</th>
-						<th>Status</th>
 						<th>Options</th>
 					</tr>
 				</thead>
@@ -36,10 +37,10 @@
 						<tr>
 							<td>@item.Code</td>
 							<td>@item.Name</td>
+							<td>@item.ItemNature.ToString()</td>
 							<td>@item.ProductCategory.Name</td>
 							<td>@item.ReorderLevel</td>
 							<td>@item.UnitOfMeasure</td>
-							<td>@item.Status.ToString()</td>
 							<td class="project-actions text-right">
 								@if (!User.IsInRole(Role.Clerk))
 								{
@@ -62,10 +63,10 @@
 					<tr>
 						<th>Code</th>
 						<th>Name</th>
+						<th>Item Type</th>
 						<th>Category</th>
 						<th>Reorder</th>
 						<th>Unit</th>
-						<th>Status</th>
 						<th>Options</th>
 					</tr>
 				</tfoot>

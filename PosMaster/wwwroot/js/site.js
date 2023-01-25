@@ -189,10 +189,7 @@ $('#receiptsdt tbody').on('click', 'td.details-control', function () {
 
 $("input[value='credit']").prop('checked', false);
 populateSelect(false);
-//$("#credit-sale").on("click", function () {
-//	let checked = $("input[value='credit']").is(':checked')? true : false;
-//	populateSelect(checked);
-//});
+
 function populateSelect(checked) {
     //if (!checked) {
     //	$('#customer-select')
@@ -224,6 +221,7 @@ $('#customer-select').select2({
     minimumInputLength: 1
 });
 
+
 let orderId;
 $('.launch-modal').click(function (event) {
     event.preventDefault();
@@ -232,18 +230,12 @@ $('.launch-modal').click(function (event) {
     $('#modal-default .modal-title').text(modalTitle);
 })
 $("#fulfil-order").click(function () {
-    console.log(orderId);
     $.post('/Orders/FulFilOrder', { id: orderId }, function (result) {
         console.log(result);
     });
     $('#modal-default').modal('hide');
 });
-// var salesChartCanvas = document.getElementById('revenue-chart-canvas').getContext('2d')
-// $.get('/Reports/MonthlySalesReport').done(function (data) {
-// 	let sales = new Object();
-// 	sales = getSales(data);
-// 	plot(sales);
-// });
+
 var ul = $("#low-stock-ul");
 var x = document.getElementById('revenue-chart-canvas');
 if (x) {
@@ -397,3 +389,41 @@ $('#credit-sale').change(function () {
         $('#payment-mode').show();
     }
 });
+
+
+$('#is-service').change(function () {
+    if (this.checked) {
+        $('#product-related').hide();
+    } else { 
+        $('#product-related').show();
+    }
+});
+
+
+$("#item-price-select").change(function () {
+    var instanceId = $(this).val();
+     $.get(`/Products/GetInstanceProducts/${instanceId}`).done(function (data) {
+         if (data) {
+            var items = data.data;
+            var select = $("#items-price-dropdown").empty()
+                .append($('<option>').text("-- Please select --").attr('value', ""));;
+            $.each(items, function () {
+                if (this.status === 1) {
+                    select.append($('<option>').text(this.name).attr('value', this.id)
+                        .attr('data-buy', this.buyingPrice)
+                        .attr('data-sell', this.sellingPrice)
+                        .attr('data-priceStart', this.priceStartDate)
+                        .attr('data-priceEnd', this.priceEndDate)
+                    );
+                }
+            });
+        }
+    });
+})
+
+function addProductItemToList()
+{
+    $('#items-price-dropdown')
+}
+
+ 

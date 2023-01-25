@@ -13,9 +13,8 @@ namespace PosMaster.Dal.Interfaces
     {
         Task<ReturnData<Customer>> GetCustomerAsync();
         Task<ReturnData<Product>> EditAsync(ProductViewModel model);
-        Task<ReturnData<List<Product>>> AllAsync();
-        Task<ReturnData<List<Product>>> ByClientIdAsync(Guid clientId);
-        Task<ReturnData<List<Product>>> ByInstanceIdAsync(Guid instanceId);
+        Task<ReturnData<List<Product>>> AllAsync(); 
+        Task<ReturnData<List<Product>>> ByInstanceIdAsync(Guid clientId,Guid? instanceId=null, bool isPos=false);
         Task<ReturnData<Product>> ByIdAsync(Guid id);
         Task<ReturnData<Receipt>> ProductsSaleAsync(ProductSaleViewModel model);
         Task<ReturnData<List<Receipt>>> ReceiptsAsync(Guid? clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "");
@@ -175,35 +174,6 @@ namespace PosMaster.Dal.Interfaces
             }
         }
 
-        public async Task<ReturnData<List<Product>>> ByClientIdAsync(Guid clientId)
-        {
-            var result = new ReturnData<List<Product>> { Data = new List<Product>() };
-            var tag = nameof(ByClientIdAsync);
-            _logger.LogInformation($"{tag} get all client {clientId} products");
-            try
-            {
-                var data = await _context.Products
-                    .Include(c => c.ProductCategory)
-                    .Where(c => c.ClientId.Equals(clientId))
-                    .OrderByDescending(c => c.DateCreated)
-                    .ToListAsync();
-                result.Success = data.Any();
-                result.Message = result.Success ? "Found" : "Not Found";
-                if (result.Success)
-                    result.Data = data;
-                _logger.LogInformation($"{tag} found {data.Count} products");
-                return result;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-                result.ErrorMessage = ex.Message;
-                result.Message = "Error occured";
-                _logger.LogError($"{tag} {result.Message} : {ex}");
-                return result;
-            }
-        }
-
         public async Task<ReturnData<Product>> ByIdAsync(Guid id)
         {
             var result = new ReturnData<Product> { Data = new Product() };
@@ -230,17 +200,24 @@ namespace PosMaster.Dal.Interfaces
             }
         }
 
-        public async Task<ReturnData<List<Product>>> ByInstanceIdAsync(Guid instanceId)
+        public async Task<ReturnData<List<Product>>> ByInstanceIdAsync(Guid clientId, Guid? instanceId,bool isPos=false)
         {
             var result = new ReturnData<List<Product>> { Data = new List<Product>() };
             var tag = nameof(ByInstanceIdAsync);
             _logger.LogInformation($"{tag} get all instance {instanceId} products");
             try
             {
-                var data = await _context.Products
+                var dataQry =  _context.Products
                     .Include(c => c.ProductCategory)
-                    .Where(c => c.InstanceId.Equals(instanceId))
-                    .OrderByDescending(c => c.DateCreated)
+                    .Where(c => c.ClientId.Equals(clientId))
+                    .AsQueryable();
+                if(instanceId!=null)
+                    dataQry = dataQry.Where(d => d.InstanceId.Equals(instanceId.Value));
+                if(isPos){
+                    dataQry = dataQry.Where(d => d.AvailableQuantity > 0 && d.SellingPrice > 0)
+                    .Where(d => d.PriceStartDate.Date <= DateTime.Now.Date && (d.PriceEndDate == null || d.PriceEndDate.Value.Date >= DateTime.Now.Date));
+                }
+                var data= await dataQry.OrderByDescending(c => c.DateCreated)
                     .ToListAsync();
                 result.Success = data.Any();
                 result.Message = result.Success ? "Found" : "Not Found";

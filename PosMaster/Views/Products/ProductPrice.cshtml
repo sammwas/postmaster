@@ -1,0 +1,83 @@
+﻿@inject IClientInstanceInterface _instanceInterface;
+@inject ICookiesService _cookies;
+@model List<DailySalesViewModel>
+@{
+	ViewData["Active"] = "Product Price";
+	ViewData["Title"] = "Product Price";
+	var userData = _cookies.Read();
+	var instancesRes = User.IsInRole(Role.SuperAdmin) ?
+	await _instanceInterface.AllAsync()
+	: await _instanceInterface.ByClientIdAsync(userData.ClientId);
+	var instances = instancesRes.Data;
+	var instanceId = ViewData["instanceId"]?.ToString();
+	var dateToday = DateTime.Now.ToString("dd-MMM-yyyy");
+}
+<div class="card card-primary">
+	<div class="card-header">
+		<h3 class="card-title">@ViewData["Title"]</h3>
+	</div>
+	<form role="form" autocomplete="off">
+		<input type="hidden" name="Option" value="@ViewData["option"]" />
+		<div class="row">
+			<div class="card-body">
+				<div class="row">
+					<div class="col-md-4">
+						<div class="form-group">
+							<label>Instance</label>
+							<select class="form-control select2" name="InstanceId" style="width: 100%;"
+								id="item-price-select">
+								<option value="">--Select Instance--</option>
+								@foreach (var item in instances)
+								{
+									<option selected="selected" value="@item.Id" client-id="@item.ClientId"
+									title="@item.Notes">@item.Code - @item.Name
+										(@item.Client.Code - @item.Client.Name)</option>
+								}
+							</select>
+						</div>
+					</div>
+					<div class="col-md-4">
+						<div class="form-group">
+							<label>Items</label>
+							<select class="form-control select2" name="InstanceId" style="width: 100%;"
+								id="items-price-dropdown">
+							</select>
+						</div>
+					</div>
+					<div class="col-md-4">
+						<div class="form-group">
+							<br />
+							<button type="submit" class="btn btn-primary">Add Item</button>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-12">
+						<table id="datataTable" class="table table-bordered table-striped">
+							<thead>
+								<tr>
+									<th>Item</th>
+									<th>Price</th>
+									<th>Start Date</th>
+									<th>End Date</th>
+									<th></th>
+								</tr>
+							</thead>
+							<tbody id="item-price-list-table">
+							</tbody>
+							<tfoot>
+								<tr>
+									<th>Item</th>
+									<th>Price</th>
+									<th>Start Date</th>
+									<th>End Date</th>
+									<th></th>
+								</tr>
+							</tfoot>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</form>
+</div>
