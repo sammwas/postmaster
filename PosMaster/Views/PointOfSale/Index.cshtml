@@ -8,9 +8,6 @@
     var title = $"Point Of Sale";
     ViewData["Title"] = title;
     var userData = _cookies.Read();
-    var products = User.IsInRole(Role.Clerk) ?
-    await _productInterface.ByInstanceIdAsync(userData.ClientId, userData.InstanceId, true) :
-    await _productInterface.ByInstanceIdAsync(userData.ClientId, (Guid?)null, true);
     var paymentModes = await _masterDataInterface.PaymentModesAsync(userData.ClientId);
     var walkIn = await _customerInterface.DefaultClientCustomerAsync(userData.ClientId);
 }
@@ -28,14 +25,8 @@
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label>Product</label>
-                                    <select class="form-control select2" style="width: 100%;" id="productItem">
+                                    <select class="form-control select2" style="width: 100%;" id="product-select">
                                         <option value="">--Select Product--</option>
-                                        @foreach (var item in products.Data)
-                                        {
-                                            <option data-qty="@item.AvailableQuantity" value="@item.Id" title="@item.Notes"
-                                            data-uom="@item.UnitOfMeasure" data-price="@item.SellingPrice">@item.Name
-                                                @item.UnitOfMeasure (Qty @item.AvailableQuantity)</option>
-                                        }
                                     </select>
                                 </div>
                             </div>
@@ -136,7 +127,7 @@
                         </div>
                         <div class="col-md-4">
                             <div class="form-group" id="refNo">
-                                <label>Reference No</label>
+                                <label>KRA Pin</label>
                                 <input asp-for="ExternalRef" class="form-control" id="refNoVal" placeholder="Ref No">
                                 <span asp-validation-for="ExternalRef" class="text-danger"></span>
                             </div>
@@ -145,7 +136,7 @@
                     <input asp-for="LineItemListStr" id="issListRecords" type="hidden" />
                     <input asp-for="Code" type="hidden" value="@userData.InstanceCode" />
                     <input asp-for="InstanceId" id="instanceId" type="hidden" value="@userData.InstanceId" />
-                    <input asp-for="ClientId" id="clientId" type="hidden" value="@userData.ClientId" />
+                    <input asp-for="ClientId" type="hidden" value="@userData.ClientId" />
                     <button disabled class="btn btn-primary" type="submit" id="btnSumbitIss"><i class="fa fa-save"></i>
                         Submit</button>
                 </form>

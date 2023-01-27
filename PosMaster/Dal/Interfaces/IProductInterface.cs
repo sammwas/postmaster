@@ -14,7 +14,7 @@ namespace PosMaster.Dal.Interfaces
         Task<ReturnData<Customer>> GetCustomerAsync();
         Task<ReturnData<Product>> EditAsync(ProductViewModel model);
         Task<ReturnData<List<Product>>> AllAsync();
-        Task<ReturnData<List<Product>>> ByInstanceIdAsync(Guid clientId, Guid? instanceId = null, bool isPos = false);
+        Task<ReturnData<List<Product>>> ByInstanceIdAsync(Guid clientId, Guid? instanceId = null, bool isPos = false, string search = "");
         Task<ReturnData<Product>> ByIdAsync(Guid id);
         Task<ReturnData<Receipt>> ProductsSaleAsync(ProductSaleViewModel model);
         Task<ReturnData<List<Receipt>>> ReceiptsAsync(Guid? clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "");
@@ -201,7 +201,7 @@ namespace PosMaster.Dal.Interfaces
             }
         }
 
-        public async Task<ReturnData<List<Product>>> ByInstanceIdAsync(Guid clientId, Guid? instanceId, bool isPos = false)
+        public async Task<ReturnData<List<Product>>> ByInstanceIdAsync(Guid clientId, Guid? instanceId, bool isPos = false, string search = "")
         {
             var result = new ReturnData<List<Product>> { Data = new List<Product>() };
             var tag = nameof(ByInstanceIdAsync);
@@ -218,6 +218,13 @@ namespace PosMaster.Dal.Interfaces
                 {
                     dataQry = dataQry.Where(d => d.AvailableQuantity > 0 && d.SellingPrice > 0)
                     .Where(d => d.PriceStartDate.Date <= DateTime.Now.Date && (d.PriceEndDate == null || d.PriceEndDate.Value.Date >= DateTime.Now.Date));
+                }
+                if (!string.IsNullOrEmpty(search))
+                {
+                    search = search.ToLower();
+                    dataQry = dataQry.Where(d => d.Code.ToLower().Contains(search)
+                    || d.Name.ToLower().Contains(search))
+                    .Take(10);
                 }
                 var data = await dataQry.OrderByDescending(c => c.DateCreated)
                     .ToListAsync();
@@ -385,7 +392,7 @@ namespace PosMaster.Dal.Interfaces
                     ClientId = model.ClientId,
                     InstanceId = model.InstanceId,
                     PaymentMode = model.PaymentMode,
-                    ExternalRef = model.ExternalRef,
+                    KRAPin = model.KraPin,
                     IsCredit = model.IsCredit,
                     IsWalkIn = model.IsWalkIn,
                     Notes = model.Notes,
@@ -810,8 +817,8 @@ namespace PosMaster.Dal.Interfaces
                         var hasToDate = DateTime.TryParse(p.PriceEndDate, out var endDate);
                         product.SellingPrice = p.SellingPrice;
                         product.PriceStartDate = DateTime.Parse(p.PriceStartDate);
-                        product.PriceEndDate =hasToDate? endDate:(DateTime?)null;
-                        
+                        product.PriceEndDate = hasToDate ? endDate : (DateTime?)null;
+
                         productPriceLog.ProductId = product.Id;
                         productPriceLog.PriceStartDate = product.PriceStartDate;
                         productPriceLog.PriceEndDate = product.PriceEndDate;

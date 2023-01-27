@@ -15,23 +15,26 @@ $('#selectedProductItem').change(function () {
 });
 
 let sellingPrice;
-$("#productItem").change(function () {
-    sellingPrice = $('option:selected', this).attr('data-price')
+$("#product-select").change(function () {
+    sellingPrice = $(this).select2('data')[0].sellingPrice;
     $('#sellingPrice').val(sellingPrice)
     $("#quantityBought").focus();
 });
+var item = {};
 $('#issBtnAdd').click(function (event) {
+    item = {};
     event.preventDefault();
     addItemToList();
     $('#productListForm').trigger('reset');
 })
 
 var addItemToList = function () {
-    var productId = $("#productItem option:selected").val();
-    var itemName = $("#productItem option:selected").text();
+     item = $('#product-select').select2('data')[0];
+    var productId = item.id;
+    var itemName = item.text;
     var quantity = $("#quantityBought").val();
-    var unitPrice = $("#sellingPrice").val();
-    var avQuantity = $("#productItem option:selected").attr("data-qty");
+    var unitPrice = item.sellingPrice;
+    var avQuantity = item.availableQuantity;
     quantity = parseFloat(quantity)
     avQuantity = parseFloat(avQuantity)
     var discount = 0;
@@ -209,7 +212,7 @@ $('#customer-select').select2({
         dataType: 'json',
         delay: 250,
         url: function (params) {
-            return '/Customers/Search?term=' + params.term + '&cId=' + $("#clientId").val();
+            return '/Customers/Search?term=' + params.term ;
         },
         processResults: function (data, params) {
             return {
@@ -430,16 +433,23 @@ $('#product-select').select2({
         dataType: 'json',
         delay: 250,
         url: function (params) {
-            return '/Products/Search?instId=' + $("#instanceId").val() + '&cId=' + $("#clientId").val();
+            return '/Products/Search?Id=' + $("#instanceId").val() +'&term='+ params.term;
         },
         processResults: function (data, params) {
             return {
-                results: data.data
+                results: $.map(data.data, function (item) { 
+                    return {
+                        text: item.code + ' - ' + item.name+' ('+item.availableQuantity+' '+item.unitOfMeasure+' )',
+                        quantity: item.availableQuantity,
+                        sellingPrice: item.sellingPrice,
+                        id: item.id
+                    }
+                })
             };
         },
         cache: true
     },
 
-    placeholder: 'Search by name, Id number or phone number',
+    placeholder: 'Search by product code or name',
     minimumInputLength: 1
 });

@@ -68,9 +68,9 @@ namespace PosMaster.Controllers
             return RedirectToAction(nameof(ByClientId));
         }
 
-        public async Task<JsonResult> Search(Guid cId, string term)
+        public async Task<JsonResult> Search(string term)
         {
-            var data = await _customerInterface.SearchClientCustomerAsync(cId, term);
+            var data = await _customerInterface.SearchClientCustomerAsync(_userData.ClientId, term);
             return Json(data);
         }
     }
