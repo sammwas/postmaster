@@ -462,37 +462,30 @@
                             </li>
 
                         }
-                        <li class="nav-item has-treeview">
-                            <a href="#" class="nav-link">
-                                <i class="nav-icon fas fa-cog"></i>
-                                <p>
-                                    Settings
-                                    <i class="right fas fa-angle-left"></i>
-                                </p>
-                            </a>
-                            <ul class="nav nav-treeview">
-                                @* <li class="nav-item">
-                                    <a asp-controller="Clients" asp-action="Edit" asp-route-id="@userData.ClientId"
-                                    class="nav-link">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>Setup</p>
-                                    </a>
-                                    </li> *@
-                                <li class="nav-item">
-                                    <a asp-controller="Settings" asp-action="EmailSettings" asp-route-clientId="@userData.ClientId"
+                        @if (User.IsInRole(Role.SuperAdmin))
+                        {
+                            <li class="nav-item has-treeview">
+                                <a href="#" class="nav-link">
+                                    <i class="nav-icon fas fa-cog"></i>
+                                    <p>
+                                        Settings
+                                        <i class="right fas fa-angle-left"></i>
+                                    </p>
+                                </a>
+                                <ul class="nav nav-treeview">
+                                    <li class="nav-item">
+                                        <a asp-controller="Settings" asp-action="EmailSettings" asp-route-clientId="@userData.ClientId"
                                        class="nav-link">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Email Settings</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a asp-controller="Settings" asp-action="SendTestEmail" class="nav-link">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Test Email</p>
-                                    </a>
-                                </li>
-                                @if (User.IsInRole(Role.SuperAdmin))
-                                {
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>Email Settings</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a asp-controller="Settings" asp-action="SendTestEmail" class="nav-link">
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>Test Email</p>
+                                        </a>
+                                    </li>
                                     <li class="nav-item">
                                         <a asp-controller="Settings" asp-action="System" class="nav-link">
                                             <i class="far fa-circle nav-icon"></i>
@@ -505,9 +498,10 @@
                                             <p>Home,&nbsp;Terms &amp; Privacy</p>
                                         </a>
                                     </li>
-                                }
-                            </ul>
-                        </li>
+
+                                </ul>
+                            </li>
+                        }
                         <li class="nav-item">
                             <a asp-controller="Home" asp-action="Logout" class="nav-link">
                                 <i class="nav-icon fas fa-lock"></i>

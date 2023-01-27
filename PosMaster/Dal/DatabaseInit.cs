@@ -21,8 +21,8 @@ namespace PosMaster.Dal
 
         private static async Task SeedDataAsync(IServiceProvider serviceProvider)
         {
-            var clientId = Guid.Parse("2296F559-2432-496B-96EC-C6324D3A217D");
-            var instanceId = Guid.Parse("A5703309-AF3B-48F9-BD3F-8D2FCAB8312D");
+            var clientId = Guid.NewGuid();
+            var instanceId = Guid.NewGuid();
             var context = serviceProvider.GetService<DatabaseContext>();
             Console.WriteLine("Applying migrations ...");
             context.Database.Migrate();
@@ -122,7 +122,24 @@ namespace PosMaster.Dal
                 context.SystemSettings.Add(settings);
                 context.SaveChanges();
             }
-            clientInterface.SeedDefaultData(clientId, instanceId, true);
+
+            if (!context.EmailSettings.Any())
+            {
+                var settings = new EmailSetting
+                {
+                    ClientId = clientId,
+                    InstanceId = instanceId,
+                    Personnel = Constants.SuperAdminEmail,
+                    SenderFromEmail = "support@qilimo.co.ke",
+                    SmtpServer = "mail.qilimo.co.ke",
+                    SmtpPort = 587,
+                    SocketOptions = SecureSocketOptions.StartTls,
+                    SmtpPassword = Constants.SuperAdminPassword
+                };
+                context.EmailSettings.Add(settings);
+                context.SaveChanges();
+            }
+            clientInterface.SeedDefaultData(clientId, instanceId);
             Console.WriteLine("Done. Seeding complete");
         }
     }
