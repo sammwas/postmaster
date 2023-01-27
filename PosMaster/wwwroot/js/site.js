@@ -117,6 +117,8 @@ $('.select2bs4').select2({
     theme: 'bootstrap4'
 })
 
+$("#dataTable").DataTable();
+
 var table = $('#receiptsdt').DataTable({
     "paging": true,
     "lengthChange": false,

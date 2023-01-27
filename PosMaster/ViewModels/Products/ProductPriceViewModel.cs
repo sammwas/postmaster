@@ -18,20 +18,20 @@ namespace PosMaster.ViewModels
     {
         public ProductPriceMiniViewModel()
         {
-            
+
         }
         public ProductPriceMiniViewModel(Product product)
         {
             Id = product.Id;
             Name = product.Name;
-            PriceStartDate = product.PriceStartDate;
-            PriceEndDate = product.PriceEndDate;
+            PriceStartDate = product.PriceStartDate.ToString("dd-MMM-yyyy");
+            PriceEndDate = product.PriceEndDate.HasValue ? product.PriceEndDate.Value.ToString("dd-MMM-yyyy") : DateTime.Now.ToString("dd-MMM-yyyy");
             SellingPrice = product.SellingPrice;
         }
         public Guid Id { get; set; }
         public string Name { get; set; }
-        public DateTime PriceStartDate { get; set; }
-        public DateTime? PriceEndDate { get; set; }
+        public string PriceStartDate { get; set; }
+        public string PriceEndDate { get; set; }
         public decimal SellingPrice { get; set; }
     }
 }

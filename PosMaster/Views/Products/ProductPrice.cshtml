@@ -45,7 +45,9 @@
 					</div>
 					</div>
 					<div class="col-md-4">
-						<button type="submit" class="btn btn-primary">Submit</button>
+						<div class="form-group">
+							<button type="submit" class="btn btn-primary">Submit</button>
+						</div>
 					</div>
 				</form>
 			</div>
@@ -79,10 +81,10 @@
 											<input class="" asp-for="ProductPriceMiniViewModels[i].SellingPrice" />
 										</td>
 										<td>
-											<input class="" asp-for="ProductPriceMiniViewModels[i].PriceStartDate" />
+											<input type="date"  class=""  required asp-for="ProductPriceMiniViewModels[i].PriceStartDate" />
 										</td>
 										<td>
-											<input class="" asp-for="ProductPriceMiniViewModels[i].PriceEndDate" />
+											<input type="date" class="" asp-for="ProductPriceMiniViewModels[i].PriceEndDate" />
 										</td>
 										<td>
 											<button type="button" class="btn bg-red btn-block waves-effect"

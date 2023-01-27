@@ -13,8 +13,8 @@ namespace PosMaster.Dal.Interfaces
     {
         Task<ReturnData<Customer>> GetCustomerAsync();
         Task<ReturnData<Product>> EditAsync(ProductViewModel model);
-        Task<ReturnData<List<Product>>> AllAsync(); 
-        Task<ReturnData<List<Product>>> ByInstanceIdAsync(Guid clientId,Guid? instanceId=null, bool isPos=false);
+        Task<ReturnData<List<Product>>> AllAsync();
+        Task<ReturnData<List<Product>>> ByInstanceIdAsync(Guid clientId, Guid? instanceId = null, bool isPos = false);
         Task<ReturnData<Product>> ByIdAsync(Guid id);
         Task<ReturnData<Receipt>> ProductsSaleAsync(ProductSaleViewModel model);
         Task<ReturnData<List<Receipt>>> ReceiptsAsync(Guid? clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "");
@@ -201,24 +201,25 @@ namespace PosMaster.Dal.Interfaces
             }
         }
 
-        public async Task<ReturnData<List<Product>>> ByInstanceIdAsync(Guid clientId, Guid? instanceId,bool isPos=false)
+        public async Task<ReturnData<List<Product>>> ByInstanceIdAsync(Guid clientId, Guid? instanceId, bool isPos = false)
         {
             var result = new ReturnData<List<Product>> { Data = new List<Product>() };
             var tag = nameof(ByInstanceIdAsync);
             _logger.LogInformation($"{tag} get all instance {instanceId} products");
             try
             {
-                var dataQry =  _context.Products
+                var dataQry = _context.Products
                     .Include(c => c.ProductCategory)
                     .Where(c => c.ClientId.Equals(clientId))
                     .AsQueryable();
-                if(instanceId!=null)
+                if (instanceId != null)
                     dataQry = dataQry.Where(d => d.InstanceId.Equals(instanceId.Value));
-                if(isPos){
+                if (isPos)
+                {
                     dataQry = dataQry.Where(d => d.AvailableQuantity > 0 && d.SellingPrice > 0)
                     .Where(d => d.PriceStartDate.Date <= DateTime.Now.Date && (d.PriceEndDate == null || d.PriceEndDate.Value.Date >= DateTime.Now.Date));
                 }
-                var data= await dataQry.OrderByDescending(c => c.DateCreated)
+                var data = await dataQry.OrderByDescending(c => c.DateCreated)
                     .ToListAsync();
                 result.Success = data.Any();
                 result.Message = result.Success ? "Found" : "Not Found";
@@ -804,12 +805,13 @@ namespace PosMaster.Dal.Interfaces
                 model.ProductPriceMiniViewModels.ForEach(p =>
                 {
                     var product = dataQry.FirstOrDefault(c => c.Id.Equals(p.Id));
-                    if (product!=null)
+                    if (product != null)
                     {
+                        var hasToDate = DateTime.TryParse(p.PriceEndDate, out var endDate);
                         product.SellingPrice = p.SellingPrice;
-                        product.PriceStartDate = p.PriceStartDate;
-                        product.PriceEndDate = p.PriceEndDate;
-
+                        product.PriceStartDate = DateTime.Parse(p.PriceStartDate);
+                        product.PriceEndDate =hasToDate? endDate:(DateTime?)null;
+                        
                         productPriceLog.ProductId = product.Id;
                         productPriceLog.PriceStartDate = product.PriceStartDate;
                         productPriceLog.PriceEndDate = product.PriceEndDate;
@@ -817,14 +819,14 @@ namespace PosMaster.Dal.Interfaces
                         productPriceLog.PriceTo = p.SellingPrice;
 
                         priceLogs.Add(productPriceLog);
-                    }    
+                    }
                 });
 
                 await _context.ProductPriceLogs.AddRangeAsync(priceLogs);
                 await _context.SaveChangesAsync();
                 result.Success = true;
                 result.Message = "Updated";
-                
+
                 _logger.LogInformation($"{tag} updated {model.Id} : {result.Message}");
                 return result;
             }
