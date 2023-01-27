@@ -24,5 +24,5 @@ namespace PosMaster.Dal
         public bool IsTaxable => TaxType != null;
         public decimal TotalValue => AvailableQuantity * SellingPrice;
         public string ProductUniqueCode => $"{InstanceId}.{Code}";
-}
+    }
 }

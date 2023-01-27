@@ -144,7 +144,7 @@
                     </div>
                     <input asp-for="LineItemListStr" id="issListRecords" type="hidden" />
                     <input asp-for="Code" type="hidden" value="@userData.InstanceCode" />
-                    <input asp-for="InstanceId" type="hidden" value="@userData.InstanceId" />
+                    <input asp-for="InstanceId" id="instanceId" type="hidden" value="@userData.InstanceId" />
                     <input asp-for="ClientId" id="clientId" type="hidden" value="@userData.ClientId" />
                     <button disabled class="btn btn-primary" type="submit" id="btnSumbitIss"><i class="fa fa-save"></i>
                         Submit</button>

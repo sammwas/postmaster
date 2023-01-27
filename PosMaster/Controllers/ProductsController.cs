@@ -230,10 +230,10 @@ namespace PosMaster.Controllers
                 return RedirectToAction(nameof(ProductPrice), new { instId = result.Data.InstanceId.ToString() });
             return View(model);
         }
-        public async Task<JsonResult> GetInstanceProducts(Guid id)
+        public async Task<JsonResult> Search(Guid cId, Guid instId)
         {
-            var result = await _producutInterface.ByInstanceIdAsync(_userData.ClientId, id);
-            return Json(result);
+            var data = await _producutInterface.ByInstanceIdAsync(cId, instId, true);
+            return Json(data);
         }
     }
 }

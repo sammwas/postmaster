@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PosMaster.Dal;
@@ -9,9 +10,10 @@ using PosMaster.Dal;
 namespace PosMaster.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20230127151358_AddKraPinAndAmountReceivedColumns")]
+    partial class AddKraPinAndAmountReceivedColumns
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1822,14 +1824,8 @@ namespace PosMaster.Migrations
                     b.Property<bool>("IsPaid")
                         .HasColumnType("boolean");
 
-                    b.Property<bool>("IsPrinted")
-                        .HasColumnType("boolean");
-
                     b.Property<bool>("IsWalkIn")
                         .HasColumnType("boolean");
-
-                    b.Property<string>("KRAPin")
-                        .HasColumnType("text");
 
                     b.Property<string>("LastModifiedBy")
                         .HasColumnType("text");
