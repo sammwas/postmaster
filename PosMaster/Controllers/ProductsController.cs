@@ -15,19 +15,16 @@ namespace PosMaster.Controllers
     public class ProductsController : Controller
     {
         private readonly IProductInterface _producutInterface;
-        private readonly ICookiesService _cookieService;
-        private readonly FileUploadService _fileUploadService;
         private readonly UserCookieData _userData;
+        private readonly FileUploadService _fileUploadService;
         public ProductsController(IProductInterface productInterface, ICookiesService cookiesService, FileUploadService fileUploadService)
         {
             _producutInterface = productInterface;
-            _cookieService = cookiesService;
             _fileUploadService = fileUploadService;
-            _userData = _cookieService.Read();
+            _userData = cookiesService.Read();
         }
         public async Task<IActionResult> Index()
         {
-            var user = _cookieService.Read();
             if (User.IsInRole(Role.SuperAdmin))
             {
                 var result = await _producutInterface.AllAsync();
@@ -37,7 +34,7 @@ namespace PosMaster.Controllers
             }
             if (User.IsInRole(Role.Manager) || User.IsInRole(Role.Admin))
             {
-                var result = await _producutInterface.ByInstanceIdAsync(user.ClientId, (Guid?)null);
+                var result = await _producutInterface.ByInstanceIdAsync(_userData.ClientId, (Guid?)null);
                 if (!result.Success)
                     TempData.SetData(AlertLevel.Warning, "Products", result.Message);
                 return View(result.Data);
@@ -45,7 +42,7 @@ namespace PosMaster.Controllers
 
             if (User.IsInRole(Role.Clerk))
             {
-                var result = await _producutInterface.ByInstanceIdAsync(user.ClientId, user.InstanceId);
+                var result = await _producutInterface.ByInstanceIdAsync(_userData.ClientId, _userData.InstanceId);
                 if (!result.Success)
                     TempData.SetData(AlertLevel.Warning, "Products", result.Message);
                 return View(result.Data);
@@ -81,9 +78,7 @@ namespace PosMaster.Controllers
                 TempData.SetData(AlertLevel.Warning, title, message);
                 return View(model);
             }
-
-            var userData = _cookieService.Read();
-            model.ClientId = userData.ClientId;
+            model.ClientId = _userData.ClientId;
             model.InstanceId = Guid.Parse(model.InstanceIdStr);
             if (model.File != null)
             {
@@ -105,10 +100,9 @@ namespace PosMaster.Controllers
         }
         public async Task<IActionResult> ProductStockAdjustment()
         {
-            var userData = _cookieService.Read();
-            var result = userData.Role.Equals(Role.Clerk) ?
-             await _producutInterface.ByInstanceIdAsync(userData.ClientId, userData.InstanceId) :
-             await _producutInterface.ByInstanceIdAsync(userData.ClientId);
+            var result = _userData.Role.Equals(Role.Clerk) ?
+             await _producutInterface.ByInstanceIdAsync(_userData.ClientId, _userData.InstanceId) :
+             await _producutInterface.ByInstanceIdAsync(_userData.ClientId);
             var model = new ProductStockAdjustmentViewModel
             {
                 Products = result.Data
@@ -120,9 +114,8 @@ namespace PosMaster.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ProductStockAdjustment(ProductStockAdjustmentViewModel model)
         {
-            var userData = _cookieService.Read();
-            model.ClientId = userData.ClientId;
-            model.InstanceId = userData.InstanceId;
+            model.ClientId = _userData.ClientId;
+            model.InstanceId = _userData.InstanceId;
             model.Personnel = User.Identity.Name;
             var title = "Adjust stock";
             if (!ModelState.IsValid)
@@ -144,17 +137,16 @@ namespace PosMaster.Controllers
             ViewData["DtFrom"] = dtFrom;
             ViewData["DtTo"] = dtTo;
             ViewData["Search"] = search;
-            var userData = _cookieService.Read();
             Guid? clientId = null;
             Guid? instanceId = null;
             if (!User.IsInRole(Role.SuperAdmin))
-                clientId = userData.ClientId;
+                clientId = _userData.ClientId;
             if (Guid.TryParse(insId, out var iId))
                 instanceId = iId;
             var personnel = "";
             if (User.IsInRole(Role.Clerk))
             {
-                instanceId = userData.InstanceId;
+                instanceId = _userData.InstanceId;
                 personnel = User.Identity.Name;
             }
             var result = await _producutInterface.PurchaseOrdersAsync(clientId, instanceId, dtFrom, dtTo, search, personnel);
@@ -170,26 +162,24 @@ namespace PosMaster.Controllers
 
         public async Task<IActionResult> LowStockProducts()
         {
-            var userData = _cookieService.Read();
             Guid? clientId = null;
             if (!User.IsInRole(Role.SuperAdmin))
-                clientId = userData.ClientId;
+                clientId = _userData.ClientId;
             Guid? instanceId = null;
             if (User.IsInRole(Role.Clerk))
-                instanceId = userData.InstanceId;
+                instanceId = _userData.InstanceId;
             var data = await _producutInterface.LowStockProductsAsync(clientId, instanceId, 5);
             return Json(data);
         }
 
         public async Task<IActionResult> TopSellingByVolume()
         {
-            var userData = _cookieService.Read();
             Guid? clientId = null;
             if (!User.IsInRole(Role.SuperAdmin))
-                clientId = userData.ClientId;
+                clientId = _userData.ClientId;
             Guid? instanceId = null;
             if (User.IsInRole(Role.Clerk))
-                instanceId = userData.InstanceId;
+                instanceId = _userData.InstanceId;
             var data = await _producutInterface.TopSellingProductsByVolumeAsync(clientId, instanceId, 5);
             return Json(data);
         }

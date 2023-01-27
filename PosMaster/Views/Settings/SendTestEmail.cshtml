@@ -1,46 +1,46 @@
 ﻿@model TestEmailViewModel
 @{
-	ViewData["Active"] = "Settings";
-	var title = $"Send Test Email";
-	ViewData["Title"] = title;
+    ViewData["Active"] = "Settings";
+    var title = $"Send Email";
+    ViewData["Title"] = title;
 }
 
 <div class="card card-primary">
-	<div class="card-header">
-		<h3 class="card-title">@ViewData["Title"]</h3>
-	</div>
+    <div class="card-header">
+        <h3 class="card-title">@ViewData["Title"]</h3>
+    </div>
 
-	<form role="form" method="post" autocomplete="off">
-		<div asp-validation-summary="All" class="text-danger"></div>
-		<div class="card-body">
-			<div class="row">
-				<div class="col-md-6">
-					<div class="form-group">
-						<label asp-for="Recipient"></label>
-						<input asp-for="Recipient" class="form-control" placeholder="@User.Identity.Name">
-						<span asp-validation-for="Recipient" class="text-danger"></span>
-					</div>
-				</div>
-				<div class="col-md-6">
-					<div class="form-group">
-						<label asp-for="Subject"></label>
-						<input asp-for="Subject" class="form-control" placeholder="@ViewData["Title"]">
-						<span asp-validation-for="Subject" class="text-danger"></span>
-					</div>
-				</div>
-			</div>
-			<div class="row">
-				<div class="col-md-12">
-					<div class="form-group">
-						<label asp-for="Content"></label>
-						<textarea asp-for="Content" class="form-control" rows="3" placeholder="Hello World"></textarea>
-						<span asp-validation-for="Content" class="text-danger"></span>
-					</div>
-				</div>
-			</div>
-		</div>
-		<div class="card-footer">
-			<button type="submit" class="btn btn-primary">Submit</button>
-		</div>
-	</form>
+    <form role="form" method="post" autocomplete="off">
+        <div asp-validation-summary="All" class="text-danger"></div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="Recipient"></label>
+                        <input asp-for="Recipient" class="form-control" placeholder="@User.Identity.Name">
+                        <span asp-validation-for="Recipient" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="Subject"></label>
+                        <input asp-for="Subject" class="form-control" placeholder="@ViewData["Title"]">
+                        <span asp-validation-for="Subject" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label asp-for="Content"></label>
+                        <textarea asp-for="Content" class="form-control" rows="3" placeholder="Hello World"></textarea>
+                        <span asp-validation-for="Content" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+    </form>
 </div>
