@@ -420,8 +420,8 @@ namespace PosMaster.Dal.Interfaces
                         Quantity = item.Quantity,
                         Discount = item.Discount,
                         Personnel = receipt.Personnel,
-                        ClientId = receipt.ClientId,
-                        InstanceId = receipt.InstanceId,
+                        ClientId = product.ClientId,
+                        InstanceId = product.InstanceId,
                         BuyingPrice = product.BuyingPrice
                     };
                     receipt.ReceiptLineItems.Add(lineItem);

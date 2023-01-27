@@ -14,16 +14,15 @@ namespace PosMaster.Controllers
     public class HumanResourceController : Controller
     {
         private readonly IHumanResourceInterface _humanResourceInterface;
-        private readonly ICookiesService _cookiesService;
+        private readonly UserCookieData _userData;
         public HumanResourceController(IHumanResourceInterface humanResourceInterface, ICookiesService cookiesService)
         {
             _humanResourceInterface = humanResourceInterface;
-            _cookiesService = cookiesService;
+            _userData = cookiesService.Read();
         }
 
         public async Task<IActionResult> EditBank(Guid? id)
         {
-            var userData = _cookiesService.Read();
             if (id == null)
                 return View(new BankViewModel { Status = EntityStatus.Active });
 
@@ -31,7 +30,7 @@ namespace PosMaster.Controllers
             if (!result.Success)
             {
                 TempData.SetData(AlertLevel.Warning, "Banks", result.Message);
-                return RedirectToAction(nameof(Banks), new { userData.ClientId });
+                return RedirectToAction(nameof(Banks));
             }
 
             var model = new BankViewModel(result.Data);
@@ -40,7 +39,6 @@ namespace PosMaster.Controllers
 
         public async Task<IActionResult> EditLeaveCategory(Guid? id)
         {
-            var userData = _cookiesService.Read();
             if (id == null)
                 return View(new EmployeeLeaveCategoryViewModel { Status = EntityStatus.Active });
 
@@ -48,7 +46,7 @@ namespace PosMaster.Controllers
             if (!result.Success)
             {
                 TempData.SetData(AlertLevel.Warning, "Leave Categories", result.Message);
-                return RedirectToAction(nameof(LeaveCategories), new { userData.ClientId });
+                return RedirectToAction(nameof(LeaveCategories));
             }
 
             var model = new EmployeeLeaveCategoryViewModel(result.Data);
@@ -68,9 +66,8 @@ namespace PosMaster.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditEmployeeKin(EmployeeKinViewModel model)
         {
-            var userData = _cookiesService.Read();
-            model.ClientId = userData.ClientId;
-            model.InstanceId = userData.InstanceId;
+            model.ClientId = _userData.ClientId;
+            model.InstanceId = _userData.InstanceId;
             model.Personnel = User.Identity.Name;
             var option = model.IsEditMode ? "Update" : "Add";
             var title = $"{option} Kin";
@@ -99,9 +96,8 @@ namespace PosMaster.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditEmployeeSalary(EmployeeSalaryViewModel model)
         {
-            var userData = _cookiesService.Read();
-            model.ClientId = userData.ClientId;
-            model.InstanceId = userData.InstanceId;
+            model.ClientId = _userData.ClientId;
+            model.InstanceId = _userData.InstanceId;
             model.Personnel = User.Identity.Name;
             var option = model.IsEditMode ? "Update" : "Add";
             var title = $"{option} Salary";
@@ -121,9 +117,8 @@ namespace PosMaster.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditBank(BankViewModel model)
         {
-            var userData = _cookiesService.Read();
-            model.ClientId = userData.ClientId;
-            model.InstanceId = userData.InstanceId;
+            model.ClientId = _userData.ClientId;
+            model.InstanceId = _userData.InstanceId;
             model.Personnel = User.Identity.Name;
             var option = model.IsEditMode ? "Update" : "Add";
             var title = $"{option} Bank";
@@ -138,16 +133,15 @@ namespace PosMaster.Controllers
             TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, title, result.Message);
             if (!result.Success)
                 return View(model);
-            return RedirectToAction(nameof(Banks), new { userData.ClientId });
+            return RedirectToAction(nameof(Banks));
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditLeaveCategory(EmployeeLeaveCategoryViewModel model)
         {
-            var userData = _cookiesService.Read();
-            model.ClientId = userData.ClientId;
-            model.InstanceId = userData.InstanceId;
+            model.ClientId = _userData.ClientId;
+            model.InstanceId = _userData.InstanceId;
             model.Personnel = User.Identity.Name;
             var option = model.IsEditMode ? "Update" : "Add";
             var title = $"{option} Leave Category";
@@ -162,20 +156,20 @@ namespace PosMaster.Controllers
             TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, title, result.Message);
             if (!result.Success)
                 return View(model);
-            return RedirectToAction(nameof(LeaveCategories), new { userData.ClientId });
+            return RedirectToAction(nameof(LeaveCategories));
         }
 
-        public async Task<IActionResult> Banks(Guid clientId)
+        public async Task<IActionResult> Banks()
         {
-            var result = await _humanResourceInterface.BanksAsync(clientId);
+            var result = await _humanResourceInterface.BanksAsync(_userData.ClientId);
             if (!result.Success)
                 TempData.SetData(AlertLevel.Warning, "Banks", result.Message);
             return View(result.Data);
         }
 
-        public async Task<IActionResult> LeaveCategories(Guid clientId)
+        public async Task<IActionResult> LeaveCategories()
         {
-            var result = await _humanResourceInterface.LeaveCategoriesAsync(clientId);
+            var result = await _humanResourceInterface.LeaveCategoriesAsync(_userData.ClientId);
             if (!result.Success)
                 TempData.SetData(AlertLevel.Warning, "Leave Categories", result.Message);
             return View(result.Data);
@@ -183,12 +177,10 @@ namespace PosMaster.Controllers
 
         public async Task<IActionResult> EditLeaveApplication(Guid? id)
         {
-            var userData = _cookiesService.Read();
             if (id == null)
                 return View(new LeaveApplicationViewModel
                 {
-                    Status = EntityStatus.Active,
-                    UserId = userData.UserId
+                    Status = EntityStatus.Active
                 });
 
             var result = await _humanResourceInterface.LeaveApplicationByIdAsync(id.Value);
@@ -206,12 +198,11 @@ namespace PosMaster.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditLeaveApplication(LeaveApplicationViewModel model)
         {
-            var userData = _cookiesService.Read();
-            model.ClientId = userData.ClientId;
-            model.InstanceId = userData.InstanceId;
+            model.ClientId = _userData.ClientId;
+            model.InstanceId = _userData.InstanceId;
             model.Personnel = User.Identity.Name;
-            model.UserId = userData.UserId;
-            model.Gender = userData.Gender;
+            model.UserId = _userData.UserId;
+            model.Gender = _userData.Gender;
             var option = model.IsEditMode ? "Update" : "Add";
             var title = $"{option} Leave";
             if (!ModelState.IsValid)
@@ -232,30 +223,29 @@ namespace PosMaster.Controllers
         {
             ViewData["dtTo"] = dtTo;
             ViewData["dtFrom"] = dtFrom;
-            var userData = _cookiesService.Read();
-            var result = await _humanResourceInterface.LeaveApplicationsAsync(userData.ClientId, userData.InstanceId, userData.UserId, dtFrom, dtTo);
+            var result = await _humanResourceInterface
+                .LeaveApplicationsAsync(_userData.ClientId, _userData.InstanceId, _userData.UserId, dtFrom, dtTo);
             if (!result.Success)
                 TempData.SetData(AlertLevel.Warning, "My Applications", result.Message);
             return View(result.Data);
         }
 
-        public async Task<IActionResult> LeaveApplications(Guid? clientId, Guid? instanceId, string userId = "", string dtFrom = "",
+        public async Task<IActionResult> LeaveApplications(Guid? instanceId, string userId = "", string dtFrom = "",
             string dtTo = "", string search = "")
         {
             ViewData["dtTo"] = dtTo;
             ViewData["dtFrom"] = dtFrom;
             ViewData["instanceId"] = instanceId;
-            var result = await _humanResourceInterface.LeaveApplicationsAsync(clientId, instanceId, userId, dtFrom, dtTo, search);
+            var result = await _humanResourceInterface.LeaveApplicationsAsync(_userData.ClientId, instanceId, userId, dtFrom, dtTo, search);
             if (!result.Success)
                 TempData.SetData(AlertLevel.Warning, "Leave Applications", result.Message);
             return View(result.Data);
         }
 
-        public async Task<IActionResult> EmployeeSalaries(Guid? instanceId)
+        public async Task<IActionResult> EmployeeSalaries(Guid? id)
         {
-            ViewData["InstanceId"] = instanceId;
-            var userData = _cookiesService.Read();
-            var result = await _humanResourceInterface.EmployeeSalariesAsync(userData.ClientId, instanceId);
+            ViewData["InstanceId"] = id;
+            var result = await _humanResourceInterface.EmployeeSalariesAsync(_userData.ClientId, id);
             if (!result.Success)
                 TempData.SetData(AlertLevel.Warning, "Salaries", result.Message);
             return View(result.Data);
@@ -277,10 +267,8 @@ namespace PosMaster.Controllers
             var result = await _humanResourceInterface.ApproveLeaveApplicationAsync(model);
             if (!result.Success)
                 TempData.SetData(AlertLevel.Warning, "Leave", result.Message);
-            var userData = _cookiesService.Read();
             return RedirectToAction(nameof(LeaveApplications), new
             {
-                userData.ClientId,
                 dtFrom = Helpers.firstDayOfYear.ToString("dd-MMM-yyyy")
             });
         }
@@ -297,23 +285,21 @@ namespace PosMaster.Controllers
             var result = await _humanResourceInterface.ApproveMonthPaymentAsync(model);
             if (!result.Success)
                 TempData.SetData(AlertLevel.Warning, "Approve Payments", result.Message);
-            var userData = _cookiesService.Read();
             return RedirectToAction(nameof(MonthlyPayments), new
             {
-                userData.ClientId,
                 model.Year,
                 model.Month,
                 model.InstanceId
             });
         }
 
-        public async Task<IActionResult> MonthlyPayments(Guid clientId, Guid? instanceId, int year, int month)
+        public async Task<IActionResult> MonthlyPayments(Guid? instanceId, int year, int month)
         {
             ViewData["InstanceId"] = instanceId;
-            ViewData["ClientId"] = clientId;
+            ViewData["ClientId"] = _userData.ClientId;
             ViewData["Year"] = year;
             ViewData["Month"] = month;
-            var result = await _humanResourceInterface.MonthlyPaymentsAsync(month, year, clientId, instanceId);
+            var result = await _humanResourceInterface.MonthlyPaymentsAsync(month, year, _userData.ClientId, instanceId);
             if (!result.Success)
                 TempData.SetData(AlertLevel.Warning, "Monthly Payments", result.Message);
             return View(result.Data);
