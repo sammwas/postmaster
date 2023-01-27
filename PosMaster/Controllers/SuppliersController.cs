@@ -13,23 +13,22 @@ namespace PosMaster.Controllers
 {
     public class SuppliersController : Controller
     {
-        private readonly ICookiesService _cookieService;
+        private readonly UserCookieData _userData;
         private readonly ISupplierInterface _supplierInterface;
         public SuppliersController(ICookiesService cookieService, ISupplierInterface supplierInterface)
         {
-            _cookieService = cookieService;
+            _userData = cookieService.Read();
             _supplierInterface = supplierInterface;
         }
-        public async Task<IActionResult> ByClientId(Guid clientId)
+        public async Task<IActionResult> ByClientId()
         {
-            var result = await _supplierInterface.ByClientIdAsync(clientId);
+            var result = await _supplierInterface.ByClientIdAsync(_userData.ClientId);
             if (!result.Success)
                 TempData.SetData(AlertLevel.Warning, "Suppliers", result.Message);
             return View(result.Data);
         }
         public async Task<IActionResult> Edit(Guid? id)
         {
-            var userData = _cookieService.Read();
             if (id == null)
                 return View(new SupplierViewModel { Status = EntityStatus.Active });
 
@@ -37,7 +36,7 @@ namespace PosMaster.Controllers
             if (!result.Success)
             {
                 TempData.SetData(AlertLevel.Warning, "Suppliers", result.Message);
-                return RedirectToAction(nameof(ByClientId), new { userData.ClientId });
+                return RedirectToAction(nameof(ByClientId));
             }
 
             var model = new SupplierViewModel(result.Data);
@@ -47,9 +46,8 @@ namespace PosMaster.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(SupplierViewModel model)
         {
-            var userData = _cookieService.Read();
-            model.ClientId = userData.ClientId;
-            model.InstanceId = userData.InstanceId;
+            model.ClientId = _userData.ClientId;
+            model.InstanceId = _userData.InstanceId;
             model.Personnel = User.Identity.Name;
             var option = model.IsEditMode ? "Update" : "Add";
             var title = $"{option} Supplier";
@@ -64,7 +62,7 @@ namespace PosMaster.Controllers
             TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, title, result.Message);
             if (!result.Success)
                 return View(model);
-            return RedirectToAction(nameof(ByClientId), new { userData.ClientId });
+            return RedirectToAction(nameof(ByClientId));
         }
     }
 }

@@ -9,7 +9,6 @@
 }
 <!DOCTYPE html>
 <html>
-
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -181,8 +180,7 @@
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a asp-controller="Customers" asp-action="ByClientId" asp-route-clientId="@userData.ClientId"
-                                       class="nav-link">
+                                    <a asp-controller="Customers" asp-action="ByClientId" class="nav-link">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Customers</p>
                                     </a>
@@ -364,14 +362,13 @@
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a asp-controller="Products" asp-action="ProductStockAdjustment"
-                                       asp-route-clientId="@userData.ClientId" class="nav-link">
+                                    <a asp-controller="Products" asp-action="ProductStockAdjustment" class="nav-link">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Stock Adjustment</p>
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a asp-controller="Suppliers" asp-action="ByClientId" asp-route-clientId="@userData.ClientId"
+                                    <a asp-controller="Suppliers" asp-action="ByClientId"
                                        class="nav-link">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Suppliers</p>
@@ -455,12 +452,11 @@
                                     <li class="nav-item">
                                         <a asp-controller="Settings" asp-action="SendTestEmail" class="nav-link">
                                             <i class="far fa-circle nav-icon"></i>
-                                            <p>Test Email</p>
+                                            <p>Send Email</p>
                                         </a>
                                     </li>
                                 </ul>
                             </li>
-
                         }
                         @if (User.IsInRole(Role.SuperAdmin))
                         {
@@ -474,7 +470,7 @@
                                 </a>
                                 <ul class="nav nav-treeview">
                                     <li class="nav-item">
-                                        <a asp-controller="Settings" asp-action="EmailSettings" asp-route-clientId="@userData.ClientId"
+                                        <a asp-controller="Settings" asp-action="EmailSettings"
                                        class="nav-link">
                                             <i class="far fa-circle nav-icon"></i>
                                             <p>Email Settings</p>
