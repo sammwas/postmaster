@@ -25,6 +25,7 @@ namespace PosMaster.Dal.Interfaces
         string DocumentRefNumber(Document document, Guid clientId);
         Task<ReturnData<List<Product>>> LowStockProductsAsync(Guid? clientId, Guid? instanceId, int limit = 10);
         Task<ReturnData<List<TopSellingProductViewModel>>> TopSellingProductsByVolumeAsync(Guid? clientId, Guid? instanceId, int limit = 10);
+        Task<ReturnData<ProductPriceViewModel>> EditPriceAsync(ProductPriceViewModel model);
     }
 
     public class ProductImplementation : IProductInterface
@@ -770,6 +771,61 @@ namespace PosMaster.Dal.Interfaces
                 if (result.Success)
                     result.Data = data;
                 _logger.LogInformation($"{tag} found {data.Count} products");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                result.ErrorMessage = ex.Message;
+                result.Message = "Error occured";
+                _logger.LogError($"{tag} {result.Message} : {ex}");
+                return result;
+            }
+        }
+
+        public async Task<ReturnData<ProductPriceViewModel>> EditPriceAsync(ProductPriceViewModel model)
+        {
+            var result = new ReturnData<ProductPriceViewModel> { Data = new ProductPriceViewModel() };
+            var priceLogs = new List<ProductPriceLog>();
+            var tag = nameof(EditPriceAsync);
+            _logger.LogInformation($"{tag} edit product price");
+            try
+            {
+                var productPriceLog = new ProductPriceLog();
+                if (!model.ProductPriceMiniViewModels.Any())
+                {
+                    result.Message = "Not Found";
+                    _logger.LogWarning($"{tag} update failed {model.Id} : {result.Message}");
+                    return result;
+                }
+
+                var dataQry = await _context.Products
+                    .Where(c => c.ClientId.Equals(model.ClientId) && c.InstanceId.Equals(model.InstanceId)).ToListAsync();
+                model.ProductPriceMiniViewModels.ForEach(p =>
+                {
+                    var product = dataQry.FirstOrDefault(c => c.Id.Equals(p.Id));
+                    if (product!=null)
+                    {
+                        product.SellingPrice = p.SellingPrice;
+                        product.PriceStartDate = p.PriceStartDate;
+                        product.PriceEndDate = p.PriceEndDate;
+
+                        productPriceLog.ProductId = product.Id;
+                        productPriceLog.PriceStartDate = product.PriceStartDate;
+                        productPriceLog.PriceEndDate = product.PriceEndDate;
+                        productPriceLog.PriceFrom = product.SellingPrice;
+                        productPriceLog.PriceTo = p.SellingPrice;
+
+                        priceLogs.Add(productPriceLog);
+                    }    
+                });
+
+                await _context.ProductPriceLogs.AddRangeAsync(priceLogs);
+                await _context.SaveChangesAsync();
+                result.Success = true;
+                result.Message = "Updated";
+                
+                _logger.LogInformation($"{tag} updated {model.Id} : {result.Message}");
                 return result;
             }
             catch (Exception ex)

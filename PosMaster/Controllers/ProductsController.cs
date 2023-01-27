@@ -193,9 +193,42 @@ namespace PosMaster.Controllers
             var data = await _producutInterface.TopSellingProductsByVolumeAsync(clientId, instanceId, 5);
             return Json(data);
         }
-        public IActionResult ProductPrice()
+        public async Task<IActionResult> ProductPrice(string instId = "")
         {
-            return View();
+            var data = new ProductPriceViewModel();
+            ViewData["InstanceId"] = instId;
+            if (String.IsNullOrEmpty(instId))
+                return View(data);
+            var result = await _producutInterface.ByInstanceIdAsync(_userData.ClientId, Guid.Parse(instId));
+            if (!result.Success)
+            {
+                TempData.SetData(AlertLevel.Warning, "Products", result.Message);
+                return View(data);
+            }
+            var products = new List<ProductPriceMiniViewModel>();
+            foreach (var item in result.Data)
+            {
+                products.Add(new ProductPriceMiniViewModel(item));
+            }
+            data.ProductPriceMiniViewModels = products;
+            return View(data);
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ProductPrice(ProductPriceViewModel model)
+        {
+            var title = "Edit Price";
+            if (!ModelState.IsValid)
+            {
+                var message = "Missing fields";
+                TempData.SetData(AlertLevel.Warning, title, message);
+                return View(model);
+            }
+            var result = await _producutInterface.EditPriceAsync(model);
+            TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, title, result.Message);
+            if (!result.Success)
+                return RedirectToAction(nameof(ProductPrice), new { instId = result.Data.InstanceId.ToString() });
+            return View(model);
         }
         public async Task<JsonResult> GetInstanceProducts(Guid id)
         {

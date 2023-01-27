@@ -421,9 +421,57 @@ $("#item-price-select").change(function () {
     });
 })
 
-function addProductItemToList()
-{
-    $('#items-price-dropdown')
-}
+// let itemPriceList = [];
+// function addProductItemToList()
+// {
+//     let itemId = $('#items-price-dropdown option:selected').val();
+//     let itemName = $('#items-price-dropdown option:selected').text();
+//     let itemPrice = $('#items-price-dropdown option:selected').attr('data-sell');
+//     let itemStartDate = $('#items-price-dropdown option:selected').attr('data-priceStart')
+//     let itemEndDate = $('#items-price-dropdown option:selected').attr('data-priceEnd')
 
- 
+//     let listItem = {
+//         "id": itemId,
+//         "name": itemName,
+//         "sellingPrice": parseFloat(itemPrice),
+//         "priceStartDate": new Date(itemStartDate),
+//         "priceEndDate": new Date(itemEndDate),
+//     };
+    
+//     itemPriceList.push(listItem);
+//     createPriceListTable()
+// }
+
+// $("#item-add-btn").click(function (e) {
+//     e.preventDefault();
+//     addProductItemToList();
+//     $('#item-price-form').trigger('reset');
+// })
+// function createPriceListTable() {
+//     $("#item-price-list-table").html("");
+//     var tr = "";
+//     var index = 0;
+//     $.each(itemPriceList, function () {
+//         tr += '<tr><td>' + this.name + '</td><td>' + this.sellingPrice + '</td><td>' + this.priceStartDate + '</td><td>' + this.priceEndDate + '</td>'
+//             + '<td><button class="btn btn-primary btn-sm" onclick="addToPriceList(e)">Add</button></td>'
+//             + '<td><button class="btn btn-danger btn-sm" onclick="removeListItem(' + index + ', e)">Remove</button> </td > </tr > ';
+//         index++;
+//     });
+
+//     $("#item-price-list-table").html(tr);
+// };
+
+// function removePriceListItem(index, event) {
+//     event.preventDefault();
+//     itemPriceList.splice(index, 1);
+//     createPriceListTable();
+//     $("#price-list-records").val(JSON.stringify(issueListItems));
+// };
+
+// function addToPriceList(index,event) {
+//     event.preventDefault();
+//     $("#price-list-records").val(JSON.stringify(itemPriceList));
+// }
+removeGradingSchemeRow = function (id) {
+    document.getElementById("tr_" + id).remove();
+};

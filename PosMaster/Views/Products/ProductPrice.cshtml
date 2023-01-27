@@ -1,6 +1,6 @@
 ﻿@inject IClientInstanceInterface _instanceInterface;
 @inject ICookiesService _cookies;
-@model List<DailySalesViewModel>
+@model ProductPriceViewModel
 @{
 	ViewData["Active"] = "Product Price";
 	ViewData["Title"] = "Product Price";
@@ -16,46 +16,47 @@
 	<div class="card-header">
 		<h3 class="card-title">@ViewData["Title"]</h3>
 	</div>
-	<form role="form" autocomplete="off">
-		<input type="hidden" name="Option" value="@ViewData["option"]" />
+	<div class="card-body">
 		<div class="row">
-			<div class="card-body">
-				<div class="row">
+			<div class="col-md-12">
+				<form method="get" class="form-inline" autocomplete="off">
 					<div class="col-md-4">
 						<div class="form-group">
-							<label>Instance</label>
-							<select class="form-control select2" name="InstanceId" style="width: 100%;"
-								id="item-price-select">
-								<option value="">--Select Instance--</option>
-								@foreach (var item in instances)
+						<label>Instance</label>
+						<select class="form-control select2" name="instId" style="width: 100%;"
+							id="item-price-select">
+							<option value="">--Select Instance--</option>
+							@foreach (var item in instances)
+							{
+								if (item.Id.ToString().Equals(instanceId))
 								{
-									<option selected="selected" value="@item.Id" client-id="@item.ClientId"
-									title="@item.Notes">@item.Code - @item.Name
+									<option selected value="@item.Id" client-id="@item.ClientId" title="@item.Notes">
+										@item.Code - @item.Name
 										(@item.Client.Code - @item.Client.Name)</option>
 								}
-							</select>
-						</div>
+								else
+								{
+									<option value="@item.Id" client-id="@item.ClientId" title="@item.Notes">@item.Code -
+										@item.Name
+										(@item.Client.Code - @item.Client.Name)</option>
+								}
+							}
+						</select>
+					</div>
 					</div>
 					<div class="col-md-4">
-						<div class="form-group">
-							<label>Items</label>
-							<select class="form-control select2" name="InstanceId" style="width: 100%;"
-								id="items-price-dropdown">
-							</select>
-						</div>
+						<button type="submit" class="btn btn-primary">Submit</button>
 					</div>
-					<div class="col-md-4">
-						<div class="form-group">
-							<br />
-							<button type="submit" class="btn btn-primary">Add Item</button>
-						</div>
-					</div>
-				</div>
-				<div class="row">
-					<div class="col-md-12">
-						<table id="datataTable" class="table table-bordered table-striped">
-							<thead>
-								<tr>
+				</form>
+			</div>
+		</div>
+
+		<div class="row">
+			<form method="post" autocomplete="off" asp-action="ProductPrice">
+				<div class="col-md-12">
+					<table id="datataTable" class="table table-bordered table-striped">
+						<thead>
+                            <tr>
 									<th>Item</th>
 									<th>Price</th>
 									<th>Start Date</th>
@@ -64,6 +65,34 @@
 								</tr>
 							</thead>
 							<tbody id="item-price-list-table">
+								@{
+									var i = 0;
+								}
+								@foreach (var item in Model.ProductPriceMiniViewModels)
+								{
+									<tr id="tr_@item.Id">
+										<td>
+											<input type="hidden" asp-for="ProductPriceMiniViewModels[i].Id" />
+											<input class="" asp-for="ProductPriceMiniViewModels[i].Name" />
+										</td>
+										<td>
+											<input class="" asp-for="ProductPriceMiniViewModels[i].SellingPrice" />
+										</td>
+										<td>
+											<input class="" asp-for="ProductPriceMiniViewModels[i].PriceStartDate" />
+										</td>
+										<td>
+											<input class="" asp-for="ProductPriceMiniViewModels[i].PriceEndDate" />
+										</td>
+										<td>
+											<button type="button" class="btn bg-red btn-block waves-effect"
+											onclick="removePriceItemRow('@item.Id')">
+												Remove
+											</button>
+										</td>
+									</tr>
+									i++;
+								}
 							</tbody>
 							<tfoot>
 								<tr>
@@ -75,9 +104,14 @@
 								</tr>
 							</tfoot>
 						</table>
-					</div>
 				</div>
-			</div>
+				<input asp-for="Code" type="hidden" value="@userData.InstanceCode" />
+				<input asp-for="InstanceId" type="hidden" value="@userData.InstanceId" />
+				<input asp-for="ClientId" id="clientId" type="hidden" value="@userData.ClientId" />
+				<button class="btn btn-primary" type="submit" id="item-submit-btn"><i
+						class="fa fa-save"></i>
+					Submit</button>
+			</form>
 		</div>
-	</form>
+	</div>
 </div>
