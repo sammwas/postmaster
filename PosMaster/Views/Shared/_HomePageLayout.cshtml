@@ -18,7 +18,7 @@
     <link href="~/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
     <link href="~/vendor/simple-line-icons/css/simple-line-icons.css" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic,700italic" rel="stylesheet"
-        type="text/css">
+          type="text/css">
     <link href="~/css/landing-page.css" rel="stylesheet">
 </head>
 
@@ -29,7 +29,7 @@
             @if (!_signInManager.IsSignedIn(User))
             {
                 <a asp-controller="Home" asp-action="Login" asp-route-returnUrl="@ViewData["ReturnUrl"]"
-                class="btn btn-primary">Log In</a>
+               class="btn btn-primary">Log In</a>
             }
             else
             {
@@ -44,13 +44,15 @@
     <footer class="footer bg-light">
         <div class="container">
             <div class="row">
-                <div class="col-lg-6 h-100 text-center text-lg-left my-auto">
-                    <span><a asp-controller="Home" asp-action="Terms">Terms of Use</a></span>&sdot;
-                    <span><a asp-controller="Home" asp-action="Privacy">Privacy Policy</a></span>
+                <div class="col-lg-12 h-100 text-center text-lg-left my-auto">
                     <p class="text-muted small mb-4 mb-lg-0">
-                        <strong>Copyright &copy; @DateTime.Now.Year <a asp-controller="Home"
-                                asp-action="Index">@settings.Name</a>.</strong>
-                        All rights reserved. &nbsp; Version @settings.Version
+                        <span><a asp-controller="Home" asp-action="Terms">Terms of Use</a></span> &nbsp;|&nbsp;
+                        <span><a asp-controller="Home" asp-action="Privacy">Privacy Policy</a></span>&nbsp;
+                        <span>
+                            Copyright &copy; @DateTime.Now.Year <a asp-controller="Home"
+                                                                   asp-action="Index">@settings.Name</a>.
+                        </span> &nbsp;
+                        <span>All rights reserved. &nbsp; Version @settings.Version</span>
                     </p>
                 </div>
             </div>

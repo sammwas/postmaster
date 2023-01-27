@@ -14,15 +14,15 @@ namespace PosMaster.Controllers
     public class MasterDataController : Controller
     {
         private readonly IMasterDataInterface _masterDataInterface;
-        private readonly ICookiesService _cookieService;
+        private readonly UserCookieData _userData;
         public MasterDataController(IMasterDataInterface masterDataInterface, ICookiesService cookiesService)
         {
             _masterDataInterface = masterDataInterface;
-            _cookieService = cookiesService;
+            _userData = cookiesService.Read();
         }
-        public async Task<IActionResult> ProductCategories(Guid clientId)
+        public async Task<IActionResult> ProductCategories()
         {
-            var result = await _masterDataInterface.ProductCategoriesAsync(clientId);
+            var result = await _masterDataInterface.ProductCategoriesAsync(_userData.ClientId);
             if (!result.Success)
                 TempData.SetData(AlertLevel.Warning, "Product Categories", result.Message);
             return View(result.Data);
@@ -35,10 +35,8 @@ namespace PosMaster.Controllers
             var result = await _masterDataInterface.ByIdProductCategoryAsync(id.Value);
             if (!result.Success)
             {
-                var userData = _cookieService.Read();
-                var clientId = userData.ClientId;
                 TempData.SetData(AlertLevel.Warning, "Product Categories", result.Message);
-                return RedirectToAction(nameof(ProductCategories), new { clientId });
+                return RedirectToAction(nameof(ProductCategories));
             }
 
             var model = new ProductCategoryViewModel(result.Data);
@@ -48,9 +46,8 @@ namespace PosMaster.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditProductCategory(ProductCategoryViewModel model)
         {
-            var userData = _cookieService.Read();
-            model.ClientId = userData.ClientId;
-            model.InstanceId = userData.InstanceId;
+            model.ClientId = _userData.ClientId;
+            model.InstanceId = _userData.InstanceId;
             model.Personnel = User.Identity.Name;
             var option = model.IsEditMode ? "Update" : "Add";
             var title = $"{option} Product Category";
@@ -65,11 +62,11 @@ namespace PosMaster.Controllers
             TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, title, result.Message);
             if (!result.Success)
                 return View(model);
-            return RedirectToAction(nameof(ProductCategories), new { model.ClientId });
+            return RedirectToAction(nameof(ProductCategories));
         }
-        public async Task<IActionResult> UnitOfMeasures(Guid clientId)
+        public async Task<IActionResult> UnitOfMeasures()
         {
-            var result = await _masterDataInterface.UnitOfMeasuresAsync(clientId);
+            var result = await _masterDataInterface.UnitOfMeasuresAsync(_userData.ClientId);
             if (!result.Success)
                 TempData.SetData(AlertLevel.Warning, "Unit of Measures", result.Message);
             return View(result.Data);
@@ -82,10 +79,8 @@ namespace PosMaster.Controllers
 
             if (!result.Success)
             {
-                var userData = _cookieService.Read();
-                var clientId = userData.ClientId;
                 TempData.SetData(AlertLevel.Warning, "Unit of Measure", result.Message);
-                return RedirectToAction(nameof(UnitOfMeasures), new { clientId });
+                return RedirectToAction(nameof(UnitOfMeasures));
             }
             var model = new UnitOfMeasureViewModel(result.Data);
             return View(model);
@@ -94,9 +89,8 @@ namespace PosMaster.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditUnitOfMeasure(UnitOfMeasureViewModel model)
         {
-            var userData = _cookieService.Read();
-            model.ClientId = userData.ClientId;
-            model.InstanceId = userData.InstanceId;
+            model.ClientId = _userData.ClientId;
+            model.InstanceId = _userData.InstanceId;
             model.Personnel = User.Identity.Name;
             var option = model.IsEditMode ? "Update" : "Add";
             var title = $"{option} Unit of Measure";
@@ -111,11 +105,11 @@ namespace PosMaster.Controllers
             TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, title, result.Message);
             if (!result.Success)
                 return View(model);
-            return RedirectToAction(nameof(UnitOfMeasures), new { model.ClientId });
+            return RedirectToAction(nameof(UnitOfMeasures));
         }
-        public async Task<IActionResult> ExpenseTypes(Guid clientId)
+        public async Task<IActionResult> ExpenseTypes()
         {
-            var result = await _masterDataInterface.ExpenseTypesAsync(clientId);
+            var result = await _masterDataInterface.ExpenseTypesAsync(_userData.ClientId);
             if (!result.Success)
                 TempData.SetData(AlertLevel.Warning, "Expense Types", result.Message);
 
@@ -129,10 +123,8 @@ namespace PosMaster.Controllers
 
             if (!result.Success)
             {
-                var userData = _cookieService.Read();
-                var clientId = userData.ClientId;
                 TempData.SetData(AlertLevel.Warning, "Expense Type", result.Message);
-                return RedirectToAction(nameof(ExpenseTypes), new { clientId });
+                return RedirectToAction(nameof(ExpenseTypes));
             }
             var model = new ExpenseTypeViewModel(result.Data);
             return View(model);
@@ -141,9 +133,8 @@ namespace PosMaster.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditExpenseType(ExpenseTypeViewModel model)
         {
-            var userData = _cookieService.Read();
-            model.ClientId = userData.ClientId;
-            model.InstanceId = userData.InstanceId;
+            model.ClientId = _userData.ClientId;
+            model.InstanceId = _userData.InstanceId;
             model.Personnel = User.Identity.Name;
             var option = model.IsEditMode ? "Update" : "Add";
             var title = $"{option} Expense Type";
@@ -158,11 +149,11 @@ namespace PosMaster.Controllers
             TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, title, result.Message);
             if (!result.Success)
                 return View(model);
-            return RedirectToAction(nameof(ExpenseTypes), new { model.ClientId });
+            return RedirectToAction(nameof(ExpenseTypes));
         }
-        public async Task<IActionResult> PaymentModes(Guid clientId)
+        public async Task<IActionResult> PaymentModes()
         {
-            var result = await _masterDataInterface.PaymentModesAsync(clientId);
+            var result = await _masterDataInterface.PaymentModesAsync(_userData.ClientId);
             if (!result.Success)
                 TempData.SetData(AlertLevel.Warning, "Expense Types", result.Message);
             return View(result.Data);
@@ -175,10 +166,8 @@ namespace PosMaster.Controllers
             var result = await _masterDataInterface.ByIdPaymentModeAsync(id.Value);
             if (!result.Success)
             {
-                var userData = _cookieService.Read();
-                var clientId = userData.ClientId;
                 TempData.SetData(AlertLevel.Warning, "Payment Mode", result.Message);
-                return RedirectToAction(nameof(PaymentModes), new { clientId });
+                return RedirectToAction(nameof(PaymentModes));
             }
             var model = new PaymentModeViewModel(result.Data);
             return View(model);
@@ -187,9 +176,8 @@ namespace PosMaster.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditPaymentMode(PaymentModeViewModel model)
         {
-            var userData = _cookieService.Read();
-            model.ClientId = userData.ClientId;
-            model.InstanceId = userData.InstanceId;
+            model.ClientId = _userData.ClientId;
+            model.InstanceId = _userData.InstanceId;
             model.Personnel = User.Identity.Name;
             var option = model.IsEditMode ? "Update" : "Add";
             var title = $"{option} Payment Mode";
@@ -204,11 +192,11 @@ namespace PosMaster.Controllers
             TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, title, result.Message);
             if (!result.Success)
                 return View(model);
-            return RedirectToAction(nameof(PaymentModes), new { model.ClientId });
+            return RedirectToAction(nameof(PaymentModes));
         }
-        public async Task<IActionResult> TaxTypes(Guid clientId)
+        public async Task<IActionResult> TaxTypes()
         {
-            var result = await _masterDataInterface.TaxTypesAsync(clientId);
+            var result = await _masterDataInterface.TaxTypesAsync(_userData.ClientId);
             if (!result.Success)
                 TempData.SetData(AlertLevel.Warning, "Tax Types", result.Message);
             return View(result.Data);
@@ -221,10 +209,8 @@ namespace PosMaster.Controllers
 
             if (!result.Success)
             {
-                var userData = _cookieService.Read();
-                var clientId = userData.ClientId;
                 TempData.SetData(AlertLevel.Warning, "Tax Type", result.Message);
-                return RedirectToAction(nameof(TaxTypes), new { clientId });
+                return RedirectToAction(nameof(TaxTypes));
             }
             var model = new TaxTypeViewModel(result.Data);
             return View(model);
@@ -233,9 +219,8 @@ namespace PosMaster.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditTaxType(TaxTypeViewModel model)
         {
-            var userData = _cookieService.Read();
-            model.ClientId = userData.ClientId;
-            model.InstanceId = userData.InstanceId;
+            model.ClientId = _userData.ClientId;
+            model.InstanceId = _userData.InstanceId;
             model.Personnel = User.Identity.Name;
             var option = model.IsEditMode ? "Update" : "Add";
             var title = $"{option} Tax Type";
@@ -250,7 +235,7 @@ namespace PosMaster.Controllers
             TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, title, result.Message);
             if (!result.Success)
                 return View(model);
-            return RedirectToAction(nameof(TaxTypes), new { model.ClientId });
+            return RedirectToAction(nameof(TaxTypes));
         }
     }
 }

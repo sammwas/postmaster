@@ -1,83 +1,88 @@
 ﻿@model List<Client>
 @{
-	ViewData["Active"] = "Clients";
-	ViewData["Title"] = "Clients";
+    ViewData["Active"] = "Clients";
+    ViewData["Title"] = "Clients";
 }
 <div>
-	<div class="card">
-		<div class="card-header">
-			<h3 class="card-title">@ViewData["Title"] <span class="text-right"><a asp-action="Edit" asp-route-id=""
-						class="btn btn-sm btn-info">Add New</a></span></h3>
-		</div>
-		<div class="card-body table-responsive">
-			<table id="dataTable" class="table table-bordered table-striped">
-				<thead>
-					<tr>
-						<th>Code</th>
-						<th>Name</th>
-						<th>Email Address</th>
-						<th>Phone Numbers</th>
-						<th>Postal Address</th>
-						<th>Location</th>
-						<th>Password Policy</th>
-						<th>Display Price</th>
-						<th>Country</th>
-						<th>Currency</th>
-						<th>Options</th>
-					</tr>
-				</thead>
-				<tbody>
-					@foreach (var item in Model)
-					{
-						<tr>
-							<td><a asp-controller="ClientInstances" asp-action="All">@item.Code</a></td>
-							<td>@item.Name</td>
-							<td>@item.EmailAddress</td>
-							<td>
-								@item.PrimaryTelephone <span>
-									@if (!string.IsNullOrEmpty(item.SecondaryTelephone))
-									{
-										<span> or @item.SecondaryTelephone</span>
-									}
-								</span>
-							</td>
-							<td>@item.PostalAddress</td>
-							<td>@item.Town</td>
-							<td>@item.EnforcePassword</td>
-							<td>@item.DisplayBuyingPrice</td>
-							<td>@item.CountryShort</td>
-							<td>@item.CurrencyShort</td>
-							<td class="project-actions text-right">
-								<a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-info btn-xs">
-									<i class="fas fa-pencil-alt">
-									</i>
-									Edit
-								</a>
-								@* <a asp-action="ById" asp-route-id="@item.Id" class="btn btn-danger btn-xs">
-									<i class="fas fa-trash">
-									</i>
-									Delete
-									</a> *@
-							</td>
-						</tr>
-					}
-				</tbody>
-				<tfoot>
-					<tr>
-						<th>Code</th>
-						<th>Name</th>
-						<th>Email Address</th>
-						<th>Phone Numbers</th>
-						<th>Postal Address</th>
-						<th>Location</th>
-						<th>Password Policy</th>
-						<th>Display Price</th>
-						<th>Country</th>
-						<th>Currency</th>
-						<th>Options</th>
-					</tr>
-				</tfoot>
-			</table>
-		</div>
-	</div>
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">
+                @ViewData["Title"] <span class="text-right">
+                    <a asp-action="Edit" asp-route-id=""
+                       class="btn btn-sm btn-info">Add New</a>
+                </span>
+            </h3>
+        </div>
+        <div class="card-body table-responsive">
+            <table id="dataTable" class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Name</th>
+                        <th>Email Address</th>
+                        <th>Phone Numbers</th>
+                        <th>Postal Address</th>
+                        <th>Location</th>
+                        <th>Password Policy</th>
+                        <th>Display Price</th>
+                        <th>Country</th>
+                        <th>Currency</th>
+                        <th>Options</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            @*<td><a asp-controller="ClientInstances" asp-action="All">@item.Code</a></td>*@
+                            <td>@item.Code</td>
+                            <td>@item.Name</td>
+                            <td>@item.EmailAddress</td>
+                            <td>
+                                @item.PrimaryTelephone <span>
+                                    @if (!string.IsNullOrEmpty(item.SecondaryTelephone))
+                                    {
+                                        <span> or @item.SecondaryTelephone</span>
+                                    }
+                                </span>
+                            </td>
+                            <td>@item.PostalAddress</td>
+                            <td>@item.Town</td>
+                            <td>@item.EnforcePassword</td>
+                            <td>@item.DisplayBuyingPrice</td>
+                            <td>@item.CountryShort</td>
+                            <td>@item.CurrencyShort</td>
+                            <td class="project-actions text-right">
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-info btn-xs">
+                                    <i class="fas fa-pencil-alt">
+                                    </i>
+                                    Edit
+                                </a>
+                                @* <a asp-action="ById" asp-route-id="@item.Id" class="btn btn-danger btn-xs">
+                                    <i class="fas fa-trash">
+                                    </i>
+                                    Delete
+                                    </a> *@
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th>Code</th>
+                        <th>Name</th>
+                        <th>Email Address</th>
+                        <th>Phone Numbers</th>
+                        <th>Postal Address</th>
+                        <th>Location</th>
+                        <th>Password Policy</th>
+                        <th>Display Price</th>
+                        <th>Country</th>
+                        <th>Currency</th>
+                        <th>Options</th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
 </div>
