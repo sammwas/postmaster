@@ -2,30 +2,30 @@
 @inject ICookiesService _cookies;
 @model List<Receipt>
 @{
-	ViewData["Active"] = "POS";
-	ViewData["Title"] = "Receipts";
-	var userData = _cookies.Read();
-	var instancesRes = User.IsInRole(Role.SuperAdmin) ?
-		await _instanceInterface.AllAsync()
-		: await _instanceInterface.ByClientIdAsync(userData.ClientId);
-	var instances = instancesRes.Data;
-	var instanceId = ViewData["InstanceId"]?.ToString();
-	var dateToday = DateTime.Now.ToString("dd-MMM-yyyy");
+    ViewData["Active"] = "POS";
+    ViewData["Title"] = "Receipts";
+    var userData = _cookies.Read();
+    var instancesRes = User.IsInRole(Role.SuperAdmin) ?
+        await _instanceInterface.AllAsync()
+        : await _instanceInterface.ByClientIdAsync(userData.ClientId);
+    var instances = instancesRes.Data;
+    var instanceId = ViewData["InstanceId"]?.ToString();
+    var dateToday = DateTime.Now.ToString("dd-MMM-yyyy");
 }
 <div>
-	<div class="card">
-		<div class="row">
-			<div class="col-md-8">
-				<div class="card-header">
-					<h3 class="card-title">@ViewData["Title"] <span class="text-right"><a asp-action="Index" class="btn btn-sm btn-info">Add</a></span></h3>
-				</div>
-			</div>
-			<div class="col-md-4">
-				<p class="text-right"><strong>Total Amount: @Model.Sum(r => r.TotalAmount)</strong></p>
-			</div>
-		</div>
-		<div class="card-body">
-			<form autocomplete="off">
+    <div class="card">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card-header">
+                    <h3 class="card-title">@ViewData["Title"] <span class="text-right"><a asp-action="Index" class="btn btn-sm btn-info">Add</a></span></h3>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <p class="text-right"><strong>Total Amount: @Model.Sum(r => r.TotalAmount)</strong></p>
+            </div>
+        </div>
+        <div class="card-body">
+            <form autocomplete="off">
                 <div class="row">
                     <div class="col-md-3">
                         <div class="form-group">
@@ -75,44 +75,47 @@
                         </div>
                     </div>
                 </div>
-			</form>
-			<table id="receiptsdt" class="table table-bordered table-striped" style="width:100%">
-				<thead>
-					<tr>
-						<th></th>
-						<th>Code</th>
-						<th>Date</th>
-						<th>Personnel</th>
-						<th>Amount</th>
-					</tr>
-				</thead>
-				<tbody>
-					@if (Model.Any())
-					{
-						@foreach (var item in Model)
-                        {
-                            var receiptItems = Newtonsoft.Json.JsonConvert.SerializeObject(item.ReceiptLineItems);
-							<tr data-items="@receiptItems">
-								<td class="details-control"></td>
-								<td>@item.Code</td>
-								<td>@item.DateCreated</td>
-								<td>@item.Personnel</td>
-								<td>@item.TotalAmount</td>
-							</tr>
-						}
-
-					}
-				</tbody>
-				<tfoot>
+            </form>
+            <table id="receiptsdt" class="table table-bordered table-striped" style="width:100%">
+                <thead>
                     <tr>
                         <th></th>
                         <th>Code</th>
                         <th>Date</th>
                         <th>Personnel</th>
                         <th>Amount</th>
+                        <th>View</th>
                     </tr>
-				</tfoot>
-			</table>
-		</div>
-	</div>
+                </thead>
+                <tbody>
+                    @if (Model.Any())
+                    {
+                        @foreach (var item in Model)
+                        {
+                            var receiptItems = Newtonsoft.Json.JsonConvert.SerializeObject(item.ReceiptLineItems);
+                            <tr data-items="@receiptItems">
+                                <td class="details-control"></td>
+                                <td>@item.Code</td>
+                                <td>@item.DateCreated</td>
+                                <td>@item.Personnel</td>
+                                <td>@item.TotalAmount</td>
+                                <td><a asp-action="Receipt" asp-route-id="@item.Id">View</a></td>
+                            </tr>
+                        }
+
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th></th>
+                        <th>Code</th>
+                        <th>Date</th>
+                        <th>Personnel</th>
+                        <th>Amount</th>
+                        <th>View</th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
 </div>

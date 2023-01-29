@@ -13,7 +13,6 @@ namespace PosMaster.Dal.Interfaces
     {
         Task<ReturnData<Customer>> GetCustomerAsync();
         Task<ReturnData<Product>> EditAsync(ProductViewModel model);
-        Task<ReturnData<List<Product>>> AllAsync();
         Task<ReturnData<List<Product>>> ByInstanceIdAsync(Guid clientId, Guid? instanceId = null, bool isPos = false, string search = "");
         Task<ReturnData<Product>> ByIdAsync(Guid id);
         Task<ReturnData<Receipt>> ProductsSaleAsync(ProductSaleViewModel model);
@@ -26,6 +25,8 @@ namespace PosMaster.Dal.Interfaces
         Task<ReturnData<List<Product>>> LowStockProductsAsync(Guid? clientId, Guid? instanceId, int limit = 10);
         Task<ReturnData<List<TopSellingProductViewModel>>> TopSellingProductsByVolumeAsync(Guid? clientId, Guid? instanceId, int limit = 10);
         Task<ReturnData<ProductPriceViewModel>> EditPriceAsync(ProductPriceViewModel model);
+        Task<ReturnData<Receipt>> ReceiptByIdAsync(Guid id);
+        Task<ReturnData<string>> PrintReceiptByIdAsync(Guid id, string personnel);
     }
 
     public class ProductImplementation : IProductInterface
@@ -135,34 +136,6 @@ namespace PosMaster.Dal.Interfaces
                 result.Success = true;
                 result.Message = "Adjusted";
                 result.Data = log;
-                return result;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-                result.ErrorMessage = ex.Message;
-                result.Message = "Error occured";
-                _logger.LogError($"{tag} {result.Message} : {ex}");
-                return result;
-            }
-        }
-
-        public async Task<ReturnData<List<Product>>> AllAsync()
-        {
-            var result = new ReturnData<List<Product>> { Data = new List<Product>() };
-            var tag = nameof(AllAsync);
-            _logger.LogInformation($"{tag} get all products");
-            try
-            {
-                var data = await _context.Products
-                    .Include(c => c.ProductCategory)
-                    .OrderByDescending(c => c.DateCreated)
-                    .ToListAsync();
-                result.Success = data.Any();
-                result.Message = result.Success ? "Found" : "Not Found";
-                if (result.Success)
-                    result.Data = data;
-                _logger.LogInformation($"{tag} found {data.Count} products");
                 return result;
             }
             catch (Exception ex)
@@ -356,7 +329,8 @@ namespace PosMaster.Dal.Interfaces
             _logger.LogInformation($"{tag} sell : credit {model.IsCredit} , walkin {model.IsWalkIn}");
             try
             {
-                var customer = await _context.Customers.FirstOrDefaultAsync(c => c.Id.Equals(Guid.Parse(model.CustomerId)));
+                var customer = await _context.Customers
+                    .FirstOrDefaultAsync(c => c.Id.Equals(Guid.Parse(model.CustomerId)));
                 var lineItems = string.IsNullOrEmpty(model.LineItemListStr) ?
                     new List<ReceiptLineItemMiniViewModel>()
                     : JsonConvert.DeserializeObject<List<ReceiptLineItemMiniViewModel>>(model.LineItemListStr);
@@ -392,7 +366,7 @@ namespace PosMaster.Dal.Interfaces
                     ClientId = model.ClientId,
                     InstanceId = model.InstanceId,
                     PaymentMode = model.PaymentMode,
-                    KRAPin = model.KraPin,
+                    KRAPin = model.ExternalRef,
                     IsCredit = model.IsCredit,
                     IsWalkIn = model.IsWalkIn,
                     Notes = model.Notes,
@@ -573,6 +547,36 @@ namespace PosMaster.Dal.Interfaces
                 if (result.Success)
                     result.Data = data;
                 _logger.LogInformation($"{tag} found {data.Count} receipts");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                result.ErrorMessage = ex.Message;
+                result.Message = "Error occured";
+                _logger.LogError($"{tag} {result.Message} : {ex}");
+                return result;
+            }
+        }
+
+        public async Task<ReturnData<Receipt>> ReceiptByIdAsync(Guid id)
+        {
+            var result = new ReturnData<Receipt> { Data = new Receipt() };
+            var tag = nameof(ReceiptByIdAsync);
+            _logger.LogInformation($"{tag} get receipt by id : {id}");
+            try
+            {
+                var data = await _context.Receipts
+                    .Include(r => r.ReceiptLineItems)
+                    .ThenInclude(r => r.Product)
+                    .ThenInclude(r => r.ProductCategory)
+                    .Include(r => r.Customer)
+                    .FirstOrDefaultAsync(i => i.Id.Equals(id));
+                result.Success = data != null;
+                result.Message = result.Success ? "Found" : "Not Found";
+                if (result.Success)
+                    result.Data = data;
+                _logger.LogInformation($"{tag} {id} {result.Message}");
                 return result;
             }
             catch (Exception ex)
@@ -835,6 +839,38 @@ namespace PosMaster.Dal.Interfaces
                 result.Message = "Updated";
 
                 _logger.LogInformation($"{tag} updated {model.Id} : {result.Message}");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                result.ErrorMessage = ex.Message;
+                result.Message = "Error occured";
+                _logger.LogError($"{tag} {result.Message} : {ex}");
+                return result;
+            }
+        }
+
+        public async Task<ReturnData<string>> PrintReceiptByIdAsync(Guid id, string personnel)
+        {
+            var tag = nameof(PrintReceiptByIdAsync);
+            _logger.LogInformation($"{tag} print original receipt {id} by {personnel}");
+            var result = new ReturnData<string> { Data = "" };
+            try
+            {
+                var receipt = await _context.Receipts
+                    .FirstOrDefaultAsync(r => r.Id.Equals(id));
+                if (receipt == null)
+                {
+                    result.Message = "Not Found";
+                    return result;
+                }
+                receipt.IsPrinted = true;
+                receipt.LastModifiedBy = personnel;
+                receipt.DateLastModified = DateTime.Now;
+                await _context.SaveChangesAsync();
+                result.Message = "Updated";
+                result.Success = true;
                 return result;
             }
             catch (Exception ex)

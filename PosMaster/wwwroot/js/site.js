@@ -29,7 +29,7 @@ $('#issBtnAdd').click(function (event) {
 })
 
 var addItemToList = function () {
-     item = $('#product-select').select2('data')[0];
+    item = $('#product-select').select2('data')[0];
     var productId = item.id;
     var itemName = item.text;
     var quantity = $("#quantityBought").val();
@@ -212,7 +212,7 @@ $('#customer-select').select2({
         dataType: 'json',
         delay: 250,
         url: function (params) {
-            return '/Customers/Search?term=' + params.term ;
+            return '/Customers/Search?term=' + params.term;
         },
         processResults: function (data, params) {
             return {
@@ -390,7 +390,7 @@ function plotDoughnut(labels, data) {
 $('#credit-sale').change(function () {
     if (this.checked) {
         $('#payment-mode').hide();
-    } else { 
+    } else {
         $('#payment-mode').show();
     }
 });
@@ -399,7 +399,7 @@ $('#credit-sale').change(function () {
 $('#is-service').change(function () {
     if (this.checked) {
         $('#product-related').hide();
-    } else { 
+    } else {
         $('#product-related').show();
     }
 });
@@ -407,8 +407,8 @@ $('#is-service').change(function () {
 
 $("#item-price-select").change(function () {
     var instanceId = $(this).val();
-     $.get(`/Products/GetInstanceProducts/${instanceId}`).done(function (data) {
-         if (data) {
+    $.get(`/Products/GetInstanceProducts/${instanceId}`).done(function (data) {
+        if (data) {
             var items = data.data;
             var select = $("#items-price-dropdown").empty()
                 .append($('<option>').text("-- Please select --").attr('value', ""));;
@@ -425,21 +425,23 @@ $("#item-price-select").change(function () {
         }
     });
 })
+
 removeGradingSchemeRow = function (id) {
     document.getElementById("tr_" + id).remove();
 };
+
 $('#product-select').select2({
     ajax: {
         dataType: 'json',
         delay: 250,
         url: function (params) {
-            return '/Products/Search?Id=' + $("#instanceId").val() +'&term='+ params.term;
+            return '/Products/Search?Id=' + $("#instanceId").val() + '&term=' + params.term;
         },
         processResults: function (data, params) {
             return {
-                results: $.map(data.data, function (item) { 
+                results: $.map(data.data, function (item) {
                     return {
-                        text: item.code + ' - ' + item.name+' ('+item.availableQuantity+' '+item.unitOfMeasure+' )',
+                        text: item.code + ' - ' + item.name + ' (' + item.availableQuantity + ' ' + item.unitOfMeasure + ' )',
                         quantity: item.availableQuantity,
                         sellingPrice: item.sellingPrice,
                         id: item.id
@@ -452,4 +454,28 @@ $('#product-select').select2({
 
     placeholder: 'Search by product code or name',
     minimumInputLength: 1
+});
+
+var printDiv = function (divName) {
+    var printContents = document.getElementById(divName).innerHTML;
+    document.body.innerHTML = printContents;
+    window.print();
+    location.reload();
+};
+
+$("#btnPrint").click(function () {
+    printDiv('printDiv');
+});
+
+$("#btnPrintReceipt").click(function () {
+    var isPrinted = $(this).attr("data-printed");
+    var id = $(this).attr("data-id");
+    if (isPrinted == 'False') {
+        $.get("/PointOfSale/PrintReceipt/" + id, function (data) {
+            printDiv('printReceiptDiv');
+        });
+    }
+    else {
+        printDiv('printReceiptDiv');
+    }
 });

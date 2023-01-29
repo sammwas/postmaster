@@ -25,21 +25,6 @@ namespace PosMaster.Controllers
         }
         public async Task<IActionResult> Index()
         {
-            if (User.IsInRole(Role.SuperAdmin))
-            {
-                var result = await _productInterface.AllAsync();
-                if (!result.Success)
-                    TempData.SetData(AlertLevel.Warning, "Products", result.Message);
-                return View(result.Data);
-            }
-            if (User.IsInRole(Role.Manager) || User.IsInRole(Role.Admin))
-            {
-                var result = await _productInterface.ByInstanceIdAsync(_userData.ClientId, (Guid?)null);
-                if (!result.Success)
-                    TempData.SetData(AlertLevel.Warning, "Products", result.Message);
-                return View(result.Data);
-            }
-
             if (User.IsInRole(Role.Clerk))
             {
                 var result = await _productInterface.ByInstanceIdAsync(_userData.ClientId, _userData.InstanceId);
@@ -47,7 +32,10 @@ namespace PosMaster.Controllers
                     TempData.SetData(AlertLevel.Warning, "Products", result.Message);
                 return View(result.Data);
             }
-            return View(new List<Product>());
+            var resultAll = await _productInterface.ByInstanceIdAsync(_userData.ClientId, (Guid?)null);
+            if (!resultAll.Success)
+                TempData.SetData(AlertLevel.Warning, "Products", resultAll.Message);
+            return View(resultAll.Data);
         }
         public async Task<IActionResult> Edit(Guid? id)
         {
