@@ -13,6 +13,7 @@ namespace PosMaster.Dal.Interfaces
         Task<ReturnData<List<ProductCategory>>> ProductCategoriesAsync(Guid clientId);
         Task<ReturnData<ProductCategory>> EditProductCategoryAsync(ProductCategoryViewModel model);
         Task<ReturnData<ProductCategory>> ByIdProductCategoryAsync(Guid id);
+        Task<ReturnData<ProductCategory>> ByNameProductCategoryAsync(Guid clientId, Guid instanceId, string categoryName);
         Task<ReturnData<List<UnitOfMeasure>>> UnitOfMeasuresAsync(Guid clientId);
         Task<ReturnData<UnitOfMeasure>> EditUnitOfMeasureAsync(UnitOfMeasureViewModel model);
         Task<ReturnData<UnitOfMeasure>> ByIdUnitOfMeasureAsync(Guid id);
@@ -25,6 +26,7 @@ namespace PosMaster.Dal.Interfaces
         Task<ReturnData<List<TaxType>>> TaxTypesAsync(Guid clientId);
         Task<ReturnData<TaxType>> EditTaxTypesAsync(TaxTypeViewModel model);
         Task<ReturnData<TaxType>> ByIdTaxTypeAsync(Guid id);
+        Task<ReturnData<TaxType>> ByRateTaxTypeAsync(Guid clientId, Guid instanceId, decimal taxRate);
     }
 
     public class MasterDataImplementation : IMasterDataInterface
@@ -149,6 +151,104 @@ namespace PosMaster.Dal.Interfaces
                 if (result.Success)
                     result.Data = data;
                 _logger.LogInformation($"{tag} UnitOfMeasure {id} {result.Message}");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                result.ErrorMessage = ex.Message;
+                result.Message = "Error occured";
+                _logger.LogError($"{tag} {result.Message} : {ex}");
+                return result;
+            }
+        }
+
+        public async Task<ReturnData<ProductCategory>> ByNameProductCategoryAsync(Guid clientId, Guid instanceId, string categoryName)
+        {
+            var result = new ReturnData<ProductCategory> { Data = new ProductCategory() };
+            var tag = nameof(ByNameProductCategoryAsync);
+            _logger.LogInformation($"{tag} get product category for {clientId} by name {categoryName}");
+            try
+            {
+                if (string.IsNullOrWhiteSpace(categoryName))
+                {
+                    var category = await _context.ProductCategories
+                        .Where(c => c.ClientId.Equals(clientId)).FirstAsync();
+                    result.Success = true;
+                    result.Message = "Default found";
+                    result.Data = category;
+                    _logger.LogInformation($"{tag} default category for client {clientId} {result.Message}");
+                    return result;
+                }
+                categoryName = categoryName.ToLower();
+                var dbCategory = await _context.ProductCategories
+                    .FirstOrDefaultAsync(c => c.ClientId.Equals(clientId) && c.Name.ToLower().Equals(categoryName));
+                if (dbCategory != null)
+                {
+
+                    result.Success = true;
+                    result.Message = "Found";
+                    result.Data = dbCategory;
+                    return result;
+                }
+                var productCategory = new ProductCategory
+                {
+                    Code = $"{categoryName}",
+                    Id = Guid.NewGuid(),
+                    ClientId = clientId,
+                    Name = categoryName.ToUpper(),
+                    InstanceId = instanceId,
+                    Status = EntityStatus.Active
+                };
+                _context.ProductCategories.Add(productCategory);
+                await _context.SaveChangesAsync();
+                result.Success = true;
+                result.Message = "Added";
+                result.Data = productCategory;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                result.ErrorMessage = ex.Message;
+                result.Message = "Error occured";
+                _logger.LogError($"{tag} {result.Message} : {ex}");
+                return result;
+            }
+        }
+
+        public async Task<ReturnData<TaxType>> ByRateTaxTypeAsync(Guid clientId, Guid instanceId, decimal taxRate)
+        {
+            var result = new ReturnData<TaxType> { Data = new TaxType() };
+            var tag = nameof(ByRateTaxTypeAsync);
+            _logger.LogInformation($"{tag} get taxt type for {clientId} for {taxRate}");
+            try
+            {
+                var dbType = await _context.TaxTypes
+                    .FirstOrDefaultAsync(c => c.ClientId.Equals(clientId) && c.Rate.Equals(taxRate));
+                if (dbType != null)
+                {
+
+                    result.Success = true;
+                    result.Message = "Found";
+                    result.Data = dbType;
+                    return result;
+                }
+                var taxType = new TaxType
+                {
+                    Code = $"TAX-{taxRate}",
+                    Id = Guid.NewGuid(),
+                    ClientId = clientId,
+                    Name = taxRate.Equals(0) ? "NONE" : $"{taxRate * 100}% TAX",
+                    InstanceId = instanceId,
+                    Status = EntityStatus.Active,
+                    Rate = taxRate,
+                };
+                _context.TaxTypes.Add(taxType);
+                await _context.SaveChangesAsync();
+                result.Success = true;
+                result.Message = "Added";
+                result.Data = taxType;
                 return result;
             }
             catch (Exception ex)

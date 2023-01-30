@@ -1,0 +1,110 @@
+﻿@inject IClientInstanceInterface _instanceInterface;
+@inject ICookiesService _cookies;
+@model UploadExcelViewModel
+@{
+    ViewData["Active"] = "Products";
+    var title = $"Upload Excel";
+    ViewData["Title"] = title;
+    var userData = _cookies.Read();
+    var instancesRes = await _instanceInterface.ByClientIdAsync(userData.ClientId);
+    var instances = instancesRes.Data;
+}
+<div class="card card-primary">
+    <div class="card-header">
+        <h3 class="card-title">@ViewData["Title"]</h3>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-12">
+                        Upload products via Excel.
+                    </div>
+                    <hr />
+                    <div class="col-12">
+                        Select the instance to upload products to.
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    @if (Model.Result.Any())
+                    {
+                        <table id="dataTable" class="table table-stripped">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Success</th>
+                                    <th>Message</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    var i = 0;
+                                }
+                                @foreach (var item in Model.Result)
+                                {
+                                    i++;
+                                    <tr>
+                                        <td>@i</td>
+                                        <td>@item.Id</td>
+                                        <td>@item.Text</td>
+                                    </tr>
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Success</th>
+                                    <th>Message</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    }
+                </div>
+            </div>
+            <div class="card-footer">
+                <a asp-action="DownloadTemplate" class="btn btn-secondary">Download template</a>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h4>File</h4>
+                    <div class="">
+                        <div>
+                            <form role="form" method="post" autocomplete="off" enctype="multipart/form-data">
+                                <div class="">
+                                    <div class="form-group">
+                                        <label asp-for="InstanceIdStr"></label>
+                                        <select class="form-control select2" asp-for="InstanceIdStr" style="width: 100%;">
+                                            <option value="">--Select Instance--</option>
+                                            @foreach (var item in instances)
+                                            {
+                                                <option value="@item.Id" title="@item.Notes">
+                                                    @item.Code - @item.Name (@item.Client.Code -
+                                                    @item.Client.Name)
+                                                </option>
+                                            }
+                                        </select>
+                                        <span asp-validation-for="InstanceIdStr" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="userInputFile">File</label>
+                                    <div class="input-group">
+                                        <div class="custom-file">
+                                            <input type="file" required class="custom-file-input" accept="@Constants.XlsxContentType" asp-for="File" id="userInputFile">
+                                            <label class="custom-file-label" for="userInputFile">Choose file</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="">
+                                    <button type="submit" class="input-group-text bg-primary">Upload</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

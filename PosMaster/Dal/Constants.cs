@@ -7,5 +7,6 @@
         public static string SuperAdminPassword = "Password.123#";
         public static string SystemEmailAddress = "support@posmaster.co.ke";
         public static string DefaultPaymentMode = "CASH";
+        public const string XlsxContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
     }
 }

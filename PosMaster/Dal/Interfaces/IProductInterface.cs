@@ -11,7 +11,6 @@ namespace PosMaster.Dal.Interfaces
 {
     public interface IProductInterface
     {
-        Task<ReturnData<Customer>> GetCustomerAsync();
         Task<ReturnData<Product>> EditAsync(ProductViewModel model);
         Task<ReturnData<List<Product>>> ByInstanceIdAsync(Guid clientId, Guid? instanceId = null, bool isPos = false, string search = "");
         Task<ReturnData<Product>> ByIdAsync(Guid id);
@@ -309,19 +308,7 @@ namespace PosMaster.Dal.Interfaces
             }
         }
 
-        public async Task<ReturnData<Customer>> GetCustomerAsync()
-        {
-            var customer = await _context.Customers.FirstAsync();
-            var result = new ReturnData<Customer>
-            {
-                Success = customer != null,
-                Data = customer,
-                Message = "Customer found"
-            };
-
-            return result;
-        }
-
+    
         public async Task<ReturnData<Receipt>> ProductsSaleAsync(ProductSaleViewModel model)
         {
             var result = new ReturnData<Receipt> { Data = new Receipt() };

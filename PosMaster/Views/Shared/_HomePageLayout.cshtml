@@ -29,11 +29,11 @@
             @if (!_signInManager.IsSignedIn(User))
             {
                 <a asp-controller="Home" asp-action="Login" asp-route-returnUrl="@ViewData["ReturnUrl"]"
-               class="btn btn-primary">Log In</a>
+               class="btn btn-primary"><i class="icon-login icons"></i> Login to system </a>
             }
             else
             {
-                <a asp-controller="Home" asp-action="Logout" class="btn btn-secondary">Log out</a>
+                <a asp-controller="Home" asp-action="Logout" class="btn btn-secondary"><i class="icon-logout icons"></i> Log out now</a>
             }
         </div>
     </nav>

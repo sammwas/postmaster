@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using OfficeOpenXml;
 using PosMaster.Dal;
 using PosMaster.Dal.Interfaces;
 using PosMaster.Extensions;
@@ -7,6 +9,8 @@ using PosMaster.Services;
 using PosMaster.ViewModels;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace PosMaster.Controllers
@@ -17,11 +21,18 @@ namespace PosMaster.Controllers
         private readonly IProductInterface _productInterface;
         private readonly UserCookieData _userData;
         private readonly FileUploadService _fileUploadService;
-        public ProductsController(IProductInterface productInterface, ICookiesService cookiesService, FileUploadService fileUploadService)
+        private readonly string xlsxContentType = Constants.XlsxContentType;
+        private readonly IWebHostEnvironment _hostingEnvironment;
+        private readonly IMasterDataInterface _masterDataInterface;
+
+        public ProductsController(IProductInterface productInterface, ICookiesService cookiesService,
+            FileUploadService fileUploadService, IWebHostEnvironment hostingEnvironment, IMasterDataInterface masterDataInterface)
         {
             _productInterface = productInterface;
             _fileUploadService = fileUploadService;
             _userData = cookiesService.Read();
+            _hostingEnvironment = hostingEnvironment;
+            _masterDataInterface = masterDataInterface;
         }
         public async Task<IActionResult> Index()
         {
@@ -191,6 +202,7 @@ namespace PosMaster.Controllers
             data.ProductPriceMiniViewModels = products;
             return View(data);
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ProductPrice(ProductPriceViewModel model)
@@ -208,12 +220,155 @@ namespace PosMaster.Controllers
                 return RedirectToAction(nameof(ProductPrice), new { instId = result.Data.InstanceId.ToString() });
             return View(model);
         }
-        public async Task<JsonResult> Search(Guid id, string term = "")
+
+        public async Task<JsonResult> Search(string term = "")
         {
             var products = User.IsInRole(Role.Clerk) ?
                     await _productInterface.ByInstanceIdAsync(_userData.ClientId, _userData.InstanceId, true, term) :
                     await _productInterface.ByInstanceIdAsync(_userData.ClientId, (Guid?)null, true, term);
             return Json(products);
+        }
+
+        public IActionResult UploadExcel()
+        {
+            return View(new UploadExcelViewModel());
+        }
+
+        public FileContentResult DownloadTemplate()
+        {
+            try
+            {
+                var title = "Products_Upload_Template";
+                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                var package = new ExcelPackage();
+                package.Workbook.Properties.Title = title;
+                package.Workbook.Properties.Company = _userData.ClientName;
+                package.Workbook.Properties.Author = "cassignpro@gmail.com";
+                package.Workbook.Properties.Subject = "Products Upload Template";
+
+                var headers = new List<string>
+                {
+                    "Code", "Product name", "Allow discount", "Tax rate (0.16)","Service",
+                    "Product category","Unit of measure", "Reorder level"
+                };
+
+
+                var worksheet = package.Workbook.Worksheets.Add(title);
+                const int cols = 1;
+                var index = 1;
+                foreach (var e in headers)
+                {
+                    worksheet.Cells[cols, index].Style.Font.Bold = true;
+                    worksheet.Cells[cols, index].Value = e;
+                    index++;
+                }
+                var date = DateTime.Now.ToString("dd-MMM-yyyy");
+                var unique = Guid.NewGuid().ToString("").Substring(0, 8).ToUpper();
+                var excelName = $"{title}-{unique}-{date}";
+                return File(package.GetAsByteArray(), xlsxContentType, excelName + ".xlsx");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return null;
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UploadExcel(UploadExcelViewModel model)
+        {
+            var tag = "Upload excel";
+            try
+            {
+                var fileExtension = Path.GetExtension(model.File.FileName);
+                var exts = new List<string> { ".xls", ".xlsx" };
+                if (!exts.Contains(fileExtension))
+                {
+                    var fErr = $"Allowed formats {string.Join(", ", exts)}";
+                    TempData.SetData(AlertLevel.Warning, tag, fErr);
+                    ModelState.AddModelError("File", fErr);
+                    return View(model);
+                }
+
+                var personnel = User.Identity.Name;
+                var rootFolder = Path.Combine(_hostingEnvironment.WebRootPath, "uploads", $"{_userData.ClientId}");
+                var fileName = $"temp_{_userData.UserId}_upload{fileExtension}";
+                var filePath = Path.Combine(rootFolder, fileName);
+                if (System.IO.File.Exists(filePath))
+                {
+                    Console.WriteLine($"Delete exisiting File at {filePath}");
+                    System.IO.File.Delete(filePath);
+                    Console.WriteLine("Deleted");
+                }
+                var fileLocation = new FileInfo(filePath);
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await model.File.CopyToAsync(fileStream);
+                }
+                var added = 0;
+                var totalRows = 0;
+                var prog = 1;
+                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                using (var package = new ExcelPackage(fileLocation))
+                {
+                    var workSheet = package.Workbook.Worksheets.First();
+                    totalRows = workSheet.Dimension.Rows;
+                    for (int i = 2; i <= totalRows; i++)
+                    {
+
+                        var discount = workSheet.Cells[i, 3]?.Value?.ToString() ?? "";
+                        var tax = workSheet.Cells[i, 4]?.Value?.ToString() ?? "";
+                        var hasRate = decimal.TryParse(tax, out var rate);
+                        var taxRes = await _masterDataInterface
+                            .ByRateTaxTypeAsync(_userData.ClientId, _userData.InstanceId, hasRate ? rate : 0);
+                        var service = workSheet.Cells[i, 5]?.Value?.ToString() ?? "";
+                        var category = workSheet.Cells[i, 6]?.Value?.ToString() ?? "";
+                        var categoryRes = await _masterDataInterface
+                            .ByNameProductCategoryAsync(_userData.ClientId, _userData.InstanceId, category);
+                        var level = workSheet.Cells[i, 8]?.Value?.ToString() ?? "";
+                        var uom = workSheet.Cells[i, 7]?.Value?.ToString() ?? "";
+                        var productViewModel = new ProductViewModel
+                        {
+                            Code = workSheet.Cells[i, 1]?.Value?.ToString() ?? "",
+                            Name = workSheet.Cells[i, 2]?.Value?.ToString() ?? "",
+                            AllowDiscount = discount.ToLower().Equals("yes"),
+                            IsService = service.ToLower().Equals("yes"),
+                            UnitOfMeasure = uom.ToUpper(),
+                            ReorderLevel = string.IsNullOrEmpty(level) ? 0 : decimal.Parse(level),
+                            ProductCategoryId = categoryRes.Data.Id.ToString(),
+                            InstanceId = Guid.Parse(model.InstanceIdStr),
+                            InstanceIdStr = model.InstanceIdStr,
+                            ClientId = _userData.ClientId,
+                            TaxTypeId = taxRes.Data.Id.ToString()
+                        };
+
+                        var result = await _productInterface.EditAsync(productViewModel);
+                        var _msg = $"Processing {prog} of {totalRows} ... {result.Message}";
+                        var percentage = decimal.Divide(prog, totalRows) * 100;
+                        model.Result.Add(new FormSelectViewModel
+                        {
+                            Id = result.Success.ToString(),
+                            Text = $"{productViewModel.Code} - {result.Message}"
+                        });
+                        if (result.Success)
+                            added++;
+                        prog++;
+                    }
+
+                }
+                totalRows--;
+                System.IO.File.Delete(filePath);
+                var msg = $"Uploaded {added} out of {totalRows}";
+                TempData.SetData(added.Equals(totalRows) ? AlertLevel.Success : AlertLevel.Warning, tag, msg);
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                TempData.SetData(AlertLevel.Error, tag, "Error occured. Try later");
+                return View(model);
+            }
         }
     }
 }
