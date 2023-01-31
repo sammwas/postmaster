@@ -182,6 +182,7 @@ namespace PosMaster.Dal.Interfaces
             {
                 var dataQry = _context.Products
                     .Include(c => c.ProductCategory)
+                    .Include(p => p.TaxType)
                     .Where(c => c.ClientId.Equals(clientId))
                     .AsQueryable();
                 if (instanceId != null)

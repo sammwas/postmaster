@@ -26,6 +26,7 @@
 						<th>Category</th>
 						<th>Reorder</th>
 						<th>Unit</th>
+						<th>Tax</th>
 						<th>Status</th>
 						<th>Options</th>
 					</tr>
@@ -33,12 +34,14 @@
 				<tbody>
 					@foreach (var item in Model)
 					{
+						var tax=item.TaxType==null?"--":item.TaxType.Name;
 						<tr>
 							<td>@item.Code</td>
 							<td>@item.Name</td>
 							<td>@item.ProductCategory.Name</td>
 							<td>@item.ReorderLevel</td>
 							<td>@item.UnitOfMeasure</td>
+							<td>@tax</td>
 							<td>@item.Status.ToString()</td>
 							<td class="project-actions text-right">
 								@if (!User.IsInRole(Role.Clerk))
@@ -65,6 +68,7 @@
 						<th>Category</th>
 						<th>Reorder</th>
 						<th>Unit</th>
+						<th>Tax</th>
 						<th>Status</th>
 						<th>Options</th>
 					</tr>
