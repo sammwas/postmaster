@@ -17,7 +17,7 @@ $('#selectedProductItem').change(function () {
 let sellingPrice;
 $("#product-select").change(function () {
     sellingPrice = $(this).select2('data')[0].sellingPrice;
-    $('#sellingPrice').val(sellingPrice)
+    $('#unitPrice').val(sellingPrice)
     $("#quantityBought").focus();
 });
 var item = {};
@@ -33,11 +33,12 @@ var addItemToList = function () {
     var productId = item.id;
     var itemName = item.text;
     var quantity = $("#quantityBought").val();
-    var unitPrice = item.sellingPrice;
+    var unitPrice = $("#unitPrice").val();
+    var sellingPrice = item.sellingPrice;;
     var avQuantity = item.availableQuantity;
     quantity = parseFloat(quantity)
     avQuantity = parseFloat(avQuantity)
-    var discount = 0;
+    var discount = sellingPrice - unitPrice;
     var taxAmount = 0;
     if (productId === "") {
         $("#issMsg").text("select an item first").addClass('text-danger');
@@ -75,10 +76,12 @@ var createIssueListTable = function () {
     $("#IssueListTable").html("");
     var tr = "";
     var total = 0;
+    var discount = 0;
     var index = 0;
     $.each(issueListItems, function () {
         var trTotal = this.quantity * this.unitPrice;
         total += trTotal;
+        discount += this.discount
         tr += '<tr><td>' + this.itemName + '</td><td>' + this.quantity + '</td><td>' + this.unitPrice + '</td><td>' + trTotal + '</td>'
             + '<td><button class="btn btn-danger btn-sm" onclick="removeListItem(' + index + ')">Remove</button> </td > </tr > ';
         index++;
@@ -87,6 +90,7 @@ var createIssueListTable = function () {
     issueListItems.length > 0 ? $("#btnSumbitIss").prop("disabled", false) : $("#btnSumbitIss").prop("disabled", true);
     $("#IssueListTable").html(tr);
     $("#issTotal").text(total.toLocaleString());
+    $("#issDiscount").text(discount.toLocaleString());
 };
 
 var list = $("#issListRecords").val();

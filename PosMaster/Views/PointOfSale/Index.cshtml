@@ -36,27 +36,31 @@
                                 <div class="form-group">
                                     <label>Quantity</label>
                                     <input class="form-control numbers-only" value="" id="quantityBought"
-                                        placeholder="0.00">
+                                           placeholder="0.00">
                                     <span class="text-danger" id="quantity-validate"></span>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Selling Price</label>
-                                    <input class="form-control numbers-only" id="sellingPrice" placeholder="0.00">
+                                    <input class="form-control numbers-only" id="unitPrice" placeholder="0.00">
+                                    <input class="form-control" type="hidden" id="sellingPrice" placeholder="0.00">
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-6">
-                            <br />
                             <p id="issMsg"></p>
                         </div>
                     </div>
                     <div class="card-footer">
-                        <span class="text-right"><button type="submit" class="btn btn-primary"
-                                id="issBtnAdd">Add</button></span>
+                        <span class="text-right">
+                            <button type="submit" class="btn btn-primary btn-sm"
+                                    id="issBtnAdd">
+                                Add to Receipt
+                            </button>
+                        </span>
                     </div>
                 </form>
             </div>
@@ -86,7 +90,9 @@
                     </tfoot>
                 </table>
                 <p>
-                    <strong>Total Value : <span id="issTotal">0</span> </strong>
+                    <strong>Discount : <span id="issDiscount">0</span> </strong>&nbsp;
+                    <strong>Tax : <span id="issTax">0</span> </strong>&nbsp;
+                    <strong>Total  : <span id="issTotal">0</span> </strong>
                 </p>
                 <br />
                 <form method="post" autocomplete="off">
@@ -101,7 +107,7 @@
                             <div class="form-group">
                                 <label asp-for="CustomerId"></label>
                                 <select asp-for="CustomerId" class="form-control select2" style="width: 50%;"
-                                    id="customer-select">
+                                        id="customer-select">
                                     <option value="@walkIn.Data.Id">@walkIn.Data.Text</option>
                                 </select>
                                 <span asp-validation-for="CustomerId" class="text-danger"></span>
@@ -114,7 +120,7 @@
                                 <div class="form-group">
                                     <label>Payment Mode</label>
                                     <select asp-for="PaymentMode" class="form-control select2" style="width: 100%;"
-                                        id="paymentMode">
+                                            id="paymentMode">
                                         <option value="">--Select Payment Mode--</option>
                                         @foreach (var item in paymentModes.Data)
                                         {
@@ -128,8 +134,8 @@
                         <div class="col-md-4">
                             <div class="form-group" id="refNo">
                                 <label>KRA Pin</label>
-                                <input asp-for="ExternalRef" class="form-control" id="refNoVal" placeholder="Ref No">
-                                <span asp-validation-for="ExternalRef" class="text-danger"></span>
+                                <input asp-for="KraPin" class="form-control" id="refNoVal" placeholder="Ref No">
+                                <span asp-validation-for="KraPin" class="text-danger"></span>
                             </div>
                         </div>
                     </div>
@@ -137,8 +143,10 @@
                     <input asp-for="Code" type="hidden" value="@userData.InstanceCode" />
                     <input asp-for="InstanceId" id="instanceId" type="hidden" value="@userData.InstanceId" />
                     <input asp-for="ClientId" type="hidden" value="@userData.ClientId" />
-                    <button disabled class="btn btn-primary" type="submit" id="btnSumbitIss"><i class="fa fa-save"></i>
-                        Submit</button>
+                    <button disabled class="btn btn-primary" type="submit" id="btnSumbitIss">
+                        <i class="fa fa-save"></i>
+                        Submit
+                    </button>
                 </form>
             </div>
         </div>

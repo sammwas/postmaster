@@ -224,6 +224,7 @@ namespace PosMaster.Dal.Interfaces
             _logger.LogInformation($"{tag} edit product");
             try
             {
+                var hasTaxTypeId = Guid.TryParse(model.TaxTypeId, out var taxTypeId);
                 if (model.IsEditMode)
                 {
                     var dbProduct = await _context.Products
@@ -261,6 +262,7 @@ namespace PosMaster.Dal.Interfaces
                     dbProduct.DateLastModified = DateTime.Now;
                     dbProduct.Notes = model.Notes;
                     dbProduct.Status = model.Status;
+                    dbProduct.TaxTypeId = hasTaxTypeId ? taxTypeId : (Guid?)null;
                     if (model.IsNewImage)
                         dbProduct.ImagePath = model.ImagePath;
 
@@ -288,7 +290,8 @@ namespace PosMaster.Dal.Interfaces
                     InstanceId = model.InstanceId,
                     Personnel = model.Personnel,
                     Status = model.Status,
-                    ImagePath = model.ImagePath
+                    ImagePath = model.ImagePath,
+                    TaxTypeId = hasTaxTypeId ? taxTypeId : (Guid?)null
                 };
                 _context.Products.Add(product);
                 await _context.SaveChangesAsync();
@@ -308,7 +311,7 @@ namespace PosMaster.Dal.Interfaces
             }
         }
 
-    
+
         public async Task<ReturnData<Receipt>> ProductsSaleAsync(ProductSaleViewModel model)
         {
             var result = new ReturnData<Receipt> { Data = new Receipt() };
@@ -347,13 +350,12 @@ namespace PosMaster.Dal.Interfaces
                 {
                     Id = Guid.NewGuid(),
                     Code = rcptRef,
-                    Discount = model.Discount,
                     Customer = customer,
                     CustomerId = customer.Id,
                     ClientId = model.ClientId,
                     InstanceId = model.InstanceId,
                     PaymentMode = model.PaymentMode,
-                    KRAPin = model.ExternalRef,
+                    KraPin = string.IsNullOrEmpty(model.KraPin) ? customer.KraPin : model.KraPin,
                     IsCredit = model.IsCredit,
                     IsWalkIn = model.IsWalkIn,
                     Notes = model.Notes,
@@ -364,7 +366,9 @@ namespace PosMaster.Dal.Interfaces
                 foreach (var item in lineItems)
                 {
                     i++;
-                    var product = await _context.Products.FirstOrDefaultAsync(p => p.Id.Equals(item.ProductId));
+                    var product = await _context.Products
+                        .Include(p => p.TaxType)
+                        .FirstOrDefaultAsync(p => p.Id.Equals(item.ProductId));
                     if (product == null)
                     {
                         result.Message = "Provided product not Found";
@@ -387,7 +391,6 @@ namespace PosMaster.Dal.Interfaces
                         SellingPrice = product.SellingPrice,
                         UnitPrice = item.UnitPrice,
                         Quantity = item.Quantity,
-                        Discount = item.Discount,
                         Personnel = receipt.Personnel,
                         ClientId = product.ClientId,
                         InstanceId = product.InstanceId,

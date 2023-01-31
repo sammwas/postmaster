@@ -2,12 +2,10 @@
 
 namespace PosMaster.ViewModels
 {
-	public class ReceiptLineItemMiniViewModel
-	{
-		public Guid ProductId { get; set; }
-		public decimal Quantity { get; set; }
-		public decimal UnitPrice { get; set; }
-		public decimal Discount { get; set; }
-		public decimal TaxAmount { get; set; }
-	}
+    public class ReceiptLineItemMiniViewModel
+    {
+        public Guid ProductId { get; set; }
+        public decimal Quantity { get; set; }
+        public decimal UnitPrice { get; set; }
+    }
 }
