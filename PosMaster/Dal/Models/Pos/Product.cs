@@ -14,7 +14,7 @@ namespace PosMaster.Dal
         public decimal ReorderLevel { get; set; }
         public decimal AvailableQuantity { get; set; }
         public string UnitOfMeasure { get; set; }
-        public decimal TaxRate { get; set; }
+        public decimal TaxRate => TaxType == null ? 0 : TaxType.Rate;
         public DateTime PriceStartDate { get; set; }
         public DateTime? PriceEndDate { get; set; }
         public bool IsService { get; set; }

@@ -1,66 +1,69 @@
 ﻿@model List<Customer>
 @{
-	ViewData["Active"] = "Customers";
-	ViewData["Title"] = "Customers";
+    ViewData["Active"] = "Customers";
+    ViewData["Title"] = "Customers";
 }
 <div>
-	<div class="card">
-		<div class="card-header">
-			<h3 class="card-title">@ViewData["Title"] <span class="text-right"><a asp-action="Edit" asp-route-id="" class="btn btn-sm btn-info">Add New</a></span></h3>
-		</div>
-		<div class="card-body">
-			<table id="dataTable" class="table table-bordered table-striped">
-				<thead>
-					<tr>
-						<th>Code</th>
-						<th>Name</th>
-						<th>Phone Number</th>
-						<th>Email</th>
-						<th>Gender</th>
-						<th>Town</th>
-						<th>Limit</th>
-						<th>Options</th>
-					</tr>
-				</thead>
-				<tbody>
-					@foreach (var item in Model)
-					{
-						<tr>
-							<td>@item.Code</td>
-							<td>@item.FullName </td>
-							<td>@item.PhoneNumber </td>
-							<td>@item.EmailAddress</td>
-							<td>@item.Gender</td>
-							<td>@item.Town</td>
-							<td>@item.CreditLimit</td>
-							<td>
-								<a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-info btn-xs">
-									<i class="fas fa-pencil-alt">
-									</i>
-									Edit
-								</a>
-								<a asp-action="ById" asp-route-id="@item.Id" class="btn btn-danger btn-xs">
-									<i class="fas fa-trash">
-									</i>
-									Delete
-								</a>
-							</td>
-						</tr>
-					}
-				</tbody>
-				<tfoot>
-					<tr>
-						<th>Code</th>
-						<th>Name</th>
-						<th>Phone Number</th>
-						<th>Email</th>
-						<th>Gender</th>
-						<th>Town</th>
-						<th>Limit</th>
-						<th>Options</th>
-					</tr>
-				</tfoot>
-			</table>
-		</div>
-	</div>
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">@ViewData["Title"] <span class="text-right"><a asp-action="Edit" asp-route-id="" class="btn btn-sm btn-info">Add New</a></span></h3>
+        </div>
+        <div class="card-body">
+            <table id="dataTable" class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Name</th>
+                        <th>Phone Number</th>
+                        <th>Email</th>
+                        <th>Gender</th>
+                        <th>Town</th>
+                        <th>KRA Pin</th>
+                        <th>Limit</th>
+                        <th>Options</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.Code</td>
+                            <td>@item.FullName </td>
+                            <td>@item.PhoneNumber </td>
+                            <td>@item.EmailAddress</td>
+                            <td>@item.Gender</td>
+                            <td>@item.Town</td>
+                            <td>@item.KraPin</td>
+                            <td>@item.CreditLimit</td>
+                            <td>
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-info btn-xs">
+                                    <i class="fas fa-pencil-alt">
+                                    </i>
+                                    Edit
+                                </a>
+                                <a asp-action="ById" asp-route-id="@item.Id" class="btn btn-danger btn-xs">
+                                    <i class="fas fa-trash">
+                                    </i>
+                                    Delete
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th>Code</th>
+                        <th>Name</th>
+                        <th>Phone Number</th>
+                        <th>Email</th>
+                        <th>Gender</th>
+                        <th>Town</th>
+                        <th>KRA Pin</th>
+                        <th>Limit</th>
+                        <th>Options</th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
 </div>

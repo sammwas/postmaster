@@ -4,11 +4,9 @@ namespace PosMaster.ViewModels
 {
     public class ProductSaleViewModel : BaseViewModel
     {
-        public decimal Discount { get; set; }
         [Required]
         [Display(Name = "Customer")]
         public string CustomerId { get; set; }
-        [Required]
         [Display(Name = "Payment Mode")]
         public string PaymentMode { get; set; }
         [Display(Name = "External Ref")]
