@@ -11,7 +11,7 @@ namespace PosMaster.ViewModels
         public string PaymentMode { get; set; }
         [Display(Name = "External Ref")]
         public string ExternalRef { get; set; }
-        public string KraPin { get; set; }
+        public string PinNo { get; set; }
         public bool IsCredit { get; set; }
         public bool IsWalkIn { get; set; }
         public string LineItemListStr { get; set; }

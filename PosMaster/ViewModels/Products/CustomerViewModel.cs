@@ -28,7 +28,7 @@ namespace PosMaster.ViewModels
             IsEditMode = true;
             CreditLimit = customer.CreditLimit;
             Gender = customer.Gender;
-            KraPin = customer.KraPin;
+            PinNo = customer.PinNo;
         }
 
         [Required]
@@ -49,7 +49,7 @@ namespace PosMaster.ViewModels
         [Display(Name = "Credit Limit")]
         public decimal CreditLimit { get; set; }
         [Display(Name = "KRA PIN No")]
-        public string KraPin { get; set; }
+        public string PinNo { get; set; }
 
     }
 }

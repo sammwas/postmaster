@@ -195,7 +195,7 @@ namespace PosMaster.Dal.Interfaces
                     dbCustomer.Status = model.Status;
                     dbCustomer.CreditLimit = model.CreditLimit;
                     dbCustomer.Gender = model.Gender;
-                    dbCustomer.KraPin = model.KraPin;
+                    dbCustomer.PinNo = model.PinNo;
                     await _context.SaveChangesAsync();
                     result.Success = true;
                     result.Message = "Updated";
@@ -221,7 +221,7 @@ namespace PosMaster.Dal.Interfaces
                     LastName = model.LastName,
                     CreditLimit = model.CreditLimit,
                     Gender = model.Gender,
-                    KraPin = model.KraPin
+                    PinNo = model.PinNo
                 };
                 _context.Customers.Add(Customer);
                 await _context.SaveChangesAsync();

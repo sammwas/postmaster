@@ -19,7 +19,7 @@ namespace PosMaster.Dal
         public bool IsWalkIn { get; set; }
         public bool IsPaid { get; set; }
         public decimal AmountReceived { get; set; }
-        public string KraPin { get; set; }
+        public string PinNo { get; set; }
         public bool IsPrinted { get; set; }
         public List<ReceiptLineItem> ReceiptLineItems { get; set; }
         public decimal TotalAmount => IsPaid ? ReceiptLineItems.Sum(i => i.Amount) : ReceiptLineItems.Sum(i => i.Amount) * -1;

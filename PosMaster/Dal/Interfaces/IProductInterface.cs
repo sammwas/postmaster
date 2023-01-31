@@ -355,7 +355,7 @@ namespace PosMaster.Dal.Interfaces
                     ClientId = model.ClientId,
                     InstanceId = model.InstanceId,
                     PaymentMode = model.PaymentMode,
-                    KraPin = string.IsNullOrEmpty(model.KraPin) ? customer.KraPin : model.KraPin,
+                    PinNo = string.IsNullOrEmpty(model.PinNo) ? customer.PinNo : model.PinNo,
                     IsCredit = model.IsCredit,
                     IsWalkIn = model.IsWalkIn,
                     Notes = model.Notes,
