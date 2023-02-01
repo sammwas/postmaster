@@ -190,7 +190,8 @@ namespace PosMaster.Dal.Interfaces
                 if (isPos)
                 {
                     dataQry = dataQry.Where(d => d.AvailableQuantity > 0 && d.SellingPrice > 0)
-                    .Where(d => d.PriceStartDate.Date <= DateTime.Now.Date && (d.PriceEndDate == null || d.PriceEndDate.Value.Date >= DateTime.Now.Date));
+                    .Where(d => d.PriceStartDate.Date <= DateTime.Now.Date && (d.PriceEndDate == null
+                    || d.PriceEndDate.Value.Date >= DateTime.Now.Date));
                 }
                 if (!string.IsNullOrEmpty(search))
                 {

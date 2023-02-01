@@ -8,9 +8,6 @@
     var title = $"Customer Orders";
     ViewData["Title"] = title;
     var userData = _cookies.Read();
-    var products = User.IsInRole(Role.Clerk) ?
-    await _productInterface.ByInstanceIdAsync(userData.ClientId, userData.InstanceId) :
-    await _productInterface.ByInstanceIdAsync(userData.ClientId, (Guid?)null);
     var customers = await _customerInterface.ByClientIdAsync(userData.ClientId);
     var customerName = Model.IsEditMode ? customers.Data.FirstOrDefault(c => c.Id == Guid.Parse(Model.CustomerId)).FullName
     : "";
@@ -40,7 +37,7 @@
                                             @foreach (var item in customers.Data)
                                             {
                                                 <option data-crd="@item.CreditLimit" value="@item.Id" title="@item.Notes"
-                                            data-customer="@item.Id">@item.FullName</option>
+                                                data-customer="@item.Id">@item.FullName</option>
                                             }
                                         </select>
                                     }
@@ -51,14 +48,8 @@
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label>Product</label>
-                                    <select class="form-control select2" style="width: 100%;" id="productItem">
+                                    <select class="form-control select2" style="width: 100%;" id="product-select">
                                         <option value="">--Select Product--</option>
-                                        @foreach (var item in products.Data)
-                                        {
-                                            <option data-qty="@item.AvailableQuantity" value="@item.Id" title="@item.Notes"
-                                            data-uom="@item.UnitOfMeasure" data-price="@item.SellingPrice">@item.Name
-                                                @item.UnitOfMeasure (Qty @item.AvailableQuantity)</option>
-                                        }
                                     </select>
                                 </div>
                             </div>
@@ -68,7 +59,7 @@
                                 <div class="form-group">
                                     <label>Quantity</label>
                                     <input class="form-control numbers-only" value="" id="quantityBought"
-                                        placeholder="0.00">
+                                           placeholder="0.00">
                                     <span class="text-danger" id="quantity-validate"></span>
                                 </div>
                             </div>
@@ -82,13 +73,17 @@
                     </div>
                     <div class="row">
                         <div class="col-md-6">
-                            <br />
                             <p id="issMsg"></p>
+                            <input id="inpIsPos" value="False" type="hidden" />
                         </div>
                     </div>
                     <div class="card-footer">
-                        <span class="text-right"><button type="submit" class="btn btn-primary"
-                                id="issBtnAdd">Add</button></span>
+                        <span class="text-right">
+                            <button type="submit" class="btn btn-primary btn-sm"
+                                    id="issBtnAdd">
+                                <i class="fa fa-plus-circle"></i>    Add to list
+                            </button>
+                        </span>
                     </div>
                 </form>
             </div>
@@ -96,7 +91,7 @@
         <div class="col-md-8">
             <div class="receipt-items">
                 <table id="datataTable" class="table table-bordered table-striped">
-                    <thead>
+                    <thead class="bg-secondary">
                         <tr>
                             <th>Item</th>
                             <th>Quantity</th>
@@ -107,15 +102,6 @@
                     </thead>
                     <tbody id="IssueListTable">
                     </tbody>
-                    <tfoot>
-                        <tr>
-                            <th>Item</th>
-                            <th>Quantity</th>
-                            <th>Price</th>
-                            <th>Total</th>
-                            <th>Option</th>
-                        </tr>
-                    </tfoot>
                 </table>
                 <p>
                     <strong>Total Value : <span id="issTotal">0</span> </strong>
@@ -125,14 +111,16 @@
                     <input asp-for="Id" />
                     <input asp-for="IsEditMode" />
                     <input asp-for="Name" type="hidden" id="order-name"
-                        value="ORD -@DateTime.Now.ToString("dd-MMM-yyyy hh:mm tt")" />
+                           value="ORD -@DateTime.Now.ToString("dd-MMM-yyyy hh:mm tt")" />
                     <input asp-for="CustomerId" type="hidden" id="order-customer" />
                     <input asp-for="LineItemListStr" id="issListRecords" type="hidden" />
                     <input asp-for="Code" type="hidden" value="@userData.InstanceCode" />
                     <input asp-for="InstanceId" type="hidden" value="@userData.InstanceId" />
                     <input asp-for="ClientId" id="clientId" type="hidden" value="@userData.ClientId" />
-                    <button disabled class="btn btn-primary" type="submit" id="btnSumbitIss"> <i class="fa fa-save"></i>
-                        Submit</button>
+                    <button disabled class="btn btn-primary" type="submit" id="btnSumbitIss">
+                        <i class="fa fa-save"></i>
+                        Submit
+                    </button>
                 </form>
             </div>
         </div>

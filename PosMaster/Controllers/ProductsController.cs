@@ -221,11 +221,11 @@ namespace PosMaster.Controllers
             return View(model);
         }
 
-        public async Task<JsonResult> Search(string term = "")
+        public async Task<JsonResult> Search(string term = "", bool isPos = false)
         {
             var products = User.IsInRole(Role.Clerk) ?
-                    await _productInterface.ByInstanceIdAsync(_userData.ClientId, _userData.InstanceId, true, term) :
-                    await _productInterface.ByInstanceIdAsync(_userData.ClientId, (Guid?)null, true, term);
+                    await _productInterface.ByInstanceIdAsync(_userData.ClientId, _userData.InstanceId, isPos, term) :
+                    await _productInterface.ByInstanceIdAsync(_userData.ClientId, (Guid?)null, isPos, term);
             return Json(products);
         }
 

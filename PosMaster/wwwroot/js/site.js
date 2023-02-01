@@ -444,7 +444,8 @@ $('#product-select').select2({
         dataType: 'json',
         delay: 250,
         url: function (params) {
-            return '/Products/Search?Id=' + $("#instanceId").val() + '&term=' + params.term;
+            var isPos = $("#inpIsPos").val();
+            return '/Products/Search?isPos=' + isPos + '&term=' + params.term;
         },
         processResults: function (data, params) {
             return {
