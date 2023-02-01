@@ -34,19 +34,17 @@ namespace PosMaster.Controllers
             _hostingEnvironment = hostingEnvironment;
             _masterDataInterface = masterDataInterface;
         }
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string insId = "", string search = "")
         {
-            if (User.IsInRole(Role.Clerk))
-            {
-                var result = await _productInterface.ByInstanceIdAsync(_userData.ClientId, _userData.InstanceId);
-                if (!result.Success)
-                    TempData.SetData(AlertLevel.Warning, "Products", result.Message);
-                return View(result.Data);
-            }
-            var resultAll = await _productInterface.ByInstanceIdAsync(_userData.ClientId, (Guid?)null);
-            if (!resultAll.Success)
-                TempData.SetData(AlertLevel.Warning, "Products", resultAll.Message);
-            return View(resultAll.Data);
+            if (string.IsNullOrEmpty(insId))
+                insId = _userData.InstanceId.ToString();
+
+            ViewData["InstanceId"] = insId;
+            ViewData["Search"] = search;
+            var result = await _productInterface.ByInstanceIdAsync(_userData.ClientId, Guid.Parse(insId));
+            if (!result.Success)
+                TempData.SetData(AlertLevel.Warning, "Products", result.Message);
+            return View(result.Data);
         }
         public async Task<IActionResult> Edit(Guid? id)
         {
@@ -186,7 +184,7 @@ namespace PosMaster.Controllers
         {
             var data = new ProductPriceViewModel();
             ViewData["InstanceId"] = instId;
-            if (String.IsNullOrEmpty(instId))
+            if (string.IsNullOrEmpty(instId))
                 return View(data);
             var result = await _productInterface.ByInstanceIdAsync(_userData.ClientId, Guid.Parse(instId));
             if (!result.Success)
@@ -194,12 +192,11 @@ namespace PosMaster.Controllers
                 TempData.SetData(AlertLevel.Warning, "Products", result.Message);
                 return View(data);
             }
-            var products = new List<ProductPriceMiniViewModel>();
+
             foreach (var item in result.Data)
             {
-                products.Add(new ProductPriceMiniViewModel(item));
+                data.ProductPriceMiniViewModels.Add(new ProductPriceMiniViewModel(item));
             }
-            data.ProductPriceMiniViewModels = products;
             return View(data);
         }
 
@@ -208,6 +205,7 @@ namespace PosMaster.Controllers
         public async Task<IActionResult> ProductPrice(ProductPriceViewModel model)
         {
             var title = "Edit Price";
+            ViewData["InstanceId"] = model.InstanceId;
             if (!ModelState.IsValid)
             {
                 var message = "Missing fields";
@@ -217,7 +215,7 @@ namespace PosMaster.Controllers
             var result = await _productInterface.EditPriceAsync(model);
             TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, title, result.Message);
             if (!result.Success)
-                return RedirectToAction(nameof(ProductPrice), new { instId = result.Data.InstanceId.ToString() });
+                return RedirectToAction(nameof(ProductPrice), new { instId = model.InstanceId });
             return View(model);
         }
 
@@ -293,6 +291,9 @@ namespace PosMaster.Controllers
 
                 var personnel = User.Identity.Name;
                 var rootFolder = Path.Combine(_hostingEnvironment.WebRootPath, "uploads", $"{_userData.ClientId}");
+                if (!Directory.Exists(rootFolder))
+                    Directory.CreateDirectory(rootFolder);
+
                 var fileName = $"temp_{_userData.UserId}_upload{fileExtension}";
                 var filePath = Path.Combine(rootFolder, fileName);
                 if (System.IO.File.Exists(filePath))
@@ -301,6 +302,7 @@ namespace PosMaster.Controllers
                     System.IO.File.Delete(filePath);
                     Console.WriteLine("Deleted");
                 }
+
                 var fileLocation = new FileInfo(filePath);
                 using (var fileStream = new FileStream(filePath, FileMode.Create))
                 {

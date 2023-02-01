@@ -255,10 +255,7 @@ namespace PosMaster.Dal.Interfaces
                     dbProduct.ProductCategoryId = Guid.Parse(model.ProductCategoryId);
                     dbProduct.Name = model.Name;
                     dbProduct.ReorderLevel = model.ReorderLevel;
-                    dbProduct.BuyingPrice = model.BuyingPrice;
-                    dbProduct.SellingPrice = model.SellingPrice;
                     dbProduct.AllowDiscount = model.AllowDiscount;
-                    dbProduct.AvailableQuantity = model.AvailableQuantity;
                     dbProduct.UnitOfMeasure = model.UnitOfMeasure;
                     dbProduct.LastModifiedBy = model.Personnel;
                     dbProduct.DateLastModified = DateTime.Now;
@@ -293,8 +290,10 @@ namespace PosMaster.Dal.Interfaces
                     Personnel = model.Personnel,
                     Status = model.Status,
                     ImagePath = model.ImagePath,
-                    TaxTypeId = hasTaxTypeId ? taxTypeId : (Guid?)null
+                    TaxTypeId = hasTaxTypeId ? taxTypeId : (Guid?)null,
+                    PriceStartDate = DateTime.Now
                 };
+                product.ProductInstanceStamp = product.ProductInstanceStamp;
                 _context.Products.Add(product);
                 await _context.SaveChangesAsync();
                 result.Success = true;
@@ -312,7 +311,6 @@ namespace PosMaster.Dal.Interfaces
                 return result;
             }
         }
-
 
         public async Task<ReturnData<Receipt>> ProductsSaleAsync(ProductSaleViewModel model)
         {
@@ -803,11 +801,12 @@ namespace PosMaster.Dal.Interfaces
                     return result;
                 }
 
-                var dataQry = await _context.Products
-                    .Where(c => c.ClientId.Equals(model.ClientId) && c.InstanceId.Equals(model.InstanceId)).ToListAsync();
-                model.ProductPriceMiniViewModels.ForEach(p =>
+                var dataQry = _context.Products
+                    .Where(c => c.ClientId.Equals(model.ClientId) && c.InstanceId.Equals(model.InstanceId))
+                    .AsQueryable();
+                model.ProductPriceMiniViewModels.ForEach(async p =>
                 {
-                    var product = dataQry.FirstOrDefault(c => c.Id.Equals(p.Id));
+                    var product = await dataQry.FirstOrDefaultAsync(c => c.Id.Equals(p.Id));
                     if (product != null)
                     {
                         var hasToDate = DateTime.TryParse(p.PriceEndDate, out var endDate);

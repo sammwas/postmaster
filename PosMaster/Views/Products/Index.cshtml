@@ -1,79 +1,127 @@
-﻿@inject ICookiesService cookieService;
+﻿@inject ICookiesService _cookieService;
+@inject IClientInstanceInterface _instanceInterface;
 @model List<Product>
 @{
-	ViewData["Active"] = "Products";
-	ViewData["Title"] = "Products";
-	var user = cookieService.Read();
+    ViewData["Active"] = "Products";
+    ViewData["Title"] = "Products";
+    var userData = _cookieService.Read();
+    var instancesRes = await _instanceInterface.ByClientIdAsync(userData.ClientId);
+    var instances = instancesRes.Data;
+    var instanceId = ViewData["InstanceId"]?.ToString();
 }
 <div>
-	<div class="card">
-		<div class="card-header">
-			<h3 class="card-title">
-				@ViewData["Title"]
-				@if (!User.IsInRole(Role.Clerk))
-				{
-					<span class="text-right"><a asp-action="Edit" asp-route-id="" class="btn btn-sm btn-info">Add New</a></span>
-
-				}
-			</h3>
-		</div>
-		<div class="card-body">
-			<table id="dataTable" class="table table-bordered table-striped">
-				<thead>
-					<tr>
-						<th>Code</th>
-						<th>Name</th>
-						<th>Category</th>
-						<th>Reorder</th>
-						<th>Unit</th>
-						<th>Tax</th>
-						<th>Status</th>
-						<th>Options</th>
-					</tr>
-				</thead>
-				<tbody>
-					@foreach (var item in Model)
-					{
-						var tax=item.TaxType==null?"--":item.TaxType.Name;
-						<tr>
-							<td>@item.Code</td>
-							<td>@item.Name</td>
-							<td>@item.ProductCategory.Name</td>
-							<td>@item.ReorderLevel</td>
-							<td>@item.UnitOfMeasure</td>
-							<td>@tax</td>
-							<td>@item.Status.ToString()</td>
-							<td class="project-actions text-right">
-								@if (!User.IsInRole(Role.Clerk))
-								{
-									<a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-info btn-xs">
-										<i class="fas fa-pencil-alt">
-										</i>
-										Edit
-									</a>
-								}
-								<a asp-action="ById" asp-route-id="@item.Id" class="btn btn-danger btn-xs">
-									<i class="fas fa-trash">
-									</i>
-									Delete
-								</a>
-							</td>
-						</tr>
-					}
-				</tbody>
-				<tfoot>
-					<tr>
-						<th>Code</th>
-						<th>Name</th>
-						<th>Category</th>
-						<th>Reorder</th>
-						<th>Unit</th>
-						<th>Tax</th>
-						<th>Status</th>
-						<th>Options</th>
-					</tr>
-				</tfoot>
-			</table>
-		</div>
-	</div>
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">
+                <form autocomplete="off">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Instance</label>
+                                <select class="form-control select2" name="insId" style="width: 100%;" required>
+                                    <option value="">--Select Instance--</option>
+                                    @foreach (var item in instances)
+                                    {
+                                        if (item.Id.ToString().Equals(instanceId))
+                                        {
+                                            <option selected="selected" value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mt-4">
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </div>
+                        <div class="col-md-3 mt-4">
+                            @if (!User.IsInRole(Role.Clerk))
+                            {
+                                <span class="text-right">
+                                    <a asp-action="Edit" asp-route-id="" class="btn btn-sm btn-info"><i class="fa fa-plus-circle"></i> Add New</a>
+                                </span>
+                            }
+                        </div>
+                    </div>
+                </form>
+            </h3>
+        </div>
+        <div class="card-body">
+            <table id="dataTable" class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Name</th>
+                        <th>Reorder</th>
+                        <th>Qty</th>
+                        <th>Price</th>
+                        <th>Unit</th>
+                        <th>Tax</th>
+                        <th>Discount</th>
+                        <th>Status</th>
+                        <th>Options</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        var tax = item.TaxType == null ? "--" : item.TaxType.Name;
+                        var price = item.ShowSellingPrice ? $"{item.SellingPrice}" : "--";
+                        <tr>
+                            <td>@item.Code</td>
+                            <td>@item.Name [@item.ProductCategory.Name]</td>
+                            <td>@item.ReorderLevel</td>
+                            <td>@item.AvailableQuantity</td>
+                            <td>@price</td>
+                            <td>@item.UnitOfMeasure</td>
+                            <td>@tax</td>
+                            <td>
+                                @if (item.AllowDiscount)
+                                {
+                                    <span class="badge badge-success">YES</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-danger">NO</span>
+                                }
+                            </td>
+                            <td>@item.Status.ToString()</td>
+                            <td class="project-actions text-right">
+                                @if (!User.IsInRole(Role.Clerk))
+                                {
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-info btn-xs">
+                                        <i class="fas fa-pencil-alt">
+                                        </i>
+                                        Edit
+                                    </a>
+                                }
+                                <a asp-action="ById" asp-route-id="@item.Id" class="btn btn-danger btn-xs">
+                                    <i class="fas fa-trash">
+                                    </i>
+                                    Delete
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th>Code</th>
+                        <th>Name</th>
+                        <th>Reorder</th>
+                        <th>Qty</th>
+                        <th>Price</th>
+                        <th>Unit</th>
+                        <th>Tax</th>
+                        <th>Discount</th>
+                        <th>Status</th>
+                        <th>Options</th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
 </div>

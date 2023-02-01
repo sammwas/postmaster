@@ -21,8 +21,10 @@ namespace PosMaster.Dal
         public string ProductInstanceStamp { get; set; }
         public Guid? TaxTypeId { get; set; }
         public TaxType TaxType { get; set; }
-        public bool IsTaxable => TaxType != null;
         public decimal TotalValue => AvailableQuantity * SellingPrice;
         public string ProductUniqueCode => $"{InstanceId}.{Code}";
+        public bool ShowSellingPrice => SellingPrice > 0 && PriceStartDate.Date <= DateTime.Now.Date
+            && (!PriceEndDate.HasValue || PriceEndDate.Value.Date >= DateTime.Now.Date);
+
     }
 }

@@ -1,9 +1,8 @@
 ﻿var issueListItems = [];
-let currentQty;
-let productCode;
-$("#selectedProduct").change(function () {
-    currentQty = $('option:selected', this).attr('data-qty');
-    productCode = $('option:selected', this).attr('data-pcode')
+$("#selectedProductAdj").change(function () {
+    var item = $(this).select2('data')[0];
+    var currentQty = item.quantity;
+    var productCode = item.code;
     $('#currentQuantity').val(currentQty);
     $('#productCode').val(productCode)
 });
@@ -16,8 +15,13 @@ $('#selectedProductItem').change(function () {
 
 let sellingPrice;
 $("#product-select").change(function () {
-    sellingPrice = $(this).select2('data')[0].sellingPrice;
+    var item = $(this).select2('data')[0];
+    sellingPrice = item.sellingPrice;
+    var allowDisc = item.allowDiscount;
     $('#unitPrice').val(sellingPrice)
+    if (!allowDisc) {
+        $('#unitPrice').attr("readonly", true);
+    }
     $("#quantityBought").focus();
 });
 var item = {};
@@ -109,10 +113,9 @@ function removeListItem(index) {
     $("#issListRecords").val(JSON.stringify(issueListItems));
 };
 
-let customerId;
-$('#customerId').change(function () {
-    customerId = $('option:selected', this).attr('data-customer');
-    $('#order-customer').val(customerId);
+$('#customer-select').change(function () {
+    var customer = $('#customer-select').select2('data')[0];
+    $('#order-customer').val(customer.id);
 });
 
 $('#dateTo').datetimepicker({
@@ -439,7 +442,7 @@ removeGradingSchemeRow = function (id) {
     document.getElementById("tr_" + id).remove();
 };
 
-$('#product-select').select2({
+$('.product-select-search').select2({
     ajax: {
         dataType: 'json',
         delay: 250,
@@ -459,7 +462,9 @@ $('#product-select').select2({
                         sellingPrice: item.sellingPrice,
                         id: item.id,
                         tax: taxRate,
-                        name: item.code + ' - ' + item.name
+                        name: item.code + ' - ' + item.name,
+                        allowDiscount: item.allowDiscount,
+                        code: item.code
                     }
                 })
             };

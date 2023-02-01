@@ -29,7 +29,7 @@
             <div class="col-md-6">
                 <h4>@userData.ClientName</h4>
                 <p>@userData.InstanceName</p>
-                <p>Served By : @Model.Personnel.Split('@')[0]</p>
+                <p>Served By : @Model.Personnel.Split('@')[0].ToUpper()</p>
             </div>
             <div class="col-md-6">
                 <p><b>Receipt No.</b> @Model.Code  <span class="badge badge-info">@status</span> </p>
