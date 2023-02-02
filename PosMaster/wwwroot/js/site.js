@@ -1,9 +1,8 @@
 ﻿var issueListItems = [];
-let currentQty;
-let productCode;
-$("#selectedProduct").change(function () {
-    currentQty = $('option:selected', this).attr('data-qty');
-    productCode = $('option:selected', this).attr('data-pcode')
+$("#selectedProductAdj").change(function () {
+    var item = $(this).select2('data')[0];
+    var currentQty = item.quantity;
+    var productCode = item.code;
     $('#currentQuantity').val(currentQty);
     $('#productCode').val(productCode)
 });
@@ -16,8 +15,13 @@ $('#selectedProductItem').change(function () {
 
 let sellingPrice;
 $("#product-select").change(function () {
-    sellingPrice = $(this).select2('data')[0].sellingPrice;
+    var item = $(this).select2('data')[0];
+    sellingPrice = item.sellingPrice;
+    var allowDisc = item.allowDiscount;
     $('#unitPrice').val(sellingPrice)
+    if (!allowDisc) {
+        $('#unitPrice').attr("readonly", true);
+    }
     $("#quantityBought").focus();
 });
 var item = {};
@@ -31,15 +35,15 @@ $('#issBtnAdd').click(function (event) {
 var addItemToList = function () {
     item = $('#product-select').select2('data')[0];
     var productId = item.id;
-    var itemName = item.text;
+    var itemName = item.name;
     var quantity = $("#quantityBought").val();
     var unitPrice = $("#unitPrice").val();
     var sellingPrice = item.sellingPrice;;
     var avQuantity = item.availableQuantity;
+    var taxAmount = item.tax;
     quantity = parseFloat(quantity)
     avQuantity = parseFloat(avQuantity)
     var discount = sellingPrice - unitPrice;
-    var taxAmount = 0;
     if (productId === "") {
         $("#issMsg").text("select an item first").addClass('text-danger');
         $("#issItemId").focus();
@@ -70,18 +74,22 @@ var addItemToList = function () {
         createIssueListTable();
         $("#issListRecords").val(JSON.stringify(issueListItems));
         $("#quantityBought").val("");
+        $('#product-select').empty();
     }
 };
 var createIssueListTable = function () {
     $("#IssueListTable").html("");
     var tr = "";
     var total = 0;
-    var discount = 0;
+    var totalTax = 0;
+    var totalDiscount = 0;
     var index = 0;
     $.each(issueListItems, function () {
         var trTotal = this.quantity * this.unitPrice;
+        var lineTax = (trTotal - this.discount) * this.taxAmount;
         total += trTotal;
-        discount += this.discount
+        totalDiscount += this.discount;
+        totalTax += lineTax;
         tr += '<tr><td>' + this.itemName + '</td><td>' + this.quantity + '</td><td>' + this.unitPrice + '</td><td>' + trTotal + '</td>'
             + '<td><button class="btn btn-danger btn-sm" onclick="removeListItem(' + index + ')">Remove</button> </td > </tr > ';
         index++;
@@ -89,8 +97,9 @@ var createIssueListTable = function () {
 
     issueListItems.length > 0 ? $("#btnSumbitIss").prop("disabled", false) : $("#btnSumbitIss").prop("disabled", true);
     $("#IssueListTable").html(tr);
-    $("#issTotal").text(total.toLocaleString());
-    $("#issDiscount").text(discount.toLocaleString());
+    $("#issTotal").text((total + totalTax).toLocaleString());
+    $("#issDiscount").text(totalDiscount.toLocaleString());
+    $("#issTax").text(totalTax.toLocaleString());
 };
 
 var list = $("#issListRecords").val();
@@ -104,10 +113,9 @@ function removeListItem(index) {
     $("#issListRecords").val(JSON.stringify(issueListItems));
 };
 
-let customerId;
-$('#customerId').change(function () {
-    customerId = $('option:selected', this).attr('data-customer');
-    $('#order-customer').val(customerId);
+$('#customer-select').change(function () {
+    var customer = $('#customer-select').select2('data')[0];
+    $('#order-customer').val(customer.id);
 });
 
 $('#dateTo').datetimepicker({
@@ -434,21 +442,29 @@ removeGradingSchemeRow = function (id) {
     document.getElementById("tr_" + id).remove();
 };
 
-$('#product-select').select2({
+$('.product-select-search').select2({
     ajax: {
         dataType: 'json',
         delay: 250,
         url: function (params) {
-            return '/Products/Search?Id=' + $("#instanceId").val() + '&term=' + params.term;
+            var isPos = $("#inpIsPos").val();
+            return '/Products/Search?isPos=' + isPos + '&term=' + params.term;
         },
         processResults: function (data, params) {
             return {
                 results: $.map(data.data, function (item) {
+                    var taxRate = 0;
+                    if (item.taxRate)
+                        taxRate = item.taxRate.taxRate;
                     return {
                         text: item.code + ' - ' + item.name + ' (' + item.availableQuantity + ' ' + item.unitOfMeasure + ' )',
                         quantity: item.availableQuantity,
                         sellingPrice: item.sellingPrice,
-                        id: item.id
+                        id: item.id,
+                        tax: taxRate,
+                        name: item.code + ' - ' + item.name,
+                        allowDiscount: item.allowDiscount,
+                        code: item.code
                     }
                 })
             };

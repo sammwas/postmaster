@@ -6,7 +6,7 @@
     ViewData["Title"] = title;
     var userData = _cookies.Read();
     var status = Model.IsPrinted ? "COPY" : "ORIGINAL";
-    var saleType = Model.IsCredit ? "CREDIT SALE" : $"CASH SALE ({Model.PaymentMode})";
+    var saleType = Model.IsCredit ? "CREDIT SALE" : $"CASH SALE";
 }
 <div class="card card-primary">
     <div class="card-header row">
@@ -29,12 +29,18 @@
             <div class="col-md-6">
                 <h4>@userData.ClientName</h4>
                 <p>@userData.InstanceName</p>
-                <p>Served By : @Model.Personnel.Split('@')[0]</p>
+                <p>Served By : @Model.Personnel.Split('@')[0].ToUpper()</p>
             </div>
             <div class="col-md-6">
                 <p><b>Receipt No.</b> @Model.Code  <span class="badge badge-info">@status</span> </p>
                 <p><b>Customer </b> @Model.Customer.FullName </p>
-                <p><b>Type </b> @saleType </p>
+                <p>
+                    <b>Type </b> @saleType
+                    @if (!string.IsNullOrEmpty(Model.PaymentMode))
+                    {
+                        <span>(@Model.PaymentMode)</span>
+                    }
+                </p>
                 <p><b>Date </b>@Model.DateCreated</p>
             </div>
         </div>
@@ -72,14 +78,14 @@
                         <td>@Model.Tax</td>
                     </tr>
                     <tr>
-                        <td colspan="3"></td>
+                        <td colspan="3" style="border:none"></td>
                         <td>Discount</td>
                         <td>@Model.Discount</td>
                     </tr>
                     <tr>
-                        <td colspan="3"></td>
+                        <td colspan="3" style="border:none"></td>
                         <td>Total</td>
-                        <td>@Model.TotalNetAmount</td>
+                        <td><b>@Model.TotalNetAmount</b></td>
                     </tr>
                 </tfoot>
             </table>

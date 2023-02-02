@@ -1,16 +1,16 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using PosMaster.Dal;
 using PosMaster.Dal.Interfaces;
 using PosMaster.Extensions;
 using PosMaster.Services;
 using PosMaster.ViewModels;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace PosMaster.Controllers
 {
+    [Authorize]
     public class SuppliersController : Controller
     {
         private readonly UserCookieData _userData;

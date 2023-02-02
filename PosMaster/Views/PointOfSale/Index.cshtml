@@ -25,7 +25,7 @@
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label>Product</label>
-                                    <select class="form-control select2" style="width: 100%;" id="product-select">
+                                    <select class="form-control select2 product-select-search" style="width: 100%;" id="product-select">
                                         <option value="">--Select Product--</option>
                                     </select>
                                 </div>
@@ -50,15 +50,16 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-md-6 ml-4">
                             <p id="issMsg"></p>
+                            <input id="inpIsPos" value="True" type="hidden" />
                         </div>
                     </div>
                     <div class="card-footer">
                         <span class="text-right">
                             <button type="submit" class="btn btn-primary btn-sm"
                                     id="issBtnAdd">
-                                Add to Receipt
+                                <i class="fa fa-plus-circle"></i>  Add to list
                             </button>
                         </span>
                     </div>
@@ -68,7 +69,7 @@
         <div class="col-md-8">
             <div class="receipt-items">
                 <table id="datataTable" class="table table-bordered table-striped">
-                    <thead>
+                    <thead class="bg-secondary">
                         <tr>
                             <th>Item</th>
                             <th>Quantity</th>
@@ -79,19 +80,10 @@
                     </thead>
                     <tbody id="IssueListTable">
                     </tbody>
-                    <tfoot>
-                        <tr>
-                            <th>Item</th>
-                            <th>Quantity</th>
-                            <th>Price</th>
-                            <th>Total</th>
-                            <th>Option</th>
-                        </tr>
-                    </tfoot>
                 </table>
-                <p>
-                    <strong>Discount : <span id="issDiscount">0</span> </strong>&nbsp;
-                    <strong>Tax : <span id="issTax">0</span> </strong>&nbsp;
+                <p class="text-right mr-4">
+                    <strong>Discount : <span id="issDiscount">0</span> </strong><br />
+                    <strong>Tax : <span id="issTax">0</span> </strong><br />
                     <strong>Total  : <span id="issTotal">0</span> </strong>
                 </p>
                 <br />
@@ -124,7 +116,7 @@
                                         <option value="">--Select Payment Mode--</option>
                                         @foreach (var item in paymentModes.Data)
                                         {
-                                            <option value="@item.Id" title="@item.Notes">@item.Name</option>
+                                            <option value="@item.Name" title="@item.Notes">@item.Name</option>
                                         }
                                     </select>
                                     <span asp-validation-for="PaymentMode" class="text-danger"></span>

@@ -1,8 +1,6 @@
+using PosMaster.Dal;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using PosMaster.Dal;
 
 namespace PosMaster.ViewModels
 {
@@ -24,8 +22,8 @@ namespace PosMaster.ViewModels
         {
             Id = product.Id;
             Name = product.Name;
-            PriceStartDate = product.PriceStartDate.ToString("dd-MMM-yyyy");
-            PriceEndDate = product.PriceEndDate.HasValue ? product.PriceEndDate.Value.ToString("dd-MMM-yyyy") : DateTime.Now.ToString("dd-MMM-yyyy");
+            PriceStartDate = product.PriceStartDate.ToString("yyyy-MM-dd");
+            PriceEndDate = product.PriceEndDate.HasValue ? product.PriceEndDate.Value.ToString("yyyy-MM-dd") : "";
             SellingPrice = product.SellingPrice;
         }
         public Guid Id { get; set; }

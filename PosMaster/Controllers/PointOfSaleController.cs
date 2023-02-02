@@ -53,7 +53,7 @@ namespace PosMaster.Controllers
         public async Task<IActionResult> Receipts(string insId = "", string dtFrom = "", string dtTo = "", string search = "")
         {
             ViewData["DtFrom"] = dtFrom;
-            if (!string.IsNullOrEmpty(dtFrom))
+            if (string.IsNullOrEmpty(dtFrom))
             {
                 dtFrom = DateTime.Now.ToString("dd-MMM-yyyy");
                 ViewData["DtFrom"] = dtFrom;

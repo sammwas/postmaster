@@ -156,14 +156,14 @@
                                 <li class="nav-item">
                                     <a asp-controller="PointOfSale" asp-action="Index" class="nav-link">
                                         <i class="far fa-circle nav-icon"></i>
-                                        <p>Sell</p>
+                                        <p>Sell Now</p>
                                     </a>
                                 </li>
                                 <li class="nav-item">
                                     <a asp-controller="PointOfSale" asp-action="Receipts" asp-route-dtFrom="@firstDayOfWeek"
                                        asp-route-dtTo="@DateTime.Now.ToString("dd-MMM-yyyy")" class="nav-link">
                                         <i class="far fa-circle nav-icon"></i>
-                                        <p>Receipts</p>
+                                        <p>Sale Receipts</p>
                                     </a>
                                 </li>
                                 <li class="nav-item">
@@ -592,7 +592,7 @@
     <script src="~/plugins/datatables-buttons/js/buttons.html5.min.js"></script>
     <script src="~/plugins/datatables-buttons/js/buttons.print.min.js"></script>
     <script src="~/plugins/datatables-buttons/js/buttons.colVis.min.js"></script>
-    <script src="~/js/site.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
 
     <script>
         $(function () {
