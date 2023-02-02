@@ -483,3 +483,48 @@ $("#btnPrintReceipt").click(function () {
         printDiv('printReceiptDiv');
     }
 });
+
+function addPoItem() {
+    var product = $('#select-poItems').select2('data')[0];
+    var itemName = product.title.split('-')[0];
+    var uom = product.title.split('-')[1];
+    var productId = product.id;
+    var length = document.getElementById("tablePurchaseItems").tBodies[0].rows.length;
+    var id = new Date().valueOf();
+    $("#purchaseOrderItemList").append("<tr id='tr_" + id + "'>"
+    + "<td><input class=''  value="+productId+" name='PurchaseOrderItems[" + length + "].ProductId' type='hidden'/>" +
+    "<input class='product-event' id='product-quantity' name= 'PurchaseOrderItems[" + length + "].Quantity' placeholder='0.00'/></td>"
+    + "<td><input class='' id='product-name' value="+itemName+" name= 'PurchaseOrderItems["+length+"].ProductName'/></td>"
+    + "<td><input class='' id='product-uom' value="+uom+" name= 'PurchaseOrderItems["+length+"].UnitOfMeasure'/></td>"
+    + "<td><input class='product-event' id='product-price' name= 'PurchaseOrderItems["+length+"].UnitPrice' placeholder='0.00'/></td>"
+    + "<td><input class='' name= 'PurchaseOrderItems["+length+"].TaxType'/></td>"
+    + "<td><input class='poTotalItems' name= 'PurchaseOrderItems["+length+"].Amount' placeholder='0.00'/></td>"
+    + "<td><button type='button' class='btn bg-red btn-block' onclick='removePoItemRow("+id+")'>Remove</button></td>"
+    + "</tr>"
+    );
+
+
+}
+
+$('#purchaseOrderItemList').on('change', 'input.product-event', function(){
+    let amount = 0.00;
+    let quantity = $(this).closest('tr').find('#product-quantity').val();
+    let price = $(this).closest('tr').find('#product-price').val();
+    if (quantity=='' || price=='') {
+        $(this).closest('tr').find('.poTotalItems').val(parseFloat(amount));
+    }
+    amount = price * quantity;
+    $(this).closest('tr').find('.poTotalItems').val(parseFloat(amount));
+
+    updateTotal();
+})
+
+function updateTotal() {
+  let total = 0;
+  $('.poTotalItems').each((i, el) => total += parseFloat(el.textContent.trim() || 0));
+  $('#poTotalAmount').text('Ksh: ' + total.toFixed(2));
+}
+
+removePoItemRow = function (id) {
+    document.getElementById("tr_" + id).remove();
+};

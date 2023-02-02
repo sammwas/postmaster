@@ -25,6 +25,7 @@ namespace PosMaster.Dal.Interfaces
         Task<ReturnData<List<TopSellingProductViewModel>>> TopSellingProductsByVolumeAsync(Guid? clientId, Guid? instanceId, int limit = 10);
         Task<ReturnData<ProductPriceViewModel>> EditPriceAsync(ProductPriceViewModel model);
         Task<ReturnData<Receipt>> ReceiptByIdAsync(Guid id);
+        Task<ReturnData<PurchaseOrder>> EditPurchaseOrderAsync(PurchaseOrderViewModel model);
         Task<ReturnData<string>> PrintReceiptByIdAsync(Guid id, string personnel);
     }
 
@@ -861,6 +862,96 @@ namespace PosMaster.Dal.Interfaces
                 await _context.SaveChangesAsync();
                 result.Message = "Updated";
                 result.Success = true;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                result.ErrorMessage = ex.Message;
+                result.Message = "Error occured";
+                _logger.LogError($"{tag} {result.Message} : {ex}");
+                return result;
+            }
+        }
+
+        public async Task<ReturnData<PurchaseOrder>> EditPurchaseOrderAsync(PurchaseOrderViewModel model)
+        {
+            var result = new ReturnData<PurchaseOrder> { Data = new PurchaseOrder() };
+            var tag = nameof(EditPurchaseOrderAsync);
+            _logger.LogInformation($"{tag} edit purchase order");
+            try
+            {
+                if (model.IsEditMode)
+                {
+                    var dbPurchaseOrder = await _context.PurchaseOrders
+                            .Include(r => r.Supplier)
+                            .Include(r => r.PoGrnProducts)
+                            .ThenInclude(r => r.Product)
+                            .FirstOrDefaultAsync(p => p.Id.Equals(model.Id));
+                    if (dbPurchaseOrder == null)
+                    {
+                        result.Message = "Not Found";
+                        _logger.LogWarning($"{tag} update failed {model.Id} : {result.Message}");
+                        return result;
+                    }
+                    dbPurchaseOrder.Code = model.Code;
+                    dbPurchaseOrder.Name = model.Name;
+                    dbPurchaseOrder.SupplierId = Guid.Parse(model.SupplierId);
+                    dbPurchaseOrder.LastModifiedBy = model.Personnel;
+                    dbPurchaseOrder.DateLastModified = DateTime.Now;
+                    dbPurchaseOrder.Status = model.Status;
+                    if (!dbPurchaseOrder.PoGrnProducts.Any())
+                    {
+                        result.Message = "Not Found";
+                        _logger.LogWarning($"{tag} update failed {model.Id} : {result.Message}");
+                        return result;
+                    }
+
+                    await _context.SaveChangesAsync();
+                    result.Success = true;
+                    result.Message = "Updated";
+                    result.Data = dbPurchaseOrder;
+                    _logger.LogInformation($"{tag} updated {dbPurchaseOrder.Name} {model.Id} : {result.Message}");
+                    return result;
+                }
+
+                var poRef = DocumentRefNumber(Document.Po, model.ClientId);
+                var purchaseOrder = new PurchaseOrder
+                {
+                    Id = Guid.NewGuid(),
+                    ClientId = model.ClientId,
+                    InstanceId = model.InstanceId,
+                    Code = poRef,
+                    Name = model.Name,
+                    Notes = model.Notes,
+                    SupplierId = Guid.Parse(model.SupplierId),
+                    Personnel = model.Personnel
+                };
+                _context.PurchaseOrders.Add(purchaseOrder);
+                foreach (var item in model.PurchaseOrderItems)
+                {
+                    var dbProduct = await _context.Products.FirstOrDefaultAsync(d => d.Id.Equals(item.ProductId));
+                    dbProduct.BuyingPrice = item.UnitPrice;
+
+                    var lineProduct = new PoGrnProduct
+                    {
+                        PurchaseOrderId = purchaseOrder.Id,
+                        ProductId = item.ProductId,
+                        PoNotes = item.Notes,
+                        PoQuantity = item.Quantity,
+                        PoUnitPrice = item.UnitPrice,
+                        Personnel = model.Personnel,
+                        ClientId = model.ClientId,
+                        InstanceId = model.InstanceId
+                    };
+                    _context.PoGrnProducts.Add(lineProduct);
+                }
+
+                await _context.SaveChangesAsync();
+                result.Success = true;
+                result.Message = "Added";
+                result.Data = purchaseOrder;
+                _logger.LogInformation($"{tag} added {purchaseOrder.Name}  {purchaseOrder.Id} : {result.Message}");
                 return result;
             }
             catch (Exception ex)

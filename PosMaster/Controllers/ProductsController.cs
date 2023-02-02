@@ -154,11 +154,37 @@ namespace PosMaster.Controllers
             return View(result.Data);
         }
 
-        public IActionResult EditPurchaseOrder()
+        public async Task<IActionResult> EditPurchaseOrder(Guid? id)
         {
-            return View();
-        }
+            if (id == null)
+                return View(new PurchaseOrderViewModel { Status = EntityStatus.Active });
+            var result = await _productInterface.PurchaseOrderByIdAsync(id.Value);
+            if (!result.Success)
+            {
+                TempData.SetData(AlertLevel.Warning, "Purchase Order", result.Message);
+                return RedirectToAction(nameof(Index));
+            }
 
+            var model = new PurchaseOrderViewModel(result.Data);
+            return View(model);  
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditPurchaseOrder(PurchaseOrderViewModel model) 
+        {
+            var title = "Add Purchase Order";
+            if (!ModelState.IsValid)
+            {
+                var message = "Missing fields";
+                TempData.SetData(AlertLevel.Warning, title, message);
+                return View(model);
+            }
+            var result = await _productInterface.EditPurchaseOrderAsync(model);
+            TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, title, result.Message);
+            if (!result.Success)
+                return RedirectToAction(nameof(PurchaseOrders));
+            return View(model);
+        }
         public async Task<IActionResult> LowStockProducts()
         {
             Guid? clientId = null;
