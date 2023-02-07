@@ -274,6 +274,14 @@ namespace PosMaster.Dal.Interfaces
                     return result;
                 }
 
+                var stamp = $"{model.InstanceId}_{model.Code}";
+                if (await _context.Products.AnyAsync(p => p.ProductInstanceStamp.Equals(stamp)))
+                {
+                    result.Message = "Exists on instance";
+                    _logger.LogInformation($"{tag} added {model.Name} - {model.Code} : {result.Message}");
+                    return result;
+                }
+
                 var product = new Product
                 {
                     Code = model.Code,
@@ -292,7 +300,8 @@ namespace PosMaster.Dal.Interfaces
                     Status = model.Status,
                     ImagePath = model.ImagePath,
                     TaxTypeId = hasTaxTypeId ? taxTypeId : (Guid?)null,
-                    PriceStartDate = DateTime.Now
+                    PriceStartDate = DateTime.Now,
+                    ProductInstanceStamp = stamp
                 };
                 product.ProductInstanceStamp = product.ProductInstanceStamp;
                 _context.Products.Add(product);

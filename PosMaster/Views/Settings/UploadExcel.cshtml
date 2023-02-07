@@ -11,18 +11,18 @@
 }
 <div class="card card-primary">
     <div class="card-header">
-        <h3 class="card-title">@ViewData["Title"]</h3>
+        <h3 class="card-title">@ViewData["Title"] - @Model.Option</h3>
     </div>
     <div class="row">
         <div class="col-md-6">
             <div class="card-body">
                 <div class="row">
                     <div class="col-12">
-                        Upload products via Excel.
+                        Upload @Model.Option via Excel.
                     </div>
                     <hr />
                     <div class="col-12">
-                        Select the instance to upload products to.
+                        Select the instance to upload @Model.Option to.
                     </div>
                 </div>
                 <div class="col-md-12">
@@ -45,7 +45,15 @@
                                     i++;
                                     <tr>
                                         <td>@i</td>
-                                        <td>@item.Id</td>
+                                        @if (item.Id.Equals("True"))
+                                        {
+                                            <td><span class="badge badge-success">Success</span></td>
+                                        }
+                                        else
+                                        {
+                                            <td><span class="badge badge-warning">Failed</span></td>
+
+                                        }
                                         <td>@item.Text</td>
                                     </tr>
                                 }
@@ -62,7 +70,7 @@
                 </div>
             </div>
             <div class="card-footer">
-                <a asp-action="DownloadTemplate" class="btn btn-secondary">Download template</a>
+                <a asp-action="DownloadTemplate" asp-route-option="@Model.Option" class="btn btn-secondary">Download template</a>
             </div>
         </div>
         <div class="col-md-6">
@@ -93,6 +101,7 @@
                                     <div class="input-group">
                                         <div class="custom-file">
                                             <input type="file" required class="custom-file-input" accept="@Constants.XlsxContentType" asp-for="File" id="userInputFile">
+                                            <input type="hidden" asp-for="Option">
                                             <label class="custom-file-label" for="userInputFile">Choose file</label>
                                         </div>
                                     </div>
