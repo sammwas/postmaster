@@ -262,15 +262,15 @@ namespace PosMaster.Controllers
                         {
                             case UploadExelOption.Products:
                                 var discount = workSheet.Cells[i, 3]?.Value?.ToString() ?? "";
-                                var tax = workSheet.Cells[i, 4]?.Value?.ToString() ?? "";
-                                var hasRate = decimal.TryParse(tax, out var rate);
+                                var tax = workSheet.Cells[i, 4]?.Value?.ToString() ?? "0";
+                                var rate = decimal.Parse(tax);
                                 var taxRes = await _masterDataInterface
-                                    .ByRateTaxTypeAsync(_userData.ClientId, _userData.InstanceId, hasRate ? rate : 0);
+                                    .ByRateTaxTypeAsync(_userData.ClientId, _userData.InstanceId, rate);
                                 var service = workSheet.Cells[i, 5]?.Value?.ToString() ?? "";
                                 var category = workSheet.Cells[i, 6]?.Value?.ToString() ?? "";
                                 var categoryRes = await _masterDataInterface
                                     .ByNameProductCategoryAsync(_userData.ClientId, _userData.InstanceId, category);
-                                var level = workSheet.Cells[i, 8]?.Value?.ToString() ?? "";
+                                var level = workSheet.Cells[i, 8]?.Value?.ToString() ?? "0";
                                 var uom = workSheet.Cells[i, 7]?.Value?.ToString() ?? "";
                                 var productViewModel = new ProductViewModel
                                 {
@@ -279,7 +279,7 @@ namespace PosMaster.Controllers
                                     AllowDiscount = discount.ToLower().Equals("yes"),
                                     IsService = service.ToLower().Equals("yes"),
                                     UnitOfMeasure = uom.ToUpper(),
-                                    ReorderLevel = string.IsNullOrEmpty(level) ? 0 : decimal.Parse(level),
+                                    ReorderLevel = decimal.Parse(level),
                                     ProductCategoryId = categoryRes.Data.Id.ToString(),
                                     InstanceId = Guid.Parse(model.InstanceIdStr),
                                     InstanceIdStr = model.InstanceIdStr,

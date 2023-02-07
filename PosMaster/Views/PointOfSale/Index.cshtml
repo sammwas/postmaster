@@ -44,14 +44,13 @@
                                 <div class="form-group">
                                     <label>Selling Price</label>
                                     <input class="form-control numbers-only" id="unitPrice" placeholder="0.00">
-                                    <input class="form-control" type="hidden" id="sellingPrice" placeholder="0.00">
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-6 ml-4">
-                            <p id="issMsg"></p>
+                        <div class="col ml-4">
+                            <p><span id="issMsg"></span> </p>
                             <input id="inpIsPos" value="True" type="hidden" />
                         </div>
                     </div>
@@ -125,8 +124,8 @@
                         </div>
                         <div class="col-md-4">
                             <div class="form-group" id="refNo">
-                                <label>KRA Pin</label>
-                                <input asp-for="PinNo" class="form-control" id="refNoVal" placeholder="Ref No">
+                                <label>PIN No.</label>
+                                <input asp-for="PinNo" class="form-control" id="refNoVal" placeholder="PIN No">
                                 <span asp-validation-for="PinNo" class="text-danger"></span>
                             </div>
                         </div>

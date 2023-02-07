@@ -811,28 +811,27 @@ namespace PosMaster.Dal.Interfaces
                     return result;
                 }
 
-                var dataQry = _context.Products
-                    .Where(c => c.ClientId.Equals(model.ClientId) && c.InstanceId.Equals(model.InstanceId))
-                    .AsQueryable();
-                model.ProductPriceMiniViewModels.ForEach(async p =>
-                {
-                    var product = await dataQry.FirstOrDefaultAsync(c => c.Id.Equals(p.Id));
-                    if (product != null)
-                    {
-                        var hasToDate = DateTime.TryParse(p.PriceEndDate, out var endDate);
-                        product.SellingPrice = p.SellingPrice;
-                        product.PriceStartDate = DateTime.Parse(p.PriceStartDate);
-                        product.PriceEndDate = hasToDate ? endDate : (DateTime?)null;
+                model.ProductPriceMiniViewModels.ForEach(p =>
+               {
+                   var product = _context.Products
+                   .Where(c => c.ClientId.Equals(model.ClientId) && c.InstanceId.Equals(model.InstanceId))
+                   .FirstOrDefault(c => c.Id.Equals(p.Id));
+                   if (product != null)
+                   {
+                       var hasToDate = DateTime.TryParse(p.PriceEndDate, out var endDate);
+                       product.SellingPrice = p.SellingPrice;
+                       product.PriceStartDate = DateTime.Parse(p.PriceStartDate);
+                       product.PriceEndDate = hasToDate ? endDate : (DateTime?)null;
 
-                        productPriceLog.ProductId = product.Id;
-                        productPriceLog.PriceStartDate = product.PriceStartDate;
-                        productPriceLog.PriceEndDate = product.PriceEndDate;
-                        productPriceLog.PriceFrom = product.SellingPrice;
-                        productPriceLog.PriceTo = p.SellingPrice;
+                       productPriceLog.ProductId = product.Id;
+                       productPriceLog.PriceStartDate = product.PriceStartDate;
+                       productPriceLog.PriceEndDate = product.PriceEndDate;
+                       productPriceLog.PriceFrom = product.SellingPrice;
+                       productPriceLog.PriceTo = p.SellingPrice;
 
-                        priceLogs.Add(productPriceLog);
-                    }
-                });
+                       priceLogs.Add(productPriceLog);
+                   }
+               });
 
                 await _context.ProductPriceLogs.AddRangeAsync(priceLogs);
                 await _context.SaveChangesAsync();

@@ -1,4 +1,5 @@
-﻿var issueListItems = [];
+﻿var item = {};
+var issueListItems = [];
 $("#selectedProductAdj").change(function () {
     var item = $(this).select2('data')[0];
     var currentQty = item.quantity;
@@ -15,50 +16,52 @@ $('#selectedProductItem').change(function () {
 
 let sellingPrice;
 $("#product-select").change(function () {
-    var item = $(this).select2('data')[0];
-    sellingPrice = item.sellingPrice;
+    item = {};
+    item = $(this).select2('data')[0];
     var allowDisc = item.allowDiscount;
-    $('#unitPrice').val(sellingPrice)
-    if (!allowDisc) {
-        $('#unitPrice').attr("readonly", true);
-    }
+    $('#unitPrice').val(item.sellingPrice)
+    $('#unitPrice').attr("readonly", !allowDisc);
     $("#quantityBought").focus();
 });
-var item = {};
+
 $('#issBtnAdd').click(function (event) {
     item = {};
     event.preventDefault();
     addItemToList();
-    $('#productListForm').trigger('reset');
 })
 
 var addItemToList = function () {
+    item = {};
     item = $('#product-select').select2('data')[0];
     var productId = item.id;
     var itemName = item.name;
     var quantity = $("#quantityBought").val();
     var unitPrice = $("#unitPrice").val();
     var sellingPrice = item.sellingPrice;;
-    var avQuantity = item.availableQuantity;
+    var avQuantity = item.quantity;
     var taxAmount = item.tax;
     quantity = parseFloat(quantity)
     avQuantity = parseFloat(avQuantity)
     var discount = sellingPrice - unitPrice;
     if (productId === "") {
-        $("#issMsg").text("select an item first").addClass('text-danger');
+        $("#issMsg").html('<i class="fa fa-times-circle"></i> ' + " Select an item first").addClass('text-danger');
         $("#issItemId").focus();
+        return
     }
-    else if (quantity === "") {
-        $("#issMsg").text("quantity is required").addClass('text-danger');
+    else if (!quantity || quantity <= 0) {
+        $("#issMsg").html('<i class="fa fa-times-circle"></i> ' + " Quantity is required").addClass('text-danger');
         $("#quantityBought").focus();
+        return
     }
     else if (unitPrice === "") {
-        $("#issMsg").text("price is required").addClass('text-danger');
+        $("#issMsg").html('<i class="fa fa-times-circle"></i> ' + " Price is required").addClass('text-danger');
         $("#issWarehouseId").focus();
+        return
     }
     else if (quantity > avQuantity) {
-        $("#issMsg").text("available quantity is " + avQuantity).addClass('text-danger');
+        $("#issMsg").html('<i class="fa fa-times-circle"></i> ' + " Available quantity is " + avQuantity).addClass('text-danger');
         $("#quantityBought").focus();
+        return
     }
     else {
         $("#issMsg").text("");
@@ -70,11 +73,12 @@ var addItemToList = function () {
             "taxAmount": taxAmount,
             "itemName": itemName
         }
+        console.log(listItem);
         issueListItems.push(listItem);
         createIssueListTable();
         $("#issListRecords").val(JSON.stringify(issueListItems));
-        $("#quantityBought").val("");
         $('#product-select').empty();
+        $('#productListForm').trigger('reset');
     }
 };
 var createIssueListTable = function () {
@@ -86,7 +90,7 @@ var createIssueListTable = function () {
     var index = 0;
     $.each(issueListItems, function () {
         var trTotal = this.quantity * this.unitPrice;
-        var lineTax = (trTotal - this.discount) * this.taxAmount;
+        var lineTax = (trTotal * this.taxAmount * 100) / (this.taxAmount * 100 + 100);
         total += trTotal;
         totalDiscount += this.discount;
         totalTax += lineTax;
@@ -97,9 +101,9 @@ var createIssueListTable = function () {
 
     issueListItems.length > 0 ? $("#btnSumbitIss").prop("disabled", false) : $("#btnSumbitIss").prop("disabled", true);
     $("#IssueListTable").html(tr);
-    $("#issTotal").text((total + totalTax).toLocaleString());
-    $("#issDiscount").text(totalDiscount.toLocaleString());
-    $("#issTax").text(totalTax.toLocaleString());
+    $("#issTotal").text((total).toFixed(2));
+    $("#issDiscount").text(totalDiscount.toFixed(2));
+    $("#issTax").text(totalTax.toFixed(2));
 };
 
 var list = $("#issListRecords").val();
@@ -147,14 +151,14 @@ function createRow(item) {
     return '<tr>' +
         '<td>' + item.Product.Name + '</td>' +
         '<td>' + item.Quantity + '</td>' +
-        '<td>' + item.SellingPrice + '</td>' +
+        '<td>' + item.UnitPrice + '</td>' +
         '<td>' + item.Amount + '</td>'
         + '</tr>';
 }
 function appendTtRow(items) {
     let total = 0;
     for (let item of items)
-        total += (item.Quantity * item.SellingPrice)
+        total += (item.Quantity * item.UnitPrice)
 
     return '<tr>' +
         '<td></td>' +
@@ -453,15 +457,12 @@ $('.product-select-search').select2({
         processResults: function (data, params) {
             return {
                 results: $.map(data.data, function (item) {
-                    var taxRate = 0;
-                    if (item.taxRate)
-                        taxRate = item.taxRate.taxRate;
                     return {
                         text: item.code + ' - ' + item.name + ' (' + item.availableQuantity + ' ' + item.unitOfMeasure + ' )',
                         quantity: item.availableQuantity,
                         sellingPrice: item.sellingPrice,
                         id: item.id,
-                        tax: taxRate,
+                        tax: item.taxRate,
                         name: item.code + ' - ' + item.name,
                         allowDiscount: item.allowDiscount,
                         code: item.code
@@ -508,25 +509,25 @@ function addPoItem() {
     var length = document.getElementById("tablePurchaseItems").tBodies[0].rows.length;
     var id = new Date().valueOf();
     $("#purchaseOrderItemList").append("<tr id='tr_" + id + "'>"
-    + "<td><input class=''  value="+productId+" name='PurchaseOrderItems[" + length + "].ProductId' type='hidden'/>" +
-    "<input class='product-event' id='product-quantity' name= 'PurchaseOrderItems[" + length + "].Quantity' placeholder='0.00'/></td>"
-    + "<td><input class='' id='product-name' value="+itemName+" name= 'PurchaseOrderItems["+length+"].ProductName'/></td>"
-    + "<td><input class='' id='product-uom' value="+uom+" name= 'PurchaseOrderItems["+length+"].UnitOfMeasure'/></td>"
-    + "<td><input class='product-event' id='product-price' name= 'PurchaseOrderItems["+length+"].UnitPrice' placeholder='0.00'/></td>"
-    + "<td><input class='' name= 'PurchaseOrderItems["+length+"].TaxType'/></td>"
-    + "<td><input class='poTotalItems' name= 'PurchaseOrderItems["+length+"].Amount' placeholder='0.00'/></td>"
-    + "<td><button type='button' class='btn bg-red btn-block' onclick='removePoItemRow("+id+")'>Remove</button></td>"
-    + "</tr>"
+        + "<td><input class=''  value=" + productId + " name='PurchaseOrderItems[" + length + "].ProductId' type='hidden'/>" +
+        "<input class='product-event' id='product-quantity' name= 'PurchaseOrderItems[" + length + "].Quantity' placeholder='0.00'/></td>"
+        + "<td><input class='' id='product-name' value=" + itemName + " name= 'PurchaseOrderItems[" + length + "].ProductName'/></td>"
+        + "<td><input class='' id='product-uom' value=" + uom + " name= 'PurchaseOrderItems[" + length + "].UnitOfMeasure'/></td>"
+        + "<td><input class='product-event' id='product-price' name= 'PurchaseOrderItems[" + length + "].UnitPrice' placeholder='0.00'/></td>"
+        + "<td><input class='' name= 'PurchaseOrderItems[" + length + "].TaxType'/></td>"
+        + "<td><input class='poTotalItems' name= 'PurchaseOrderItems[" + length + "].Amount' placeholder='0.00'/></td>"
+        + "<td><button type='button' class='btn bg-red btn-block' onclick='removePoItemRow(" + id + ")'>Remove</button></td>"
+        + "</tr>"
     );
 
 
 }
 
-$('#purchaseOrderItemList').on('change', 'input.product-event', function(){
+$('#purchaseOrderItemList').on('change', 'input.product-event', function () {
     let amount = 0.00;
     let quantity = $(this).closest('tr').find('#product-quantity').val();
     let price = $(this).closest('tr').find('#product-price').val();
-    if (quantity=='' || price=='') {
+    if (quantity == '' || price == '') {
         $(this).closest('tr').find('.poTotalItems').val(parseFloat(amount));
     }
     amount = price * quantity;
@@ -536,9 +537,9 @@ $('#purchaseOrderItemList').on('change', 'input.product-event', function(){
 })
 
 function updateTotal() {
-  let total = 0;
-  $('.poTotalItems').each((i, el) => total += parseFloat(el.textContent.trim() || 0));
-  $('#poTotalAmount').text('Ksh: ' + total.toFixed(2));
+    let total = 0;
+    $('.poTotalItems').each((i, el) => total += parseFloat(el.textContent.trim() || 0));
+    $('#poTotalAmount').text('Ksh: ' + total.toFixed(2));
 }
 
 removePoItemRow = function (id) {
