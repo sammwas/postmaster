@@ -1,10 +1,11 @@
 ﻿var item = {};
 var issueListItems = [];
 $("#selectedProductAdj").change(function () {
-    var item = $(this).select2('data')[0];
-    var currentQty = item.quantity;
+    item = {};
+    item = $(this).select2('data')[0];
     var productCode = item.code;
-    $('#currentQuantity').val(currentQty);
+    $('.currentQuantity').val(item.quantity);
+    $('.currentPrice').val(item.buyingPrice);
     $('#productCode').val(productCode)
 });
 
@@ -461,6 +462,7 @@ $('.product-select-search').select2({
                         text: item.code + ' - ' + item.name + ' (' + item.availableQuantity + ' ' + item.unitOfMeasure + ' )',
                         quantity: item.availableQuantity,
                         sellingPrice: item.sellingPrice,
+                        buyingPrice: item.buyingPrice,
                         id: item.id,
                         tax: item.taxRate,
                         name: item.code + ' - ' + item.name,

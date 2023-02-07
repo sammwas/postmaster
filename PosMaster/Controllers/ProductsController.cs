@@ -17,7 +17,6 @@ namespace PosMaster.Controllers
         private readonly IProductInterface _productInterface;
         private readonly UserCookieData _userData;
         private readonly FileUploadService _fileUploadService;
-        private readonly string xlsxContentType = Constants.XlsxContentType;
         private readonly IWebHostEnvironment _hostingEnvironment;
         private readonly IMasterDataInterface _masterDataInterface;
 
@@ -91,16 +90,9 @@ namespace PosMaster.Controllers
                 return View(model);
             return RedirectToAction(nameof(Index));
         }
-        public async Task<IActionResult> ProductStockAdjustment()
+        public IActionResult ProductStockAdjustment()
         {
-            var result = _userData.Role.Equals(Role.Clerk) ?
-             await _productInterface.ByInstanceIdAsync(_userData.ClientId, _userData.InstanceId) :
-             await _productInterface.ByInstanceIdAsync(_userData.ClientId);
-            var model = new ProductStockAdjustmentViewModel
-            {
-                Products = result.Data
-            };
-            return View(model);
+            return View(new ProductStockAdjustmentViewModel());
         }
 
         [HttpPost]

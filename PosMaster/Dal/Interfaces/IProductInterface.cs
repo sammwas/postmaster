@@ -116,26 +116,31 @@ namespace PosMaster.Dal.Interfaces
                     _logger.LogWarning($"{tag} adjustment failed {model.ProductId} : {result.Message}");
                     return result;
                 }
-                var count = _context.ProductStockAdjustmentLogs.Count(p => p.ProductId.Equals(product.Id));
-                var log = new ProductStockAdjustmentLog
+                var count = _context.ProductStockAdjustmentLogs
+                    .Count(p => p.ProductId.Equals(product.Id));
+                if (product.AvailableQuantity.Equals(model.QuantityTo))
                 {
-                    Code = $"{product.Code}-{count + 1}",
-                    ProductId = product.Id,
-                    QuantityFrom = product.AvailableQuantity,
-                    QuantityTo = model.QuantityTo,
-                    ClientId = model.ClientId,
-                    InstanceId = model.InstanceId,
-                    Personnel = model.Personnel,
-                    Notes = model.Notes
-                };
+                    count += 1;
+                    var log = new ProductStockAdjustmentLog
+                    {
+                        Code = $"{product.Code}-{count}",
+                        ProductId = product.Id,
+                        QuantityFrom = product.AvailableQuantity,
+                        QuantityTo = model.QuantityTo,
+                        ClientId = model.ClientId,
+                        InstanceId = model.InstanceId,
+                        Personnel = model.Personnel,
+                        Notes = model.Notes
+                    };
+                    _context.ProductStockAdjustmentLogs.Add(log);
+                }
                 product.AvailableQuantity = model.QuantityTo;
+                product.BuyingPrice = model.BuyingPriceTo;
                 product.LastModifiedBy = model.Personnel;
                 product.DateLastModified = DateTime.Now;
-                _context.ProductStockAdjustmentLogs.Add(log);
                 await _context.SaveChangesAsync();
                 result.Success = true;
                 result.Message = "Adjusted";
-                result.Data = log;
                 return result;
             }
             catch (Exception ex)
