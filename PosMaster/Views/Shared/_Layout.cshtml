@@ -65,7 +65,7 @@
                         @userData.ClientName
                         @if (User.IsInRole(Role.Clerk))
                         {
-                                        <span>(@userData.InstanceName)</span>
+                            <span>(@userData.InstanceName)</span>
                         }
                     </a>
                 </li>
@@ -74,11 +74,11 @@
                         <div class="image">
                             @if (string.IsNullOrEmpty(userData.ImagePath))
                             {
-                                            <span class="i-circle">@firstChar</span>
+                                <span class="i-circle">@firstChar</span>
                             }
                             else
                             {
-                                            <img src="~/@userData.ImagePath" width="60" height="60" class="img-circle elevation-2"
+                                <img src="~/@userData.ImagePath" width="60" height="60" class="img-circle elevation-2"
                                  alt="@userData.FirstName">
                             }
                         </div>
@@ -89,11 +89,11 @@
                             <div class="image">
                                 @if (string.IsNullOrEmpty(userData.ImagePath))
                                 {
-                                                <span class="i-circle">@firstChar</span>
+                                    <span class="i-circle">@firstChar</span>
                                 }
                                 else
                                 {
-                                                <img src="~/@userData.ImagePath" width="160" height="160" class="img-circle elevation-2"
+                                    <img src="~/@userData.ImagePath" width="160" height="160" class="img-circle elevation-2"
                                      alt="@userData.FirstName">
                                 }
                             </div>
@@ -124,11 +124,11 @@
             <a asp-controller="Dashboard" asp-action="Index" class="brand-link">
                 @if (string.IsNullOrEmpty(userData.ClientLogoPath))
                 {
-                                <span class="i-circle">@userData.ClientName?.ElementAtOrDefault(0)</span>
+                    <span class="i-circle">@userData.ClientName?.ElementAtOrDefault(0)</span>
                 }
                 else
                 {
-                                <img src="~/@userData.ClientLogoPath" alt="@userData.ClientCode" class="brand-image img-circle elevation-3"
+                    <img src="~/@userData.ClientLogoPath" alt="@userData.ClientCode" class="brand-image img-circle elevation-3"
                      style="opacity: .8">
                 }
                 <span class="brand-text font-weight-light">@userData.ClientCode</span>
@@ -137,14 +137,15 @@
                 <nav class="mt-2">
                     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
                         <li class="nav-item">
-                            <a asp-controller="Dashboard" asp-action="Index" class="nav-link">
+                            <a asp-controller="Dashboard" asp-action="Index" class="nav-link"
+                               id="MenuDashboard">
                                 <i class="nav-icon fas fa-tachometer-alt"></i>
                                 <p>
                                     Dashboard
                                 </p>
                             </a>
                         </li>
-                        <li class="nav-item has-treeview">
+                        <li class="nav-item has-treeview" id="MenuPOS">
                             <a href="#" class="nav-link">
                                 <i class="nav-icon fa fa-calculator"></i>
                                 <p>
@@ -226,121 +227,121 @@
                         </li>
                         @if (!userData.Role.Equals(Role.Clerk))
                         {
-                                        <li class="nav-item has-treeview">
-                                            <a href="#" class="nav-link">
-                                                <i class="nav-icon fas fa-users"></i>
-                                                <p>
-                                                    Human Resource
-                                                    <i class="right fas fa-angle-left"></i>
-                                                </p>
-                                            </a>
-                                            <ul class="nav nav-treeview">
-                                                <li class="nav-item">
-                                                    <a asp-controller="Users" asp-action="All" class="nav-link">
-                                                        <i class="far fa-circle nav-icon"></i>
-                                                        <p>Employees</p>
-                                                    </a>
-                                                </li>
-                                                <li class="nav-item">
-                                                    <a asp-controller="HumanResource" asp-action="EmployeeSalaries" class="nav-link">
-                                                        <i class="far fa-circle nav-icon"></i>
-                                                        <p>Employee Salaries</p>
-                                                    </a>
-                                                </li>
-                                                <li class="nav-item">
-                                                    <a asp-controller="HumanResource" asp-action="LeaveApplications"
+                            <li class="nav-item has-treeview" id="MenuHR">
+                                <a href="#" class="nav-link">
+                                    <i class="nav-icon fas fa-users"></i>
+                                    <p>
+                                        Human Resource
+                                        <i class="right fas fa-angle-left"></i>
+                                    </p>
+                                </a>
+                                <ul class="nav nav-treeview">
+                                    <li class="nav-item">
+                                        <a asp-controller="Users" asp-action="All" class="nav-link">
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>Employees</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a asp-controller="HumanResource" asp-action="EmployeeSalaries" class="nav-link">
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>Employee Salaries</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a asp-controller="HumanResource" asp-action="LeaveApplications"
                                        asp-route-dtFrom="@Helpers.firstDayOfYear.ToString("dd-MMM-yyyy")" class="nav-link">
-                                                        <i class="far fa-circle nav-icon"></i>
-                                                        <p>Leave Applications</p>
-                                                    </a>
-                                                </li>
-                                                <li class="nav-item">
-                                                    <a asp-controller="HumanResource" asp-action="LeaveCategories" class="nav-link">
-                                                        <i class="far fa-circle nav-icon"></i>
-                                                        <p>Leave Categories</p>
-                                                    </a>
-                                                </li>
-                                                <li class="nav-item">
-                                                    <a asp-controller="HumanResource" asp-action="Banks" class="nav-link">
-                                                        <i class="far fa-circle nav-icon"></i>
-                                                        <p>Banks</p>
-                                                    </a>
-                                                </li>
-                                                <li class="nav-item">
-                                                    <a asp-controller="HumanResource" asp-action="MonthlyPayments"
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>Leave Applications</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a asp-controller="HumanResource" asp-action="LeaveCategories" class="nav-link">
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>Leave Categories</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a asp-controller="HumanResource" asp-action="Banks" class="nav-link">
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>Banks</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a asp-controller="HumanResource" asp-action="MonthlyPayments"
                                        asp-route-year="@DateTime.Now.Year" asp-route-month="@DateTime.Now.Month" class="nav-link">
-                                                        <i class="far fa-circle nav-icon"></i>
-                                                        <p>Monthly Payments</p>
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        </li>
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>Monthly Payments</p>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
                         }
                         @if (User.IsInRole(Role.SuperAdmin))
                         {
-                                        <li class="nav-item has-treeview">
-                                            <a href="#" class="nav-link">
-                                                <i class="nav-icon fas fa-list"></i>
-                                                <p>
-                                                    Clients
-                                                    <i class="right fas fa-angle-left"></i>
-                                                </p>
-                                            </a>
-                                            <ul class="nav nav-treeview">
-                                                <li class="nav-item">
-                                                    <a asp-controller="Clients" asp-action="All" class="nav-link">
-                                                        <i class="far fa-circle nav-icon"></i>
-                                                        <p>View All</p>
-                                                    </a>
-                                                </li>
-                                                <li class="nav-item">
-                                                    <a asp-controller="Clients" asp-action="Edit" asp-route-id="" class="nav-link">
-                                                        <i class="far fa-circle nav-icon"></i>
-                                                        <p>Add New</p>
-                                                    </a>
-                                                </li>
-                                                <li class="nav-item">
-                                                    <a asp-controller="Clients" asp-action="Summary" class="nav-link">
-                                                        <i class="far fa-circle nav-icon"></i>
-                                                        <p>Summary</p>
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        </li>
+                            <li class="nav-item has-treeview" id="MenuClients">
+                                <a href="#" class="nav-link">
+                                    <i class="nav-icon fas fa-list"></i>
+                                    <p>
+                                        Clients
+                                        <i class="right fas fa-angle-left"></i>
+                                    </p>
+                                </a>
+                                <ul class="nav nav-treeview">
+                                    <li class="nav-item">
+                                        <a asp-controller="Clients" asp-action="All" class="nav-link">
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>View All</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a asp-controller="Clients" asp-action="Edit" asp-route-id="" class="nav-link">
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>Add New</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a asp-controller="Clients" asp-action="Summary" class="nav-link">
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>Summary</p>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
                         }
                         @if (User.IsInRole(Role.Manager) || User.IsInRole(Role.SuperAdmin))
                         {
-                                        <li class="nav-item has-treeview">
-                                            <a href="#" class="nav-link">
-                                                <i class="nav-icon fas fa-table"></i>
-                                                <p>
-                                                    Instances
-                                                    <i class="right fas fa-angle-left"></i>
-                                                </p>
-                                            </a>
-                                            <ul class="nav nav-treeview">
-                                                <li class="nav-item">
-                                                    <a asp-controller="ClientInstances" asp-action="All" class="nav-link">
-                                                        <i class="far fa-circle nav-icon"></i>
-                                                        <p>View All</p>
-                                                    </a>
-                                                </li>
-                                                <li class="nav-item">
-                                                    <a asp-controller="ClientInstances" asp-action="Edit" asp-route-id="" class="nav-link">
-                                                        <i class="far fa-circle nav-icon"></i>
-                                                        <p>Add New</p>
-                                                    </a>
-                                                </li>
-                                                <li class="nav-item">
-                                                    <a asp-controller="ClientInstances" asp-action="All" class="nav-link">
-                                                        <i class="far fa-circle nav-icon"></i>
-                                                        <p>Summary</p>
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        </li>
+                            <li class="nav-item has-treeview" id="MenuInstances">
+                                <a href="#" class="nav-link">
+                                    <i class="nav-icon fas fa-table"></i>
+                                    <p>
+                                        Instances
+                                        <i class="right fas fa-angle-left"></i>
+                                    </p>
+                                </a>
+                                <ul class="nav nav-treeview">
+                                    <li class="nav-item">
+                                        <a asp-controller="ClientInstances" asp-action="All" class="nav-link">
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>View All</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a asp-controller="ClientInstances" asp-action="Edit" asp-route-id="" class="nav-link">
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>Add New</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a asp-controller="ClientInstances" asp-action="All" class="nav-link">
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>Summary</p>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
                         }
-                        <li class="nav-item has-treeview">
+                        <li class="nav-item has-treeview" id="MenuProducts">
                             <a href="#" class="nav-link">
                                 <i class="nav-icon fas fa-th"></i>
                                 <p>
@@ -390,7 +391,7 @@
                                 </li>
                             </ul>
                         </li>
-                        <li class="nav-item has-treeview">
+                        <li class="nav-item has-treeview" id="MenuMasterData">
                             <a href="#" class="nav-link">
                                 <i class="nav-icon fa fa-database"></i>
                                 <p>
@@ -438,79 +439,79 @@
                         </li>
                         @if (User.IsInRole(Role.SuperAdmin) || User.IsInRole(Role.Manager))
                         {
-                                        <li class="nav-item has-treeview">
-                                            <a href="#" class="nav-link">
-                                                <i class="nav-icon fa fa-chart-pie"></i>
-                                                <p>
-                                                    Reports
-                                                    <i class="right fas fa-angle-left"></i>
-                                                </p>
-                                            </a>
-                                            <ul class="nav nav-treeview">
-                                                <li class="nav-item">
-                                                    <a asp-controller="Reports" asp-action="SalesReport" asp-route-dtFrom="@firstDayOfWeek"
+                            <li class="nav-item has-treeview" id="MenuReports">
+                                <a href="#" class="nav-link">
+                                    <i class="nav-icon fa fa-chart-pie"></i>
+                                    <p>
+                                        Reports
+                                        <i class="right fas fa-angle-left"></i>
+                                    </p>
+                                </a>
+                                <ul class="nav nav-treeview">
+                                    <li class="nav-item">
+                                        <a asp-controller="Reports" asp-action="SalesReport" asp-route-dtFrom="@firstDayOfWeek"
                                        asp-route-dtTo="@DateTime.Now.ToString("dd-MMM-yyyy")" asp-route-option="Weekly" class="nav-link">
-                                                        <i class="far fa-circle nav-icon"></i>
-                                                        <p>Weekly Report</p>
-                                                    </a>
-                                                </li>
-                                                <li class="nav-item">
-                                                    <a asp-controller="Reports" asp-action="SalesReport"
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>Weekly Report</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a asp-controller="Reports" asp-action="SalesReport"
                                        asp-route-dtFrom="@Helpers.firstDayOfMonth.ToString("dd-MMM-yyyy")"
                                        asp-route-dtTo="@Helpers.lastDayOfMonth.ToString("dd-MMM-yyyy")" asp-route-option="Monthly"
                                        class="nav-link">
-                                                        <i class="far fa-circle nav-icon"></i>
-                                                        <p>Monthly Report</p>
-                                                    </a>
-                                                </li>
-                                                <li class="nav-item">
-                                                    <a asp-controller="Settings" asp-action="SendTestEmail" class="nav-link">
-                                                        <i class="far fa-circle nav-icon"></i>
-                                                        <p>Send Email</p>
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        </li>
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>Monthly Report</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a asp-controller="Settings" asp-action="SendTestEmail" class="nav-link">
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>Send Email</p>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
                         }
                         @if (User.IsInRole(Role.SuperAdmin))
                         {
-                                        <li class="nav-item has-treeview">
-                                            <a href="#" class="nav-link">
-                                                <i class="nav-icon fas fa-cog"></i>
-                                                <p>
-                                                    Settings
-                                                    <i class="right fas fa-angle-left"></i>
-                                                </p>
-                                            </a>
-                                            <ul class="nav nav-treeview">
-                                                <li class="nav-item">
-                                                    <a asp-controller="Settings" asp-action="EmailSettings"
+                            <li class="nav-item has-treeview" id="MenuSettings">
+                                <a href="#" class="nav-link">
+                                    <i class="nav-icon fas fa-cog"></i>
+                                    <p>
+                                        Settings
+                                        <i class="right fas fa-angle-left"></i>
+                                    </p>
+                                </a>
+                                <ul class="nav nav-treeview">
+                                    <li class="nav-item">
+                                        <a asp-controller="Settings" asp-action="EmailSettings"
                                        class="nav-link">
-                                                        <i class="far fa-circle nav-icon"></i>
-                                                        <p>Email Settings</p>
-                                                    </a>
-                                                </li>
-                                                <li class="nav-item">
-                                                    <a asp-controller="Settings" asp-action="SendTestEmail" class="nav-link">
-                                                        <i class="far fa-circle nav-icon"></i>
-                                                        <p>Test Email</p>
-                                                    </a>
-                                                </li>
-                                                <li class="nav-item">
-                                                    <a asp-controller="Settings" asp-action="GlobalSystem" class="nav-link">
-                                                        <i class="far fa-circle nav-icon"></i>
-                                                        <p>System Settings</p>
-                                                    </a>
-                                                </li>
-                                                <li class="nav-item">
-                                                    <a asp-controller="Settings" asp-action="TermsAndPrivacy" class="nav-link">
-                                                        <i class="far fa-circle nav-icon"></i>
-                                                        <p>Home,&nbsp;Terms &amp; Privacy</p>
-                                                    </a>
-                                                </li>
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>Email Settings</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a asp-controller="Settings" asp-action="SendTestEmail" class="nav-link">
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>Test Email</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a asp-controller="Settings" asp-action="GlobalSystem" class="nav-link">
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>System Settings</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a asp-controller="Settings" asp-action="TermsAndPrivacy" class="nav-link">
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>Home,&nbsp;Terms &amp; Privacy</p>
+                                        </a>
+                                    </li>
 
-                                            </ul>
-                                        </li>
+                                </ul>
+                            </li>
                         }
                         <li class="nav-item">
                             <a asp-controller="Home" asp-action="Logout" class="nav-link">
@@ -631,7 +632,15 @@
 
         $(document).ready(function () {
           var opt = "@ViewData["Active"]";
-          $("#menu" + opt).addClass("active");
+          $("#Menu" + opt).addClass("active") .addClass("menu-open");
+          $("#Menu" + opt+">.nav-link").addClass("active")
+
+            var pathName = window.location.pathname;
+            var currLink = document.querySelectorAll("a[href='"+pathName+"']");
+            if(currLink) {
+              currLink.forEach((el) => {  el.classList.add('active'); });
+           }
+
           var message = '@TempData["Message"]';
           var title = '@TempData["Title"]';
           var type = '@TempData["Type"]';
