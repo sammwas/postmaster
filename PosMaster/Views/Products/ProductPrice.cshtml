@@ -17,7 +17,7 @@
         <div class="row">
             <div class="col-md-12">
                 <form method="get" class="form-inline" autocomplete="off">
-                    <div class="col-md-4">
+                    <div class="col-md-8">
                         <div class="form-group">
                             <label>Instance</label>
                             <select class="form-control select2" name="instId" style="width: 100%;"
@@ -52,12 +52,12 @@
                 </form>
             </div>
         </div>
-
-        <div class="row">
+        <hr />
+        <div class="">
             <form method="post" autocomplete="off" asp-action="ProductPrice">
-                <div class="col-md-12">
-                    <table id="datataTable" class="table table-bordered table-striped">
-                        <thead>
+                <div class="">
+                    <table id="dataTable" class="table table-bordered table-striped">
+                        <thead class="bg-secondary">
                             <tr>
                                 <th>Item</th>
                                 <th>Price</th>
@@ -75,7 +75,8 @@
                                 <tr id="tr_@item.Id">
                                     <td>
                                         <input type="hidden" asp-for="ProductPriceMiniViewModels[i].Id" />
-                                        <input class="" asp-for="ProductPriceMiniViewModels[i].Name" />
+                                        <input type="hidden" asp-for="ProductPriceMiniViewModels[i].Name" />
+                                        <span>@item.Code - @item.Name</span>
                                     </td>
                                     <td>
                                         <input class="" asp-for="ProductPriceMiniViewModels[i].SellingPrice" />
@@ -87,7 +88,7 @@
                                         <input type="date" class="" asp-for="ProductPriceMiniViewModels[i].PriceEndDate" />
                                     </td>
                                     <td>
-                                        <button type="button" class="btn bg-red btn-block waves-effect"
+                                        <button type="button" class="btn bg-red btn-block waves-effect btn-sm"
                                             onclick="removePriceItemRow('@item.Id')">
                                             Remove
                                         </button>
@@ -96,15 +97,15 @@
                                 i++;
                             }
                         </tbody>
-                        <tfoot>
+                        @* <tfoot class="bg-secondary">
                             <tr>
-                                <th>Item</th>
-                                <th>Price</th>
-                                <th>Start Date</th>
-                                <th>End Date</th>
-                                <th>Option</th>
+                            <th>Item</th>
+                            <th>Price</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Option</th>
                             </tr>
-                        </tfoot>
+                            </tfoot>*@
                     </table>
                 </div>
                 <input asp-for="Code" type="hidden" value="@userData.InstanceCode" />

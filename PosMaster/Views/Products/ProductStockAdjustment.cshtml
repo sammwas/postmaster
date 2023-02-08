@@ -29,17 +29,37 @@
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <div class="form-group">
-                        <label asp-for="CurrentQuantity"></label>
-                        <input asp-for="CurrentQuantity" class="form-control" value="" id="currentQuantity" readonly>
-                        <span asp-validation-for="CurrentQuantity" class="text-danger"></span>
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label>Current Qty</label>
+                                <input class="form-control currentQuantity" value="" readonly>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label>Current Buy Price</label>
+                                <input class="form-control currentPrice" value="" readonly>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <div class="form-group">
-                        <label asp-for="QuantityTo"></label>
-                        <input asp-for="QuantityTo" class="form-control">
-                        <span asp-validation-for="QuantityTo" class="text-danger"></span>
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label asp-for="QuantityTo"></label>
+                                <input asp-for="QuantityTo" class="form-control currentQuantity">
+                                <span asp-validation-for="QuantityTo" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label asp-for="BuyingPriceTo"></label>
+                                <input asp-for="BuyingPriceTo" class="form-control currentPrice">
+                                <span asp-validation-for="BuyingPriceTo" class="text-danger"></span>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="col-md-6">

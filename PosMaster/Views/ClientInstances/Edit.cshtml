@@ -1,6 +1,6 @@
 ﻿@model ClientInstanceViewModel
 @{
-    ViewData["Active"] = "Clients";
+    ViewData["Active"] = "Instances";
     var statuses = Helpers.Statuses();
     var option = Model.IsEditMode ? "Update" : "Add";
     var title = $"{option} Client instance";

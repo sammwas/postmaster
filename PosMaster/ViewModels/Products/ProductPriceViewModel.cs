@@ -21,12 +21,14 @@ namespace PosMaster.ViewModels
         public ProductPriceMiniViewModel(Product product)
         {
             Id = product.Id;
+            Code = product.Code;
             Name = product.Name;
             PriceStartDate = product.PriceStartDate.ToString("yyyy-MM-dd");
             PriceEndDate = product.PriceEndDate.HasValue ? product.PriceEndDate.Value.ToString("yyyy-MM-dd") : "";
             SellingPrice = product.SellingPrice;
         }
         public Guid Id { get; set; }
+        public string Code { get; set; }
         public string Name { get; set; }
         public string PriceStartDate { get; set; }
         public string PriceEndDate { get; set; }

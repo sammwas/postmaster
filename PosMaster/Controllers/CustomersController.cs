@@ -6,8 +6,6 @@ using PosMaster.Extensions;
 using PosMaster.Services;
 using PosMaster.ViewModels;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace PosMaster.Controllers
@@ -17,10 +15,11 @@ namespace PosMaster.Controllers
     {
         private readonly ICustomerInterface _customerInterface;
         private readonly UserCookieData _userData;
+
         public CustomersController(ICookiesService cookiesService, ICustomerInterface customerInterface)
         {
             _userData = cookiesService.Read();
-            _customerInterface = customerInterface;
+            _customerInterface = customerInterface; 
         }
         public async Task<IActionResult> ByClientId()
         {
@@ -72,6 +71,6 @@ namespace PosMaster.Controllers
         {
             var data = await _customerInterface.SearchClientCustomerAsync(_userData.ClientId, term);
             return Json(data);
-        }
-    }
+        }         
+ }
 }

@@ -117,26 +117,31 @@ namespace PosMaster.Dal.Interfaces
                     _logger.LogWarning($"{tag} adjustment failed {model.ProductId} : {result.Message}");
                     return result;
                 }
-                var count = _context.ProductStockAdjustmentLogs.Count(p => p.ProductId.Equals(product.Id));
-                var log = new ProductStockAdjustmentLog
+                var count = _context.ProductStockAdjustmentLogs
+                    .Count(p => p.ProductId.Equals(product.Id));
+                if (product.AvailableQuantity.Equals(model.QuantityTo))
                 {
-                    Code = $"{product.Code}-{count + 1}",
-                    ProductId = product.Id,
-                    QuantityFrom = product.AvailableQuantity,
-                    QuantityTo = model.QuantityTo,
-                    ClientId = model.ClientId,
-                    InstanceId = model.InstanceId,
-                    Personnel = model.Personnel,
-                    Notes = model.Notes
-                };
+                    count += 1;
+                    var log = new ProductStockAdjustmentLog
+                    {
+                        Code = $"{product.Code}-{count}",
+                        ProductId = product.Id,
+                        QuantityFrom = product.AvailableQuantity,
+                        QuantityTo = model.QuantityTo,
+                        ClientId = model.ClientId,
+                        InstanceId = model.InstanceId,
+                        Personnel = model.Personnel,
+                        Notes = model.Notes
+                    };
+                    _context.ProductStockAdjustmentLogs.Add(log);
+                }
                 product.AvailableQuantity = model.QuantityTo;
+                product.BuyingPrice = model.BuyingPriceTo;
                 product.LastModifiedBy = model.Personnel;
                 product.DateLastModified = DateTime.Now;
-                _context.ProductStockAdjustmentLogs.Add(log);
                 await _context.SaveChangesAsync();
                 result.Success = true;
                 result.Message = "Adjusted";
-                result.Data = log;
                 return result;
             }
             catch (Exception ex)
@@ -275,6 +280,14 @@ namespace PosMaster.Dal.Interfaces
                     return result;
                 }
 
+                var stamp = $"{model.InstanceId}_{model.Code}";
+                if (await _context.Products.AnyAsync(p => p.ProductInstanceStamp.Equals(stamp)))
+                {
+                    result.Message = "Exists on instance";
+                    _logger.LogInformation($"{tag} added {model.Name} - {model.Code} : {result.Message}");
+                    return result;
+                }
+
                 var product = new Product
                 {
                     Code = model.Code,
@@ -293,7 +306,8 @@ namespace PosMaster.Dal.Interfaces
                     Status = model.Status,
                     ImagePath = model.ImagePath,
                     TaxTypeId = hasTaxTypeId ? taxTypeId : (Guid?)null,
-                    PriceStartDate = DateTime.Now
+                    PriceStartDate = DateTime.Now,
+                    ProductInstanceStamp = stamp
                 };
                 product.ProductInstanceStamp = product.ProductInstanceStamp;
                 _context.Products.Add(product);
@@ -803,28 +817,27 @@ namespace PosMaster.Dal.Interfaces
                     return result;
                 }
 
-                var dataQry = _context.Products
-                    .Where(c => c.ClientId.Equals(model.ClientId) && c.InstanceId.Equals(model.InstanceId))
-                    .AsQueryable();
-                model.ProductPriceMiniViewModels.ForEach(async p =>
-                {
-                    var product = await dataQry.FirstOrDefaultAsync(c => c.Id.Equals(p.Id));
-                    if (product != null)
-                    {
-                        var hasToDate = DateTime.TryParse(p.PriceEndDate, out var endDate);
-                        product.SellingPrice = p.SellingPrice;
-                        product.PriceStartDate = DateTime.Parse(p.PriceStartDate);
-                        product.PriceEndDate = hasToDate ? endDate : (DateTime?)null;
+                model.ProductPriceMiniViewModels.ForEach(p =>
+               {
+                   var product = _context.Products
+                   .Where(c => c.ClientId.Equals(model.ClientId) && c.InstanceId.Equals(model.InstanceId))
+                   .FirstOrDefault(c => c.Id.Equals(p.Id));
+                   if (product != null)
+                   {
+                       var hasToDate = DateTime.TryParse(p.PriceEndDate, out var endDate);
+                       product.SellingPrice = p.SellingPrice;
+                       product.PriceStartDate = DateTime.Parse(p.PriceStartDate);
+                       product.PriceEndDate = hasToDate ? endDate : (DateTime?)null;
 
-                        productPriceLog.ProductId = product.Id;
-                        productPriceLog.PriceStartDate = product.PriceStartDate;
-                        productPriceLog.PriceEndDate = product.PriceEndDate;
-                        productPriceLog.PriceFrom = product.SellingPrice;
-                        productPriceLog.PriceTo = p.SellingPrice;
+                       productPriceLog.ProductId = product.Id;
+                       productPriceLog.PriceStartDate = product.PriceStartDate;
+                       productPriceLog.PriceEndDate = product.PriceEndDate;
+                       productPriceLog.PriceFrom = product.SellingPrice;
+                       productPriceLog.PriceTo = p.SellingPrice;
 
-                        priceLogs.Add(productPriceLog);
-                    }
-                });
+                       priceLogs.Add(productPriceLog);
+                   }
+               });
 
                 await _context.ProductPriceLogs.AddRangeAsync(priceLogs);
                 await _context.SaveChangesAsync();

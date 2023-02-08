@@ -21,7 +21,6 @@ namespace PosMaster.Controllers
         private readonly IProductInterface _productInterface;
         private readonly UserCookieData _userData;
         private readonly FileUploadService _fileUploadService;
-        private readonly string xlsxContentType = Constants.XlsxContentType;
         private readonly IWebHostEnvironment _hostingEnvironment;
         private readonly IMasterDataInterface _masterDataInterface;
 
@@ -95,16 +94,9 @@ namespace PosMaster.Controllers
                 return View(model);
             return RedirectToAction(nameof(Index));
         }
-        public async Task<IActionResult> ProductStockAdjustment()
+        public IActionResult ProductStockAdjustment()
         {
-            var result = _userData.Role.Equals(Role.Clerk) ?
-             await _productInterface.ByInstanceIdAsync(_userData.ClientId, _userData.InstanceId) :
-             await _productInterface.ByInstanceIdAsync(_userData.ClientId);
-            var model = new ProductStockAdjustmentViewModel
-            {
-                Products = result.Data
-            };
-            return View(model);
+            return View(new ProductStockAdjustmentViewModel());
         }
 
         [HttpPost]
@@ -283,46 +275,6 @@ namespace PosMaster.Controllers
         public IActionResult UploadExcel()
         {
             return View(new UploadExcelViewModel());
-        }
-
-        public FileContentResult DownloadTemplate()
-        {
-            try
-            {
-                var title = "Products_Upload_Template";
-                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-                var package = new ExcelPackage();
-                package.Workbook.Properties.Title = title;
-                package.Workbook.Properties.Company = _userData.ClientName;
-                package.Workbook.Properties.Author = "cassignpro@gmail.com";
-                package.Workbook.Properties.Subject = "Products Upload Template";
-
-                var headers = new List<string>
-                {
-                    "Code", "Product name", "Allow discount", "Tax rate (0.16)","Service",
-                    "Product category","Unit of measure", "Reorder level"
-                };
-
-
-                var worksheet = package.Workbook.Worksheets.Add(title);
-                const int cols = 1;
-                var index = 1;
-                foreach (var e in headers)
-                {
-                    worksheet.Cells[cols, index].Style.Font.Bold = true;
-                    worksheet.Cells[cols, index].Value = e;
-                    index++;
-                }
-                var date = DateTime.Now.ToString("dd-MMM-yyyy");
-                var unique = Guid.NewGuid().ToString("").Substring(0, 8).ToUpper();
-                var excelName = $"{title}-{unique}-{date}";
-                return File(package.GetAsByteArray(), xlsxContentType, excelName + ".xlsx");
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                return null;
-            }
         }
 
         [HttpPost]

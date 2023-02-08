@@ -48,8 +48,12 @@ namespace PosMaster.ViewModels
         public string Gender { get; set; }
         [Display(Name = "Credit Limit")]
         public decimal CreditLimit { get; set; }
-        [Display(Name = "KRA PIN No")]
+        [Display(Name = "PIN No")]
         public string PinNo { get; set; }
+        public decimal OpeningBalance { get; set; }
+        public string OpeningBalanceAsAt { get; set; }
+        [Display(Name = "ID Number")]
+        public string IdNumber { get; set; }
 
     }
 }

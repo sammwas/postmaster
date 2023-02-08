@@ -137,14 +137,15 @@
                 <nav class="mt-2">
                     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
                         <li class="nav-item">
-                            <a asp-controller="Dashboard" asp-action="Index" class="nav-link">
+                            <a asp-controller="Dashboard" asp-action="Index" class="nav-link"
+                               id="MenuDashboard">
                                 <i class="nav-icon fas fa-tachometer-alt"></i>
                                 <p>
                                     Dashboard
                                 </p>
                             </a>
                         </li>
-                        <li class="nav-item has-treeview">
+                        <li class="nav-item has-treeview" id="MenuPOS">
                             <a href="#" class="nav-link">
                                 <i class="nav-icon fa fa-calculator"></i>
                                 <p>
@@ -167,7 +168,7 @@
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a asp-controller="PointOfSale" asp-action="Invoices" asp-route-dtFrom="@Helpers.firstDayOfMonth"
+                                    <a asp-controller="PointOfSale" asp-action="Invoices" asp-route-dtFrom="@firstDayOfWeek"
                                        asp-route-dtTo="@DateTime.Now.ToString("dd-MMM-yyyy")" class="nav-link">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Invoices</p>
@@ -183,6 +184,13 @@
                                     <a asp-controller="Customers" asp-action="ByClientId" class="nav-link">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Customers</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a asp-controller="Settings" asp-action="UploadExcel" asp-route-id="@UploadExelOption.Customers"
+                                       class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Upload Customers</p>
                                     </a>
                                 </li>
                                 <li class="nav-item">
@@ -219,7 +227,7 @@
                         </li>
                         @if (!userData.Role.Equals(Role.Clerk))
                         {
-                            <li class="nav-item has-treeview">
+                            <li class="nav-item has-treeview" id="MenuHR">
                                 <a href="#" class="nav-link">
                                     <i class="nav-icon fas fa-users"></i>
                                     <p>
@@ -271,7 +279,7 @@
                         }
                         @if (User.IsInRole(Role.SuperAdmin))
                         {
-                            <li class="nav-item has-treeview">
+                            <li class="nav-item has-treeview" id="MenuClients">
                                 <a href="#" class="nav-link">
                                     <i class="nav-icon fas fa-list"></i>
                                     <p>
@@ -303,7 +311,7 @@
                         }
                         @if (User.IsInRole(Role.Manager) || User.IsInRole(Role.SuperAdmin))
                         {
-                            <li class="nav-item has-treeview">
+                            <li class="nav-item has-treeview" id="MenuInstances">
                                 <a href="#" class="nav-link">
                                     <i class="nav-icon fas fa-table"></i>
                                     <p>
@@ -333,7 +341,7 @@
                                 </ul>
                             </li>
                         }
-                        <li class="nav-item has-treeview">
+                        <li class="nav-item has-treeview" id="MenuProducts">
                             <a href="#" class="nav-link">
                                 <i class="nav-icon fas fa-th"></i>
                                 <p>
@@ -375,15 +383,15 @@
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a asp-controller="Products" asp-action="UploadExcel"
+                                    <a asp-controller="Settings" asp-action="UploadExcel" asp-route-id="@UploadExelOption.Products"
                                        class="nav-link">
                                         <i class="far fa-circle nav-icon"></i>
-                                        <p>Upload Excel</p>
+                                        <p>Upload Products</p>
                                     </a>
                                 </li>
                             </ul>
                         </li>
-                        <li class="nav-item has-treeview">
+                        <li class="nav-item has-treeview" id="MenuMasterData">
                             <a href="#" class="nav-link">
                                 <i class="nav-icon fa fa-database"></i>
                                 <p>
@@ -431,7 +439,7 @@
                         </li>
                         @if (User.IsInRole(Role.SuperAdmin) || User.IsInRole(Role.Manager))
                         {
-                            <li class="nav-item has-treeview">
+                            <li class="nav-item has-treeview" id="MenuReports">
                                 <a href="#" class="nav-link">
                                     <i class="nav-icon fa fa-chart-pie"></i>
                                     <p>
@@ -467,7 +475,7 @@
                         }
                         @if (User.IsInRole(Role.SuperAdmin))
                         {
-                            <li class="nav-item has-treeview">
+                            <li class="nav-item has-treeview" id="MenuSettings">
                                 <a href="#" class="nav-link">
                                     <i class="nav-icon fas fa-cog"></i>
                                     <p>
@@ -490,7 +498,7 @@
                                         </a>
                                     </li>
                                     <li class="nav-item">
-                                        <a asp-controller="Settings" asp-action="System" class="nav-link">
+                                        <a asp-controller="Settings" asp-action="GlobalSystem" class="nav-link">
                                             <i class="far fa-circle nav-icon"></i>
                                             <p>System Settings</p>
                                         </a>
@@ -624,7 +632,15 @@
 
         $(document).ready(function () {
           var opt = "@ViewData["Active"]";
-          $("#menu" + opt).addClass("active");
+          $("#Menu" + opt).addClass("active") .addClass("menu-open");
+          $("#Menu" + opt+">.nav-link").addClass("active")
+
+            var pathName = window.location.pathname;
+            var currLink = document.querySelectorAll("a[href='"+pathName+"']");
+            if(currLink) {
+              currLink.forEach((el) => {  el.classList.add('active'); });
+           }
+
           var message = '@TempData["Message"]';
           var title = '@TempData["Title"]';
           var type = '@TempData["Type"]';

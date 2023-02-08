@@ -14,5 +14,12 @@ namespace PosMaster.ViewModels
         [Required]
         public string InstanceIdStr { get; set; }
         public System.Collections.Generic.List<FormSelectViewModel> Result { get; set; }
+        public UploadExelOption Option { get; set; }
+    }
+
+    public enum UploadExelOption
+    {
+        Products,
+        Customers
     }
 }
