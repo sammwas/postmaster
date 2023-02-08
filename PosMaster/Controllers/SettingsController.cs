@@ -104,12 +104,13 @@ namespace PosMaster.Controllers
             return View(new EmailSettingViewModel(result.Data));
         }
 
-        public IActionResult SendTestEmail()
+        public IActionResult SendTestEmail(bool test = false)
         {
             return View(new TestEmailViewModel
             {
-                Recipient = _userData.EmailAddress,
-                Subject = $"{_userData.ClientName} Test Email - {DateTime.Now}"
+                Recipient = test ? _userData.EmailAddress : "",
+                Subject = test ? $"{_userData.ClientName} Test Email - {DateTime.Now}" : "",
+                IsTest = test
             });
         }
 

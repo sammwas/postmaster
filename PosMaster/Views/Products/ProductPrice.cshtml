@@ -2,7 +2,7 @@
 @inject ICookiesService _cookies;
 @model ProductPriceViewModel
 @{
-    ViewData["Active"] = "Product Price";
+    ViewData["Active"] = "Products";
     ViewData["Title"] = "Product Price";
     var userData = _cookies.Read();
     var instancesRes = await _instanceInterface.ByClientIdAsync(userData.ClientId);

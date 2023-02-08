@@ -1,6 +1,6 @@
 ﻿@model TestEmailViewModel
 @{
-    ViewData["Active"] = "Settings";
+    ViewData["Active"] = Model.IsTest ? "Settings" : "Reports";
     var title = $"Send Email";
     ViewData["Title"] = title;
 }
@@ -16,6 +16,7 @@
             <div class="row">
                 <div class="col-md-6">
                     <div class="form-group">
+                        <input type="hidden" asp-for="IsTest" />
                         <label asp-for="Recipient"></label>
                         <input asp-for="Recipient" class="form-control" placeholder="@User.Identity.Name">
                         <span asp-validation-for="Recipient" class="text-danger"></span>

@@ -1,95 +1,87 @@
 ﻿@model EmailSettingViewModel
 @{
-
-	if (User.IsInRole(Role.SuperAdmin))
-	{
-		ViewData["Active"] = "MasterData";
-	}
-	else
-	{
-		ViewData["Active"] = "Settings";
-	}
-	var sockets = Helpers.SocketOptions();
-	var option = Model.IsEditMode ? "Update" : "Add";
-	var title = $"{option} Email Settings";
-	ViewData["Title"] = title;
+    ViewData["Active"] = "Settings";
+    var sockets = Helpers.SocketOptions();
+    var option = Model.IsEditMode ? "Update" : "Add";
+    var title = $"{option} Email Settings";
+    ViewData["Title"] = title;
 }
 <div class="card card-primary">
-	<div class="card-header">
-		<h3 class="card-title">@ViewData["Title"]</h3>
-	</div>
+    <div class="card-header">
+        <h3 class="card-title">@ViewData["Title"]</h3>
+    </div>
 
-	<form role="form" method="post" autocomplete="off">
-		<div asp-validation-summary="All" class="text-danger"></div>
-		<input asp-for="Id" />
-		<input asp-for="IsEditMode" />
-		<input asp-for="Code" value="@DateTime.Now" type="hidden" />
-		<div class="card-body">
-			<div class="row">
-				<div class="col-md-6">
-					<div class="form-group">
-						<label asp-for="SmtpServer"></label>
-						<input asp-for="SmtpServer" class="form-control" placeholder="smtp.gmail.com">
-						<span asp-validation-for="SmtpServer" class="text-danger"></span>
-					</div>
-				</div>
-				<div class="col-md-6">
-					<div class="form-group">
-						<label asp-for="SmtpPort"></label>
-						<input asp-for="SmtpPort" class="form-control" placeholder="587">
-						<span asp-validation-for="SmtpPort" class="text-danger"></span>
-					</div>
-				</div>
-			</div>
-			<div class="row">
-				<div class="col-md-6">
-					<div class="form-group">
-						<label asp-for="SmtpUsername"></label>
-						<input asp-for="SmtpUsername" class="form-control" placeholder="johndoe@gmail.com">
-						<span asp-validation-for="SmtpUsername" class="text-danger"></span>
-					</div>
-				</div>
-				<div class="col-md-6">
-					<div class="form-group">
-						<label asp-for="SmtpPassword"></label>
-						<input asp-for="SmtpPassword" class="form-control" placeholder="********">
-						<span asp-validation-for="SmtpPassword" class="text-danger"></span>
-					</div>
-				</div>
-			</div>
-			<div class="row">
-				<div class="col-md-6">
-					<div class="form-group">
-						<label asp-for="SenderFromEmail"></label>
-						<input asp-for="SenderFromEmail" class="form-control" placeholder="noreply@client.com">
-						<span asp-validation-for="SenderFromEmail" class="text-danger"></span>
-					</div>
-				</div>
-				<div class="col-md-6">
-					<div class="form-group">
-						<label asp-for="SenderFromName"></label>
-						<input asp-for="SenderFromName" class="form-control" placeholder="POS Email">
-						<span asp-validation-for="SenderFromName" class="text-danger"></span>
-					</div>
-				</div>
-			</div>
-			<div class="row">
-				<div class="col-md-12">
-					<p><strong> Socket Option</strong></p>
-				</div>
-				@foreach (var item in sockets)
-				{
-					<div class="col-md-3">
-						<div class="form-check">
-							<input class="form-check-input" id="@item.Id" type="radio" asp-for="SocketOptions" value="@item.Id">
-							<label class="form-check-label" for="@item.Id">@item.Text</label>
-						</div>
-					</div>
-				}
-			</div>
-		</div>
-		<div class="card-footer">
-			<button type="submit" class="btn btn-primary">Submit</button>
-		</div>
-	</form>
+    <form role="form" method="post" autocomplete="off">
+        <div asp-validation-summary="All" class="text-danger"></div>
+        <input asp-for="Id" />
+        <input asp-for="IsEditMode" />
+        <input asp-for="Code" value="@DateTime.Now" type="hidden" />
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="SmtpServer"></label>
+                        <input asp-for="SmtpServer" class="form-control" placeholder="smtp.gmail.com">
+                        <span asp-validation-for="SmtpServer" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="SmtpPort"></label>
+                        <input asp-for="SmtpPort" class="form-control" placeholder="587">
+                        <span asp-validation-for="SmtpPort" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="SmtpUsername"></label>
+                        <input asp-for="SmtpUsername" class="form-control" placeholder="johndoe@gmail.com">
+                        <span asp-validation-for="SmtpUsername" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="SmtpPassword"></label>
+                        <input asp-for="SmtpPassword" class="form-control" placeholder="********">
+                        <span asp-validation-for="SmtpPassword" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="SenderFromEmail"></label>
+                        <input asp-for="SenderFromEmail" class="form-control" placeholder="noreply@client.com">
+                        <span asp-validation-for="SenderFromEmail" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="SenderFromName"></label>
+                        <input asp-for="SenderFromName" class="form-control" placeholder="POS Email">
+                        <span asp-validation-for="SenderFromName" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <p><strong> Socket Option</strong></p>
+                </div>
+                @foreach (var item in sockets)
+                {
+                    <div class="col-md-3">
+                        <div class="form-check">
+                            <input class="form-check-input" id="@item.Id" type="radio" asp-for="SocketOptions" value="@item.Id">
+                            <label class="form-check-label" for="@item.Id">@item.Text</label>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+        <div class="card-footer">
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+    </form>
 </div>
