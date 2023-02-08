@@ -1,0 +1,145 @@
+﻿@inject IMasterDataInterface _masterDataInterface;
+@inject IProductInterface _productInterface;
+@inject IClientInstanceInterface _instanceInterface;
+@inject ICookiesService _cookies;
+@model GoodsReceivedNoteViewModel;
+@{
+    ViewData["Active"] = "Products";
+    var statuses = Helpers.Statuses();
+    var title = "Receive Goods";
+    ViewData["Title"] = title;
+    var userData = _cookies.Read();
+    var ordersRes = await _productInterface.PurchaseOrdersAsync(userData.ClientId, userData.InstanceId);
+    var orders = ordersRes.Data.Where(o => o.Status.Equals(EntityStatus.Active));
+    var supplier = ViewData["Supplier"]?.ToString();
+    var instancesRes = User.IsInRole(Role.SuperAdmin) ?
+    await _instanceInterface.AllAsync()
+    : await _instanceInterface.ByClientIdAsync(userData.ClientId);
+    var instances = instancesRes.Data;
+}
+<div class="card card-primary">
+    <div class="card-header">
+        <h3 class="card-title">@ViewData["Title"]</h3>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-12">
+                <form action="">
+                    <div class="row">
+                        <div class="col-md-4"></div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label asp-for="PoId"></label>
+                                <select class="form-control select2" asp-for="PoId" style="width: 100%;">
+                                    <option value="">--Select Order No:--</option>
+                                    @foreach (var item in orders)
+                                    {
+                                        <option value="@item.Id" title="@item.Notes">
+                                            @item.Code - @item.Name
+                                        </option>
+                                    }
+                                </select>
+                                <span asp-validation-for="PoId" class="text-danger"></span>
+                            </div>
+                            <button class="btn btn-info" type="button"> Submit</button>
+                        </div>
+                        <div class="col-md-4"></div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <form action="">
+                    <div asp-validation-summary="All" class="text-danger"></div>
+                    <input asp-for="Id" />
+                    <input asp-for="ClientId" value="@userData.ClientId" />
+                    <input asp-for="InstanceId" value="@userData.InstanceId" />
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="Name"></label>
+                                <input asp-for="Name" class="form-control" placeholder="Name">
+                                <span asp-validation-for="Name" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="SupplierId"></label>
+                                <input asp-for="SupplierId" class="form-control" placeholder="Supplier"
+                                    value="@supplier">
+                                <span asp-validation-for="SupplierId" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="Notes"></label>
+                                <input asp-for="Notes" class="form-control" placeholder="Notes">
+                                <span asp-validation-for="Notes" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12">
+                        <label>Received Items</label>
+                        <table class="table table-striped" id="tablePurchaseItems">
+                            <thead>
+                                <tr>
+                                    <th>Quantity</th>
+                                    <th>Name</th>
+                                    <th>U.O.M</th>
+                                    <th>Unit Price</th>
+                                    <th>Tax</th>
+                                    <th>Total Amount</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="goodReceived">
+                                @{
+                                    var i = 0;
+                                }
+                                @foreach (var item in Model.GrnItems)
+                                {
+                                    <tr id="tr_grn@i">
+                                        <td>
+                                            <input class="" asp-for="GrnItems[i].Quantity" />
+                                        </td>
+                                        <td>
+                                            <input type="hidden" asp-for="GrnItems[i].ProductId" />
+                                            <input class="" asp-for="GrnItems[i].ProductName" />
+                                        </td>
+                                        <td>
+                                            <input class="" asp-for="GrnItems[i].UnitOfMeasure" />
+                                        </td>
+                                        <td>
+                                            <input class="" asp-for="GrnItems[i].UnitPrice" />
+                                        </td>
+                                        <td>
+                                            <input class="" asp-for="GrnItems[i].TaxType" />
+                                        </td>
+                                        <td>
+                                            <input class="" asp-for="GrnItems[i].Amount" />
+                                        </td>
+                                        <td><button type="button" class="btn btn-danger"
+                                            onclick="removeOrderItemRow(@i)">Remove</button></td>
+                                    </tr>
+                                    i++;
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    @if (Model.GrnItems.Any())
+                    {
+                        <div class="row">
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </div>
+                    }
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

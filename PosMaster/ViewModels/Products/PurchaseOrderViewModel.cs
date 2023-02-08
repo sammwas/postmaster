@@ -22,10 +22,10 @@ namespace PosMaster.ViewModels
             Name = purchaseOrder.Name;
             Code = purchaseOrder.Code;
             SupplierId = purchaseOrder.SupplierId.ToString();
-            PurchaseOrderItems = GetPoViewModels(purchaseOrder);
+            PurchaseOrderItems = GetPoProducts(purchaseOrder);
             IsEditMode = true;
         }
-        private List<PoGrnProductViewModel> GetPoViewModels(PurchaseOrder po) 
+        private List<PoGrnProductViewModel> GetPoProducts(PurchaseOrder po)
         {
             var productViewModels = new List<PoGrnProductViewModel>();
             if (po.PoGrnProducts.Any())

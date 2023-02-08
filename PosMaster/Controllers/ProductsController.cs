@@ -164,11 +164,11 @@ namespace PosMaster.Controllers
             }
 
             var model = new PurchaseOrderViewModel(result.Data);
-            return View(model);  
+            return View(model);
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditPurchaseOrder(PurchaseOrderViewModel model) 
+        public async Task<IActionResult> EditPurchaseOrder(PurchaseOrderViewModel model)
         {
             var title = "Add Purchase Order";
             if (!ModelState.IsValid)
@@ -180,8 +180,35 @@ namespace PosMaster.Controllers
             var result = await _productInterface.EditPurchaseOrderAsync(model);
             TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, title, result.Message);
             if (!result.Success)
-                return RedirectToAction(nameof(PurchaseOrders));
+                return RedirectToAction(nameof(PurchaseOrders), new { dtFrom = Helpers.FirstDayOfWeek().ToString("dd-MMM-yyyy"), dtTo = DateTime.Now.ToString("dd-MMM-yyyy") });
             return View(model);
+        }
+        public async Task<IActionResult> ReceivedGoods(string insId = "", string dtFrom = "", string dtTo = "", string search = "")
+        {
+            ViewData["InstanceId"] = insId;
+            ViewData["DtFrom"] = dtFrom;
+            ViewData["DtTo"] = dtTo;
+            ViewData["Search"] = search;
+            Guid? clientId = null;
+            Guid? instanceId = null;
+            if (!User.IsInRole(Role.SuperAdmin))
+                clientId = _userData.ClientId;
+            if (Guid.TryParse(insId, out var iId))
+                instanceId = iId;
+            var personnel = "";
+            if (User.IsInRole(Role.Clerk))
+            {
+                instanceId = _userData.InstanceId;
+                personnel = User.Identity.Name;
+            }
+            var result = await _productInterface.GoodsReceivedAsync(clientId, instanceId, dtFrom, dtTo, search, personnel);
+            if (!result.Success)
+                TempData.SetData(AlertLevel.Warning, "Received Goods", result.Message);
+            return View(result.Data);
+        }
+        public IActionResult EditReceivedGoods(Guid? id)
+        {
+            return View(new GoodsReceivedNoteViewModel { Status = EntityStatus.Active });
         }
         public async Task<IActionResult> LowStockProducts()
         {
@@ -397,6 +424,25 @@ namespace PosMaster.Controllers
                 TempData.SetData(AlertLevel.Error, tag, "Error occured. Try later");
                 return View(model);
             }
+        }
+        public async Task<IActionResult> GetPurchaseOrderDetails(string poId = "")
+        {
+            var model = new GoodsReceivedNoteViewModel { GrnItems = new List<PoGrnProductViewModel>() };
+            if (string.IsNullOrEmpty(poId))
+            {
+                return View(model);
+            }
+            var purchaseOrderId = Guid.Parse(poId);
+            var result = await _productInterface.PurchaseOrderByIdAsync(purchaseOrderId);
+            if (!result.Success)
+            {
+                TempData.SetData(AlertLevel.Warning, "Received Goods", result.Message);
+                return View(model);
+            }
+            var purchaseOrder = result.Data;
+            model.SupplierId = purchaseOrder.SupplierId.ToString();
+            model.GrnItems = model.GetPoProducts(purchaseOrder);
+            return View(model);
         }
     }
 }

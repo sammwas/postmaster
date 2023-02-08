@@ -19,6 +19,7 @@ namespace PosMaster.Dal.Interfaces
         Task<ReturnData<ProductStockAdjustmentLog>> AdjustProductStockAsync(ProductStockAdjustmentViewModel model);
         Task<ReturnData<PurchaseOrder>> AddPurchaseOrderAsync(PoViewModel model);
         Task<ReturnData<List<PurchaseOrder>>> PurchaseOrdersAsync(Guid? clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "", string personnel = "");
+        Task<ReturnData<List<GoodReceivedNote>>> GoodsReceivedAsync(Guid? clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "", string personnel = "");
         Task<ReturnData<PurchaseOrder>> PurchaseOrderByIdAsync(Guid id);
         string DocumentRefNumber(Document document, Guid clientId);
         Task<ReturnData<List<Product>>> LowStockProductsAsync(Guid? clientId, Guid? instanceId, int limit = 10);
@@ -953,6 +954,50 @@ namespace PosMaster.Dal.Interfaces
                 result.Message = "Added";
                 result.Data = purchaseOrder;
                 _logger.LogInformation($"{tag} added {purchaseOrder.Name}  {purchaseOrder.Id} : {result.Message}");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                result.ErrorMessage = ex.Message;
+                result.Message = "Error occured";
+                _logger.LogError($"{tag} {result.Message} : {ex}");
+                return result;
+            }
+        }
+
+        public async Task<ReturnData<List<GoodReceivedNote>>> GoodsReceivedAsync(Guid? clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "", string personnel = "")
+        {
+            var result = new ReturnData<List<GoodReceivedNote>> { Data = new List<GoodReceivedNote>() };
+            var tag = nameof(GoodsReceivedAsync);
+            _logger.LogInformation($"{tag} get goods received note: clientId {clientId}, instanceId {instanceId}, duration {dateFrom}-{dateTo}, search {search}");
+            try
+            {
+                var dataQuery = _context.GoodReceivedNotes
+                    .Include(r => r.Supplier)
+                    .Include(r => r.PoGrnProducts)
+                    .AsQueryable();
+                if (clientId != null)
+                    dataQuery = dataQuery.Where(r => r.ClientId.Equals(clientId.Value));
+                if (instanceId != null)
+                    dataQuery = dataQuery.Where(r => r.InstanceId.Equals(instanceId.Value));
+                var hasFromDate = DateTime.TryParse(dateFrom, out var dtFrom);
+                var hasToDate = DateTime.TryParse(dateTo, out var dtTo);
+                if (hasFromDate)
+                    dataQuery = dataQuery.Where(r => r.DateCreated.Date >= dtFrom.Date);
+                if (hasToDate)
+                    dataQuery = dataQuery.Where(r => r.DateCreated.Date <= dtTo.Date);
+                if (!string.IsNullOrEmpty(personnel))
+                    dataQuery = dataQuery.Where(r => r.Personnel.Equals(personnel));
+                if (!string.IsNullOrEmpty(search))
+                    dataQuery = dataQuery.Where(r => r.Code.ToLower().Contains(search.ToLower()));
+                var data = await dataQuery.OrderByDescending(r => r.DateCreated)
+                    .ToListAsync();
+                result.Success = data.Any();
+                result.Message = result.Success ? "Found" : "Not Found";
+                if (result.Success)
+                    result.Data = data;
+                _logger.LogInformation($"{tag} found {data.Count} goods received note");
                 return result;
             }
             catch (Exception ex)
