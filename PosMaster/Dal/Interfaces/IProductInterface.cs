@@ -28,6 +28,9 @@ namespace PosMaster.Dal.Interfaces
         Task<ReturnData<Receipt>> ReceiptByIdAsync(Guid id);
         Task<ReturnData<PurchaseOrder>> EditPurchaseOrderAsync(PurchaseOrderViewModel model);
         Task<ReturnData<string>> PrintReceiptByIdAsync(Guid id, string personnel);
+        Task<ReturnData<GoodReceivedNote>> EditGrnAsync(GoodsReceivedNoteViewModel model);
+        Task<ReturnData<GoodReceivedNote>> GrnByIdAsync(Guid id);
+        Task<ReturnData<ProductPriceLog>> ProductPriceAsync(ItemPriceViewModel model);
     }
 
     public class ProductImplementation : IProductInterface
@@ -458,6 +461,7 @@ namespace PosMaster.Dal.Interfaces
                     .Include(r => r.Supplier)
                     .Include(r => r.PoGrnProducts)
                     .ThenInclude(p => p.Product)
+                    .ThenInclude(p => p.TaxType)
                     .FirstOrDefaultAsync(p => p.Id.Equals(id));
                 result.Success = purchaseOrder != null;
                 result.Message = result.Success ? "Found" : "Not Found";
@@ -1011,6 +1015,175 @@ namespace PosMaster.Dal.Interfaces
                 if (result.Success)
                     result.Data = data;
                 _logger.LogInformation($"{tag} found {data.Count} goods received note");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                result.ErrorMessage = ex.Message;
+                result.Message = "Error occured";
+                _logger.LogError($"{tag} {result.Message} : {ex}");
+                return result;
+            }
+        }
+
+        public async Task<ReturnData<GoodReceivedNote>> EditGrnAsync(GoodsReceivedNoteViewModel model)
+        {
+            var result = new ReturnData<GoodReceivedNote> { Data = new GoodReceivedNote() };
+            var tag = nameof(EditGrnAsync);
+            _logger.LogInformation($"{tag} edit good received note");
+            try
+            {
+                if (model.IsEditMode)
+                {
+                    var dbGrn = await _context.GoodReceivedNotes
+                            .Include(r => r.Supplier)
+                            .Include(r => r.PoGrnProducts)
+                            .ThenInclude(r => r.Product)
+                            .FirstOrDefaultAsync(p => p.Id.Equals(model.Id));
+                    if (dbGrn == null)
+                    {
+                        result.Message = "Not Found";
+                        _logger.LogWarning($"{tag} update failed {model.Id} : {result.Message}");
+                        return result;
+                    }
+                    dbGrn.Code = model.Code;
+                    dbGrn.Name = model.Name;
+                    dbGrn.SupplierId = Guid.Parse(model.SupplierId);
+                    dbGrn.LastModifiedBy = model.Personnel;
+                    dbGrn.DateLastModified = DateTime.Now;
+                    dbGrn.Status = model.Status;
+                    if (!dbGrn.PoGrnProducts.Any())
+                    {
+                        result.Message = "Not Found";
+                        _logger.LogWarning($"{tag} update failed {model.Id} : {result.Message}");
+                        return result;
+                    }
+
+                    await _context.SaveChangesAsync();
+                    result.Success = true;
+                    result.Message = "Updated";
+                    result.Data = dbGrn;
+                    _logger.LogInformation($"{tag} updated {dbGrn.Name} {model.Id} : {result.Message}");
+                    return result;
+                }
+
+                var poRef = DocumentRefNumber(Document.Grn, model.ClientId);
+                var grn = new GoodReceivedNote
+                {
+                    Id = Guid.NewGuid(),
+                    ClientId = model.ClientId,
+                    InstanceId = model.InstanceId,
+                    Code = poRef,
+                    Name = model.Name,
+                    Notes = model.Notes,
+                    SupplierId = Guid.Parse(model.SupplierId),
+                    Personnel = model.Personnel
+                };
+                _context.GoodReceivedNotes.Add(grn);
+                foreach (var item in model.GrnItems)
+                {
+                    var dbProduct = await _context.Products.FirstOrDefaultAsync(d => d.Id.Equals(item.ProductId));
+                    dbProduct.AvailableQuantity = item.Quantity;
+
+                    var lineProduct = new PoGrnProduct
+                    {
+                        PurchaseOrderId = grn.Id,
+                        ProductId = item.ProductId,
+                        GrnNotes = item.Notes,
+                        GrnQuantity = item.Quantity,
+                        GrnUnitPrice = item.UnitPrice,
+                        Personnel = model.Personnel,
+                        ClientId = model.ClientId,
+                        InstanceId = model.InstanceId
+                    };
+                    _context.PoGrnProducts.Add(lineProduct);
+                }
+
+                await _context.SaveChangesAsync();
+                result.Success = true;
+                result.Message = "Added";
+                result.Data = grn;
+                _logger.LogInformation($"{tag} added {grn.Name}  {grn.Id} : {result.Message}");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                result.ErrorMessage = ex.Message;
+                result.Message = "Error occured";
+                _logger.LogError($"{tag} {result.Message} : {ex}");
+                return result;
+            }
+        }
+
+        public async Task<ReturnData<GoodReceivedNote>> GrnByIdAsync(Guid id)
+        {
+            var result = new ReturnData<GoodReceivedNote> { Data = new GoodReceivedNote() };
+            var tag = nameof(GrnByIdAsync);
+            _logger.LogInformation($"{tag} get grn by id {id}");
+            try
+            {
+                var grn = await _context.GoodReceivedNotes
+                    .Include(r => r.Supplier)
+                    .Include(r => r.PoGrnProducts)
+                    .ThenInclude(p => p.Product)
+                    .ThenInclude(p => p.TaxType)
+                    .FirstOrDefaultAsync(p => p.Id.Equals(id));
+                result.Success = grn != null;
+                result.Message = result.Success ? "Found" : "Not Found";
+                if (result.Success)
+                    result.Data = grn;
+                _logger.LogInformation($"{tag} found purchase order {grn.Code}");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                result.ErrorMessage = ex.Message;
+                result.Message = "Error occured";
+                _logger.LogError($"{tag} {result.Message} : {ex}");
+                return result;
+            }
+        }
+        public async Task<ReturnData<ProductPriceLog>> ProductPriceAsync(ItemPriceViewModel model)
+        {
+            var result = new ReturnData<ProductPriceLog> { Data = new ProductPriceLog() };
+            var tag = nameof(ProductPriceAsync);
+            _logger.LogInformation($"{tag} set price for product {model.ProductId}");
+            try
+            {
+                var product = await _context.Products
+                    .FirstOrDefaultAsync(p => p.Id.Equals(Guid.Parse(model.ProductId)));
+                if (product == null)
+                {
+                    result.Message = "Not Found";
+                    _logger.LogWarning($"{tag} price set failed {model.ProductId} : {result.Message}");
+                    return result;
+                }
+                var log = new ProductPriceLog
+                {
+                    Code = $"{product.Code}",
+                    ProductId = product.Id,
+                    PriceFrom = product.SellingPrice,
+                    PriceTo = model.SellingPrice,
+                    ClientId = model.ClientId,
+                    InstanceId = model.InstanceId,
+                    Personnel = model.Personnel,
+                    Notes = model.Notes
+                };
+
+                var hasToDate = DateTime.TryParse(model.PriceEndDateStr, out var endDate);
+                product.SellingPrice = model.SellingPrice;
+                product.PriceStartDate = DateTime.Parse(model.PriceStartDateStr);
+                product.PriceEndDate = hasToDate ? endDate : (DateTime?)null;
+
+                _context.ProductPriceLogs.Add(log);
+                product.LastModifiedBy = model.Personnel;
+                product.DateLastModified = DateTime.Now;
+                await _context.SaveChangesAsync();
+                result.Success = true;
+                result.Message = "Price Set";
                 return result;
             }
             catch (Exception ex)

@@ -172,8 +172,9 @@ namespace PosMaster.Controllers
             var result = await _productInterface.EditPurchaseOrderAsync(model);
             TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, title, result.Message);
             if (!result.Success)
-                return RedirectToAction(nameof(PurchaseOrders), new { dtFrom = Helpers.FirstDayOfWeek().ToString("dd-MMM-yyyy"), dtTo = DateTime.Now.ToString("dd-MMM-yyyy") });
-            return View(model);
+                return View(model);
+
+            return RedirectToAction(nameof(PurchaseOrders), new { dtFrom = Helpers.FirstDayOfWeek().ToString("dd-MMM-yyyy"), dtTo = DateTime.Now.ToString("dd-MMM-yyyy") });
         }
         public async Task<IActionResult> ReceivedGoods(string insId = "", string dtFrom = "", string dtTo = "", string search = "")
         {
@@ -198,9 +199,54 @@ namespace PosMaster.Controllers
                 TempData.SetData(AlertLevel.Warning, "Received Goods", result.Message);
             return View(result.Data);
         }
-        public IActionResult EditReceivedGoods(Guid? id)
+        public async Task<IActionResult> EditReceivedGoods(Guid? id)
         {
-            return View(new GoodsReceivedNoteViewModel { Status = EntityStatus.Active });
+            var model = new GoodsReceivedNoteViewModel { Status = EntityStatus.Active };
+            if (string.IsNullOrEmpty(id.ToString()))
+                return View(model);
+            ViewData["OrderId"] = id.Value.ToString();
+            var result = await _productInterface.GrnByIdAsync(id.Value);
+            if (result.Success)
+            {
+                var grnViewModel = new GoodsReceivedNoteViewModel(result.Data);
+                ViewData["Supplier"] = result.Data.Supplier.Name;
+                return View(grnViewModel);
+            }
+            var order = await _productInterface.PurchaseOrderByIdAsync(id.Value);
+            var po = order.Data;
+            model.GrnItems = model.GetPoProducts(po);
+            model.PoId = po.Id.ToString();
+            model.SupplierId = po.SupplierId.ToString();
+            ViewData["Supplier"] = po.Supplier.Name;
+            return View(model);
+        }
+        public IActionResult GetPurchaseOrderDetails(string poId = "")
+        {
+            if (string.IsNullOrEmpty(poId))
+            {
+                return RedirectToAction(nameof(EditReceivedGoods), new { id = "" });
+
+            }
+            var purchaseOrderId = Guid.Parse(poId);
+            return RedirectToAction(nameof(EditReceivedGoods), new { id = purchaseOrderId });
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditReceivedGoods(GoodsReceivedNoteViewModel model)
+        {
+            var title = "Add Goods Received Note";
+            if (!ModelState.IsValid)
+            {
+                var message = "Missing fields";
+                TempData.SetData(AlertLevel.Warning, title, message);
+                return View(model);
+            }
+            var result = await _productInterface.EditGrnAsync(model);
+            TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, title, result.Message);
+            if (!result.Success)
+                return View(model);
+
+            return RedirectToAction(nameof(ReceivedGoods), new { dtFrom = Helpers.FirstDayOfWeek().ToString("dd-MMM-yyyy"), dtTo = DateTime.Now.ToString("dd-MMM-yyyy") });
         }
         public async Task<IActionResult> LowStockProducts()
         {
@@ -377,24 +423,31 @@ namespace PosMaster.Controllers
                 return View(model);
             }
         }
-        public async Task<IActionResult> GetPurchaseOrderDetails(string poId = "")
+        public IActionResult ItemPrice()
         {
-            var model = new GoodsReceivedNoteViewModel { GrnItems = new List<PoGrnProductViewModel>() };
-            if (string.IsNullOrEmpty(poId))
-            {
-                return View(model);
-            }
-            var purchaseOrderId = Guid.Parse(poId);
-            var result = await _productInterface.PurchaseOrderByIdAsync(purchaseOrderId);
-            if (!result.Success)
-            {
-                TempData.SetData(AlertLevel.Warning, "Received Goods", result.Message);
-                return View(model);
-            }
-            var purchaseOrder = result.Data;
-            model.SupplierId = purchaseOrder.SupplierId.ToString();
-            model.GrnItems = model.GetPoProducts(purchaseOrder);
-            return View(model);
+            return View(new ItemPriceViewModel());
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ItemPrice(ItemPriceViewModel model)
+        {
+            model.ClientId = _userData.ClientId;
+            model.InstanceId = _userData.InstanceId;
+            model.Personnel = User.Identity.Name;
+            var title = "Product Price";
+            if (!ModelState.IsValid)
+            {
+                var message = "Missing fields";
+                TempData.SetData(AlertLevel.Warning, title, message);
+                return View(model);
+            }
+            var result = await _productInterface.ProductPriceAsync(model);
+            TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, title, result.Message);
+            if (!result.Success)
+                return View(model);
+            return RedirectToAction(nameof(Index));
+        }
+
     }
 }

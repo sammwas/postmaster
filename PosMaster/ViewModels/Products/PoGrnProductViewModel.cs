@@ -13,12 +13,12 @@ namespace PosMaster.ViewModels
         {
             ProductId = product.ProductId;
             DocumentId = isPo ? product.PurchaseOrderId : (Guid)product.GoodReceivedNoteId;
-            UnitPrice = isPo ? product.PoUnitPrice : product.GrnUnitPrice;
+            UnitPrice = product.PoUnitPrice;
             Quantity = isPo ? product.PoQuantity : product.GrnQuantity;
             Notes = isPo ? product.PoNotes : product.GrnNotes;
             ProductName = product.Product == null ? "" : $"{product.Product.Code} - {product.Product.Name}";
             UnitOfMeasure = product.Product != null ? product.Product.UnitOfMeasure : "";
-            TaxType = product.Product.TaxType.Name;
+            TaxType = product.Product.TaxType != null ? product.Product.TaxType.Name : "";
         }
 
         public Guid DocumentId { get; set; }

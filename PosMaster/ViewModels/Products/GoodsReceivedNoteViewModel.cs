@@ -16,7 +16,6 @@ namespace PosMaster.ViewModels
         [Display(Name = "Supplier")]
         public string SupplierId { get; set; }
         [Required]
-        [Display(Name = "Order No.")]
         public string PoId { get; set; }
         public List<PoGrnProductViewModel> GrnItems { get; set; } = new List<PoGrnProductViewModel>();
         public GoodsReceivedNoteViewModel()
@@ -42,14 +41,16 @@ namespace PosMaster.ViewModels
             }
             return productViewModels;
         }
-        public List<PoGrnProductViewModel> GetPoProducts(PurchaseOrder purchaseOrder) 
+        public List<PoGrnProductViewModel> GetPoProducts(PurchaseOrder purchaseOrder)
         {
             var products = new List<PoGrnProductViewModel>();
             if (purchaseOrder.PoGrnProducts.Any())
             {
                 foreach (var item in purchaseOrder.PoGrnProducts)
                 {
-                    products.Add(new PoGrnProductViewModel(item, false));
+                    var product = new PoGrnProductViewModel(item, false);
+                    product.Quantity = item.PoQuantity;
+                    products.Add(product);
                 }
             }
             return products;

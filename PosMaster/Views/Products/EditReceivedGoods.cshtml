@@ -11,6 +11,7 @@
     var userData = _cookies.Read();
     var ordersRes = await _productInterface.PurchaseOrdersAsync(userData.ClientId, userData.InstanceId);
     var orders = ordersRes.Data.Where(o => o.Status.Equals(EntityStatus.Active));
+    var orderId = ViewData["OrderId"]?.ToString();
     var supplier = ViewData["Supplier"]?.ToString();
     var instancesRes = User.IsInRole(Role.SuperAdmin) ?
     await _instanceInterface.AllAsync()
@@ -24,24 +25,30 @@
     <div class="card-body">
         <div class="row">
             <div class="col-md-12">
-                <form action="">
+                <form asp-controller="Products" asp-action="GetPurchaseOrderDetails" method="get">
                     <div class="row">
                         <div class="col-md-4"></div>
                         <div class="col-md-4">
                             <div class="form-group">
-                                <label asp-for="PoId"></label>
-                                <select class="form-control select2" asp-for="PoId" style="width: 100%;">
+                                <label>Order No:</label>
+                                <select class="form-control select2" name="poId" style="width: 100%;">
                                     <option value="">--Select Order No:--</option>
                                     @foreach (var item in orders)
                                     {
+                                        @if (!string.IsNullOrEmpty(orderId) && item.Id.ToString().Equals(orderId))
+                                        {
+                                            <option selected="selected" value="@item.Id" title="@item.Notes">
+                                                @item.Code - @item.Name
+                                            </option>
+                                        }
                                         <option value="@item.Id" title="@item.Notes">
                                             @item.Code - @item.Name
                                         </option>
                                     }
                                 </select>
-                                <span asp-validation-for="PoId" class="text-danger"></span>
+                                <span class="text-danger"></span>
                             </div>
-                            <button class="btn btn-info" type="button"> Submit</button>
+                            <button class="btn btn-info" type="submit"> Submit</button>
                         </div>
                         <div class="col-md-4"></div>
                     </div>
@@ -51,11 +58,13 @@
 
         <div class="row">
             <div class="col-md-12">
-                <form action="">
+                <form role="form" method="post" autocomplete="off">
                     <div asp-validation-summary="All" class="text-danger"></div>
-                    <input asp-for="Id" />
                     <input asp-for="ClientId" value="@userData.ClientId" />
                     <input asp-for="InstanceId" value="@userData.InstanceId" />
+                    <input asp-for="PoId" type="hidden" />
+                    <input asp-for="Code" type="hidden" value="@userData.InstanceCode" />
+                    <input asp-for="SupplierId" type="hidden" />
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
@@ -66,10 +75,8 @@
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label asp-for="SupplierId"></label>
-                                <input asp-for="SupplierId" class="form-control" placeholder="Supplier"
-                                    value="@supplier">
-                                <span asp-validation-for="SupplierId" class="text-danger"></span>
+                                <label>Supplier</label>
+                                <input class="form-control" placeholder="Supplier" value="@supplier" disabled>
                             </div>
                         </div>
                     </div>
@@ -83,7 +90,7 @@
                         </div>
                     </div>
 
-                    <div class="col-md-12">
+                    <div class="col-md-12 table-responsive">
                         <label>Received Items</label>
                         <table class="table table-striped" id="tablePurchaseItems">
                             <thead>
@@ -131,13 +138,9 @@
                             </tbody>
                         </table>
                     </div>
-
-                    @if (Model.GrnItems.Any())
-                    {
-                        <div class="row">
-                            <button type="submit" class="btn btn-primary">Submit</button>
-                        </div>
-                    }
+                    <div class="row">
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
                 </form>
             </div>
         </div>

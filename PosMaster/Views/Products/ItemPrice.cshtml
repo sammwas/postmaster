@@ -1,0 +1,66 @@
+﻿@inject IProductInterface _productInterface;
+@inject IClientInstanceInterface _instanceInterface;
+@inject ICookiesService _cookies;
+@model ItemPriceViewModel;
+@{
+    ViewData["Active"] = "Products";
+    var statuses = Helpers.Statuses();
+    var title = $"Product Price";
+    ViewData["Title"] = title;
+    var userData = _cookies.Read();
+}
+<div class="card card-primary">
+    <div class="card-header">
+        <h3 class="card-title">@ViewData["Title"]</h3>
+    </div>
+
+    <form role="form" method="post" autocomplete="off">
+        <div asp-validation-summary="All" class="text-danger"></div>
+        <input asp-for="Id" />
+        <input asp-for="IsEditMode" />
+        <input type="hidden" id="productCode" asp-for="Code" />
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="row">
+                        <div class="col-8">
+                            <div class="form-group">
+                                <label asp-for="ProductId"></label>
+                                <select class="form-control select2 product-select-search" asp-for="ProductId"
+                                    style="width: 100%;" id="selectedProductAdj">
+                                    <option value="">--Select Product--</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label asp-for="SellingPrice"></label>
+                                <input asp-for="SellingPrice" class="form-control currentPrice">
+                                <span asp-validation-for="SellingPrice" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label asp-for="PriceStartDate"></label>
+                                <input type="date" class="form-control" asp-for="PriceStartDate" />
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label asp-for="PriceEndDate"></label>
+                                <input type="date" class="form-control" asp-for="PriceEndDate" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+    </form>
+</div>
