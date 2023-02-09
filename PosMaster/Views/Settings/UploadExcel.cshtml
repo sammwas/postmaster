@@ -2,7 +2,7 @@
 @inject ICookiesService _cookies;
 @model UploadExcelViewModel
 @{
-    ViewData["Active"] = "Products";
+    ViewData["Active"] = Model.Option.Equals(UploadExelOption.Products) ? "Products" : "POS";
     var title = $"Upload Excel";
     ViewData["Title"] = title;
     var userData = _cookies.Read();

@@ -1,62 +1,62 @@
 ﻿@inject ISystemSettingInterface _sysSettings;
 @{
-	var settingRes = await _sysSettings.ReadAsync();
-	var settings = settingRes.Data;
+    var settingRes = await _sysSettings.ReadAsync();
+    var settings = settingRes.Data;
 }
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="utf-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>@settings.Name | @ViewData["Title"]</title>
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<link rel="stylesheet" href="~/plugins/fontawesome-free/css/all.min.css">
-	<link rel="stylesheet" href="~/plugins/icheck-bootstrap/icheck-bootstrap.min.css">
-	<link rel="stylesheet" href="~/dist/css/adminlte.min.css">
-	<link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
-	<link href="~/lib/toastr/toastr.min.css" rel="stylesheet">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>@settings.Name | @ViewData["Title"]</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="~/plugins/fontawesome-free/css/all.min.css">
+    <link rel="stylesheet" href="~/plugins/icheck-bootstrap/icheck-bootstrap.min.css">
+    <link rel="stylesheet" href="~/dist/css/adminlte.min.css">
+    <link rel="stylesheet" href="~/lib/google-fonts/SourceSansPro.css">
+    <link href="~/lib/toastr/toastr.min.css" rel="stylesheet">
 </head>
 <body class="hold-transition login-page">
-	<div class="login-box">
-		<div class="login-logo">
-			<a asp-action="Index"><b>@settings.Name</b> @settings.Version</a>
-		</div>
-		<div class="card">
-			<div class="card-body login-card-body">
-				<p class="login-box-msg"><strong>@ViewData["Title"]</strong></p>
-				<div>
-					@RenderBody()
-				</div>
-			</div>
-			<hr />
-			<p class="text-center">
-				&copy; @DateTime.Now.Year @settings.Name . All rights Reserved. <br />
-				<a asp-controller="Home" asp-action="Privacy">Privacy</a> &nbsp; | &nbsp;
-				<a asp-controller="Home" asp-action="Terms">Terms &amp; Conditions </a>
-			</p>
-		</div>
-	</div>
-	<partial name="_CookieConsentPartial" />
-	<script src="~/plugins/jquery/jquery.min.js"></script>
-	<script src="~/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-	<script src="~/dist/js/adminlte.min.js"></script>
-	<script src="~/lib/toastr/toastr.min.js"></script>
-	<script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
-	<script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
-	<script>
-    $(document).ready(function () {
-    var message = '@TempData["Message"]';
-    var title = '@TempData["Title"]';
-    var type = '@TempData["Type"]';
-    if (message.length > 0) {
-        if (type === 'Success')
-            toastr.success(message, title);
-        else if (type === 'Error')
-            toastr.error(message, title);
-        else
-            toastr.warning(message, title);
-        }
-  });
-	</script>
+    <div class="login-box">
+        <div class="login-logo">
+            <a asp-action="Index"><b>@settings.Name</b> @settings.Version</a>
+        </div>
+        <div class="card">
+            <div class="card-body login-card-body">
+                <p class="login-box-msg"><strong>@ViewData["Title"]</strong></p>
+                <div>
+                    @RenderBody()
+                </div>
+            </div>
+            <hr />
+            <p class="text-center">
+                &copy; @DateTime.Now.Year @settings.Name . All rights Reserved. <br />
+                <a asp-controller="Home" asp-action="Privacy">Privacy</a> &nbsp; | &nbsp;
+                <a asp-controller="Home" asp-action="Terms">Terms &amp; Conditions </a>
+            </p>
+        </div>
+    </div>
+    <partial name="_CookieConsentPartial" />
+    <script src="~/plugins/jquery/jquery.min.js"></script>
+    <script src="~/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="~/dist/js/adminlte.min.js"></script>
+    <script src="~/lib/toastr/toastr.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+    <script>
+          $(document).ready(function () {
+          var message = '@TempData["Message"]';
+          var title = '@TempData["Title"]';
+          var type = '@TempData["Type"]';
+          if (message.length > 0) {
+              if (type === 'Success')
+                  toastr.success(message, title);
+              else if (type === 'Error')
+                  toastr.error(message, title);
+              else
+                  toastr.warning(message, title);
+              }
+        });
+    </script>
 </body>
 </html>

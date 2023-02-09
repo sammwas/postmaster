@@ -17,15 +17,18 @@
     <link href="~/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link href="~/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
     <link href="~/vendor/simple-line-icons/css/simple-line-icons.css" rel="stylesheet" type="text/css">
-    <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic,700italic" rel="stylesheet"
-          type="text/css">
+    <link rel="stylesheet" href="~/lib/google-fonts/SourceSansPro.css">
     <link href="~/css/landing-page.css" rel="stylesheet">
 </head>
 
 <body>
     <nav class="navbar navbar-light bg-light static-top">
         <div class="container">
-            <a class="navbar-brand" asp-controller="Home" asp-action="Index"><strong>@settings.Name</strong></a>
+            <a class="navbar-brand" asp-controller="Home" asp-action="Index">
+                <h4>
+                    <i class="icon-home icons"></i>  @settings.Name
+                </h4>
+            </a>
             @if (!_signInManager.IsSignedIn(User))
             {
                 <a asp-controller="Home" asp-action="Login" asp-route-returnUrl="@ViewData["ReturnUrl"]"
@@ -33,7 +36,12 @@
             }
             else
             {
-                <a asp-controller="Home" asp-action="Logout" class="btn btn-secondary"><i class="icon-logout icons"></i> Log out now</a>
+                <div class="">
+                    <a asp-controller="Dashboard" asp-action="Index"
+                   class="btn btn-primary"><i class="icon-speedometer icons"></i> Back to Dashboard </a>
+                    <span>&nbsp;</span>
+                    <a asp-controller="Home" asp-action="Logout" class="btn btn-secondary"><i class="icon-logout icons"></i> Log out now</a>
+                </div>
             }
         </div>
     </nav>

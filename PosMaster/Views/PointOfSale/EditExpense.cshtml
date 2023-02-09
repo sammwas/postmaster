@@ -2,7 +2,7 @@
 @inject IMasterDataInterface _masterDataInterface;
 @inject ICookiesService _cookies;
 @{
-    ViewData["Active"] = "Expenses";
+    ViewData["Active"] = "POS";
     var statuses = Helpers.Statuses();
     var option = Model.IsEditMode ? "Update" : "Add";
     var title = $"{option} Expense";
