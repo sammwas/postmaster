@@ -362,7 +362,7 @@ if (x) {
     $.get('/Products/LowStockProducts').done(function (data) {
         if (data.success) {
             data.data.forEach(element => {
-                ul.append('<li><span class= "text">[' + element.code + ']' + element.name + ' [Av. ' + element.availableQuantity + ' ' + element.unitOfMeasure
+                ul.append('<li><span class= "text">[' + element.code + ']' + element.name + ' [Qty ' + element.availableQuantity + ' ' + element.unitOfMeasure
                     + ']</span > <small class="badge badge-info">' + element.productCategory.name + '</small>  </li >');
             });
         }

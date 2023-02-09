@@ -81,11 +81,27 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-md-12">
+                <div class="col-md-6">
                     <div class="form-group">
                         <label asp-for="Notes"></label>
                         <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Notes"></textarea>
                         <span asp-validation-for="Notes" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="Status"></label>
+                        <div class="row">
+                            @foreach (var item in statuses)
+                            {
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" id="@item.Id" type="radio" asp-for="Status" value="@item.Id">
+                                        <label class="form-check-label" for="@item.Id">@item.Text</label>
+                                    </div>
+                                </div>
+                            }
+                        </div>
                     </div>
                 </div>
             </div>
