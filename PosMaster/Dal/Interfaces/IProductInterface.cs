@@ -31,6 +31,7 @@ namespace PosMaster.Dal.Interfaces
         Task<ReturnData<GoodReceivedNote>> EditGrnAsync(GoodsReceivedNoteViewModel model);
         Task<ReturnData<GoodReceivedNote>> GrnByIdAsync(Guid id);
         Task<ReturnData<ProductPriceLog>> ProductPriceAsync(ItemPriceViewModel model);
+        Task<ReturnData<ProductDataViewModel>> ProductDetailsAsync(string productCode, Guid instanceId);
     }
 
     public class ProductImplementation : IProductInterface
@@ -992,7 +993,6 @@ namespace PosMaster.Dal.Interfaces
             {
                 var dataQuery = _context.GoodReceivedNotes
                     .Include(r => r.Supplier)
-                    .Include(r => r.PoGrnProducts)
                     .AsQueryable();
                 if (clientId != null)
                     dataQuery = dataQuery.Where(r => r.ClientId.Equals(clientId.Value));
@@ -1038,8 +1038,6 @@ namespace PosMaster.Dal.Interfaces
                 {
                     var dbGrn = await _context.GoodReceivedNotes
                             .Include(r => r.Supplier)
-                            .Include(r => r.PoGrnProducts)
-                            .ThenInclude(r => r.Product)
                             .FirstOrDefaultAsync(p => p.Id.Equals(model.Id));
                     if (dbGrn == null)
                     {
@@ -1126,9 +1124,7 @@ namespace PosMaster.Dal.Interfaces
             {
                 var grn = await _context.GoodReceivedNotes
                     .Include(r => r.Supplier)
-                    .Include(r => r.PoGrnProducts)
-                    .ThenInclude(p => p.Product)
-                    .ThenInclude(p => p.TaxType)
+                    .Include(p => p.PoGrnProducts)
                     .FirstOrDefaultAsync(p => p.Id.Equals(id));
                 result.Success = grn != null;
                 result.Message = result.Success ? "Found" : "Not Found";
@@ -1161,6 +1157,10 @@ namespace PosMaster.Dal.Interfaces
                     _logger.LogWarning($"{tag} price set failed {model.ProductId} : {result.Message}");
                     return result;
                 }
+                var hasToDate = DateTime.TryParse(model.PriceEndDateStr, out var endDate);
+                product.SellingPrice = model.SellingPrice;
+                product.PriceStartDate = DateTime.Parse(model.PriceStartDateStr);
+                product.PriceEndDate = hasToDate ? endDate : (DateTime?)null;
                 var log = new ProductPriceLog
                 {
                     Code = $"{product.Code}",
@@ -1170,20 +1170,70 @@ namespace PosMaster.Dal.Interfaces
                     ClientId = model.ClientId,
                     InstanceId = model.InstanceId,
                     Personnel = model.Personnel,
-                    Notes = model.Notes
+                    Notes = model.Notes,
+                    PriceStartDate = product.PriceStartDate,
+                    PriceEndDate = product.PriceEndDate,
                 };
-
-                var hasToDate = DateTime.TryParse(model.PriceEndDateStr, out var endDate);
-                product.SellingPrice = model.SellingPrice;
-                product.PriceStartDate = DateTime.Parse(model.PriceStartDateStr);
-                product.PriceEndDate = hasToDate ? endDate : (DateTime?)null;
-
                 _context.ProductPriceLogs.Add(log);
                 product.LastModifiedBy = model.Personnel;
                 product.DateLastModified = DateTime.Now;
                 await _context.SaveChangesAsync();
                 result.Success = true;
                 result.Message = "Price Set";
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                result.ErrorMessage = ex.Message;
+                result.Message = "Error occured";
+                _logger.LogError($"{tag} {result.Message} : {ex}");
+                return result;
+            }
+        }
+
+        public async Task<ReturnData<ProductDataViewModel>> ProductDetailsAsync(string productCode, Guid instanceId)
+        {
+            var tag = nameof(ProductDetailsAsync);
+            _logger.LogInformation($"{tag} get product data for {productCode} in {instanceId}");
+            var result = new ReturnData<ProductDataViewModel> { Data = new ProductDataViewModel() };
+            try
+            {
+                if (string.IsNullOrEmpty(productCode))
+                {
+                    result.Message = result.Data.Message = "Product code is required";
+                    return result;
+                }
+                productCode = productCode.ToLower();
+                var product = await _context.Products
+                    .Include(p => p.ProductCategory).Include(p => p.TaxType)
+                    .Where(p => p.InstanceId.Equals(instanceId))
+                    .Where(p => p.Code.ToLower().Equals(productCode))
+                    .FirstOrDefaultAsync();
+                if (product == null)
+                {
+                    result.Message = result.Data.Message = $" {productCode } Not found";
+                    _logger.LogWarning($"{tag} get product details failed {productCode} : {result.Message}");
+                    return result;
+                }
+
+                result.Success = result.Data.Success = true;
+                result.Message = result.Data.Message = "Found";
+                result.Data.Product = product;
+                result.Data.ProductStockAdjustmentLogs = await _context.ProductStockAdjustmentLogs
+                    .Where(a => a.ProductId.Equals(product.Id))
+                    .OrderByDescending(a => a.DateCreated)
+                    .ToListAsync();
+                result.Data.ProductPriceLogs = await _context.ProductPriceLogs
+                    .Where(a => a.ProductId.Equals(product.Id))
+                    .OrderByDescending(a => a.DateCreated)
+                    .ToListAsync();
+                result.Data.TotalSales = await _context.ReceiptLineItems
+                    .Where(r => r.ProductId.Equals(product.Id))
+                    .SumAsync(r => r.Quantity * r.UnitPrice);
+                result.Data.TotalQtySold = await _context.ReceiptLineItems
+                    .Where(r => r.ProductId.Equals(product.Id))
+                    .SumAsync(r => r.Quantity);
                 return result;
             }
             catch (Exception ex)

@@ -318,6 +318,17 @@ namespace PosMaster.Controllers
             return Json(products);
         }
 
+        public async Task<IActionResult> ViewProduct(Guid id, string code = "")
+        {
+            ViewData["ProductCode"] = code;
+            var result = await _productInterface.ProductDetailsAsync(code, id);
+            if (!result.Success)
+            {
+                TempData.SetData(AlertLevel.Warning, "View Product", $"{code} {result.Message}");
+            }
+            return View(result.Data);
+        }
+
         public IActionResult UploadExcel()
         {
             return View(new UploadExcelViewModel());
