@@ -56,7 +56,7 @@
 								<option value="">--Select Product--</option>
 								@foreach (var item in products)
 								{
-									<option data-bp="@item.BuyingPrice" value="@item.Id" title="@item.Name-@item.UnitOfMeasure" data-po-name="@item.Name" data-po-uom="@item.UnitOfMeasure">@item.Code - @item.Name  (Qty @item.AvailableQuantity)</option>
+									<option data-bp="@item.BuyingPrice" value="@item.Id" title="@item.Name-@item.Uom" data-po-name="@item.Name" data-po-uom="@item.Uom">@item.Code - @item.Name  (Qty @item.AvailableQuantity)</option>
 								}
 							</select>
 						</div>

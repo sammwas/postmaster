@@ -1,16 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
-using OfficeOpenXml;
 using PosMaster.Dal;
 using PosMaster.Dal.Interfaces;
 using PosMaster.Extensions;
 using PosMaster.Services;
 using PosMaster.ViewModels;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace PosMaster.Controllers
@@ -117,7 +113,7 @@ namespace PosMaster.Controllers
             TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, title, result.Message);
             if (!result.Success)
                 return View(model);
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(ProductStockAdjustment), new { });
         }
 
         public async Task<IActionResult> PurchaseOrders(string insId = "", string dtFrom = "", string dtTo = "", string search = "")
@@ -329,111 +325,6 @@ namespace PosMaster.Controllers
             return View(result.Data);
         }
 
-        public IActionResult UploadExcel()
-        {
-            return View(new UploadExcelViewModel());
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UploadExcel(UploadExcelViewModel model)
-        {
-            var tag = "Upload excel";
-            try
-            {
-                var fileExtension = Path.GetExtension(model.File.FileName);
-                var exts = new List<string> { ".xls", ".xlsx" };
-                if (!exts.Contains(fileExtension))
-                {
-                    var fErr = $"Allowed formats {string.Join(", ", exts)}";
-                    TempData.SetData(AlertLevel.Warning, tag, fErr);
-                    ModelState.AddModelError("File", fErr);
-                    return View(model);
-                }
-
-                var personnel = User.Identity.Name;
-                var rootFolder = Path.Combine(_hostingEnvironment.WebRootPath, "uploads", $"{_userData.ClientId}");
-                if (!Directory.Exists(rootFolder))
-                    Directory.CreateDirectory(rootFolder);
-
-                var fileName = $"temp_{_userData.UserId}_upload{fileExtension}";
-                var filePath = Path.Combine(rootFolder, fileName);
-                if (System.IO.File.Exists(filePath))
-                {
-                    Console.WriteLine($"Delete exisiting File at {filePath}");
-                    System.IO.File.Delete(filePath);
-                    Console.WriteLine("Deleted");
-                }
-
-                var fileLocation = new FileInfo(filePath);
-                using (var fileStream = new FileStream(filePath, FileMode.Create))
-                {
-                    await model.File.CopyToAsync(fileStream);
-                }
-                var added = 0;
-                var totalRows = 0;
-                var prog = 1;
-                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-                using (var package = new ExcelPackage(fileLocation))
-                {
-                    var workSheet = package.Workbook.Worksheets.First();
-                    totalRows = workSheet.Dimension.Rows;
-                    for (int i = 2; i <= totalRows; i++)
-                    {
-
-                        var discount = workSheet.Cells[i, 3]?.Value?.ToString() ?? "";
-                        var tax = workSheet.Cells[i, 4]?.Value?.ToString() ?? "";
-                        var hasRate = decimal.TryParse(tax, out var rate);
-                        var taxRes = await _masterDataInterface
-                            .ByRateTaxTypeAsync(_userData.ClientId, _userData.InstanceId, hasRate ? rate : 0);
-                        var service = workSheet.Cells[i, 5]?.Value?.ToString() ?? "";
-                        var category = workSheet.Cells[i, 6]?.Value?.ToString() ?? "";
-                        var categoryRes = await _masterDataInterface
-                            .ByNameProductCategoryAsync(_userData.ClientId, _userData.InstanceId, category);
-                        var level = workSheet.Cells[i, 8]?.Value?.ToString() ?? "";
-                        var uom = workSheet.Cells[i, 7]?.Value?.ToString() ?? "";
-                        var productViewModel = new ProductViewModel
-                        {
-                            Code = workSheet.Cells[i, 1]?.Value?.ToString() ?? "",
-                            Name = workSheet.Cells[i, 2]?.Value?.ToString() ?? "",
-                            AllowDiscount = discount.ToLower().Equals("yes"),
-                            IsService = service.ToLower().Equals("yes"),
-                            UnitOfMeasure = uom.ToUpper(),
-                            ReorderLevel = string.IsNullOrEmpty(level) ? 0 : decimal.Parse(level),
-                            ProductCategoryId = categoryRes.Data.Id.ToString(),
-                            InstanceId = Guid.Parse(model.InstanceIdStr),
-                            InstanceIdStr = model.InstanceIdStr,
-                            ClientId = _userData.ClientId,
-                            TaxTypeId = taxRes.Data.Id.ToString()
-                        };
-
-                        var result = await _productInterface.EditAsync(productViewModel);
-                        var _msg = $"Processing {prog} of {totalRows} ... {result.Message}";
-                        var percentage = decimal.Divide(prog, totalRows) * 100;
-                        model.Result.Add(new FormSelectViewModel
-                        {
-                            Id = result.Success.ToString(),
-                            Text = $"{productViewModel.Code} - {result.Message}"
-                        });
-                        if (result.Success)
-                            added++;
-                        prog++;
-                    }
-
-                }
-                totalRows--;
-                System.IO.File.Delete(filePath);
-                var msg = $"Uploaded {added} out of {totalRows}";
-                TempData.SetData(added.Equals(totalRows) ? AlertLevel.Success : AlertLevel.Warning, tag, msg);
-                return View(model);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-                TempData.SetData(AlertLevel.Error, tag, "Error occured. Try later");
-                return View(model);
-            }
-        }
         public IActionResult ItemPrice()
         {
             return View(new ItemPriceViewModel());
@@ -457,7 +348,7 @@ namespace PosMaster.Controllers
             TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, title, result.Message);
             if (!result.Success)
                 return View(model);
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(ItemPrice), new { });
         }
 
     }

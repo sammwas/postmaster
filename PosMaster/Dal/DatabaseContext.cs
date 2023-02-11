@@ -47,5 +47,6 @@ namespace PosMaster.Dal
         public DbSet<EmployeeSalaryLog> EmployeeSalaryLogs { get; set; }
         public DbSet<TaxType> TaxTypes { get; set; }
         public DbSet<ProductPoQuantityLog> ProductPoQuantityLogs { get; set; }
+        public DbSet<GeneralLedgerEntry> GeneralLedgerEntries { get; set; }
     }
 }

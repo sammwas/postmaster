@@ -3,7 +3,7 @@
 @model Invoice
 @{
     ViewData["Active"] = "POS";
-    ViewData["Title"] = "Invoice";
+    ViewData["Title"] = $"Invoice - {Model.Code}";
     var user = _cookies.Read();
     var instanceRes = await _instanceInterface.ByIdAsync(Model.InstanceId);
     var customer = Model.Receipt.Customer;
@@ -16,8 +16,10 @@
                 @if (!string.IsNullOrEmpty(user.ClientLogoPath))
                 {
                     <img width="50" src="~/@user.ClientLogoPath" alt="@user.ClientCode" />
-                } @user.ClientName
-                <small class="float-right">Date: @DateTime.Now.ToString("dd-MMM-yyyy")</small>
+                }
+                <br />
+                @user.ClientName
+                <small class="float-right">Date: @Model.DateCreated.ToString("dd-MMM-yyyy")</small>
             </h4>
         </div>
     </div>
@@ -26,7 +28,7 @@
             From
             <address>
                 <strong>@instanceRes.Data.Name </strong><br>
-                @instanceRes.Data.Town, @instanceRes.Data.Location<br>
+                @instanceRes.Data.Town - @instanceRes.Data.Location<br>
                 Phone: @instanceRes.Data.PrimaryTelephone OR @instanceRes.Data.SecondaryTelephone<br>
                 Email: @instanceRes.Data.EmailAddress
             </address>

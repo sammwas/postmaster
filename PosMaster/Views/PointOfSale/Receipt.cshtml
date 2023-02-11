@@ -36,11 +36,19 @@
                 <p><b>Customer </b> @Model.Customer.FullName </p>
                 <p>
                     <b>Type </b> @saleType
+                    @if (Model.Balance > 0)
+                    {
+                        <span>(@Model.Balance)</span>
+                    }
                     @if (Model.PaymentMode != null)
                     {
                         <span>(@Model.PaymentMode.Name)</span>
                     }
                 </p>
+                @if (!string.IsNullOrEmpty(Model.PinNo))
+                {
+                    <p><b>PIN No.</b> @Model.PinNo</p>
+                }
                 <p><b>Date </b>@Model.DateCreated</p>
             </div>
         </div>

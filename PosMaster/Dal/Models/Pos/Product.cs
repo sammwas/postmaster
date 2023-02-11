@@ -13,7 +13,9 @@ namespace PosMaster.Dal
         public decimal SellingPrice { get; set; }
         public decimal ReorderLevel { get; set; }
         public decimal AvailableQuantity { get; set; }
-        public string UnitOfMeasure { get; set; }
+        public Guid? UnitOfMeasureId { get; set; }
+        public UnitOfMeasure UnitOfMeasure { get; set; }
+        public string Uom => UnitOfMeasure == null ? "--" : UnitOfMeasure.Name;
         public decimal TaxRate => TaxType == null ? 0 : TaxType.Rate;
         public DateTime PriceStartDate { get; set; }
         public DateTime? PriceEndDate { get; set; }

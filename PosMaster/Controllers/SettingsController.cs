@@ -176,8 +176,9 @@ namespace PosMaster.Controllers
                     case UploadExelOption.Products:
                         headers = new List<string>()
                          {
-                            "Code", "Product name", "Allow discount", "Tax rate (0.16)","Service",  "Product category",
-                            "Unit of measure", "Reorder level","Selling price",$"Price start date ({date})","Price end date (optional)"
+                            "Code", "Product name", "Allow discount (yes/no)", "Tax rate (0.16)","Service (yes/no)",
+                            "Product category",   "Unit of measure", "Reorder level","Buying price","Available quantity",
+                            "Selling price", $"Price start date ({date})","Price end date (optional)"
                          };
                         break;
                     case UploadExelOption.Customers:
@@ -273,8 +274,12 @@ namespace PosMaster.Controllers
                                 var categoryRes = await _masterDataInterface
                                     .ByNameProductCategoryAsync(_userData.ClientId, _userData.InstanceId, category);
                                 var uom = workSheet.Cells[i, 7]?.Value?.ToString() ?? "";
+                                var uomRes = await _masterDataInterface
+                                   .ByNameUnitOfMeasureAsync(_userData.ClientId, _userData.InstanceId, uom);
                                 var level = workSheet.Cells[i, 8]?.Value?.ToString() ?? "0";
-                                var sellingPrice = workSheet.Cells[i, 9]?.Value?.ToString() ?? "0";
+                                var buyingPrice = workSheet.Cells[i, 9]?.Value?.ToString() ?? "0";
+                                var quantity = workSheet.Cells[i, 10]?.Value?.ToString() ?? "0";
+                                var sellingPrice = workSheet.Cells[i, 11]?.Value?.ToString() ?? "0";
                                 var productViewModel = new ProductViewModel
                                 {
                                     IsExcelUpload = true,
@@ -282,7 +287,7 @@ namespace PosMaster.Controllers
                                     Name = workSheet.Cells[i, 2]?.Value?.ToString() ?? "",
                                     AllowDiscount = discount.ToLower().Equals("yes"),
                                     IsService = service.ToLower().Equals("yes"),
-                                    UnitOfMeasure = uom.ToUpper(),
+                                    UnitOfMeasureId = uomRes.Data.Id.ToString(),
                                     ReorderLevel = decimal.Parse(level),
                                     ProductCategoryId = categoryRes.Data.Id.ToString(),
                                     InstanceId = Guid.Parse(model.InstanceIdStr),
@@ -290,8 +295,10 @@ namespace PosMaster.Controllers
                                     ClientId = _userData.ClientId,
                                     TaxTypeId = taxRes.Data.Id.ToString(),
                                     SellingPrice = decimal.Parse(sellingPrice),
-                                    PriceStartDateStr = workSheet.Cells[i, 10]?.Value?.ToString() ?? "",
-                                    PriceEndDateStr = workSheet.Cells[i, 11]?.Value?.ToString() ?? "",
+                                    BuyingPrice = decimal.Parse(buyingPrice),
+                                    AvailableQuantity = decimal.Parse(quantity),
+                                    PriceStartDateStr = workSheet.Cells[i, 12]?.Value?.ToString() ?? "",
+                                    PriceEndDateStr = workSheet.Cells[i, 13]?.Value?.ToString() ?? "",
                                 };
 
                                 var resultProduct = await _productInterface.EditAsync(productViewModel);

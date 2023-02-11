@@ -43,9 +43,10 @@
         Approved,
         Rejected
     }
-    public enum ItemNature
+
+    public enum GlUserType
     {
-        Product,
-        Service
+        Customer,
+        Supplier
     }
 }

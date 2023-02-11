@@ -43,7 +43,7 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>Available Qty</label>
-                                <span>@Model.Product.AvailableQuantity @Model.Product.UnitOfMeasure</span>
+                                <span>@Model.Product.AvailableQuantity @Model.Product.Uom</span>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -179,7 +179,7 @@
                         @if (Model.Success)
                         {
                             <p>
-                                <span class="btn-block">Quantity sold:  @Model.TotalQtySold @Model.Product.UnitOfMeasure</span>
+                                <span class="btn-block">Quantity sold:  @Model.TotalQtySold @Model.Product.Uom</span>
                                 <span class="btn-block">Total sales:  @Model.TotalSales</span>
                             </p>
                             <p>

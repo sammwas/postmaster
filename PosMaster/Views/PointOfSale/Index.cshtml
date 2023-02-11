@@ -14,7 +14,7 @@
     <div class="card-header">
         <h3 class="card-title">@ViewData["Title"]</h3>
     </div>
-    <div class="row">
+    <div class="col-12 row">
         <div class="col-md-4">
             <div class="receipt-line-item">
                 <form role="form" autocomplete="off" id="productListForm">
@@ -155,7 +155,7 @@
                     <input asp-for="Code" type="hidden" value="@userData.InstanceCode" />
                     <input asp-for="InstanceId" id="instanceId" type="hidden" value="@userData.InstanceId" />
                     <input asp-for="ClientId" type="hidden" value="@userData.ClientId" />
-                    <button disabled class="btn btn-primary" type="submit" id="btnSumbitIss">
+                    <button disabled class="btn btn-primary mb-4" type="submit" id="btnSumbitIss">
                         <i class="fa fa-save"></i>
                         Submit
                     </button>

@@ -26,11 +26,11 @@ namespace PosMaster.ViewModels
             SellingPrice = product.SellingPrice;
             ReorderLevel = product.ReorderLevel;
             AvailableQuantity = product.AvailableQuantity;
-            UnitOfMeasure = product.UnitOfMeasure;
+            UnitOfMeasureId = product.UnitOfMeasureId?.ToString();
             IsEditMode = true;
             IsService = product.IsService;
             Notes = product.Notes;
-            TaxTypeId = product.TaxTypeId.ToString();
+            TaxTypeId = product.TaxTypeId?.ToString();
             InstanceIdStr = product.InstanceId.ToString();
         }
 
@@ -50,7 +50,7 @@ namespace PosMaster.ViewModels
         [Display(Name = "Available Quantity")]
         public decimal AvailableQuantity { get; set; }
         [Display(Name = "Unit of Measure")]
-        public string UnitOfMeasure { get; set; }
+        public string UnitOfMeasureId { get; set; }
         [Display(Name = "Instance")]
         [Required]
         public string InstanceIdStr { get; set; }

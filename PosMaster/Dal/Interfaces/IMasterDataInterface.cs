@@ -14,6 +14,7 @@ namespace PosMaster.Dal.Interfaces
         Task<ReturnData<ProductCategory>> EditProductCategoryAsync(ProductCategoryViewModel model);
         Task<ReturnData<ProductCategory>> ByIdProductCategoryAsync(Guid id);
         Task<ReturnData<ProductCategory>> ByNameProductCategoryAsync(Guid clientId, Guid instanceId, string categoryName);
+        Task<ReturnData<UnitOfMeasure>> ByNameUnitOfMeasureAsync(Guid clientId, Guid instanceId, string uomName);
         Task<ReturnData<List<UnitOfMeasure>>> UnitOfMeasuresAsync(Guid clientId);
         Task<ReturnData<UnitOfMeasure>> EditUnitOfMeasureAsync(UnitOfMeasureViewModel model);
         Task<ReturnData<UnitOfMeasure>> ByIdUnitOfMeasureAsync(Guid id);
@@ -205,6 +206,60 @@ namespace PosMaster.Dal.Interfaces
                 result.Success = true;
                 result.Message = "Added";
                 result.Data = productCategory;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                result.ErrorMessage = ex.Message;
+                result.Message = "Error occured";
+                _logger.LogError($"{tag} {result.Message} : {ex}");
+                return result;
+            }
+        }
+
+        public async Task<ReturnData<UnitOfMeasure>> ByNameUnitOfMeasureAsync(Guid clientId, Guid instanceId, string uomName)
+        {
+            var result = new ReturnData<UnitOfMeasure> { Data = new UnitOfMeasure() };
+            var tag = nameof(ByNameProductCategoryAsync);
+            _logger.LogInformation($"{tag} get unit of measure for {clientId} by name {uomName}");
+            try
+            {
+                if (string.IsNullOrWhiteSpace(uomName))
+                {
+                    var uom = await _context.UnitOfMeasures
+                        .Where(c => c.ClientId.Equals(clientId)).FirstAsync();
+                    result.Success = true;
+                    result.Message = "Default found";
+                    result.Data = uom;
+                    _logger.LogInformation($"{tag} default uom for client {clientId} {result.Message}");
+                    return result;
+                }
+                uomName = uomName.ToLower();
+                var dbCategory = await _context.UnitOfMeasures
+                    .FirstOrDefaultAsync(c => c.ClientId.Equals(clientId) && c.Name.ToLower().Equals(uomName));
+                if (dbCategory != null)
+                {
+
+                    result.Success = true;
+                    result.Message = "Found";
+                    result.Data = dbCategory;
+                    return result;
+                }
+                var unitOfMeasure = new UnitOfMeasure
+                {
+                    Code = $"{uomName}",
+                    Id = Guid.NewGuid(),
+                    ClientId = clientId,
+                    Name = uomName.ToUpper(),
+                    InstanceId = instanceId,
+                    Status = EntityStatus.Active
+                };
+                _context.UnitOfMeasures.Add(unitOfMeasure);
+                await _context.SaveChangesAsync();
+                result.Success = true;
+                result.Message = "Added";
+                result.Data = unitOfMeasure;
                 return result;
             }
             catch (Exception ex)

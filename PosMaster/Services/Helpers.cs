@@ -37,17 +37,6 @@ namespace PosMaster.Services
                 Text = s.ToString()
             }).ToList();
         }
-        public static List<FormSelectViewModel> ItemTypes()
-        {
-            var itemTypesList = Enum.GetValues(typeof(ItemNature))
-                .Cast<ItemNature>()
-                .ToList();
-            return itemTypesList.Select(s => new FormSelectViewModel
-            {
-                Id = s.ToString(),
-                Text = s.ToString()
-            }).ToList();
-        }
 
         public static List<FormSelectViewModel> SocketOptions()
         {

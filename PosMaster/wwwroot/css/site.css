@@ -1,28 +1,50 @@
 ﻿.i-circle {
-	background: #212529;
-	color: #fff;
-	padding: 5px 20px;
-	border-radius: 50%;
-	font-size: 1rem;
-	font-weight: 400;
+    background: #212529;
+    color: #fff;
+    padding: 5px 20px;
+    border-radius: 50%;
+    font-size: 1rem;
+    font-weight: 400;
 }
+
 td.details-control {
-	background: url('../img/open-button.png') no-repeat center center;
-	width: 10px;
-	background-size: 20px 20px;
+    background: url('../img/open-button.png') no-repeat center center;
+    width: 10px;
+    background-size: 20px 20px;
 }
 
 tr.shown td.details-control {
-	background: url('../img/close-button.png') no-repeat center center;
-	width: 10px;
-	background-size: 20px 20px;
+    background: url('../img/close-button.png') no-repeat center center;
+    width: 10px;
+    background-size: 20px 20px;
 }
+
 .customer-list {
-	display: flex;
+    display: flex;
 }
-.customer-list strong {
-	margin-right: 10px;
-}
+
+    .customer-list strong {
+        margin-right: 10px;
+    }
+
 .sales-type input {
-	margin-right: 10px;
+    margin-right: 10px;
+}
+
+.float {
+    position: fixed;
+    width: 60px;
+    height: 60px;
+    bottom: 40px;
+    right: 40px;
+    color: #fff;
+    background-color: #007bff;
+    border-color: #007bff;
+    border-radius: 50px;
+    text-align: center;
+    box-shadow: 2px 2px 3px #999;
+}
+
+.my-float {
+    margin-top: 22px;
 }

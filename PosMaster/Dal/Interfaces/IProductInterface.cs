@@ -193,6 +193,7 @@ namespace PosMaster.Dal.Interfaces
             {
                 var dataQry = _context.Products
                     .Include(c => c.ProductCategory)
+                    .Include(c => c.UnitOfMeasure)
                     .Include(p => p.TaxType)
                     .Where(c => c.ClientId.Equals(clientId))
                     .AsQueryable();
@@ -281,13 +282,15 @@ namespace PosMaster.Dal.Interfaces
                     dbProduct.Name = model.Name;
                     dbProduct.ReorderLevel = model.ReorderLevel;
                     dbProduct.AllowDiscount = model.AllowDiscount;
-                    dbProduct.UnitOfMeasure = model.UnitOfMeasure;
+                    dbProduct.UnitOfMeasureId = Guid.Parse(model.UnitOfMeasureId);
                     dbProduct.LastModifiedBy = model.Personnel;
                     dbProduct.DateLastModified = DateTime.Now;
                     dbProduct.Notes = model.Notes;
                     dbProduct.Status = model.Status;
                     if (model.IsExcelUpload)
                     {
+                        dbProduct.BuyingPrice = model.BuyingPrice;
+                        dbProduct.AvailableQuantity = model.AvailableQuantity;
                         dbProduct.SellingPrice = model.SellingPrice;
                         dbProduct.PriceStartDate = hasStartDate ? startDate : DateTime.Now;
                         dbProduct.PriceEndDate = hasEndDate ? endDate : (DateTime?)null;
@@ -322,7 +325,7 @@ namespace PosMaster.Dal.Interfaces
                     SellingPrice = model.SellingPrice,
                     AllowDiscount = model.AllowDiscount,
                     AvailableQuantity = model.AvailableQuantity,
-                    UnitOfMeasure = model.UnitOfMeasure,
+                    UnitOfMeasureId = Guid.Parse(model.UnitOfMeasureId),
                     Notes = model.Notes,
                     ClientId = model.ClientId,
                     InstanceId = model.InstanceId,
@@ -330,10 +333,10 @@ namespace PosMaster.Dal.Interfaces
                     Status = model.Status,
                     ImagePath = model.ImagePath,
                     TaxTypeId = hasTaxTypeId ? taxTypeId : (Guid?)null,
-                    PriceStartDate = DateTime.Now,
+                    PriceStartDate = hasStartDate ? startDate : DateTime.Now,
+                    PriceEndDate = hasEndDate ? endDate : (DateTime?)null,
                     ProductInstanceStamp = stamp
                 };
-                product.ProductInstanceStamp = product.ProductInstanceStamp;
                 _context.Products.Add(product);
                 await _context.SaveChangesAsync();
                 result.Success = true;
@@ -749,6 +752,7 @@ namespace PosMaster.Dal.Interfaces
             {
                 var dataQry = _context.Products
                     .Include(c => c.ProductCategory)
+                    .Include(c => c.UnitOfMeasure)
                     .Where(p => p.AvailableQuantity <= p.ReorderLevel)
                     .AsQueryable();
                 if (clientId != null)
@@ -758,19 +762,6 @@ namespace PosMaster.Dal.Interfaces
                 var data = await dataQry.OrderBy(p => p.AvailableQuantity)
                     .Take(limit)
                     .ToListAsync();
-                if (!data.Any())
-                {
-                    var dataQry_ = _context.Products
-                    .Include(c => c.ProductCategory)
-                    .AsQueryable();
-                    if (clientId != null)
-                        dataQry = dataQry.Where(d => d.ClientId.Equals(clientId));
-                    if (instanceId != null)
-                        dataQry_ = dataQry_.Where(p => p.InstanceId.Equals(instanceId));
-                    data = await dataQry_.OrderBy(p => p.AvailableQuantity)
-                      .Take(limit)
-                      .ToListAsync();
-                }
                 result.Success = data.Any();
                 result.Message = result.Success ? "Found" : "Not Found";
                 if (result.Success)

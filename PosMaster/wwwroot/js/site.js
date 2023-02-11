@@ -367,7 +367,7 @@ if (x) {
     $.get('/Products/LowStockProducts').done(function (data) {
         if (data.success) {
             data.data.forEach(element => {
-                ul.append('<li><span class= "text">[' + element.code + ']' + element.name + ' [Qty ' + element.availableQuantity + ' ' + element.unitOfMeasure
+                ul.append('<li><span class= "text">[' + element.code + ']' + element.name + ' [Qty ' + element.availableQuantity + ' ' + element.uom
                     + ']</span > <small class="badge badge-info">' + element.productCategory.name + '</small>  </li >');
             });
         }
@@ -465,7 +465,7 @@ $('.product-select-search').select2({
             return {
                 results: $.map(data.data, function (item) {
                     return {
-                        text: item.code + ' - ' + item.name + ' (' + item.availableQuantity + ' ' + item.unitOfMeasure + ' )',
+                        text: item.code + ' - ' + item.name + ' (' + item.availableQuantity + ' ' + item.uom + ' )',
                         quantity: item.availableQuantity,
                         sellingPrice: item.sellingPrice,
                         buyingPrice: item.buyingPrice,
