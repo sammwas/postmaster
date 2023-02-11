@@ -9,8 +9,10 @@ namespace PosMaster.ViewModels
         public string CustomerId { get; set; }
         [Display(Name = "Payment Mode")]
         public string PaymentModeIdStr { get; set; }
-        [Display(Name = "External Ref")]
-        public string ExternalRef { get; set; }
+        [Display(Name = "Payment Mode No.")]
+        public string PaymentModeNo { get; set; }
+        [Display(Name = "Amount Received")]
+        public decimal AmountReceived { get; set; }
         public string PinNo { get; set; }
         public bool IsCredit { get; set; }
         public bool IsWalkIn { get; set; }

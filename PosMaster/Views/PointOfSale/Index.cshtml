@@ -1,5 +1,4 @@
-﻿@inject IProductInterface _productInterface;
-@inject IMasterDataInterface _masterDataInterface;
+﻿@inject IMasterDataInterface _masterDataInterface;
 @inject ICookiesService _cookies;
 @inject ICustomerInterface _customerInterface;
 @model ProductSaleViewModel
@@ -90,13 +89,13 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <input asp-for="IsCredit" type="checkbox" id="credit-sale" />
+                                <input asp-for="IsCredit" type="checkbox" id="credit-sale-check" />
                                 <label>Is Credit Sale ?</label>
                             </div>
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <div class="form-group">
                                 <label asp-for="CustomerId"></label>
                                 <select asp-for="CustomerId" class="form-control select2"
@@ -106,8 +105,15 @@
                                 <span asp-validation-for="CustomerId" class="text-danger"></span>
                             </div>
                         </div>
-                        3<div class="col-md-4">
-                            <div class="input-group" id="payment-mode">
+                        <div class="col-md-4">
+                            <div class="form-group" id="refNo">
+                                <label>PIN No.</label>
+                                <input asp-for="PinNo" class="form-control" id="refNoVal" placeholder="PIN No">
+                                <span asp-validation-for="PinNo" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-4  cash-sale">
+                            <div class="input-group">
                                 <div class="form-group">
                                     <label>Payment Mode</label>
                                     <select asp-for="PaymentModeIdStr" class="form-control select2" style="width: 100%;"
@@ -115,18 +121,33 @@
                                         <option value="">--Select Payment Mode--</option>
                                         @foreach (var item in paymentModes.Data)
                                         {
-                                            <option value="@item.Name" title="@item.Notes">@item.Name</option>
+                                            <option value="@item.Id" title="@item.Notes">@item.Name</option>
                                         }
                                     </select>
                                     <span asp-validation-for="PaymentModeIdStr" class="text-danger"></span>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-3">
-                            <div class="form-group" id="refNo">
-                                <label>PIN No.</label>
-                                <input asp-for="PinNo" class="form-control" id="refNoVal" placeholder="PIN No">
-                                <span asp-validation-for="PinNo" class="text-danger"></span>
+                        <div class="col-md-4  cash-sale">
+                            <div class="form-group">
+                                <label asp-for="PaymentModeNo"></label>
+                                <input asp-for="PaymentModeNo" class="form-control" placeholder="Mode Number">
+                                <span asp-validation-for="PaymentModeNo" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-4  cash-sale">
+                            <div class="form-group">
+                                <label asp-for="AmountReceived"></label>
+                                <input asp-for="AmountReceived" class="form-control numbers-only"
+                                       placeholder="Amount" value="0" id="posAmountRcvd">
+                                <span asp-validation-for="AmountReceived" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label asp-for="Notes"></label>
+                                <input asp-for="Notes" class="form-control" placeholder="Notes">
+                                <span asp-validation-for="Notes" class="text-danger"></span>
                             </div>
                         </div>
                     </div>

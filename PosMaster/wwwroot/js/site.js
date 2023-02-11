@@ -7,38 +7,10 @@ $("#selectedProductAdj").change(function () {
     $('.currentQuantity').val(item.quantity);
     $('.currentPrice').val(item.buyingPrice);
     $('.currSellingPrice').val(item.sellingPrice);
-    $('.priceStart').val(getDateFormat(item.priceStartDate));
-    $('.priceEnd').val(getDateFormat(item.priceEndDate));
+    $('#inpPriceDateFrom').val(item.priceStartDate);
+    $('#inpPriceDateTo').val(item.priceEndDate);
     $('#productCode').val(productCode)
 });
-
-function getDateFormat(inputDate) {
-    if (inputDate == '')
-        return '';
-    let date, month, year;
-
-    inputDate = new Date(inputDate);
-    date = inputDate.getDate();
-    month = inputDate.getMonth() + 1;
-    year = inputDate.getFullYear();
-
-    if (date < 10) {
-        date = '0' + date;
-    }
-
-    if (month < 10) {
-        month = '0' + month;
-    }
-    date = date
-        .toString()
-        .padStart(2, '0');
-
-    month = month
-        .toString()
-        .padStart(2, '0');
-
-    return `${year}-${month}-${date}`;
-}
 
 let unitOfMeasure;
 $('#selectedProductItem').change(function () {
@@ -130,11 +102,20 @@ var createIssueListTable = function () {
         index++;
     });
 
-    issueListItems.length > 0 ? $("#btnSumbitIss").prop("disabled", false) : $("#btnSumbitIss").prop("disabled", true);
+    if (issueListItems.length > 0) {
+        $("#btnSumbitIss").prop("disabled", false)
+    } else $("#btnSumbitIss").prop("disabled", true);
+    if (totalDiscount < 0)
+        totalDiscount = 0;
     $("#IssueListTable").html(tr);
     $("#issTotal").text((total).toFixed(2));
     $("#issDiscount").text(totalDiscount.toFixed(2));
     $("#issTax").text(totalTax.toFixed(2));
+    var isCredit = $('#credit-sale-check').val();
+    if (isCredit == true)
+        $("#posAmountRcvd").val(0);
+    else
+        $("#posAmountRcvd").val(total);
 };
 
 var list = $("#issListRecords").val();
@@ -151,6 +132,7 @@ function removeListItem(index) {
 $('#customer-select').change(function () {
     var customer = $('#customer-select').select2('data')[0];
     $('#order-customer').val(customer.id);
+    $('#refNoVal').val(customer.pin);
 });
 
 $('#dateTo').datetimepicker({
@@ -240,19 +222,6 @@ $('#receiptsdt tbody').on('click', 'td.details-control', function () {
 });
 
 $("input[value='credit']").prop('checked', false);
-populateSelect(false);
-
-function populateSelect(checked) {
-    //if (!checked) {
-    //	$('#customer-select')
-    //		.empty()
-    //		.append('<option selected="selected" value="walkIn">WALK-IN</option>');
-    //} else {
-    //	$('#customer-select')
-    //		.empty();
-    //}
-}
-
 
 $('#customer-select').select2({
     ajax: {
@@ -440,12 +409,12 @@ function plotDoughnut(labels, data) {
         options: donutOptions
     })
 }
-$('#credit-sale').change(function () {
+$('#credit-sale-check').change(function () {
     $('#payment-mode').attr("required", !this.checked);
     if (this.checked) {
-        $('#payment-mode').hide();
+        $('.cash-sale').hide();
     } else {
-        $('#payment-mode').show();
+        $('.cash-sale').show();
     }
 });
 
@@ -505,8 +474,8 @@ $('.product-select-search').select2({
                         name: item.code + ' - ' + item.name,
                         allowDiscount: item.allowDiscount,
                         code: item.code,
-                        priceStartDate: item.priceStartDate,
-                        priceEndDate: item.priceEndDate
+                        priceStartDate: item.priceStartDateStr,
+                        priceEndDate: item.priceEndDateStr
                     }
                 })
             };

@@ -36,9 +36,9 @@
                 <p><b>Customer </b> @Model.Customer.FullName </p>
                 <p>
                     <b>Type </b> @saleType
-                    @if (!string.IsNullOrEmpty(Model.PaymentMode))
+                    @if (Model.PaymentMode != null)
                     {
-                        <span>(@Model.PaymentMode)</span>
+                        <span>(@Model.PaymentMode.Name)</span>
                     }
                 </p>
                 <p><b>Date </b>@Model.DateCreated</p>
@@ -88,7 +88,7 @@
                     <tr>
                         <td colspan="3" style="border:none"></td>
                         <td>Total</td>
-                        <td><b>@Model.TotalNetAmount</b></td>
+                        <td><b>@Model.Amount</b></td>
                     </tr>
                 </tfoot>
             </table>

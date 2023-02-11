@@ -396,13 +396,22 @@ namespace PosMaster.Dal.Interfaces
                     ClientId = model.ClientId,
                     InstanceId = model.InstanceId,
                     PaymentModeId = hasModeId ? payModeId : (Guid?)null,
-                    PinNo = string.IsNullOrEmpty(model.PinNo) ? customer.PinNo : model.PinNo,
                     IsCredit = model.IsCredit,
                     IsWalkIn = model.IsWalkIn,
                     Notes = model.Notes,
-                    Personnel = model.Personnel
+                    Personnel = model.Personnel,
+                    AmountReceived = model.AmountReceived,
+                    PinNo = model.PinNo
                 };
-
+                if (!model.IsWalkIn && !string.IsNullOrEmpty(model.PinNo))
+                {
+                    if (!customer.PinNo.Equals(model.PinNo))
+                    {
+                        customer.PinNo = model.PinNo;
+                        customer.DateLastModified = DateTime.Now;
+                        customer.LastModifiedBy = model.Personnel;
+                    }
+                }
                 var i = 0;
                 foreach (var item in lineItems)
                 {
@@ -449,7 +458,6 @@ namespace PosMaster.Dal.Interfaces
                     _logger.LogWarning($"{tag} sale failed {model.CustomerId} : {result.Message}");
                     return result;
                 }
-                receipt.AmountReceived = model.IsCredit ? 0 : totalAmount;
                 _context.Receipts.Add(receipt);
                 await _context.SaveChangesAsync();
 

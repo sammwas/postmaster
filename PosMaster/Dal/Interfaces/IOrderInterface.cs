@@ -388,7 +388,7 @@ namespace PosMaster.Dal.Interfaces
 					CustomerId = model.CustomerId,
 					Personnel = model.Personnel,
 					LineItemListStr = model.LineItemListStr,
-					PaymentMode = "CASH"
+					PaymentModeIdStr = "CASH"
 				};
 				var receipt = await _productInterface.ProductsSaleAsync(saleObj);
 				if (!receipt.Success) 

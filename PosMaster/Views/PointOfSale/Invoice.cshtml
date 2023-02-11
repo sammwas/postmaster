@@ -9,7 +9,7 @@
     var customer = Model.Receipt.Customer;
     var isActive = Model.Status.Equals(EntityStatus.Active);
 }
-<div class="invoice p-3 mb-3">
+<div class="invoice p-3 mb-3" id="printDiv">
     <div class="row">
         <div class="col-12">
             <h4>
@@ -125,7 +125,7 @@
     </div>
     <div class="row no-print">
         <div class="col-12">
-            <a href="#" class="btn btn-default"><i class="fas fa-print"></i> Print</a>
+            <button class="btn btn-default" id="btnPrint"><i class="fas fa-print"></i> Print</button>
             @if (isActive)
             {
                 <form method="post" asp-action="PayInvoice">

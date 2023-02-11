@@ -21,7 +21,7 @@
                 </div>
             </div>
             <div class="col-md-4">
-                <p class="text-right"><strong>Total Amount: @Model.Sum(r => r.TotalAmount)</strong></p>
+                <p class="text-right"><strong>Total Amount: @Model.Sum(r =>r.Amount) </strong></p>
             </div>
         </div>
         <div class="card-body">
@@ -98,7 +98,7 @@
                                 <td>@item.Code</td>
                                 <td>@item.DateCreated</td>
                                 <td>@item.Personnel</td>
-                                <td>@item.TotalAmount</td>
+                                <td>@item.Amount</td>
                                 <td><a asp-action="Receipt" asp-route-id="@item.Id">View</a></td>
                             </tr>
                         }

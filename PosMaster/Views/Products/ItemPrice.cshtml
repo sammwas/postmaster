@@ -4,6 +4,7 @@
     var statuses = Helpers.Statuses();
     var title = $"Product Price";
     ViewData["Title"] = title;
+    var dateToday = DateTime.Now.ToString("dd-MMM-yyyy");
 }
 <div class="card card-primary">
     <div class="card-header">
@@ -17,45 +18,47 @@
         <input type="hidden" id="productCode" asp-for="Code" />
         <div class="card-body">
             <div class="row">
-                <div class="col-md-6">
-                    <div class="row">
-                        <div class="col-8">
-                            <div class="form-group">
-                                <label asp-for="ProductId"></label>
-                                <select class="form-control select2 product-select-search" asp-for="ProductId"
-                                    style="width: 100%;" id="selectedProductAdj">
-                                    <option value="">--Select Product--</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="form-group">
-                                <label asp-for="SellingPrice"></label>
-                                <input asp-for="SellingPrice" class="form-control currSellingPrice">
-                                <span asp-validation-for="SellingPrice" class="text-danger"></span>
+                <div class="col-8">
+                    <div class="form-group">
+                        <label asp-for="ProductId"></label>
+                        <select class="form-control select2 product-select-search" asp-for="ProductId"
+                                style="width: 100%;" id="selectedProductAdj">
+                            <option value="">--Select Product--</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="form-group">
+                        <label asp-for="SellingPrice"></label>
+                        <input asp-for="SellingPrice" class="form-control currSellingPrice">
+                        <span asp-validation-for="SellingPrice" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label asp-for="PriceStartDateStr"></label>
+                        <div class="input-group date" id="dateFrom" data-target-input="nearest">
+                            <input type="text" class="form-control datetimepicker-input" data-target="#dateFrom"
+                                   asp-for="PriceStartDateStr" placeholder="Date From (@dateToday)" id="inpPriceDateFrom" />
+                            <div class="input-group-append" data-target="#dateFrom" data-toggle="datetimepicker">
+                                <div class="input-group-text"><i class="fa fa-calendar"></i></div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-6">
-                    <div class="row">
-                        <div class="col-6">
-                            <div class="form-group">
-                                <label asp-for="PriceStartDate"></label>
-                                <input type="date" class="form-control priceStart" asp-for="PriceStartDate" />
-                                <span asp-validation-for="PriceStartDate" class="text-danger"></span>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="form-group">
-                                <label asp-for="PriceEndDate"></label>
-                                <input type="date" class="form-control priceEnd" asp-for="PriceEndDate" />
-                                <span asp-validation-for="PriceEndDate" class="text-danger"></span>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label asp-for="PriceEndDateStr"></label>
+                        <div class="input-group date" id="dateTo" data-target-input="nearest">
+                            <input type="text" class="form-control datetimepicker-input" data-target="#dateTo" asp-for="PriceEndDateStr"
+                                   placeholder="Date To (@dateToday)" id="inpPriceDateTo" />
+                            <div class="input-group-append" data-target="#dateTo" data-toggle="datetimepicker">
+                                <div class="input-group-text"><i class="fa fa-calendar"></i></div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <div class="form-group">
                         <label asp-for="Notes"></label>
                         <input asp-for="Notes" class="form-control" rows="3" placeholder="Notes" />

@@ -5,15 +5,25 @@ namespace PosMaster.ViewModels
 {
     public class ItemPriceViewModel : BaseViewModel
     {
+        public ItemPriceViewModel()
+        {
+
+        }
+        public ItemPriceViewModel(Dal.Product product)
+        {
+            ProductId = product.Id.ToString();
+            PriceStartDateStr = product.PriceStartDateStr;
+            PriceEndDateStr = product.PriceEndDateStr;
+            SellingPrice = product.SellingPrice;
+        }
+
         [Required]
         [Display(Name = "Product")]
         public string ProductId { get; set; }
-        [Display(Name = "Start Date")]
-        public DateTime PriceStartDate { get; set; } = DateTime.Now;
-        [Display(Name = "End Date")]
-        public DateTime? PriceEndDate { get; set; }
-        public string PriceStartDateStr => PriceStartDate.ToString("yyyy-MM-dd");
-        public string PriceEndDateStr => PriceEndDate.HasValue ? PriceEndDate.Value.ToString("yyyy-MM-dd") : "";
+        [Required, Display(Name = "Start Date")]
+        public string PriceStartDateStr { get; set; }
+        [Display(Name = "End Date (optional)")]
+        public string PriceEndDateStr { get; set; }
         [Display(Name = "Price")]
         public decimal SellingPrice { get; set; }
     }

@@ -22,7 +22,8 @@ namespace PosMaster.Dal
         public Guid? TaxTypeId { get; set; }
         public TaxType TaxType { get; set; }
         public decimal TotalValue => AvailableQuantity * SellingPrice;
-        public string ProductUniqueCode => $"{InstanceId}.{Code}";
+        public string PriceEndDateStr => PriceEndDate.HasValue ? PriceEndDate.Value.ToString("dd-MM-yyyy") : "";
+        public string PriceStartDateStr => PriceStartDate.ToString("dd-MM-yyyy");
         public bool ShowSellingPrice => SellingPrice > 0 && PriceStartDate.Date <= DateTime.Now.Date
             && (!PriceEndDate.HasValue || PriceEndDate.Value.Date >= DateTime.Now.Date);
 
