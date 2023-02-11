@@ -32,7 +32,7 @@
             @if (!_signInManager.IsSignedIn(User))
             {
                 <a asp-controller="Home" asp-action="Login" asp-route-returnUrl="@ViewData["ReturnUrl"]"
-               class="btn btn-primary"><i class="icon-login icons"></i> Login to system </a>
+               class="btn btn-primary"><i class="icon-login icons"></i> Login to System </a>
             }
             else
             {
@@ -40,7 +40,7 @@
                     <a asp-controller="Dashboard" asp-action="Index"
                    class="btn btn-primary"><i class="icon-speedometer icons"></i> Back to Dashboard </a>
                     <span>&nbsp;</span>
-                    <a asp-controller="Home" asp-action="Logout" class="btn btn-secondary"><i class="icon-logout icons"></i> Log out now</a>
+                    <a asp-controller="Home" asp-action="Logout" class="btn btn-secondary"><i class="icon-logout icons"></i> Log out Now</a>
                 </div>
             }
         </div>
@@ -49,21 +49,17 @@
     <div class="content">
         @RenderBody()
     </div>
-    <footer class="navbar navbar-light bg-light">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12 h-10 text-center text-lg-left my-auto">
-                    <p class="text-muted small mb-4 mb-lg-0">
-                        <span><a asp-controller="Home" asp-action="Terms">Terms of Use</a></span> &nbsp;|&nbsp;
-                        <span><a asp-controller="Home" asp-action="Privacy">Privacy Policy</a></span>&nbsp;
-                        <span>
-                            Copyright &copy; @DateTime.Now.Year <a asp-controller="Home"
-                                                                   asp-action="Index">@settings.Name</a>.
-                        </span> &nbsp;
-                        <span>All rights reserved. &nbsp; Version @settings.Version</span>
-                    </p>
-                </div>
-            </div>
+    <footer class="container">
+        <div class="col-md-12">
+            <p class="small text-right">
+                <span><a asp-controller="Home" asp-action="Terms">Terms of Use</a></span> &nbsp;|&nbsp;
+                <span><a asp-controller="Home" asp-action="Privacy">Privacy Policy</a></span>&nbsp;
+                <span>
+                    Copyright &copy; @DateTime.Now.Year <a asp-controller="Home"
+                                                           asp-action="Index">@settings.Name</a>.
+                </span> &nbsp;
+                <span>All rights reserved. &nbsp; Version @settings.Version</span>
+            </p>
         </div>
     </footer>
     <script src="~/plugins/jquery/jquery.min.js"></script>

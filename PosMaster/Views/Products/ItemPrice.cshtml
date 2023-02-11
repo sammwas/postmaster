@@ -1,13 +1,9 @@
-﻿@inject IProductInterface _productInterface;
-@inject IClientInstanceInterface _instanceInterface;
-@inject ICookiesService _cookies;
-@model ItemPriceViewModel;
+﻿@model ItemPriceViewModel;
 @{
     ViewData["Active"] = "Products";
     var statuses = Helpers.Statuses();
     var title = $"Product Price";
     ViewData["Title"] = title;
-    var userData = _cookies.Read();
 }
 <div class="card card-primary">
     <div class="card-header">
@@ -47,12 +43,14 @@
                             <div class="form-group">
                                 <label asp-for="PriceStartDate"></label>
                                 <input type="date" class="form-control priceStart" asp-for="PriceStartDate" />
+                                <span asp-validation-for="PriceStartDate" class="text-danger"></span>
                             </div>
                         </div>
                         <div class="col-6">
                             <div class="form-group">
                                 <label asp-for="PriceEndDate"></label>
                                 <input type="date" class="form-control priceEnd" asp-for="PriceEndDate" />
+                                <span asp-validation-for="PriceEndDate" class="text-danger"></span>
                             </div>
                         </div>
                     </div>
@@ -61,6 +59,7 @@
                     <div class="form-group">
                         <label asp-for="Notes"></label>
                         <input asp-for="Notes" class="form-control" rows="3" placeholder="Notes" />
+                        <span asp-validation-for="Notes" class="text-danger"></span>
                     </div>
                 </div>
             </div>

@@ -71,7 +71,7 @@
                         var tax = item.TaxType == null ? "--" : item.TaxType.Name;
                         var price = item.ShowSellingPrice ? $"{item.SellingPrice}" : "--";
                         <tr>
-                            <td>@item.Code</td>
+                            <td><a asp-action="ViewProduct" asp-route-id="@item.InstanceId" asp-route-code="@item.Code">@item.Code</a></td>
                             <td>@item.Name [@item.ProductCategory.Name]</td>
                             <td>@item.ReorderLevel</td>
                             <td>@item.AvailableQuantity</td>
