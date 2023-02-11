@@ -35,7 +35,7 @@
                         <div class="col-4">
                             <div class="form-group">
                                 <label asp-for="SellingPrice"></label>
-                                <input asp-for="SellingPrice" class="form-control currentPrice">
+                                <input asp-for="SellingPrice" class="form-control currSellingPrice">
                                 <span asp-validation-for="SellingPrice" class="text-danger"></span>
                             </div>
                         </div>
@@ -46,15 +46,21 @@
                         <div class="col-6">
                             <div class="form-group">
                                 <label asp-for="PriceStartDate"></label>
-                                <input type="date" class="form-control" asp-for="PriceStartDate" />
+                                <input type="date" class="form-control priceStart" asp-for="PriceStartDate" />
                             </div>
                         </div>
                         <div class="col-6">
                             <div class="form-group">
                                 <label asp-for="PriceEndDate"></label>
-                                <input type="date" class="form-control" asp-for="PriceEndDate" />
+                                <input type="date" class="form-control priceEnd" asp-for="PriceEndDate" />
                             </div>
                         </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="Notes"></label>
+                        <input asp-for="Notes" class="form-control" rows="3" placeholder="Notes" />
                     </div>
                 </div>
             </div>
