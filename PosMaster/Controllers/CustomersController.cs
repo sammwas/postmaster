@@ -19,7 +19,7 @@ namespace PosMaster.Controllers
         public CustomersController(ICookiesService cookiesService, ICustomerInterface customerInterface)
         {
             _userData = cookiesService.Read();
-            _customerInterface = customerInterface; 
+            _customerInterface = customerInterface;
         }
         public async Task<IActionResult> ByClientId()
         {
@@ -69,8 +69,8 @@ namespace PosMaster.Controllers
 
         public async Task<JsonResult> Search(string term)
         {
-            var data = await _customerInterface.SearchClientCustomerAsync(_userData.ClientId, term);
+            var data = await _customerInterface.SearchClientCustomerAsync(_userData.ClientId, term, 10);
             return Json(data);
-        }         
- }
+        }
+    }
 }

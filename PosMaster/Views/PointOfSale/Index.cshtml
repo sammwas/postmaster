@@ -94,35 +94,35 @@
                                 <label>Is Credit Sale ?</label>
                             </div>
                         </div>
+                    </div>
+                    <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label asp-for="CustomerId"></label>
-                                <select asp-for="CustomerId" class="form-control select2" style="width: 50%;"
+                                <select asp-for="CustomerId" class="form-control select2"
                                         id="customer-select">
                                     <option value="@walkIn.Data.Id">@walkIn.Data.Text</option>
                                 </select>
                                 <span asp-validation-for="CustomerId" class="text-danger"></span>
                             </div>
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
+                        3<div class="col-md-4">
                             <div class="input-group" id="payment-mode">
                                 <div class="form-group">
                                     <label>Payment Mode</label>
-                                    <select asp-for="PaymentMode" class="form-control select2" style="width: 100%;"
-                                            id="paymentMode">
+                                    <select asp-for="PaymentModeIdStr" class="form-control select2" style="width: 100%;"
+                                            id="paymentMode" required>
                                         <option value="">--Select Payment Mode--</option>
                                         @foreach (var item in paymentModes.Data)
                                         {
                                             <option value="@item.Name" title="@item.Notes">@item.Name</option>
                                         }
                                     </select>
-                                    <span asp-validation-for="PaymentMode" class="text-danger"></span>
+                                    <span asp-validation-for="PaymentModeIdStr" class="text-danger"></span>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <div class="form-group" id="refNo">
                                 <label>PIN No.</label>
                                 <input asp-for="PinNo" class="form-control" id="refNoVal" placeholder="PIN No">

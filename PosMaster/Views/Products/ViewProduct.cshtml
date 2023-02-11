@@ -68,6 +68,12 @@
                                 </div>
                             </div>
                         }
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Tax</label>
+                                <span>@Model.Product.TaxType?.Name (@(Model.Product.TaxRate*100) %)</span>
+                            </div>
+                        </div>
                     </div>
                 }
                 @if (Model.ProductStockAdjustmentLogs.Any())

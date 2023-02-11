@@ -77,11 +77,14 @@
                         <td>Tax</td>
                         <td>@Model.Tax</td>
                     </tr>
-                    <tr>
-                        <td colspan="3" style="border:none"></td>
-                        <td>Discount</td>
-                        <td>@Model.Discount</td>
-                    </tr>
+                    @if (Model.Discount >= 0)
+                    {
+                        <tr>
+                            <td colspan="3" style="border:none"></td>
+                            <td>Discount</td>
+                            <td>@Model.Discount</td>
+                        </tr>
+                    }
                     <tr>
                         <td colspan="3" style="border:none"></td>
                         <td>Total</td>

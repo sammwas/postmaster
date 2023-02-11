@@ -233,7 +233,14 @@ $('#customer-select').select2({
         },
         processResults: function (data, params) {
             return {
-                results: data.data
+                results: $.map(data.data, function (item) {
+                    return {
+                        text: item.text,
+                        id: item.id,
+                        code: item.code,
+                        pin: item.pinNo
+                    }
+                })
             };
         },
         cache: true
@@ -405,6 +412,7 @@ function plotDoughnut(labels, data) {
     })
 }
 $('#credit-sale').change(function () {
+    $('#payment-mode').attr("required", !this.checked);
     if (this.checked) {
         $('#payment-mode').hide();
     } else {

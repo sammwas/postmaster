@@ -26,7 +26,16 @@
         <div class="container">
             <a class="navbar-brand" asp-controller="Home" asp-action="Index">
                 <h4>
-                    <i class="icon-home icons"></i>  @settings.Name
+                    @if (!string.IsNullOrEmpty(settings.LogoPath))
+                    {
+                        <img id="clientLogo" src="@settings.LogoPath" alt="@settings.Code" width="40">
+
+                    }
+                    else
+                    {
+                        <i class="icon-basket icons"></i>
+                    }
+                    @settings.Name
                 </h4>
             </a>
             @if (!_signInManager.IsSignedIn(User))

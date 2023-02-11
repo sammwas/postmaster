@@ -234,20 +234,18 @@ namespace PosMaster.Dal.Interfaces
         {
             var result = new ReturnData<Product> { Data = new Product() };
             var tag = nameof(EditAsync);
-            _logger.LogInformation($"{tag} edit product");
+            _logger.LogInformation($"{tag} edit product {model.Code}");
             try
             {
                 var hasTaxTypeId = Guid.TryParse(model.TaxTypeId, out var taxTypeId);
-                if (model.IsEditMode)
-                {
-                    var dbProduct = await _context.Products
+                var hasStartDate = DateTime.TryParse(model.PriceStartDateStr, out var startDate);
+                var hasEndDate = DateTime.TryParse(model.PriceEndDateStr, out var endDate);
+                var dbProduct = model.IsExcelUpload ? await _context.Products
+                        .FirstOrDefaultAsync(c => c.Code.ToLower().Equals(model.Code.ToLower()))
+                : await _context.Products
                         .FirstOrDefaultAsync(c => c.Id.Equals(model.Id));
-                    if (dbProduct == null)
-                    {
-                        result.Message = "Not Found";
-                        _logger.LogWarning($"{tag} update failed {model.Id} : {result.Message}");
-                        return result;
-                    }
+                if (dbProduct != null)
+                {
                     if (model.AvailableQuantity != dbProduct.AvailableQuantity)
                     {
                         var adjustLog = new ProductStockAdjustmentLog
@@ -262,6 +260,22 @@ namespace PosMaster.Dal.Interfaces
                         };
                         _context.ProductStockAdjustmentLogs.Add(adjustLog);
                     }
+                    if (model.SellingPrice != dbProduct.SellingPrice)
+                    {
+                        var priceLog = new ProductPriceLog
+                        {
+                            ClientId = dbProduct.ClientId,
+                            InstanceId = dbProduct.InstanceId,
+                            ProductId = dbProduct.Id,
+                            PriceFrom = dbProduct.SellingPrice,
+                            PriceTo = model.SellingPrice,
+                            PriceStartDate = hasStartDate ? startDate : DateTime.Now,
+                            PriceEndDate = hasEndDate ? endDate : (DateTime?)null,
+                            Personnel = model.Personnel,
+                            Notes = "Product Edit"
+                        };
+                        _context.ProductPriceLogs.Add(priceLog);
+                    }
                     dbProduct.Code = model.Code;
                     dbProduct.ProductCategoryId = Guid.Parse(model.ProductCategoryId);
                     dbProduct.Name = model.Name;
@@ -272,6 +286,12 @@ namespace PosMaster.Dal.Interfaces
                     dbProduct.DateLastModified = DateTime.Now;
                     dbProduct.Notes = model.Notes;
                     dbProduct.Status = model.Status;
+                    if (model.IsExcelUpload)
+                    {
+                        dbProduct.SellingPrice = model.SellingPrice;
+                        dbProduct.PriceStartDate = hasStartDate ? startDate : DateTime.Now;
+                        dbProduct.PriceEndDate = hasEndDate ? endDate : (DateTime?)null;
+                    }
                     dbProduct.TaxTypeId = hasTaxTypeId ? taxTypeId : (Guid?)null;
                     if (model.IsNewImage)
                         dbProduct.ImagePath = model.ImagePath;
@@ -366,6 +386,7 @@ namespace PosMaster.Dal.Interfaces
                 }
 
                 var rcptRef = DocumentRefNumber(Document.Receipt, model.ClientId);
+                var hasModeId = Guid.TryParse(model.PaymentModeIdStr, out var payModeId);
                 var receipt = new Receipt
                 {
                     Id = Guid.NewGuid(),
@@ -374,14 +395,14 @@ namespace PosMaster.Dal.Interfaces
                     CustomerId = customer.Id,
                     ClientId = model.ClientId,
                     InstanceId = model.InstanceId,
-                    PaymentMode = model.PaymentMode,
+                    PaymentModeId = hasModeId ? payModeId : (Guid?)null,
                     PinNo = string.IsNullOrEmpty(model.PinNo) ? customer.PinNo : model.PinNo,
                     IsCredit = model.IsCredit,
                     IsWalkIn = model.IsWalkIn,
                     Notes = model.Notes,
                     Personnel = model.Personnel
                 };
-                receipt.IsPaid = !model.IsCredit;
+
                 var i = 0;
                 foreach (var item in lineItems)
                 {
@@ -421,14 +442,14 @@ namespace PosMaster.Dal.Interfaces
                     product.DateLastModified = DateTime.Now;
                     product.LastModifiedBy = model.Personnel;
                 }
-
-                if (model.IsCredit && receipt.ReceiptLineItems.Sum(r => r.Amount) > customer.CreditLimit)
+                var totalAmount = receipt.ReceiptLineItems.Sum(r => r.Amount);
+                if (model.IsCredit && totalAmount > customer.CreditLimit)
                 {
                     result.Message = $"{customer.Code} Limit is {customer.CreditLimit}";
                     _logger.LogWarning($"{tag} sale failed {model.CustomerId} : {result.Message}");
                     return result;
                 }
-
+                receipt.AmountReceived = model.IsCredit ? 0 : totalAmount;
                 _context.Receipts.Add(receipt);
                 await _context.SaveChangesAsync();
 
@@ -830,14 +851,13 @@ namespace PosMaster.Dal.Interfaces
                    if (product != null)
                    {
                        var hasToDate = DateTime.TryParse(p.PriceEndDate, out var endDate);
-                       product.SellingPrice = p.SellingPrice;
                        product.PriceStartDate = DateTime.Parse(p.PriceStartDate);
                        product.PriceEndDate = hasToDate ? endDate : (DateTime?)null;
-
                        productPriceLog.ProductId = product.Id;
                        productPriceLog.PriceStartDate = product.PriceStartDate;
                        productPriceLog.PriceEndDate = product.PriceEndDate;
                        productPriceLog.PriceFrom = product.SellingPrice;
+                       product.SellingPrice = p.SellingPrice;
                        productPriceLog.PriceTo = p.SellingPrice;
 
                        priceLogs.Add(productPriceLog);

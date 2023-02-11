@@ -60,5 +60,8 @@ namespace PosMaster.ViewModels
         [Display(Name = "Is Service?")]
         public bool IsService { get; set; }
         public IFormFile File { get; set; }
+        public string PriceStartDateStr { get; set; }
+        public string PriceEndDateStr { get; set; }
+        public bool IsExcelUpload { get; set; }
     }
 }

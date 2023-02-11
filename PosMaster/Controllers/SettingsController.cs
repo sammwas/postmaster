@@ -169,14 +169,15 @@ namespace PosMaster.Controllers
                 package.Workbook.Properties.Author = "cassignpro@gmail.com";
                 package.Workbook.Properties.Subject = $"{option} Upload Template";
 
+                var date = DateTime.Now.ToString("dd-MMM-yyyy");
                 var headers = new List<string>();
                 switch (option)
                 {
                     case UploadExelOption.Products:
                         headers = new List<string>()
                          {
-                            "Code", "Product name", "Allow discount", "Tax rate (0.16)","Service",
-                             "Product category","Unit of measure", "Reorder level"
+                            "Code", "Product name", "Allow discount", "Tax rate (0.16)","Service",  "Product category",
+                            "Unit of measure", "Reorder level","Selling price",$"Price start date ({date})","Price end date (optional)"
                          };
                         break;
                     case UploadExelOption.Customers:
@@ -198,7 +199,7 @@ namespace PosMaster.Controllers
                     worksheet.Cells[cols, index].Value = e;
                     index++;
                 }
-                var date = DateTime.Now.ToString("dd-MMM-yyyy");
+
                 var unique = Guid.NewGuid().ToString("")[..8].ToUpper();
                 var excelName = $"{title}-{unique}-{date}";
                 return File(package.GetAsByteArray(), Constants.XlsxContentType, excelName + ".xlsx");
@@ -271,10 +272,12 @@ namespace PosMaster.Controllers
                                 var category = workSheet.Cells[i, 6]?.Value?.ToString() ?? "";
                                 var categoryRes = await _masterDataInterface
                                     .ByNameProductCategoryAsync(_userData.ClientId, _userData.InstanceId, category);
-                                var level = workSheet.Cells[i, 8]?.Value?.ToString() ?? "0";
                                 var uom = workSheet.Cells[i, 7]?.Value?.ToString() ?? "";
+                                var level = workSheet.Cells[i, 8]?.Value?.ToString() ?? "0";
+                                var sellingPrice = workSheet.Cells[i, 9]?.Value?.ToString() ?? "0";
                                 var productViewModel = new ProductViewModel
                                 {
+                                    IsExcelUpload = true,
                                     Code = code,
                                     Name = workSheet.Cells[i, 2]?.Value?.ToString() ?? "",
                                     AllowDiscount = discount.ToLower().Equals("yes"),
@@ -285,7 +288,10 @@ namespace PosMaster.Controllers
                                     InstanceId = Guid.Parse(model.InstanceIdStr),
                                     InstanceIdStr = model.InstanceIdStr,
                                     ClientId = _userData.ClientId,
-                                    TaxTypeId = taxRes.Data.Id.ToString()
+                                    TaxTypeId = taxRes.Data.Id.ToString(),
+                                    SellingPrice = decimal.Parse(sellingPrice),
+                                    PriceStartDateStr = workSheet.Cells[i, 10]?.Value?.ToString() ?? "",
+                                    PriceEndDateStr = workSheet.Cells[i, 11]?.Value?.ToString() ?? "",
                                 };
 
                                 var resultProduct = await _productInterface.EditAsync(productViewModel);
