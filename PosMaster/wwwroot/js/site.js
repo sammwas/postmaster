@@ -6,8 +6,39 @@ $("#selectedProductAdj").change(function () {
     var productCode = item.code;
     $('.currentQuantity').val(item.quantity);
     $('.currentPrice').val(item.buyingPrice);
+    $('.currSellingPrice').val(item.sellingPrice);
+    $('.priceStart').val(getDateFormat(item.priceStartDate));
+    $('.priceEnd').val(getDateFormat(item.priceEndDate));
     $('#productCode').val(productCode)
 });
+
+function getDateFormat(inputDate) {
+    if (inputDate == '')
+        return '';
+    let date, month, year;
+
+    inputDate = new Date(inputDate);
+    date = inputDate.getDate();
+    month = inputDate.getMonth() + 1;
+    year = inputDate.getFullYear();
+
+    if (date < 10) {
+        date = '0' + date;
+    }
+
+    if (month < 10) {
+        month = '0' + month;
+    }
+    date = date
+        .toString()
+        .padStart(2, '0');
+
+    month = month
+        .toString()
+        .padStart(2, '0');
+
+    return `${year}-${month}-${date}`;
+}
 
 let unitOfMeasure;
 $('#selectedProductItem').change(function () {
@@ -74,7 +105,6 @@ var addItemToList = function () {
             "taxAmount": taxAmount,
             "itemName": itemName
         }
-        console.log(listItem);
         issueListItems.push(listItem);
         createIssueListTable();
         $("#issListRecords").val(JSON.stringify(issueListItems));
@@ -260,7 +290,6 @@ $('.launch-modal').click(function (event) {
 })
 $("#fulfil-order").click(function () {
     $.post('/Orders/FulFilOrder', { id: orderId }, function (result) {
-        console.log(result);
     });
     $('#modal-default').modal('hide');
 });
@@ -475,7 +504,9 @@ $('.product-select-search').select2({
                         tax: item.taxRate,
                         name: item.code + ' - ' + item.name,
                         allowDiscount: item.allowDiscount,
-                        code: item.code
+                        code: item.code,
+                        priceStartDate: item.priceStartDate,
+                        priceEndDate: item.priceEndDate
                     }
                 })
             };

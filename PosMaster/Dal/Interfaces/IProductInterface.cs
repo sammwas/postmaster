@@ -1103,10 +1103,9 @@ namespace PosMaster.Dal.Interfaces
                 {
                     var dbProduct = await _context.Products.FirstOrDefaultAsync(d => d.Id.Equals(item.ProductId));
                     dbProduct.AvailableQuantity = item.Quantity;
-
                     var lineProduct = new PoGrnProduct
                     {
-                        PurchaseOrderId = grn.Id,
+                        PurchaseOrderId = grn.PoId,
                         ProductId = item.ProductId,
                         GrnNotes = item.Notes,
                         GrnQuantity = item.Quantity,
