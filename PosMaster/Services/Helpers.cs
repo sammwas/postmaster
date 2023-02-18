@@ -50,6 +50,18 @@ namespace PosMaster.Services
             }).ToList();
         }
 
+        public static List<FormSelectViewModel> GlUserTypes()
+        {
+            var statusesList = Enum.GetValues(typeof(GlUserType))
+                .Cast<GlUserType>()
+                .ToList();
+            return statusesList.Select(s => new FormSelectViewModel
+            {
+                Id = s.ToString(),
+                Text = s.ToString()
+            }).ToList();
+        }
+
         public static List<string> UserRoles(string currentRole)
         {
             var roles = new List<string> { Role.Clerk, currentRole };

@@ -164,6 +164,12 @@
                                     </a>
                                 </li>
                                 <li class="nav-item">
+                                    <a asp-controller="PointOfSale" asp-action="ReceivePayment" class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Receive Payment</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
                                     <a asp-controller="PointOfSale" asp-action="Receipts"
                                        asp-route-dtFrom="@firstDayOfWeek"
                                        asp-route-dtTo="@DateTime.Now.ToString("dd-MMM-yyyy")" class="nav-link">
@@ -177,6 +183,14 @@
                                        asp-route-dtTo="@DateTime.Now.ToString("dd-MMM-yyyy")" class="nav-link">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Invoices</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a asp-controller="PointOfSale" asp-action="GeneralLedgers"
+                                       asp-route-dtFrom="@DateTime.Now.ToString("dd-MMM-yyyy")"
+                                       asp-route-dtTo="@DateTime.Now.ToString("dd-MMM-yyyy")" class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>General Ledger</p>
                                     </a>
                                 </li>
                                 <li class="nav-item">

@@ -20,6 +20,7 @@ namespace PosMaster.Dal.Interfaces
         Task<ReturnData<PurchaseOrder>> AddPurchaseOrderAsync(PoViewModel model);
         Task<ReturnData<List<PurchaseOrder>>> PurchaseOrdersAsync(Guid? clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "", string personnel = "");
         Task<ReturnData<List<GoodReceivedNote>>> GoodsReceivedAsync(Guid? clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "", string personnel = "");
+        Task<ReturnData<List<GeneralLedgerEntry>>> GeneralLedgersAsync(Guid clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "");
         Task<ReturnData<PurchaseOrder>> PurchaseOrderByIdAsync(Guid id);
         string DocumentRefNumber(Document document, Guid clientId);
         Task<ReturnData<List<Product>>> LowStockProductsAsync(Guid? clientId, Guid? instanceId, int limit = 10);
@@ -32,6 +33,8 @@ namespace PosMaster.Dal.Interfaces
         Task<ReturnData<GoodReceivedNote>> GrnByIdAsync(Guid id);
         Task<ReturnData<ProductPriceLog>> ProductPriceAsync(ItemPriceViewModel model);
         Task<ReturnData<ProductDataViewModel>> ProductDetailsAsync(string productCode, Guid instanceId);
+        Task<ReturnData<string>> ReceiptUserAsync(ReceiptUserViewModel model);
+
     }
 
     public class ProductImplementation : IProductInterface
@@ -403,9 +406,11 @@ namespace PosMaster.Dal.Interfaces
                     IsWalkIn = model.IsWalkIn,
                     Notes = model.Notes,
                     Personnel = model.Personnel,
-                    AmountReceived = model.AmountReceived,
-                    PinNo = model.PinNo
+                    PinNo = model.PinNo,
+                    PaymentModeNo = model.PaymentModeNo
                 };
+                if (!model.IsCredit)
+                    receipt.AmountReceived = model.AmountReceived;
                 if (!model.IsWalkIn && !string.IsNullOrEmpty(model.PinNo))
                 {
                     if (!customer.PinNo.Equals(model.PinNo))
@@ -463,9 +468,25 @@ namespace PosMaster.Dal.Interfaces
                 }
                 _context.Receipts.Add(receipt);
                 await _context.SaveChangesAsync();
-
-                if (model.IsCredit)
-                    await AddInvoiceAsync(receipt);
+                await AddInvoiceAsync(receipt);
+                if (!model.IsCredit)
+                {
+                    var entry = new GeneralLedgerEntry
+                    {
+                        ClientId = receipt.ClientId,
+                        InstanceId = receipt.InstanceId,
+                        Personnel = receipt.Personnel,
+                        UserId = receipt.CustomerId,
+                        UserType = GlUserType.Customer,
+                        Document = Document.Receipt,
+                        DocumentNumber = receipt.Code,
+                        Credit = receipt.Amount,
+                        Notes = receipt.Notes,
+                        Code = $"{receipt.Code}_{customer.Code}"
+                    };
+                    _context.GeneralLedgerEntries.Add(entry);
+                    await _context.SaveChangesAsync();
+                }
 
                 result.Success = true;
                 result.Data = receipt;
@@ -645,10 +666,71 @@ namespace PosMaster.Dal.Interfaces
                 InstanceId = receipt.InstanceId,
                 Personnel = receipt.Personnel
             };
+            if (!receipt.IsCredit)
+                invoice.Status = EntityStatus.Inactive;
+
             _context.Invoices.Add(invoice);
+            var entry = new GeneralLedgerEntry
+            {
+                ClientId = receipt.ClientId,
+                InstanceId = receipt.InstanceId,
+                Personnel = receipt.Personnel,
+                UserId = receipt.CustomerId,
+                UserType = GlUserType.Customer,
+                Document = Document.Invoice,
+                DocumentNumber = invRef,
+                Debit = receipt.Amount,
+                Notes = receipt.Notes,
+                Code = $"{invRef}_{receipt.Code}"
+            };
+            _context.GeneralLedgerEntries.Add(entry);
             await _context.SaveChangesAsync();
             _logger.LogInformation($"{tag} invoice {invRef} add for client {receipt.ClientId}");
             return invRef;
+        }
+
+        private async Task<string> ReceiptExcessAmount(ReceiptUserViewModel model)
+        {
+            try
+            {
+                var code = DocumentRefNumber(Document.Receipt, model.ClientId);
+                var receipt = new Receipt
+                {
+                    Id = Guid.NewGuid(),
+                    Code = code,
+                    CustomerId = Guid.Parse(model.UserId),
+                    ClientId = model.ClientId,
+                    InstanceId = model.InstanceId,
+                    PaymentModeId = Guid.Parse(model.PaymentModeId),
+                    PaymentModeNo = model.PaymentModeNo,
+                    Notes = model.Notes,
+                    Personnel = model.Personnel,
+                    AmountReceived = model.Amount,
+                    ReceiptLineItems = new List<ReceiptLineItem>()
+                };
+                _context.Receipts.Add(receipt);
+                var entry = new GeneralLedgerEntry
+                {
+                    ClientId = receipt.ClientId,
+                    InstanceId = receipt.InstanceId,
+                    Personnel = receipt.Personnel,
+                    UserId = receipt.CustomerId,
+                    UserType = GlUserType.Customer,
+                    Document = Document.Receipt,
+                    DocumentNumber = receipt.Code,
+                    Credit = receipt.AmountReceived,
+                    Notes = receipt.Notes,
+                    Code = $"{receipt.Code}_{receipt.PaymentModeNo}"
+                };
+                _context.GeneralLedgerEntries.Add(entry);
+                await _context.SaveChangesAsync();
+                return code;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return String.Empty;
+            }
         }
 
         public string DocumentRefNumber(Document document, Guid clientId)
@@ -1252,6 +1334,119 @@ namespace PosMaster.Dal.Interfaces
                 result.Data.TotalQtySold = await _context.ReceiptLineItems
                     .Where(r => r.ProductId.Equals(product.Id))
                     .SumAsync(r => r.Quantity);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                result.ErrorMessage = ex.Message;
+                result.Message = "Error occured";
+                _logger.LogError($"{tag} {result.Message} : {ex}");
+                return result;
+            }
+        }
+
+        public async Task<ReturnData<List<GeneralLedgerEntry>>> GeneralLedgersAsync(Guid clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "")
+        {
+            var result = new ReturnData<List<GeneralLedgerEntry>> { Data = new List<GeneralLedgerEntry>() };
+            var tag = nameof(GeneralLedgersAsync);
+            _logger.LogInformation($"{tag} get general ledgers: clientId {clientId}, instanceId {instanceId}, duration {dateFrom}-{dateTo}, search {search}");
+            try
+            {
+                var dataQuery = _context.GeneralLedgerEntries
+                    .Where(r => r.ClientId.Equals(clientId));
+                if (instanceId != null)
+                    dataQuery = dataQuery.Where(r => r.InstanceId.Equals(instanceId.Value));
+                var hasFromDate = DateTime.TryParse(dateFrom, out var dtFrom);
+                var hasToDate = DateTime.TryParse(dateTo, out var dtTo);
+                if (hasFromDate)
+                    dataQuery = dataQuery.Where(r => r.DateCreated.Date >= dtFrom.Date);
+                if (hasToDate)
+                    dataQuery = dataQuery.Where(r => r.DateCreated.Date <= dtTo.Date);
+                if (!string.IsNullOrEmpty(search))
+                    dataQuery = dataQuery.Where(r => r.Code.ToLower().Contains(search.ToLower()));
+                var data = await dataQuery.OrderBy(r => r.DateCreated)
+                    .ToListAsync();
+                result.Success = data.Any();
+                result.Message = result.Success ? "Found" : "Not Found";
+                if (result.Success)
+                    result.Data = data;
+                _logger.LogInformation($"{tag} found {data.Count} records");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                result.ErrorMessage = ex.Message;
+                result.Message = "Error occured";
+                _logger.LogError($"{tag} {result.Message} : {ex}");
+                return result;
+            }
+        }
+
+        public async Task<ReturnData<string>> ReceiptUserAsync(ReceiptUserViewModel model)
+        {
+            var result = new ReturnData<string> { Data = "" };
+            var tag = nameof(ReceiptUserAsync);
+            _logger.LogInformation($"{tag} receipt {model.UserType} {model.UserId}: clientId {model.ClientId}, instanceId {model.InstanceId}, amount {model.Amount}");
+
+            try
+            {
+                var invoices = await _context.Invoices
+                    .Include(i => i.Receipt)
+                    .ThenInclude(i => i.ReceiptLineItems)
+                    .Where(i => i.Receipt.ReceiptLineItems.Sum(s => s.UnitPrice * s.UnitPrice) > i.Receipt.AmountReceived)
+                    .Where(u => u.Receipt.CustomerId.Equals(Guid.Parse(model.UserId)))
+                    .OrderBy(i => i.DateCreated)
+                    .ToListAsync();
+                if (!invoices.Any())
+                {
+                    var res = await ReceiptExcessAmount(model);
+                    result.Data = res;
+                    result.Success = !string.IsNullOrEmpty(res);
+                    result.Message = result.Success ? "Receipted" : "Not receipted";
+                    return result;
+                }
+                decimal remainingAmount = model.Amount;
+                foreach (var invoice in invoices)
+                {
+                    if (remainingAmount > 0)
+                    {
+                        if (remainingAmount < invoice.Balance)
+                            continue;
+                        var toSpend = invoice.Balance;
+                        if (toSpend <= 0) continue;
+                        invoice.LastModifiedBy = model.Personnel;
+                        invoice.DateLastModified = DateTime.Now;
+                        invoice.Status = EntityStatus.Inactive;
+
+                        invoice.Receipt.AmountReceived += toSpend;
+                        invoice.Receipt.LastModifiedBy = model.Personnel;
+                        invoice.Receipt.DateLastModified = DateTime.Now;
+                        remainingAmount -= toSpend;
+                        var entry = new GeneralLedgerEntry
+                        {
+                            ClientId = model.ClientId,
+                            InstanceId = model.InstanceId,
+                            UserId = Guid.Parse(model.UserId),
+                            UserType = model.UserType,
+                            Credit = toSpend,
+                            Document = Document.Receipt,
+                            DocumentNumber = invoice.Receipt.Code,
+                            Code = $"{invoice.Receipt.Code}_{invoice.Code}",
+                            Personnel = model.Personnel
+                        };
+                        _context.GeneralLedgerEntries.Add(entry);
+                    }
+                }
+
+                if (remainingAmount > 0)
+                {
+                    model.Amount = remainingAmount;
+                    await ReceiptExcessAmount(model);
+                }
+                result.Success = true;
+                result.Message = "Receipted";
                 return result;
             }
             catch (Exception ex)

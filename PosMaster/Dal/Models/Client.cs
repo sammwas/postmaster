@@ -23,6 +23,5 @@
 		public int PhoneNumberLength { get; set; }
 		public string TelephoneCode { get; set; }
 		public bool DisplayBuyingPrice { get; set; }
-		public string InvoiceTerms { get; set; }
 	}
 }

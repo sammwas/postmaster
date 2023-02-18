@@ -1,6 +1,4 @@
-﻿@inject IProductInterface _productInterface;
-@inject IMasterDataInterface _masterDataInterface;
-@inject ICookiesService _cookies;
+﻿@inject ICookiesService _cookies;
 @inject ICustomerInterface _customerInterface;
 @model OrderViewModel
 @{
@@ -8,9 +6,8 @@
     var title = $"Customer Orders";
     ViewData["Title"] = title;
     var userData = _cookies.Read();
-    var customers = await _customerInterface.ByClientIdAsync(userData.ClientId);
-    var customerName = Model.IsEditMode ? customers.Data.FirstOrDefault(c => c.Id == Guid.Parse(Model.CustomerId)).FullName
-    : "";
+    var customerName = Model.IsEditMode ?
+    _customerInterface.ByIdAsync(Guid.Parse(Model.CustomerId)).Result.Data.FullName : "";
 }
 <div class="card card-primary">
     <div class="card-header">

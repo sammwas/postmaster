@@ -1,0 +1,112 @@
+﻿@inject IMasterDataInterface _masterDataInterface;
+@inject ICustomerInterface _customerInterface;
+@inject ICookiesService _cookies;
+@model ReceiptUserViewModel
+@{
+    ViewData["Active"] = "POS";
+    var title = $"Receive Payment";
+    ViewData["Title"] = title;
+    var userData = _cookies.Read();
+    var paymentModes = await _masterDataInterface.PaymentModesAsync(userData.ClientId);
+    var customer = string.IsNullOrEmpty(Model.UserId) ? new Customer() :
+                _customerInterface.ByIdAsync(Guid.Parse(Model.UserId)).Result.Data;
+}
+<div class="card card-primary">
+    <div class="card-header">
+        <h3 class="card-title">@ViewData["Title"]</h3>
+    </div>
+    <div class="row">
+        <div class="col-md-8">
+            <form role="form" method="post" autocomplete="off">
+                <div asp-validation-summary="All" class="text-danger"></div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="UserType"></label>
+                                <select class="form-control select2" asp-for="UserType" style="width: 100%;">
+                                    @foreach (var item in Helpers.GlUserTypes())
+                                    {
+                                        <option value="@item.Id" title="@item.Text">@item.Text</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="UserType" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="UserId"></label>
+                                <select asp-for="UserId" class="form-control select2" id="customer-select">
+                                    @if (!string.IsNullOrEmpty(customer.FirstName))
+                                    {
+                                        <option id="@customer.Id">@customer.FullName : @customer.PhoneNumber</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="UserId" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="PaymentModeId"></label>
+                                <select class="form-control select2" asp-for="PaymentModeId" style="width: 100%;">
+                                    <option value="">--Select Mode--</option>
+                                    @foreach (var item in paymentModes.Data)
+                                    {
+                                        <option value="@item.Id" title="@item.Notes">@item.Name</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="PaymentModeId" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="PaymentModeNo"></label>
+                                <input asp-for="PaymentModeNo" class="form-control" placeholder="Payment Mode No.">
+                                <span asp-validation-for="PaymentModeNo" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="Amount"></label>
+                                <input asp-for="Amount" class="form-control numbers-only" placeholder="Amount">
+                                <span asp-validation-for="Amount" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="Notes"></label>
+                                <input asp-for="Notes" class="form-control" placeholder="Notes">
+                                <span asp-validation-for="Notes" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <input type="hidden" asp-for="CreditAmount" />
+                    <input type="hidden" asp-for="DebitAmount" />
+                    <input type="hidden" asp-for="Code" value="@DateTime.Now" />
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+            </form>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h4>Details</h4>
+                    <div>
+                        <p>
+                            <b>Credit Amount : </b>
+                        </p>
+                        <p>
+                            <b>Expected Amount : </b>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

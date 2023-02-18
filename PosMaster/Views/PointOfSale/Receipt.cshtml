@@ -98,6 +98,14 @@
                         <td>Total</td>
                         <td><b>@Model.Amount</b></td>
                     </tr>
+                    @if (Model.Balance > 0)
+                    {
+                        <tr>
+                            <td colspan="3" style="border:none"></td>
+                            <td>Balance</td>
+                            <td><b>@Model.Balance</b></td>
+                        </tr>
+                    }
                 </tfoot>
             </table>
         </div>

@@ -190,5 +190,45 @@ namespace PosMaster.Controllers
             var result = await _productInterface.PrintReceiptByIdAsync(id, User.Identity.Name);
             return Json(result);
         }
+
+        public async Task<IActionResult> GeneralLedgers(string insId = "", string dtFrom = "", string dtTo = "", string search = "")
+        {
+            ViewData["InstanceId"] = insId;
+            ViewData["DtFrom"] = dtFrom;
+            ViewData["DtTo"] = dtTo;
+            ViewData["Search"] = search;
+            Guid? instanceId = null;
+            if (Guid.TryParse(insId, out var iId))
+                instanceId = iId;
+            if (User.IsInRole(Role.Clerk))
+                instanceId = _userData.InstanceId;
+            var result = await _productInterface.GeneralLedgersAsync(_userData.ClientId, instanceId, dtFrom, dtTo, search);
+            if (!result.Success)
+                TempData.SetData(AlertLevel.Warning, "General Ledgers", result.Message);
+            return View(result.Data);
+        }
+
+        public IActionResult ReceivePayment()
+        {
+            return View(new ReceiptUserViewModel());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ReceivePayment(ReceiptUserViewModel model)
+        {
+            model.Personnel = User.Identity.Name;
+            model.InstanceId = _userData.InstanceId;
+            model.ClientId = _userData.ClientId;
+
+            var result = await _productInterface.ReceiptUserAsync(model);
+            if (!result.Success)
+            {
+                TempData.SetData(AlertLevel.Warning, "Receipt", result.Message);
+                return View(model);
+            }
+            TempData.SetData(AlertLevel.Success, $"{model.UserType} Receipt", result.Message);
+            return RedirectToAction(nameof(ReceivePayment));
+        }
     }
 }
