@@ -25,7 +25,7 @@ namespace PosMaster.Dal
         public List<ReceiptLineItem> ReceiptLineItems { get; set; }
         public decimal Discount => ReceiptLineItems.Sum(i => i.Discount);
         public decimal Tax => ReceiptLineItems.Sum(i => i.TaxAmount);
-        public decimal Amount => ReceiptLineItems.Sum(i => i.NetAmount);
+        public decimal Amount => ReceiptLineItems.Sum(i => i.Amount);
         public decimal Balance => Amount - AmountReceived;
     }
 }

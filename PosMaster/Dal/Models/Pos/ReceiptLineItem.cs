@@ -16,8 +16,7 @@ namespace PosMaster.Dal
         public decimal Amount => UnitPrice * Quantity;
         public decimal TaxAmount => TaxRate > 0 ?
             Math.Round(TaxRate * 100 * Amount / (TaxRate * 100 + 100), 2) : 0;
-        // public decimal NetAmount => Amount +TaxAmount- Discount;
-        public decimal NetAmount => Amount;
+        // public decimal NetAmount => Amount +TaxAmount- Discount; 
         public decimal ActualProfit => (UnitPrice * Quantity) - (BuyingPrice * Quantity);
         public decimal ExpectedProfit => (SellingPrice * Quantity) - (BuyingPrice * Quantity);
     }

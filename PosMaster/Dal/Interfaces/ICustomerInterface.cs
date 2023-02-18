@@ -24,10 +24,13 @@ namespace PosMaster.Dal.Interfaces
     {
         private readonly DatabaseContext _context;
         private readonly ILogger<CustomerImplementation> _logger;
-        public CustomerImplementation(DatabaseContext context, ILogger<CustomerImplementation> logger)
+        private readonly IProductInterface _productInterface;
+        public CustomerImplementation(DatabaseContext context, ILogger<CustomerImplementation> logger,
+            IProductInterface productInterface)
         {
             _context = context;
             _logger = logger;
+            _productInterface = productInterface;
         }
         public async Task<ReturnData<List<Customer>>> AllAsync()
         {
@@ -167,7 +170,7 @@ namespace PosMaster.Dal.Interfaces
         {
             var result = new ReturnData<Customer> { Data = new Customer() };
             var tag = nameof(EditAsync);
-            _logger.LogInformation($"{tag} edit Customer");
+            _logger.LogInformation($"{tag} edit Customer {model.FirstName}");
             try
             {
                 if (model.IsEditMode)
@@ -203,8 +206,9 @@ namespace PosMaster.Dal.Interfaces
                     _logger.LogInformation($"{tag} updated {dbCustomer.FirstName} {model.Id} : {result.Message}");
                     return result;
                 }
-                var Customer = new Customer
+                var customer = new Customer
                 {
+                    Id = Guid.NewGuid(),
                     Code = model.Code,
                     Notes = model.Notes,
                     ClientId = model.ClientId,
@@ -223,12 +227,76 @@ namespace PosMaster.Dal.Interfaces
                     Gender = model.Gender,
                     PinNo = model.PinNo
                 };
-                _context.Customers.Add(Customer);
+                _context.Customers.Add(customer);
                 await _context.SaveChangesAsync();
+
+                #region OPENING_BALANCE
+                var paymentModeId = _context.PaymentModes.Where(x => x.ClientId == model.ClientId)
+                    .OrderByDescending(p => p.DateCreated)
+                    .Select(p => p.Id)
+                    .FirstOrDefault();
+                if (model.OpeningBalance < 0)
+                {
+                    var rcptModel = new ReceiptUserViewModel
+                    {
+                        UserId = customer.Id.ToString(),
+                        UserType = GlUserType.Customer,
+                        Amount = Math.Abs(model.OpeningBalance),
+                        Notes = $"Opening balance {model.OpeningBalanceAsAt}",
+                        ClientId = model.ClientId,
+                        InstanceId = model.InstanceId,
+                        Code = model.Code,
+                        PaymentModeId = paymentModeId.ToString(),
+                        Personnel = model.Personnel,
+                    };
+                    await _productInterface.ReceiptExcessAmount(rcptModel);
+                }
+
+                if (model.OpeningBalance > 0)
+                {
+                    var productId = _context.Products
+                        .Where(p => p.ClientId.Equals(model.ClientId))
+                        .Select(p => p.Id)
+                        .FirstOrDefault();
+                    if (!productId.Equals(Guid.Empty))
+                    {
+                        var rcptId = Guid.NewGuid();
+                        var rCode = _productInterface.DocumentRefNumber(Document.Receipt, model.ClientId);
+                        var receipt = new Receipt
+                        {
+                            Id = rcptId,
+                            CustomerId = customer.Id,
+                            IsWalkIn = false,
+                            IsCredit = true,
+                            Code = rCode,
+                            ClientId = model.ClientId,
+                            InstanceId = model.InstanceId,
+                            Personnel = model.Personnel,
+                            ReceiptLineItems = new List<ReceiptLineItem> {
+                        new ReceiptLineItem
+                        {
+                            ClientId=model.ClientId,
+                            InstanceId=model.InstanceId,
+                            Quantity=1,
+                            UnitPrice=model.OpeningBalance,
+                            Notes=$"Opening balance -{rCode}",
+                            ReceiptId=rcptId,
+                            Personnel=model.Personnel,
+                            ProductId=productId,
+                        }  }
+                        };
+                        _context.Receipts.Add(receipt);
+                        await _context.SaveChangesAsync();
+                        await _productInterface.AddInvoiceAsync(receipt);
+                    }
+                }
+
+                #endregion
+
                 result.Success = true;
                 result.Message = "Added";
-                result.Data = Customer;
-                _logger.LogInformation($"{tag} added {Customer.FirstName} {Customer.Code}  {Customer.Id} : {result.Message}");
+                result.Data = customer;
+                _logger.LogInformation($"{tag} added {customer.FirstName} {customer.Code} - {customer.Id} : {result.Message}");
                 return result;
             }
             catch (Exception ex)

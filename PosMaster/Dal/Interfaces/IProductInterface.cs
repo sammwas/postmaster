@@ -34,7 +34,8 @@ namespace PosMaster.Dal.Interfaces
         Task<ReturnData<ProductPriceLog>> ProductPriceAsync(ItemPriceViewModel model);
         Task<ReturnData<ProductDataViewModel>> ProductDetailsAsync(string productCode, Guid instanceId);
         Task<ReturnData<string>> ReceiptUserAsync(ReceiptUserViewModel model);
-
+        Task<string> ReceiptExcessAmount(ReceiptUserViewModel model);
+        Task<string> AddInvoiceAsync(Receipt receipt);
     }
 
     public class ProductImplementation : IProductInterface
@@ -653,7 +654,7 @@ namespace PosMaster.Dal.Interfaces
             }
         }
 
-        private async Task<string> AddInvoiceAsync(Receipt receipt)
+        public async Task<string> AddInvoiceAsync(Receipt receipt)
         {
             var tag = nameof(AddInvoiceAsync);
             _logger.LogInformation($"{tag} add customer invoice. receipt {receipt.Code}, customer {receipt.CustomerId}");
@@ -689,7 +690,7 @@ namespace PosMaster.Dal.Interfaces
             return invRef;
         }
 
-        private async Task<string> ReceiptExcessAmount(ReceiptUserViewModel model)
+        public async Task<string> ReceiptExcessAmount(ReceiptUserViewModel model)
         {
             try
             {
