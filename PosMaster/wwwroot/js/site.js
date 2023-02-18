@@ -549,9 +549,25 @@ $('#purchaseOrderItemList').on('change', 'input.product-event', function () {
 function updateTotal() {
     let total = 0;
     $('.poTotalItems').each((i, el) => total += parseFloat(el.textContent.trim() || 0));
-    $('#poTotalAmount').text('Ksh: ' + total.toFixed(2));
+    $('#poTotalAmount').text('*settings: ' + total.toFixed(2));
 }
 
 removePoItemRow = function (id) {
     document.getElementById("tr_" + id).remove();
 };
+
+$("#selRcptUserType").change(function () {
+    $("#spUserType").text($(this).val());
+
+});
+
+$(".selRcptUser").change(function () {
+    var type = $("#selRcptUserType").val();
+    var userId = $("#customer-select").val();
+    $.get('/Customers/Balance?id=' + userId + '&type=' + type).done(function (data) {
+        $("#spAvailCredit").text(data.data.availableCredit);
+        $("#spExpAmount").text(data.data.expectedAmount);
+        $("#inpTotalCredit").val(data.data.creditAmount);
+        $("#inpTotalDebit").val(data.data.debitAmount);
+    });
+});

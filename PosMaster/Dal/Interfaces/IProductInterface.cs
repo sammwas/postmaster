@@ -1408,7 +1408,7 @@ namespace PosMaster.Dal.Interfaces
                     result.Message = result.Success ? "Receipted" : "Not receipted";
                     return result;
                 }
-                decimal remainingAmount = model.Amount;
+                decimal remainingAmount = model.Amount + model.AvailableCredit;
                 foreach (var invoice in invoices)
                 {
                     if (remainingAmount > 0)

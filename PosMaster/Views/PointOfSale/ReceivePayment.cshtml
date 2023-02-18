@@ -24,7 +24,8 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label asp-for="UserType"></label>
-                                <select class="form-control select2" asp-for="UserType" style="width: 100%;">
+                                <select class="form-control select2" id="selRcptUserType"
+                                        asp-for="UserType" style="width: 100%;">
                                     @foreach (var item in Helpers.GlUserTypes())
                                     {
                                         <option value="@item.Id" title="@item.Text">@item.Text</option>
@@ -35,8 +36,8 @@
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label asp-for="UserId"></label>
-                                <select asp-for="UserId" class="form-control select2" id="customer-select">
+                                <label>Select <span id="spUserType">User</span> </label>
+                                <select asp-for="UserId" class="form-control select2 selRcptUser" id="customer-select">
                                     @if (!string.IsNullOrEmpty(customer.FirstName))
                                     {
                                         <option id="@customer.Id">@customer.FullName : @customer.PhoneNumber</option>
@@ -86,8 +87,8 @@
                     </div>
                 </div>
                 <div class="card-footer">
-                    <input type="hidden" asp-for="CreditAmount" />
-                    <input type="hidden" asp-for="DebitAmount" />
+                    <input type="hidden" asp-for="CreditAmount" id="inpTotalCredit" />
+                    <input type="hidden" asp-for="DebitAmount" id="inpTotalDebit" />
                     <input type="hidden" asp-for="Code" value="@DateTime.Now" />
                     <button type="submit" class="btn btn-primary">Submit</button>
                 </div>
@@ -96,13 +97,13 @@
         <div class="col-md-4">
             <div class="card">
                 <div class="card-body">
-                    <h4>Details</h4>
+                    <h6>Balance Details</h6>
                     <div>
                         <p>
-                            <b>Credit Amount : </b>
+                            <b>Credit Amount : </b> <span id="spAvailCredit">--</span>
                         </p>
                         <p>
-                            <b>Expected Amount : </b>
+                            <b>Expected Amount : </b> <span id="spExpAmount">--</span>
                         </p>
                     </div>
                 </div>

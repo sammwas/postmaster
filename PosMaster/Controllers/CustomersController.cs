@@ -72,5 +72,11 @@ namespace PosMaster.Controllers
             var data = await _customerInterface.SearchClientCustomerAsync(_userData.ClientId, term, 10);
             return Json(data);
         }
+
+        public async Task<JsonResult> Balance(Guid id, GlUserType type)
+        {
+            var data = await _customerInterface.GlUserBalanceAsync(type, id);
+            return Json(data);
+        }
     }
 }

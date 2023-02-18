@@ -18,6 +18,7 @@ namespace PosMaster.Dal.Interfaces
         Task<ReturnData<Customer>> ByIdAsync(Guid id);
         Task<ReturnData<FormSelectViewModel>> DefaultClientCustomerAsync(Guid clientId);
         Task<ReturnData<List<FormSelectViewModel>>> SearchClientCustomerAsync(Guid clientId, string term, int limit = 25);
+        Task<ReturnData<ReceiptUserViewModel>> GlUserBalanceAsync(GlUserType userType, Guid userId);
     }
 
     public class CustomerImplementation : ICustomerInterface
@@ -309,6 +310,43 @@ namespace PosMaster.Dal.Interfaces
             }
         }
 
+        public async Task<ReturnData<ReceiptUserViewModel>> GlUserBalanceAsync(GlUserType userType, Guid userId)
+        {
+            var tag = nameof(GlUserBalanceAsync);
+            _logger.LogInformation($"{tag} get {userType} {userId}  balance");
+            var result = new ReturnData<ReceiptUserViewModel>
+            {
+                Data = new ReceiptUserViewModel
+                {
+                    UserId = userId.ToString(),
+                    UserType = userType
+                }
+            };
+            try
+            {
+                var debit = await _context.GeneralLedgerEntries
+                    .Where(u => u.UserId.Equals(userId))
+                    .SumAsync(l => l.Debit);
+                var credit = await _context.GeneralLedgerEntries
+                    .Where(u => u.UserId.Equals(userId))
+                    .SumAsync(l => l.Credit);
+                result.Success = true;
+                result.Message = "Found";
+                result.Data.CreditAmount = credit;
+                result.Data.DebitAmount = debit;
+                _logger.LogInformation($"{tag} {result.Message} : credit= {credit} debit= {debit}");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                result.ErrorMessage = ex.Message;
+                result.Message = "Error occured";
+                _logger.LogError($"{tag} {result.Message} : {ex}");
+                return result;
+            }
+        }
+
         public async Task<ReturnData<List<FormSelectViewModel>>> SearchClientCustomerAsync(Guid clientId, string term, int limit = 25)
         {
             var result = new ReturnData<List<FormSelectViewModel>> { Data = new List<FormSelectViewModel>() };
@@ -348,5 +386,6 @@ namespace PosMaster.Dal.Interfaces
                 return result;
             }
         }
+
     }
 }

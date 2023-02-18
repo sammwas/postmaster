@@ -16,5 +16,7 @@ namespace PosMaster.ViewModels
         public string PaymentModeNo { get; set; }
         public decimal CreditAmount { get; set; }
         public decimal DebitAmount { get; set; }
+        public decimal ExpectedAmount => (CreditAmount - DebitAmount) > 0 ? 0 : DebitAmount - CreditAmount;
+        public decimal AvailableCredit => (CreditAmount - DebitAmount) > 0 ? CreditAmount - DebitAmount : 0;
     }
 }
