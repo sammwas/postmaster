@@ -7,7 +7,7 @@
     var user = _cookies.Read();
     var instanceRes = await _instanceInterface.ByIdAsync(Model.InstanceId);
     var customer = Model.Receipt.Customer;
-    var isActive = Model.Status.Equals(EntityStatus.Active);
+    var isActive = Model.Balance > 0;
 }
 <div class="invoice p-3 mb-3" id="printDiv">
     <div class="row">

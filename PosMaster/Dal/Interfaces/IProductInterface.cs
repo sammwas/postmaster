@@ -605,6 +605,7 @@ namespace PosMaster.Dal.Interfaces
                     dataQuery = dataQuery.Where(r => r.DateCreated.Date <= dtTo.Date);
                 if (!string.IsNullOrEmpty(search))
                     dataQuery = dataQuery.Where(r => r.Code.ToLower().Contains(search.ToLower()));
+                dataQuery.Where(d => d.ReceiptLineItems.Any());
                 var data = await dataQuery.OrderByDescending(r => r.DateCreated)
                     .ToListAsync();
                 result.Success = data.Any();
@@ -1396,8 +1397,9 @@ namespace PosMaster.Dal.Interfaces
                 var invoices = await _context.Invoices
                     .Include(i => i.Receipt)
                     .ThenInclude(i => i.ReceiptLineItems)
-                    .Where(i => i.Receipt.ReceiptLineItems.Sum(s => s.UnitPrice * s.UnitPrice) > i.Receipt.AmountReceived)
+                    //.Where(i => i.Receipt.ReceiptLineItems.Sum(s => s.UnitPrice * s.UnitPrice) > i.Receipt.AmountReceived)
                     .Where(u => u.Receipt.CustomerId.Equals(Guid.Parse(model.UserId)))
+                    .Where(i => i.Status.Equals(EntityStatus.Active))
                     .OrderBy(i => i.DateCreated)
                     .ToListAsync();
                 if (!invoices.Any())
@@ -1413,13 +1415,12 @@ namespace PosMaster.Dal.Interfaces
                 {
                     if (remainingAmount > 0)
                     {
-                        if (remainingAmount < invoice.Balance)
-                            continue;
-                        var toSpend = invoice.Balance;
+                        var toSpend = remainingAmount < invoice.Balance ? remainingAmount : invoice.Balance;
                         if (toSpend <= 0) continue;
                         invoice.LastModifiedBy = model.Personnel;
                         invoice.DateLastModified = DateTime.Now;
-                        invoice.Status = EntityStatus.Inactive;
+                        if (invoice.Balance == 0)
+                            invoice.Status = EntityStatus.Inactive;
 
                         invoice.Receipt.AmountReceived += toSpend;
                         invoice.Receipt.LastModifiedBy = model.Personnel;
@@ -1439,6 +1440,7 @@ namespace PosMaster.Dal.Interfaces
                         };
                         _context.GeneralLedgerEntries.Add(entry);
                     }
+                    _context.SaveChanges();
                 }
 
                 if (remainingAmount > 0)
