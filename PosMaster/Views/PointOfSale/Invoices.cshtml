@@ -102,7 +102,7 @@
                                 <td>
                                     @if (item.Balance > 0)
                                     {
-                                        <span class="badge badge-danger"><i class="fa fa-times-circle"></i> Not fully Paid [@item.Balance]</span>
+                                        <span class="badge badge-danger"><i class="fa fa-times-circle"></i> Not fully Paid</span>
                                         @*<br />
                                             <form method="post" asp-action="PayInvoice">
                                             <input type="hidden" value="@item.Id" name="Id" />
@@ -114,7 +114,7 @@
                                         <span class="badge badge-success"><i class="fa fa-check-circle"></i> Paid</span>
                                     }
                                 </td>
-                                <td>@item.TotalAmount</td>
+                                <td>@Helpers.FormatAmount(item.TotalAmount)</td>
                             </tr>
                         }
 

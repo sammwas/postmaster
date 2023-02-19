@@ -20,7 +20,7 @@ namespace PosMaster.Services
             int delta = dayOfWeek - DateTime.Now.DayOfWeek;
             return DateTime.Now.AddDays(delta);
         }
-        public static string FormatAmount(decimal amount, int dec = 0)
+        public static string FormatAmount(decimal amount, int dec = 2)
         {
             var format = "{0:n" + dec + "}";
             return string.Format($"{format}", amount);

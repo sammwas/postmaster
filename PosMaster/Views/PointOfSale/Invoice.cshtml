@@ -79,8 +79,8 @@
                             <td>@item.Product.Code</td>
                             <td>@item.Product.Name</td>
                             <td>@item.Quantity</td>
-                            <td>@item.SellingPrice</td>
-                            <td>@item.Amount</td>
+                            <td>@Helpers.FormatAmount(item.SellingPrice)</td>
+                            <td>@Helpers.FormatAmount(item.Amount)</td>
                         </tr>
                     }
                 </tbody>
@@ -106,19 +106,19 @@
                     <tbody>
                         <tr>
                             <th style="width:50%">Subtotal:</th>
-                            <td>@Model.TotalAmount</td>
+                            <td>@Helpers.FormatAmount(Model.TotalAmount)</td>
                         </tr>
                         <tr>
                             <th>Discount</th>
-                            <td>@Model.Receipt.Discount</td>
+                            <td>@Helpers.FormatAmount(Model.Receipt.Discount)</td>
                         </tr>
                         <tr>
                             <th>Tax</th>
-                            <td>@Model.Receipt.Tax</td>
+                            <td>@Helpers.FormatAmount(Model.Receipt.Tax)</td>
                         </tr>
                         <tr>
                             <th>Total:</th>
-                            <td>@(Model.TotalAmount)</td>
+                            <td>@Helpers.FormatAmount(Model.TotalAmount)</td>
                         </tr>
                     </tbody>
                 </table>

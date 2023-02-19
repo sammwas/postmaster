@@ -38,7 +38,7 @@
                     <b>Type </b> @saleType
                     @if (Model.Balance > 0)
                     {
-                        <span>(@Model.Balance)</span>
+                        <span>@Model.Balance</span>
                     }
                     @if (Model.PaymentMode != null)
                     {
@@ -75,7 +75,7 @@
                             <td>@item.Product.Code - @item.Product.Name</td>
                             <td>@item.Quantity</td>
                             <td>@item.UnitPrice</td>
-                            <td>@item.Amount</td>
+                            <td>@Helpers.FormatAmount(item.Amount)</td>
                         </tr>
                     }
                 </tbody>
@@ -83,27 +83,27 @@
                     <tr>
                         <td colspan="3"></td>
                         <td>Tax</td>
-                        <td>@Model.Tax</td>
+                        <td>@Helpers.FormatAmount(Model.Tax)</td>
                     </tr>
                     @if (Model.Discount >= 0)
                     {
                         <tr>
                             <td colspan="3" style="border:none"></td>
                             <td>Discount</td>
-                            <td>@Model.Discount</td>
+                            <td>@Helpers.FormatAmount(Model.Discount)</td>
                         </tr>
                     }
                     <tr>
                         <td colspan="3" style="border:none"></td>
                         <td>Total</td>
-                        <td><b>@Model.Amount</b></td>
+                        <td><b>@Helpers.FormatAmount(Model.Amount)</b></td>
                     </tr>
                     @if (Model.Balance > 0)
                     {
                         <tr>
                             <td colspan="3" style="border:none"></td>
                             <td>Balance</td>
-                            <td><b>@Model.Balance</b></td>
+                            <td><b>@Helpers.FormatAmount(Model.Balance)</b></td>
                         </tr>
                     }
                 </tfoot>
@@ -118,7 +118,6 @@
         </div>
         <div class="col-4">
             <a asp-action="Index" class="btn btn-primary"><i class="fa fa-shopping-basket"></i> Make Sale </a>
-
         </div>
     </div>
 </div>

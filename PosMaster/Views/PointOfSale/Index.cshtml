@@ -8,7 +8,7 @@
     ViewData["Title"] = title;
     var userData = _cookies.Read();
     var paymentModes = await _masterDataInterface.PaymentModesAsync(userData.ClientId);
-    var walkIn = await _customerInterface.DefaultClientCustomerAsync(userData.ClientId);
+    var walkIn = await _customerInterface.DefaultClientCustomerAsync(userData.ClientId, Model?.CustomerId);
 }
 <div class="card card-primary">
     <div class="card-header">
@@ -156,7 +156,7 @@
                     <input asp-for="InstanceId" id="instanceId" type="hidden" value="@userData.InstanceId" />
                     <input asp-for="ClientId" type="hidden" value="@userData.ClientId" />
                     <button disabled class="btn btn-primary mb-4" type="submit" id="btnSumbitIss">
-                        <i class="fa fa-save"></i>
+                        <i class="fa fa-paper-plane"></i>
                         Submit
                     </button>
                 </form>

@@ -16,7 +16,7 @@ namespace PosMaster.Dal.Interfaces
         Task<ReturnData<List<Customer>>> ByClientIdAsync(Guid clientId);
         Task<ReturnData<List<Customer>>> ByInstanceIdAsync(Guid instanceId);
         Task<ReturnData<Customer>> ByIdAsync(Guid id);
-        Task<ReturnData<FormSelectViewModel>> DefaultClientCustomerAsync(Guid clientId);
+        Task<ReturnData<FormSelectViewModel>> DefaultClientCustomerAsync(Guid clientId, string customerId = "");
         Task<ReturnData<List<FormSelectViewModel>>> SearchClientCustomerAsync(Guid clientId, string term, int limit = 25);
         Task<ReturnData<ReceiptUserViewModel>> GlUserBalanceAsync(GlUserType userType, Guid userId);
     }
@@ -141,15 +141,19 @@ namespace PosMaster.Dal.Interfaces
             }
         }
 
-        public async Task<ReturnData<FormSelectViewModel>> DefaultClientCustomerAsync(Guid clientId)
+        public async Task<ReturnData<FormSelectViewModel>> DefaultClientCustomerAsync(Guid clientId, string customerId = "")
         {
             var result = new ReturnData<FormSelectViewModel> { Data = new FormSelectViewModel() };
             var tag = nameof(DefaultClientCustomerAsync);
-            _logger.LogInformation($"{tag} get Customer by id - {clientId}");
+            _logger.LogInformation($"{tag} get client customer by client-id - {clientId} customer {customerId}");
             try
             {
-                var data = await _context.Customers
-                    .FirstOrDefaultAsync(c => c.Code.Equals(Constants.WalkInCustomerCode) && c.ClientId.Equals(clientId));
+                var hasId = Guid.TryParse(customerId, out var id);
+                var dataQry = _context.Customers
+                    .Where(c => c.ClientId.Equals(clientId));
+                dataQry = hasId ?
+                    dataQry.Where(c => c.Id.Equals(id)) : dataQry.Where(c => c.Code.Equals(Constants.WalkInCustomerCode));
+                var data = await dataQry.FirstOrDefaultAsync();
                 result.Success = data != null;
                 result.Message = result.Success ? "Found" : "Not Found";
                 if (result.Success)

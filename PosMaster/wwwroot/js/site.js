@@ -409,6 +409,13 @@ function plotDoughnut(labels, data) {
         options: donutOptions
     })
 }
+
+var creditCheck = $('#credit-sale-check').val();
+if (creditCheck) {
+    $('.cash-sale').hide();
+} else
+    $('.cash-sale').show();
+
 $('#credit-sale-check').change(function () {
     $('#payment-mode').attr("required", !this.checked);
     if (this.checked) {
