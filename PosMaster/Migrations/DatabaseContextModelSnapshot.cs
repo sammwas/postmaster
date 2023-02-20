@@ -1273,9 +1273,6 @@ namespace PosMaster.Migrations
                     b.Property<string>("Notes")
                         .HasColumnType("text");
 
-                    b.Property<decimal>("PaidAmount")
-                        .HasColumnType("numeric");
-
                     b.Property<string>("Personnel")
                         .HasColumnType("text");
 

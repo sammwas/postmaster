@@ -23,11 +23,16 @@ namespace PosMaster.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "AspNetUsers",
+                name: "Banks",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "text", nullable: false),
-                    Role = table.Column<string>(type: "text", nullable: true),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: true),
+                    ContactPerson = table.Column<string>(type: "text", nullable: true),
+                    PhoneNumber = table.Column<string>(type: "text", nullable: true),
+                    EmailAddress = table.Column<string>(type: "text", nullable: true),
+                    Website = table.Column<string>(type: "text", nullable: true),
+                    Code = table.Column<string>(type: "text", nullable: true),
                     DateCreated = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
                     ClientId = table.Column<Guid>(type: "uuid", nullable: false),
@@ -35,33 +40,11 @@ namespace PosMaster.Migrations
                     Personnel = table.Column<string>(type: "text", nullable: true),
                     LastModifiedBy = table.Column<string>(type: "text", nullable: true),
                     Notes = table.Column<string>(type: "text", nullable: true),
-                    ImagePath = table.Column<string>(type: "text", nullable: true),
-                    IdNumber = table.Column<string>(type: "text", nullable: true),
-                    Gender = table.Column<string>(type: "text", nullable: true),
-                    Title = table.Column<string>(type: "text", nullable: true),
-                    FirstName = table.Column<string>(type: "text", nullable: true),
-                    MiddleName = table.Column<string>(type: "text", nullable: true),
-                    LastName = table.Column<string>(type: "text", nullable: true),
-                    Status = table.Column<int>(type: "integer", nullable: false),
-                    PasswordChangeDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    UserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
-                    NormalizedUserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
-                    Email = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
-                    NormalizedEmail = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
-                    EmailConfirmed = table.Column<bool>(type: "boolean", nullable: false),
-                    PasswordHash = table.Column<string>(type: "text", nullable: true),
-                    SecurityStamp = table.Column<string>(type: "text", nullable: true),
-                    ConcurrencyStamp = table.Column<string>(type: "text", nullable: true),
-                    PhoneNumber = table.Column<string>(type: "text", nullable: true),
-                    PhoneNumberConfirmed = table.Column<bool>(type: "boolean", nullable: false),
-                    TwoFactorEnabled = table.Column<bool>(type: "boolean", nullable: false),
-                    LockoutEnd = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    LockoutEnabled = table.Column<bool>(type: "boolean", nullable: false),
-                    AccessFailedCount = table.Column<int>(type: "integer", nullable: false)
+                    Status = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                    table.PrimaryKey("PK_Banks", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -90,7 +73,6 @@ namespace PosMaster.Migrations
                     PhoneNumberLength = table.Column<int>(type: "integer", nullable: false),
                     TelephoneCode = table.Column<string>(type: "text", nullable: true),
                     DisplayBuyingPrice = table.Column<bool>(type: "boolean", nullable: false),
-                    InvoiceTerms = table.Column<string>(type: "text", nullable: true),
                     Code = table.Column<string>(type: "text", nullable: true),
                     DateCreated = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
@@ -107,6 +89,27 @@ namespace PosMaster.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Counties",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: true),
+                    Code = table.Column<string>(type: "text", nullable: true),
+                    DateCreated = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    ClientId = table.Column<Guid>(type: "uuid", nullable: false),
+                    InstanceId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Personnel = table.Column<string>(type: "text", nullable: true),
+                    LastModifiedBy = table.Column<string>(type: "text", nullable: true),
+                    Notes = table.Column<string>(type: "text", nullable: true),
+                    Status = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Counties", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Customers",
                 columns: table => new
                 {
@@ -120,6 +123,9 @@ namespace PosMaster.Migrations
                     PostalAddress = table.Column<string>(type: "text", nullable: true),
                     Town = table.Column<string>(type: "text", nullable: true),
                     CreditLimit = table.Column<decimal>(type: "numeric", nullable: false),
+                    EmailAddress = table.Column<string>(type: "text", nullable: true),
+                    Website = table.Column<string>(type: "text", nullable: true),
+                    PinNo = table.Column<string>(type: "text", nullable: true),
                     Code = table.Column<string>(type: "text", nullable: true),
                     DateCreated = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
@@ -163,6 +169,50 @@ namespace PosMaster.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "EmployeeKinRelationships",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: true),
+                    Code = table.Column<string>(type: "text", nullable: true),
+                    DateCreated = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    ClientId = table.Column<Guid>(type: "uuid", nullable: false),
+                    InstanceId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Personnel = table.Column<string>(type: "text", nullable: true),
+                    LastModifiedBy = table.Column<string>(type: "text", nullable: true),
+                    Notes = table.Column<string>(type: "text", nullable: true),
+                    Status = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_EmployeeKinRelationships", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "EmployeeLeaveCategories",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Title = table.Column<string>(type: "text", nullable: true),
+                    MaxDays = table.Column<decimal>(type: "numeric", nullable: false),
+                    AllowedGender = table.Column<string>(type: "text", nullable: true),
+                    Code = table.Column<string>(type: "text", nullable: true),
+                    DateCreated = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    ClientId = table.Column<Guid>(type: "uuid", nullable: false),
+                    InstanceId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Personnel = table.Column<string>(type: "text", nullable: true),
+                    LastModifiedBy = table.Column<string>(type: "text", nullable: true),
+                    Notes = table.Column<string>(type: "text", nullable: true),
+                    Status = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_EmployeeLeaveCategories", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ExpenseTypes",
                 columns: table => new
                 {
@@ -182,6 +232,33 @@ namespace PosMaster.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ExpenseTypes", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "GeneralLedgerEntries",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Debit = table.Column<decimal>(type: "numeric", nullable: false),
+                    Credit = table.Column<decimal>(type: "numeric", nullable: false),
+                    Document = table.Column<int>(type: "integer", nullable: false),
+                    DocumentNumber = table.Column<string>(type: "text", nullable: true),
+                    VoteHead = table.Column<string>(type: "text", nullable: true),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserType = table.Column<int>(type: "integer", nullable: false),
+                    Code = table.Column<string>(type: "text", nullable: true),
+                    DateCreated = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    ClientId = table.Column<Guid>(type: "uuid", nullable: false),
+                    InstanceId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Personnel = table.Column<string>(type: "text", nullable: true),
+                    LastModifiedBy = table.Column<string>(type: "text", nullable: true),
+                    Notes = table.Column<string>(type: "text", nullable: true),
+                    Status = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_GeneralLedgerEntries", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -337,6 +414,28 @@ namespace PosMaster.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "TaxTypes",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: true),
+                    Rate = table.Column<decimal>(type: "numeric", nullable: false),
+                    Code = table.Column<string>(type: "text", nullable: true),
+                    DateCreated = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    ClientId = table.Column<Guid>(type: "uuid", nullable: false),
+                    InstanceId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Personnel = table.Column<string>(type: "text", nullable: true),
+                    LastModifiedBy = table.Column<string>(type: "text", nullable: true),
+                    Notes = table.Column<string>(type: "text", nullable: true),
+                    Status = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TaxTypes", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "UnitOfMeasures",
                 columns: table => new
                 {
@@ -406,6 +505,306 @@ namespace PosMaster.Migrations
                         principalTable: "AspNetRoles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AspNetUsers",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "text", nullable: false),
+                    Role = table.Column<string>(type: "text", nullable: true),
+                    DateCreated = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    ClientId = table.Column<Guid>(type: "uuid", nullable: false),
+                    InstanceId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Personnel = table.Column<string>(type: "text", nullable: true),
+                    LastModifiedBy = table.Column<string>(type: "text", nullable: true),
+                    Notes = table.Column<string>(type: "text", nullable: true),
+                    ImagePath = table.Column<string>(type: "text", nullable: true),
+                    IdNumber = table.Column<string>(type: "text", nullable: true),
+                    Gender = table.Column<string>(type: "text", nullable: true),
+                    Title = table.Column<string>(type: "text", nullable: true),
+                    FirstName = table.Column<string>(type: "text", nullable: true),
+                    MiddleName = table.Column<string>(type: "text", nullable: true),
+                    LastName = table.Column<string>(type: "text", nullable: true),
+                    MaritalStatus = table.Column<string>(type: "text", nullable: true),
+                    AltPhoneNumber = table.Column<string>(type: "text", nullable: true),
+                    PostalAddress = table.Column<string>(type: "text", nullable: true),
+                    Town = table.Column<string>(type: "text", nullable: true),
+                    County = table.Column<string>(type: "text", nullable: true),
+                    Status = table.Column<int>(type: "integer", nullable: false),
+                    PasswordChangeDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    DateOfBirth = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    UserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
+                    NormalizedUserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
+                    Email = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
+                    NormalizedEmail = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
+                    EmailConfirmed = table.Column<bool>(type: "boolean", nullable: false),
+                    PasswordHash = table.Column<string>(type: "text", nullable: true),
+                    SecurityStamp = table.Column<string>(type: "text", nullable: true),
+                    ConcurrencyStamp = table.Column<string>(type: "text", nullable: true),
+                    PhoneNumber = table.Column<string>(type: "text", nullable: true),
+                    PhoneNumberConfirmed = table.Column<bool>(type: "boolean", nullable: false),
+                    TwoFactorEnabled = table.Column<bool>(type: "boolean", nullable: false),
+                    LockoutEnd = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    LockoutEnabled = table.Column<bool>(type: "boolean", nullable: false),
+                    AccessFailedCount = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AspNetUsers_Clients_ClientId",
+                        column: x => x.ClientId,
+                        principalTable: "Clients",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ClientInstances",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    OpeningTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    ClosingTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    Latitude = table.Column<string>(type: "text", nullable: true),
+                    Longitude = table.Column<string>(type: "text", nullable: true),
+                    Name = table.Column<string>(type: "text", nullable: true),
+                    PostalAddress = table.Column<string>(type: "text", nullable: true),
+                    Town = table.Column<string>(type: "text", nullable: true),
+                    Location = table.Column<string>(type: "text", nullable: true),
+                    PrimaryTelephone = table.Column<string>(type: "text", nullable: true),
+                    SecondaryTelephone = table.Column<string>(type: "text", nullable: true),
+                    EmailAddress = table.Column<string>(type: "text", nullable: true),
+                    PinNo = table.Column<string>(type: "text", nullable: true),
+                    InvoiceTerms = table.Column<string>(type: "text", nullable: true),
+                    InvoiceDurationDays = table.Column<int>(type: "integer", nullable: false),
+                    Code = table.Column<string>(type: "text", nullable: true),
+                    DateCreated = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    ClientId = table.Column<Guid>(type: "uuid", nullable: false),
+                    InstanceId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Personnel = table.Column<string>(type: "text", nullable: true),
+                    LastModifiedBy = table.Column<string>(type: "text", nullable: true),
+                    Notes = table.Column<string>(type: "text", nullable: true),
+                    Status = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ClientInstances", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ClientInstances_Clients_ClientId",
+                        column: x => x.ClientId,
+                        principalTable: "Clients",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Orders",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: true),
+                    CustomerId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Code = table.Column<string>(type: "text", nullable: true),
+                    DateCreated = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    ClientId = table.Column<Guid>(type: "uuid", nullable: false),
+                    InstanceId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Personnel = table.Column<string>(type: "text", nullable: true),
+                    LastModifiedBy = table.Column<string>(type: "text", nullable: true),
+                    Notes = table.Column<string>(type: "text", nullable: true),
+                    Status = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Orders", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Orders_Customers_CustomerId",
+                        column: x => x.CustomerId,
+                        principalTable: "Customers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Expenses",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    ExpenseTypeId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Amount = table.Column<decimal>(type: "numeric", nullable: false),
+                    Code = table.Column<string>(type: "text", nullable: true),
+                    DateCreated = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    ClientId = table.Column<Guid>(type: "uuid", nullable: false),
+                    InstanceId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Personnel = table.Column<string>(type: "text", nullable: true),
+                    LastModifiedBy = table.Column<string>(type: "text", nullable: true),
+                    Notes = table.Column<string>(type: "text", nullable: true),
+                    Status = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Expenses", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Expenses_ExpenseTypes_ExpenseTypeId",
+                        column: x => x.ExpenseTypeId,
+                        principalTable: "ExpenseTypes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Receipts",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    CustomerId = table.Column<Guid>(type: "uuid", nullable: false),
+                    PaymentModeId = table.Column<Guid>(type: "uuid", nullable: true),
+                    PaymentModeNo = table.Column<string>(type: "text", nullable: true),
+                    IsCredit = table.Column<bool>(type: "boolean", nullable: false),
+                    IsWalkIn = table.Column<bool>(type: "boolean", nullable: false),
+                    AmountReceived = table.Column<decimal>(type: "numeric", nullable: false),
+                    PinNo = table.Column<string>(type: "text", nullable: true),
+                    IsPrinted = table.Column<bool>(type: "boolean", nullable: false),
+                    Code = table.Column<string>(type: "text", nullable: true),
+                    DateCreated = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    ClientId = table.Column<Guid>(type: "uuid", nullable: false),
+                    InstanceId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Personnel = table.Column<string>(type: "text", nullable: true),
+                    LastModifiedBy = table.Column<string>(type: "text", nullable: true),
+                    Notes = table.Column<string>(type: "text", nullable: true),
+                    Status = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Receipts", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Receipts_Customers_CustomerId",
+                        column: x => x.CustomerId,
+                        principalTable: "Customers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Receipts_PaymentModes_PaymentModeId",
+                        column: x => x.PaymentModeId,
+                        principalTable: "PaymentModes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "GoodReceivedNotes",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    PoId = table.Column<Guid>(type: "uuid", nullable: false),
+                    PoCode = table.Column<string>(type: "text", nullable: true),
+                    Name = table.Column<string>(type: "text", nullable: true),
+                    SupplierId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Code = table.Column<string>(type: "text", nullable: true),
+                    DateCreated = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    ClientId = table.Column<Guid>(type: "uuid", nullable: false),
+                    InstanceId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Personnel = table.Column<string>(type: "text", nullable: true),
+                    LastModifiedBy = table.Column<string>(type: "text", nullable: true),
+                    Notes = table.Column<string>(type: "text", nullable: true),
+                    Status = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_GoodReceivedNotes", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_GoodReceivedNotes_Suppliers_SupplierId",
+                        column: x => x.SupplierId,
+                        principalTable: "Suppliers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PurchaseOrders",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: true),
+                    SupplierId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Code = table.Column<string>(type: "text", nullable: true),
+                    DateCreated = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    ClientId = table.Column<Guid>(type: "uuid", nullable: false),
+                    InstanceId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Personnel = table.Column<string>(type: "text", nullable: true),
+                    LastModifiedBy = table.Column<string>(type: "text", nullable: true),
+                    Notes = table.Column<string>(type: "text", nullable: true),
+                    Status = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PurchaseOrders", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_PurchaseOrders_Suppliers_SupplierId",
+                        column: x => x.SupplierId,
+                        principalTable: "Suppliers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Products",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    ProductCategoryId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: true),
+                    ImagePath = table.Column<string>(type: "text", nullable: true),
+                    AllowDiscount = table.Column<bool>(type: "boolean", nullable: false),
+                    BuyingPrice = table.Column<decimal>(type: "numeric", nullable: false),
+                    SellingPrice = table.Column<decimal>(type: "numeric", nullable: false),
+                    ReorderLevel = table.Column<decimal>(type: "numeric", nullable: false),
+                    AvailableQuantity = table.Column<decimal>(type: "numeric", nullable: false),
+                    UnitOfMeasureId = table.Column<Guid>(type: "uuid", nullable: true),
+                    PriceStartDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    PriceEndDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    IsService = table.Column<bool>(type: "boolean", nullable: false),
+                    ProductInstanceStamp = table.Column<string>(type: "text", nullable: true),
+                    TaxTypeId = table.Column<Guid>(type: "uuid", nullable: true),
+                    Code = table.Column<string>(type: "text", nullable: true),
+                    DateCreated = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    ClientId = table.Column<Guid>(type: "uuid", nullable: false),
+                    InstanceId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Personnel = table.Column<string>(type: "text", nullable: true),
+                    LastModifiedBy = table.Column<string>(type: "text", nullable: true),
+                    Notes = table.Column<string>(type: "text", nullable: true),
+                    Status = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Products", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Products_ProductCategories_ProductCategoryId",
+                        column: x => x.ProductCategoryId,
+                        principalTable: "ProductCategories",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Products_TaxTypes_TaxTypeId",
+                        column: x => x.TaxTypeId,
+                        principalTable: "TaxTypes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Products_UnitOfMeasures_UnitOfMeasureId",
+                        column: x => x.UnitOfMeasureId,
+                        principalTable: "UnitOfMeasures",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -494,20 +893,22 @@ namespace PosMaster.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ClientInstances",
+                name: "EmployeeKins",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    OpeningTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    ClosingTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    Latitude = table.Column<string>(type: "text", nullable: true),
-                    Longitude = table.Column<string>(type: "text", nullable: true),
-                    Name = table.Column<string>(type: "text", nullable: true),
+                    UserId = table.Column<string>(type: "text", nullable: true),
+                    FirstName = table.Column<string>(type: "text", nullable: true),
+                    MiddleName = table.Column<string>(type: "text", nullable: true),
+                    LastName = table.Column<string>(type: "text", nullable: true),
+                    Gender = table.Column<string>(type: "text", nullable: true),
+                    Title = table.Column<string>(type: "text", nullable: true),
                     PostalAddress = table.Column<string>(type: "text", nullable: true),
                     Town = table.Column<string>(type: "text", nullable: true),
-                    Location = table.Column<string>(type: "text", nullable: true),
-                    PrimaryTelephone = table.Column<string>(type: "text", nullable: true),
-                    SecondaryTelephone = table.Column<string>(type: "text", nullable: true),
+                    EmailAddress = table.Column<string>(type: "text", nullable: true),
+                    PhoneNumber = table.Column<string>(type: "text", nullable: true),
+                    AltPhoneNumber = table.Column<string>(type: "text", nullable: true),
+                    Relationship = table.Column<string>(type: "text", nullable: true),
                     Code = table.Column<string>(type: "text", nullable: true),
                     DateCreated = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
@@ -520,26 +921,62 @@ namespace PosMaster.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ClientInstances", x => x.Id);
+                    table.PrimaryKey("PK_EmployeeKins", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ClientInstances_Clients_ClientId",
-                        column: x => x.ClientId,
-                        principalTable: "Clients",
+                        name: "FK_EmployeeKins_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "EmployeeLeaveApplications",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    ApplicationStatus = table.Column<int>(type: "integer", nullable: false),
+                    UserId = table.Column<string>(type: "text", nullable: true),
+                    DateFrom = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    DateTo = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    EmployeeLeaveCategoryId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Days = table.Column<decimal>(type: "numeric", nullable: false),
+                    Comments = table.Column<string>(type: "text", nullable: true),
+                    Code = table.Column<string>(type: "text", nullable: true),
+                    DateCreated = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    ClientId = table.Column<Guid>(type: "uuid", nullable: false),
+                    InstanceId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Personnel = table.Column<string>(type: "text", nullable: true),
+                    LastModifiedBy = table.Column<string>(type: "text", nullable: true),
+                    Notes = table.Column<string>(type: "text", nullable: true),
+                    Status = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_EmployeeLeaveApplications", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_EmployeeLeaveApplications_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_EmployeeLeaveApplications_EmployeeLeaveCategories_EmployeeL~",
+                        column: x => x.EmployeeLeaveCategoryId,
+                        principalTable: "EmployeeLeaveCategories",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Receipts",
+                name: "EmployeeLeaveEntitlements",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    CustomerId = table.Column<Guid>(type: "uuid", nullable: false),
-                    PaymentMode = table.Column<string>(type: "text", nullable: true),
-                    ExternalRef = table.Column<string>(type: "text", nullable: true),
-                    IsCredit = table.Column<bool>(type: "boolean", nullable: false),
-                    IsWalkIn = table.Column<bool>(type: "boolean", nullable: false),
-                    Discount = table.Column<decimal>(type: "numeric", nullable: false),
+                    UserId = table.Column<string>(type: "text", nullable: true),
+                    EmployeeLeaveCategoryId = table.Column<Guid>(type: "uuid", nullable: false),
+                    RemainingDays = table.Column<int>(type: "integer", nullable: false),
                     Code = table.Column<string>(type: "text", nullable: true),
                     DateCreated = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
@@ -552,22 +989,32 @@ namespace PosMaster.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Receipts", x => x.Id);
+                    table.PrimaryKey("PK_EmployeeLeaveEntitlements", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Receipts_Customers_CustomerId",
-                        column: x => x.CustomerId,
-                        principalTable: "Customers",
+                        name: "FK_EmployeeLeaveEntitlements_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_EmployeeLeaveEntitlements_EmployeeLeaveCategories_EmployeeL~",
+                        column: x => x.EmployeeLeaveCategoryId,
+                        principalTable: "EmployeeLeaveCategories",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Expenses",
+                name: "EmployeeMonthPayments",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    ExpenseTypeId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Amount = table.Column<decimal>(type: "numeric", nullable: false),
+                    UserId = table.Column<string>(type: "text", nullable: true),
+                    BasicPay = table.Column<decimal>(type: "numeric", nullable: false),
+                    Allowance = table.Column<decimal>(type: "numeric", nullable: false),
+                    Deduction = table.Column<decimal>(type: "numeric", nullable: false),
+                    Year = table.Column<int>(type: "integer", nullable: false),
+                    Month = table.Column<int>(type: "integer", nullable: false),
                     Code = table.Column<string>(type: "text", nullable: true),
                     DateCreated = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
@@ -580,30 +1027,26 @@ namespace PosMaster.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Expenses", x => x.Id);
+                    table.PrimaryKey("PK_EmployeeMonthPayments", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Expenses_ExpenseTypes_ExpenseTypeId",
-                        column: x => x.ExpenseTypeId,
-                        principalTable: "ExpenseTypes",
+                        name: "FK_EmployeeMonthPayments_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Products",
+                name: "EmployeeSalaries",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    ProductCategoryId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Name = table.Column<string>(type: "text", nullable: true),
-                    ImagePath = table.Column<string>(type: "text", nullable: true),
-                    AllowDiscount = table.Column<bool>(type: "boolean", nullable: false),
-                    BuyingPrice = table.Column<decimal>(type: "numeric", nullable: false),
-                    SellingPrice = table.Column<decimal>(type: "numeric", nullable: false),
-                    ReorderLevel = table.Column<decimal>(type: "numeric", nullable: false),
-                    AvailableQuantity = table.Column<decimal>(type: "numeric", nullable: false),
-                    UnitOfMeasure = table.Column<string>(type: "text", nullable: true),
-                    TaxRate = table.Column<decimal>(type: "numeric", nullable: false),
+                    UserId = table.Column<string>(type: "text", nullable: true),
+                    Bank = table.Column<string>(type: "text", nullable: true),
+                    BankAccount = table.Column<string>(type: "text", nullable: true),
+                    BasicPay = table.Column<decimal>(type: "numeric", nullable: false),
+                    Allowance = table.Column<decimal>(type: "numeric", nullable: false),
+                    Deduction = table.Column<decimal>(type: "numeric", nullable: false),
                     Code = table.Column<string>(type: "text", nullable: true),
                     DateCreated = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
@@ -616,24 +1059,23 @@ namespace PosMaster.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Products", x => x.Id);
+                    table.PrimaryKey("PK_EmployeeSalaries", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Products_ProductCategories_ProductCategoryId",
-                        column: x => x.ProductCategoryId,
-                        principalTable: "ProductCategories",
+                        name: "FK_EmployeeSalaries_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
-                name: "GoodReceivedNotes",
+                name: "EmployeeSalaryLogs",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    PoId = table.Column<Guid>(type: "uuid", nullable: false),
-                    PoCode = table.Column<string>(type: "text", nullable: true),
-                    Name = table.Column<string>(type: "text", nullable: true),
-                    SupplierId = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<string>(type: "text", nullable: true),
+                    SalaryFrom = table.Column<decimal>(type: "numeric", nullable: false),
+                    SalaryTo = table.Column<decimal>(type: "numeric", nullable: false),
                     Code = table.Column<string>(type: "text", nullable: true),
                     DateCreated = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
@@ -646,22 +1088,21 @@ namespace PosMaster.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_GoodReceivedNotes", x => x.Id);
+                    table.PrimaryKey("PK_EmployeeSalaryLogs", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_GoodReceivedNotes_Suppliers_SupplierId",
-                        column: x => x.SupplierId,
-                        principalTable: "Suppliers",
+                        name: "FK_EmployeeSalaryLogs_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
-                name: "PurchaseOrders",
+                name: "GoodReturnedNotes",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Name = table.Column<string>(type: "text", nullable: true),
-                    SupplierId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ReceiptId = table.Column<Guid>(type: "uuid", nullable: false),
                     Code = table.Column<string>(type: "text", nullable: true),
                     DateCreated = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
@@ -674,11 +1115,11 @@ namespace PosMaster.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PurchaseOrders", x => x.Id);
+                    table.PrimaryKey("PK_GoodReturnedNotes", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_PurchaseOrders_Suppliers_SupplierId",
-                        column: x => x.SupplierId,
-                        principalTable: "Suppliers",
+                        name: "FK_GoodReturnedNotes_Receipts_ReceiptId",
+                        column: x => x.ReceiptId,
+                        principalTable: "Receipts",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -688,13 +1129,7 @@ namespace PosMaster.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    CustomerId = table.Column<Guid>(type: "uuid", nullable: false),
-                    ProductId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Quantity = table.Column<decimal>(type: "numeric", nullable: false),
-                    UnitPrice = table.Column<decimal>(type: "numeric", nullable: false),
                     ReceiptId = table.Column<Guid>(type: "uuid", nullable: false),
-                    ReceiptNo = table.Column<string>(type: "text", nullable: true),
-                    TaxAmount = table.Column<decimal>(type: "numeric", nullable: false),
                     Code = table.Column<string>(type: "text", nullable: true),
                     DateCreated = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
@@ -709,21 +1144,49 @@ namespace PosMaster.Migrations
                 {
                     table.PrimaryKey("PK_Invoices", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Invoices_Customers_CustomerId",
-                        column: x => x.CustomerId,
-                        principalTable: "Customers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Invoices_Products_ProductId",
-                        column: x => x.ProductId,
-                        principalTable: "Products",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
                         name: "FK_Invoices_Receipts_ReceiptId",
                         column: x => x.ReceiptId,
                         principalTable: "Receipts",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "OrderLineItems",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    OrderId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ProductId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Quantity = table.Column<decimal>(type: "numeric", nullable: false),
+                    SellingPrice = table.Column<decimal>(type: "numeric", nullable: false),
+                    UnitPrice = table.Column<decimal>(type: "numeric", nullable: false),
+                    Discount = table.Column<decimal>(type: "numeric", nullable: false),
+                    TaxRate = table.Column<decimal>(type: "numeric", nullable: false),
+                    BuyingPrice = table.Column<decimal>(type: "numeric", nullable: false),
+                    Code = table.Column<string>(type: "text", nullable: true),
+                    DateCreated = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    ClientId = table.Column<Guid>(type: "uuid", nullable: false),
+                    InstanceId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Personnel = table.Column<string>(type: "text", nullable: true),
+                    LastModifiedBy = table.Column<string>(type: "text", nullable: true),
+                    Notes = table.Column<string>(type: "text", nullable: true),
+                    Status = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_OrderLineItems", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_OrderLineItems_Orders_OrderId",
+                        column: x => x.OrderId,
+                        principalTable: "Orders",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_OrderLineItems_Products_ProductId",
+                        column: x => x.ProductId,
+                        principalTable: "Products",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -733,12 +1196,15 @@ namespace PosMaster.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    PoId = table.Column<Guid>(type: "uuid", nullable: false),
-                    GrnId = table.Column<Guid>(type: "uuid", nullable: false),
+                    PurchaseOrderId = table.Column<Guid>(type: "uuid", nullable: false),
+                    GoodReceivedNoteId = table.Column<Guid>(type: "uuid", nullable: false),
                     ProductId = table.Column<Guid>(type: "uuid", nullable: false),
-                    OrderedQuantity = table.Column<decimal>(type: "numeric", nullable: false),
-                    DeliveredQuantity = table.Column<decimal>(type: "numeric", nullable: false),
-                    UnitPrice = table.Column<decimal>(type: "numeric", nullable: false),
+                    PoQuantity = table.Column<decimal>(type: "numeric", nullable: false),
+                    GrnQuantity = table.Column<decimal>(type: "numeric", nullable: false),
+                    PoUnitPrice = table.Column<decimal>(type: "numeric", nullable: false),
+                    GrnUnitPrice = table.Column<decimal>(type: "numeric", nullable: false),
+                    PoNotes = table.Column<string>(type: "text", nullable: true),
+                    GrnNotes = table.Column<string>(type: "text", nullable: true),
                     Code = table.Column<string>(type: "text", nullable: true),
                     DateCreated = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
@@ -753,9 +1219,58 @@ namespace PosMaster.Migrations
                 {
                     table.PrimaryKey("PK_PoGrnProducts", x => x.Id);
                     table.ForeignKey(
+                        name: "FK_PoGrnProducts_GoodReceivedNotes_GoodReceivedNoteId",
+                        column: x => x.GoodReceivedNoteId,
+                        principalTable: "GoodReceivedNotes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
                         name: "FK_PoGrnProducts_Products_ProductId",
                         column: x => x.ProductId,
                         principalTable: "Products",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_PoGrnProducts_PurchaseOrders_PurchaseOrderId",
+                        column: x => x.PurchaseOrderId,
+                        principalTable: "PurchaseOrders",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ProductPoQuantityLogs",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    ProductId = table.Column<Guid>(type: "uuid", nullable: false),
+                    PurchaseOrderId = table.Column<Guid>(type: "uuid", nullable: false),
+                    BuyingPrice = table.Column<decimal>(type: "numeric", nullable: false),
+                    DeliveredQuantity = table.Column<decimal>(type: "numeric", nullable: false),
+                    AvailableQuantity = table.Column<decimal>(type: "numeric", nullable: false),
+                    Code = table.Column<string>(type: "text", nullable: true),
+                    DateCreated = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    ClientId = table.Column<Guid>(type: "uuid", nullable: false),
+                    InstanceId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Personnel = table.Column<string>(type: "text", nullable: true),
+                    LastModifiedBy = table.Column<string>(type: "text", nullable: true),
+                    Notes = table.Column<string>(type: "text", nullable: true),
+                    Status = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProductPoQuantityLogs", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ProductPoQuantityLogs_Products_ProductId",
+                        column: x => x.ProductId,
+                        principalTable: "Products",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ProductPoQuantityLogs_PurchaseOrders_PurchaseOrderId",
+                        column: x => x.PurchaseOrderId,
+                        principalTable: "PurchaseOrders",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -768,6 +1283,8 @@ namespace PosMaster.Migrations
                     ProductId = table.Column<Guid>(type: "uuid", nullable: false),
                     PriceFrom = table.Column<decimal>(type: "numeric", nullable: false),
                     PriceTo = table.Column<decimal>(type: "numeric", nullable: false),
+                    PriceStartDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    PriceEndDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
                     Code = table.Column<string>(type: "text", nullable: true),
                     DateCreated = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
@@ -819,7 +1336,7 @@ namespace PosMaster.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ReceiptLineItem",
+                name: "ReceiptLineItems",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -828,8 +1345,8 @@ namespace PosMaster.Migrations
                     Quantity = table.Column<decimal>(type: "numeric", nullable: false),
                     SellingPrice = table.Column<decimal>(type: "numeric", nullable: false),
                     UnitPrice = table.Column<decimal>(type: "numeric", nullable: false),
-                    Discount = table.Column<decimal>(type: "numeric", nullable: false),
                     TaxRate = table.Column<decimal>(type: "numeric", nullable: false),
+                    BuyingPrice = table.Column<decimal>(type: "numeric", nullable: false),
                     Code = table.Column<string>(type: "text", nullable: true),
                     DateCreated = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
@@ -842,15 +1359,15 @@ namespace PosMaster.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ReceiptLineItem", x => x.Id);
+                    table.PrimaryKey("PK_ReceiptLineItems", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ReceiptLineItem_Products_ProductId",
+                        name: "FK_ReceiptLineItems_Products_ProductId",
                         column: x => x.ProductId,
                         principalTable: "Products",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_ReceiptLineItem_Receipts_ReceiptId",
+                        name: "FK_ReceiptLineItems_Receipts_ReceiptId",
                         column: x => x.ReceiptId,
                         principalTable: "Receipts",
                         principalColumn: "Id",
@@ -889,6 +1406,11 @@ namespace PosMaster.Migrations
                 column: "NormalizedEmail");
 
             migrationBuilder.CreateIndex(
+                name: "IX_AspNetUsers_ClientId",
+                table: "AspNetUsers",
+                column: "ClientId");
+
+            migrationBuilder.CreateIndex(
                 name: "UserNameIndex",
                 table: "AspNetUsers",
                 column: "NormalizedUserName",
@@ -898,6 +1420,46 @@ namespace PosMaster.Migrations
                 name: "IX_ClientInstances_ClientId",
                 table: "ClientInstances",
                 column: "ClientId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_EmployeeKins_UserId",
+                table: "EmployeeKins",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_EmployeeLeaveApplications_EmployeeLeaveCategoryId",
+                table: "EmployeeLeaveApplications",
+                column: "EmployeeLeaveCategoryId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_EmployeeLeaveApplications_UserId",
+                table: "EmployeeLeaveApplications",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_EmployeeLeaveEntitlements_EmployeeLeaveCategoryId",
+                table: "EmployeeLeaveEntitlements",
+                column: "EmployeeLeaveCategoryId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_EmployeeLeaveEntitlements_UserId",
+                table: "EmployeeLeaveEntitlements",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_EmployeeMonthPayments_UserId",
+                table: "EmployeeMonthPayments",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_EmployeeSalaries_UserId",
+                table: "EmployeeSalaries",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_EmployeeSalaryLogs_UserId",
+                table: "EmployeeSalaryLogs",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Expenses_ExpenseTypeId",
@@ -910,14 +1472,9 @@ namespace PosMaster.Migrations
                 column: "SupplierId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Invoices_CustomerId",
-                table: "Invoices",
-                column: "CustomerId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Invoices_ProductId",
-                table: "Invoices",
-                column: "ProductId");
+                name: "IX_GoodReturnedNotes_ReceiptId",
+                table: "GoodReturnedNotes",
+                column: "ReceiptId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Invoices_ReceiptId",
@@ -925,9 +1482,44 @@ namespace PosMaster.Migrations
                 column: "ReceiptId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_OrderLineItems_OrderId",
+                table: "OrderLineItems",
+                column: "OrderId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OrderLineItems_ProductId",
+                table: "OrderLineItems",
+                column: "ProductId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Orders_CustomerId",
+                table: "Orders",
+                column: "CustomerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PoGrnProducts_GoodReceivedNoteId",
+                table: "PoGrnProducts",
+                column: "GoodReceivedNoteId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_PoGrnProducts_ProductId",
                 table: "PoGrnProducts",
                 column: "ProductId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PoGrnProducts_PurchaseOrderId",
+                table: "PoGrnProducts",
+                column: "PurchaseOrderId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProductPoQuantityLogs_ProductId",
+                table: "ProductPoQuantityLogs",
+                column: "ProductId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProductPoQuantityLogs_PurchaseOrderId",
+                table: "ProductPoQuantityLogs",
+                column: "PurchaseOrderId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ProductPriceLogs_ProductId",
@@ -940,6 +1532,16 @@ namespace PosMaster.Migrations
                 column: "ProductCategoryId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Products_TaxTypeId",
+                table: "Products",
+                column: "TaxTypeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Products_UnitOfMeasureId",
+                table: "Products",
+                column: "UnitOfMeasureId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ProductStockAdjustmentLogs_ProductId",
                 table: "ProductStockAdjustmentLogs",
                 column: "ProductId");
@@ -950,19 +1552,24 @@ namespace PosMaster.Migrations
                 column: "SupplierId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ReceiptLineItem_ProductId",
-                table: "ReceiptLineItem",
+                name: "IX_ReceiptLineItems_ProductId",
+                table: "ReceiptLineItems",
                 column: "ProductId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ReceiptLineItem_ReceiptId",
-                table: "ReceiptLineItem",
+                name: "IX_ReceiptLineItems_ReceiptId",
+                table: "ReceiptLineItems",
                 column: "ReceiptId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Receipts_CustomerId",
                 table: "Receipts",
                 column: "CustomerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Receipts_PaymentModeId",
+                table: "Receipts",
+                column: "PaymentModeId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -983,16 +1590,46 @@ namespace PosMaster.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "Banks");
+
+            migrationBuilder.DropTable(
                 name: "ClientInstances");
+
+            migrationBuilder.DropTable(
+                name: "Counties");
 
             migrationBuilder.DropTable(
                 name: "EmailSettings");
 
             migrationBuilder.DropTable(
+                name: "EmployeeKinRelationships");
+
+            migrationBuilder.DropTable(
+                name: "EmployeeKins");
+
+            migrationBuilder.DropTable(
+                name: "EmployeeLeaveApplications");
+
+            migrationBuilder.DropTable(
+                name: "EmployeeLeaveEntitlements");
+
+            migrationBuilder.DropTable(
+                name: "EmployeeMonthPayments");
+
+            migrationBuilder.DropTable(
+                name: "EmployeeSalaries");
+
+            migrationBuilder.DropTable(
+                name: "EmployeeSalaryLogs");
+
+            migrationBuilder.DropTable(
                 name: "Expenses");
 
             migrationBuilder.DropTable(
-                name: "GoodReceivedNotes");
+                name: "GeneralLedgerEntries");
+
+            migrationBuilder.DropTable(
+                name: "GoodReturnedNotes");
 
             migrationBuilder.DropTable(
                 name: "Invoices");
@@ -1001,10 +1638,13 @@ namespace PosMaster.Migrations
                 name: "Notifications");
 
             migrationBuilder.DropTable(
-                name: "PaymentModes");
+                name: "OrderLineItems");
 
             migrationBuilder.DropTable(
                 name: "PoGrnProducts");
+
+            migrationBuilder.DropTable(
+                name: "ProductPoQuantityLogs");
 
             migrationBuilder.DropTable(
                 name: "ProductPriceLogs");
@@ -1013,10 +1653,7 @@ namespace PosMaster.Migrations
                 name: "ProductStockAdjustmentLogs");
 
             migrationBuilder.DropTable(
-                name: "PurchaseOrders");
-
-            migrationBuilder.DropTable(
-                name: "ReceiptLineItem");
+                name: "ReceiptLineItems");
 
             migrationBuilder.DropTable(
                 name: "SmsSettings");
@@ -1025,25 +1662,28 @@ namespace PosMaster.Migrations
                 name: "SystemSettings");
 
             migrationBuilder.DropTable(
-                name: "UnitOfMeasures");
-
-            migrationBuilder.DropTable(
                 name: "UserLoginLogs");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "AspNetUsers");
+                name: "EmployeeLeaveCategories");
 
             migrationBuilder.DropTable(
-                name: "Clients");
+                name: "AspNetUsers");
 
             migrationBuilder.DropTable(
                 name: "ExpenseTypes");
 
             migrationBuilder.DropTable(
-                name: "Suppliers");
+                name: "Orders");
+
+            migrationBuilder.DropTable(
+                name: "GoodReceivedNotes");
+
+            migrationBuilder.DropTable(
+                name: "PurchaseOrders");
 
             migrationBuilder.DropTable(
                 name: "Products");
@@ -1052,10 +1692,25 @@ namespace PosMaster.Migrations
                 name: "Receipts");
 
             migrationBuilder.DropTable(
+                name: "Clients");
+
+            migrationBuilder.DropTable(
+                name: "Suppliers");
+
+            migrationBuilder.DropTable(
                 name: "ProductCategories");
 
             migrationBuilder.DropTable(
+                name: "TaxTypes");
+
+            migrationBuilder.DropTable(
+                name: "UnitOfMeasures");
+
+            migrationBuilder.DropTable(
                 name: "Customers");
+
+            migrationBuilder.DropTable(
+                name: "PaymentModes");
         }
     }
 }

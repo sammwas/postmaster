@@ -10,8 +10,8 @@ using PosMaster.Dal;
 namespace PosMaster.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20210322224309_AddKinRelationship")]
-    partial class AddKinRelationship
+    [Migration("20230220060633_InitialDb")]
+    partial class InitialDb
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -246,9 +246,6 @@ namespace PosMaster.Migrations
                     b.Property<Guid>("InstanceId")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("InvoiceTerms")
-                        .HasColumnType("text");
-
                     b.Property<string>("LastModifiedBy")
                         .HasColumnType("text");
 
@@ -335,6 +332,12 @@ namespace PosMaster.Migrations
                     b.Property<Guid>("InstanceId")
                         .HasColumnType("uuid");
 
+                    b.Property<int>("InvoiceDurationDays")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("InvoiceTerms")
+                        .HasColumnType("text");
+
                     b.Property<string>("LastModifiedBy")
                         .HasColumnType("text");
 
@@ -357,6 +360,9 @@ namespace PosMaster.Migrations
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Personnel")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PinNo")
                         .HasColumnType("text");
 
                     b.Property<string>("PostalAddress")
@@ -474,6 +480,9 @@ namespace PosMaster.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("PhoneNumber")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PinNo")
                         .HasColumnType("text");
 
                     b.Property<string>("PostalAddress")
@@ -684,6 +693,9 @@ namespace PosMaster.Migrations
                     b.Property<string>("Code")
                         .HasColumnType("text");
 
+                    b.Property<string>("Comments")
+                        .HasColumnType("text");
+
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("timestamp without time zone");
 
@@ -696,8 +708,8 @@ namespace PosMaster.Migrations
                     b.Property<DateTime>("DateTo")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<int>("Days")
-                        .HasColumnType("integer");
+                    b.Property<decimal>("Days")
+                        .HasColumnType("numeric");
 
                     b.Property<Guid>("EmployeeLeaveCategoryId")
                         .HasColumnType("uuid");
@@ -756,8 +768,8 @@ namespace PosMaster.Migrations
                     b.Property<string>("LastModifiedBy")
                         .HasColumnType("text");
 
-                    b.Property<int>("MaxDays")
-                        .HasColumnType("integer");
+                    b.Property<decimal>("MaxDays")
+                        .HasColumnType("numeric");
 
                     b.Property<string>("Notes")
                         .HasColumnType("text");
@@ -844,9 +856,6 @@ namespace PosMaster.Migrations
 
                     b.Property<string>("Code")
                         .HasColumnType("text");
-
-                    b.Property<DateTime?>("DateApproved")
-                        .HasColumnType("timestamp without time zone");
 
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("timestamp without time zone");
@@ -1085,6 +1094,65 @@ namespace PosMaster.Migrations
                     b.ToTable("ExpenseTypes");
                 });
 
+            modelBuilder.Entity("PosMaster.Dal.GeneralLedgerEntry", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ClientId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Code")
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("Credit")
+                        .HasColumnType("numeric");
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<DateTime?>("DateLastModified")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<decimal>("Debit")
+                        .HasColumnType("numeric");
+
+                    b.Property<int>("Document")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("DocumentNumber")
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("InstanceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Personnel")
+                        .HasColumnType("text");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("UserType")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("VoteHead")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("GeneralLedgerEntries");
+                });
+
             modelBuilder.Entity("PosMaster.Dal.GoodReceivedNote", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1215,9 +1283,6 @@ namespace PosMaster.Migrations
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
-
-                    b.Property<decimal>("TaxAmount")
-                        .HasColumnType("numeric");
 
                     b.HasKey("Id");
 
@@ -1494,6 +1559,8 @@ namespace PosMaster.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("GoodReceivedNoteId");
+
                     b.HasIndex("ProductId");
 
                     b.HasIndex("PurchaseOrderId");
@@ -1534,6 +1601,9 @@ namespace PosMaster.Migrations
                     b.Property<Guid>("InstanceId")
                         .HasColumnType("uuid");
 
+                    b.Property<bool>("IsService")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("LastModifiedBy")
                         .HasColumnType("text");
 
@@ -1546,8 +1616,17 @@ namespace PosMaster.Migrations
                     b.Property<string>("Personnel")
                         .HasColumnType("text");
 
+                    b.Property<DateTime?>("PriceEndDate")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<DateTime>("PriceStartDate")
+                        .HasColumnType("timestamp without time zone");
+
                     b.Property<Guid>("ProductCategoryId")
                         .HasColumnType("uuid");
+
+                    b.Property<string>("ProductInstanceStamp")
+                        .HasColumnType("text");
 
                     b.Property<decimal>("ReorderLevel")
                         .HasColumnType("numeric");
@@ -1558,15 +1637,19 @@ namespace PosMaster.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
-                    b.Property<decimal>("TaxRate")
-                        .HasColumnType("numeric");
+                    b.Property<Guid?>("TaxTypeId")
+                        .HasColumnType("uuid");
 
-                    b.Property<string>("UnitOfMeasure")
-                        .HasColumnType("text");
+                    b.Property<Guid?>("UnitOfMeasureId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ProductCategoryId");
+
+                    b.HasIndex("TaxTypeId");
+
+                    b.HasIndex("UnitOfMeasureId");
 
                     b.ToTable("Products");
                 });
@@ -1615,6 +1698,63 @@ namespace PosMaster.Migrations
                     b.ToTable("ProductCategories");
                 });
 
+            modelBuilder.Entity("PosMaster.Dal.ProductPoQuantityLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("AvailableQuantity")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("BuyingPrice")
+                        .HasColumnType("numeric");
+
+                    b.Property<Guid>("ClientId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Code")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<DateTime?>("DateLastModified")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<decimal>("DeliveredQuantity")
+                        .HasColumnType("numeric");
+
+                    b.Property<Guid>("InstanceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Personnel")
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("PurchaseOrderId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("PurchaseOrderId");
+
+                    b.ToTable("ProductPoQuantityLogs");
+                });
+
             modelBuilder.Entity("PosMaster.Dal.ProductPriceLog", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1645,8 +1785,14 @@ namespace PosMaster.Migrations
                     b.Property<string>("Personnel")
                         .HasColumnType("text");
 
+                    b.Property<DateTime?>("PriceEndDate")
+                        .HasColumnType("timestamp without time zone");
+
                     b.Property<decimal>("PriceFrom")
                         .HasColumnType("numeric");
+
+                    b.Property<DateTime>("PriceStartDate")
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<decimal>("PriceTo")
                         .HasColumnType("numeric");
@@ -1765,6 +1911,9 @@ namespace PosMaster.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<decimal>("AmountReceived")
+                        .HasColumnType("numeric");
+
                     b.Property<Guid>("ClientId")
                         .HasColumnType("uuid");
 
@@ -1780,19 +1929,13 @@ namespace PosMaster.Migrations
                     b.Property<DateTime?>("DateLastModified")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<decimal>("Discount")
-                        .HasColumnType("numeric");
-
-                    b.Property<string>("ExternalRef")
-                        .HasColumnType("text");
-
                     b.Property<Guid>("InstanceId")
                         .HasColumnType("uuid");
 
                     b.Property<bool>("IsCredit")
                         .HasColumnType("boolean");
 
-                    b.Property<bool>("IsPaid")
+                    b.Property<bool>("IsPrinted")
                         .HasColumnType("boolean");
 
                     b.Property<bool>("IsWalkIn")
@@ -1804,10 +1947,16 @@ namespace PosMaster.Migrations
                     b.Property<string>("Notes")
                         .HasColumnType("text");
 
-                    b.Property<string>("PaymentMode")
+                    b.Property<Guid?>("PaymentModeId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("PaymentModeNo")
                         .HasColumnType("text");
 
                     b.Property<string>("Personnel")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PinNo")
                         .HasColumnType("text");
 
                     b.Property<int>("Status")
@@ -1816,6 +1965,8 @@ namespace PosMaster.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CustomerId");
+
+                    b.HasIndex("PaymentModeId");
 
                     b.ToTable("Receipts");
                 });
@@ -1840,9 +1991,6 @@ namespace PosMaster.Migrations
 
                     b.Property<DateTime?>("DateLastModified")
                         .HasColumnType("timestamp without time zone");
-
-                    b.Property<decimal>("Discount")
-                        .HasColumnType("numeric");
 
                     b.Property<Guid>("InstanceId")
                         .HasColumnType("uuid");
@@ -2070,6 +2218,50 @@ namespace PosMaster.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("SystemSettings");
+                });
+
+            modelBuilder.Entity("PosMaster.Dal.TaxType", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ClientId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Code")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<DateTime?>("DateLastModified")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<Guid>("InstanceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Personnel")
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("Rate")
+                        .HasColumnType("numeric");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TaxTypes");
                 });
 
             modelBuilder.Entity("PosMaster.Dal.UnitOfMeasure", b =>
@@ -2522,6 +2714,12 @@ namespace PosMaster.Migrations
 
             modelBuilder.Entity("PosMaster.Dal.PoGrnProduct", b =>
                 {
+                    b.HasOne("PosMaster.Dal.GoodReceivedNote", null)
+                        .WithMany("PoGrnProducts")
+                        .HasForeignKey("GoodReceivedNoteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("PosMaster.Dal.Product", "Product")
                         .WithMany()
                         .HasForeignKey("ProductId")
@@ -2545,7 +2743,38 @@ namespace PosMaster.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("PosMaster.Dal.TaxType", "TaxType")
+                        .WithMany()
+                        .HasForeignKey("TaxTypeId");
+
+                    b.HasOne("PosMaster.Dal.UnitOfMeasure", "UnitOfMeasure")
+                        .WithMany()
+                        .HasForeignKey("UnitOfMeasureId");
+
                     b.Navigation("ProductCategory");
+
+                    b.Navigation("TaxType");
+
+                    b.Navigation("UnitOfMeasure");
+                });
+
+            modelBuilder.Entity("PosMaster.Dal.ProductPoQuantityLog", b =>
+                {
+                    b.HasOne("PosMaster.Dal.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PosMaster.Dal.PurchaseOrder", "PurchaseOrder")
+                        .WithMany()
+                        .HasForeignKey("PurchaseOrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("PurchaseOrder");
                 });
 
             modelBuilder.Entity("PosMaster.Dal.ProductPriceLog", b =>
@@ -2589,7 +2818,13 @@ namespace PosMaster.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("PosMaster.Dal.PaymentMode", "PaymentMode")
+                        .WithMany()
+                        .HasForeignKey("PaymentModeId");
+
                     b.Navigation("Customer");
+
+                    b.Navigation("PaymentMode");
                 });
 
             modelBuilder.Entity("PosMaster.Dal.ReceiptLineItem", b =>
@@ -2618,6 +2853,11 @@ namespace PosMaster.Migrations
                         .IsRequired();
 
                     b.Navigation("Client");
+                });
+
+            modelBuilder.Entity("PosMaster.Dal.GoodReceivedNote", b =>
+                {
+                    b.Navigation("PoGrnProducts");
                 });
 
             modelBuilder.Entity("PosMaster.Dal.Order", b =>
