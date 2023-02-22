@@ -36,6 +36,7 @@ namespace PosMaster.Dal.Interfaces
         Task<ReturnData<string>> ReceiptUserAsync(ReceiptUserViewModel model);
         Task<string> ReceiptExcessAmount(ReceiptUserViewModel model);
         Task<string> AddInvoiceAsync(Receipt receipt);
+        Guid DefaultClientProductId(Guid clientId);
     }
 
     public class ProductImplementation : IProductInterface
@@ -695,10 +696,12 @@ namespace PosMaster.Dal.Interfaces
         {
             try
             {
+                var id = Guid.NewGuid();
                 var code = DocumentRefNumber(Document.Receipt, model.ClientId);
+                var defProdId = DefaultClientProductId(model.ClientId);
                 var receipt = new Receipt
                 {
-                    Id = Guid.NewGuid(),
+                    Id = id,
                     Code = code,
                     CustomerId = Guid.Parse(model.UserId),
                     ClientId = model.ClientId,
@@ -708,7 +711,19 @@ namespace PosMaster.Dal.Interfaces
                     Notes = model.Notes,
                     Personnel = model.Personnel,
                     AmountReceived = model.Amount,
-                    ReceiptLineItems = new List<ReceiptLineItem>()
+                    ReceiptLineItems = new List<ReceiptLineItem>
+                    {
+                        new ReceiptLineItem
+                        {
+                            ClientId=model.ClientId,
+                            InstanceId=model.InstanceId,
+                            Personnel=model.Personnel,
+                            Quantity=1,
+                            UnitPrice=model.Amount,
+                            ReceiptId=id,
+                            ProductId=defProdId
+                        }
+                    }
                 };
                 _context.Receipts.Add(receipt);
                 var entry = new GeneralLedgerEntry
@@ -1397,8 +1412,7 @@ namespace PosMaster.Dal.Interfaces
                 var invoices = await _context.Invoices
                     .Include(i => i.Receipt)
                     .ThenInclude(i => i.ReceiptLineItems)
-                    //.Where(i => i.Receipt.ReceiptLineItems.Sum(s => s.UnitPrice * s.UnitPrice) > i.Receipt.AmountReceived)
-                    .Where(u => u.Receipt.CustomerId.Equals(Guid.Parse(model.UserId)))
+                     .Where(u => u.Receipt.CustomerId.Equals(Guid.Parse(model.UserId)))
                     .Where(i => i.Status.Equals(EntityStatus.Active))
                     .OrderBy(i => i.DateCreated)
                     .ToListAsync();
@@ -1420,7 +1434,7 @@ namespace PosMaster.Dal.Interfaces
                         invoice.LastModifiedBy = model.Personnel;
                         invoice.DateLastModified = DateTime.Now;
                         if (invoice.Balance == 0)
-                            invoice.Status = EntityStatus.Inactive;
+                            invoice.Status = EntityStatus.Closed;
 
                         invoice.Receipt.AmountReceived += toSpend;
                         invoice.Receipt.LastModifiedBy = model.Personnel;
@@ -1460,6 +1474,15 @@ namespace PosMaster.Dal.Interfaces
                 _logger.LogError($"{tag} {result.Message} : {ex}");
                 return result;
             }
+        }
+
+        public Guid DefaultClientProductId(Guid clientId)
+        {
+            return _context.Products
+                        .Where(p => p.ClientId.Equals(clientId))
+                        .OrderByDescending(p => p.DateCreated)
+                        .Select(p => p.Id)
+                        .FirstOrDefault();
         }
     }
 }

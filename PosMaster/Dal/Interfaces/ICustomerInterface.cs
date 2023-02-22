@@ -259,10 +259,7 @@ namespace PosMaster.Dal.Interfaces
 
                 if (model.OpeningBalance > 0)
                 {
-                    var productId = _context.Products
-                        .Where(p => p.ClientId.Equals(model.ClientId))
-                        .Select(p => p.Id)
-                        .FirstOrDefault();
+                    var productId = _productInterface.DefaultClientProductId(model.ClientId);
                     if (!productId.Equals(Guid.Empty))
                     {
                         var rcptId = Guid.NewGuid();

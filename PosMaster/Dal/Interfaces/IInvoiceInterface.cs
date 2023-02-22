@@ -151,12 +151,27 @@ namespace PosMaster.Dal.Interfaces
                     _logger.LogInformation($"{tag} unable to update invoice details : {result.Message}");
                     return result;
                 }
+
+                var balance = invoice.Balance;
                 invoice.Receipt.DateLastModified = DateTime.Now;
                 invoice.Receipt.LastModifiedBy = personnel;
-                invoice.Receipt.AmountReceived = invoice.Receipt.Amount;
+                invoice.Receipt.AmountReceived += balance;
                 invoice.Status = EntityStatus.Closed;
                 invoice.LastModifiedBy = personnel;
                 invoice.DateLastModified = DateTime.Now;
+                var entry = new GeneralLedgerEntry
+                {
+                    ClientId = invoice.ClientId,
+                    InstanceId = invoice.InstanceId,
+                    Personnel = personnel,
+                    UserId = invoice.Receipt.CustomerId,
+                    UserType = GlUserType.Customer,
+                    Document = Document.Receipt,
+                    DocumentNumber = invoice.Receipt.Code,
+                    Credit = balance,
+                    Code = $"{invoice.Code}_{invoice.Receipt.Code}"
+                };
+                _context.GeneralLedgerEntries.Add(entry);
                 await _context.SaveChangesAsync();
                 result.Success = true;
                 result.Message = result.Success ? "Found" : "Not Found";

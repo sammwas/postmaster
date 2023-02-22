@@ -292,30 +292,37 @@ namespace PosMaster.Dal.Interfaces
                 _context.SaveChanges();
             }
 
-            //if (!_context.EmailSettings.Any(c => c.ClientId.Equals(clientId)))
-            //{
-            //    var defaultEmailSettings = _context.EmailSettings
-            //        .OrderByDescending(s => s.DateCreated).FirstOrDefault();
-            //    if (defaultEmailSettings != null)
-            //    {
-            //        var setting = new EmailSetting
-            //        {
-            //            ClientId = clientId,
-            //            InstanceId = instanceId,
-            //            SmtpServer = defaultEmailSettings.SmtpServer,
-            //            SmtpPort = defaultEmailSettings.SmtpPort,
-            //            SmtpPassword = defaultEmailSettings.SmtpPassword,
-            //            SmtpUsername = defaultEmailSettings.SmtpUsername,
-            //            SenderFromEmail = defaultEmailSettings.SenderFromEmail,
-            //            SenderFromName = defaultEmailSettings.SenderFromName,
-            //            SocketOptions = defaultEmailSettings.SocketOptions,
-            //            Code = "DEFAULT",
-            //            Personnel = Constants.SuperAdminEmail
-            //        };
-            //        _context.EmailSettings.Add(setting);
-            //        _context.SaveChanges();
-            //    }
-            //}
+            if (!_context.TaxTypes.Any(c => c.ClientId.Equals(clientId)))
+            {
+                var taxType = new TaxType
+                {
+                    ClientId = clientId,
+                    InstanceId = instanceId,
+                    Name = "NONE",
+                    Code = "NONE",
+                    Personnel = Constants.SuperAdminEmail
+                };
+                _context.TaxTypes.Add(taxType);
+                _context.SaveChanges();
+            }
+
+            if (!_context.Products.Any(c => c.ClientId.Equals(clientId)))
+            {
+                var product = new Product
+                {
+                    Code = "D000",
+                    Name = "DEFAULT",
+                    ProductCategoryId = _context.ProductCategories
+                    .Where(u => u.ClientId.Equals(clientId)).Select(u => u.Id)
+                    .FirstOrDefault(),
+                    ClientId = clientId,
+                    InstanceId = instanceId,
+                    Personnel = Constants.SuperAdminEmail
+                };
+                product.ProductInstanceStamp = $"{product.Code}_{instanceId}";
+                _context.Products.Add(product);
+                _context.SaveChanges();
+            }
 
             if (!_context.SmsSettings.Any(c => c.ClientId.Equals(clientId)))
             {

@@ -30,6 +30,7 @@ namespace PosMaster.Dal
 
             if (!context.Clients.Any())
             {
+                Console.WriteLine($"No default client - add client {clientId}");
                 var client = new Client
                 {
                     Id = clientId,
@@ -51,10 +52,7 @@ namespace PosMaster.Dal
                 };
                 context.Clients.Add(client);
                 context.SaveChanges();
-            }
 
-            if (!context.ClientInstances.Any())
-            {
                 var instance = new ClientInstance
                 {
                     Id = instanceId,
@@ -66,10 +64,41 @@ namespace PosMaster.Dal
                 };
                 context.ClientInstances.Add(instance);
                 context.SaveChanges();
+
+                var emailSetting = new EmailSetting
+                {
+                    ClientId = clientId,
+                    InstanceId = instanceId,
+                    Personnel = Constants.SuperAdminEmail,
+                    SenderFromEmail = "support@qilimo.co.ke",
+                    SmtpServer = "mail.qilimo.co.ke",
+                    SmtpPort = 587,
+                    SocketOptions = SecureSocketOptions.StartTls,
+                    SmtpPassword = Constants.SuperAdminPassword
+                };
+                context.EmailSettings.Add(emailSetting);
+                context.SaveChanges();
+
+                var systemSetting = new SystemSetting
+                {
+                    ClientId = clientId,
+                    InstanceId = instanceId,
+                    Personnel = Constants.SuperAdminEmail,
+                    Name = "PosMaster",
+                    Version = "1.0.1",
+                    Tagline = "Best POS in the Market",
+                    TermsAndConditions = "USE AS IS",
+                    EmailAddress = Constants.SystemEmailAddress
+                };
+                context.SystemSettings.Add(systemSetting);
+                context.SaveChanges();
+
+                var clientInterface = serviceProvider.GetRequiredService<IClientInterface>();
+                clientInterface.SeedDefaultData(clientId, instanceId);
             }
+
             var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
             var userManager = serviceProvider.GetRequiredService<UserManager<User>>();
-            var clientInterface = serviceProvider.GetRequiredService<IClientInterface>();
             var roleNames = new List<string> {
                 Role.SuperAdmin, Role.Admin, Role.Clerk, Role.Manager
             };
@@ -80,8 +109,8 @@ namespace PosMaster.Dal
                 if (!roleExist)
                     await roleManager.CreateAsync(new IdentityRole(roleName));
             }
-            var userEmail = Constants.SuperAdminEmail;
-            var user = await userManager.FindByEmailAsync(userEmail);
+
+            var user = await userManager.FindByEmailAsync(Constants.SuperAdminEmail);
             if (user == null)
             {
                 var poweruser = new User
@@ -105,41 +134,6 @@ namespace PosMaster.Dal
                 if (createPowerUser.Succeeded)
                     await userManager.AddToRoleAsync(poweruser, Role.SuperAdmin);
             }
-
-            if (!context.SystemSettings.Any())
-            {
-                var settings = new SystemSetting
-                {
-                    ClientId = clientId,
-                    InstanceId = instanceId,
-                    Personnel = Constants.SuperAdminEmail,
-                    Name = "PosMaster",
-                    Version = "1.0.1",
-                    Tagline = "Best POS in the Market",
-                    TermsAndConditions = "USE AS IS",
-                    EmailAddress = Constants.SystemEmailAddress
-                };
-                context.SystemSettings.Add(settings);
-                context.SaveChanges();
-            }
-
-            if (!context.EmailSettings.Any())
-            {
-                var settings = new EmailSetting
-                {
-                    ClientId = clientId,
-                    InstanceId = instanceId,
-                    Personnel = Constants.SuperAdminEmail,
-                    SenderFromEmail = "support@qilimo.co.ke",
-                    SmtpServer = "mail.qilimo.co.ke",
-                    SmtpPort = 587,
-                    SocketOptions = SecureSocketOptions.StartTls,
-                    SmtpPassword = Constants.SuperAdminPassword
-                };
-                context.EmailSettings.Add(settings);
-                context.SaveChanges();
-            }
-            clientInterface.SeedDefaultData(clientId, instanceId);
             Console.WriteLine("Done. Seeding complete");
         }
     }
