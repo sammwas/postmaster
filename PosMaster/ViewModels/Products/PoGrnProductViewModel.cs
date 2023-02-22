@@ -11,8 +11,9 @@ namespace PosMaster.ViewModels
         }
         public PoGrnProductViewModel(PoGrnProduct product, bool isPo)
         {
+            Id = product.Id;
             ProductId = product.ProductId;
-            DocumentId = isPo ? product.PurchaseOrderId.Value : product.GoodReceivedNoteId.Value;
+            DocumentId = isPo ? product.PurchaseOrderId : product.GoodReceivedNoteId;
             UnitPrice = product.PoUnitPrice;
             Quantity = isPo ? product.PoQuantity : product.GrnQuantity;
             Notes = isPo ? product.PoNotes : product.GrnNotes;
@@ -20,8 +21,8 @@ namespace PosMaster.ViewModels
             UnitOfMeasure = product.Product != null ? product.Product.Uom : "";
             TaxType = product.Product.TaxType != null ? product.Product.TaxType.Name : "";
         }
-
-        public Guid DocumentId { get; set; }
+        public Guid Id { get; set; }
+        public Guid? DocumentId { get; set; }
         public Guid ProductId { get; set; }
         public decimal UnitPrice { get; set; }
         public decimal Quantity { get; set; }

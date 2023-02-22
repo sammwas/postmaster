@@ -13,10 +13,6 @@
     var orders = ordersRes.Data.Where(o => o.Status.Equals(EntityStatus.Active));
     var orderId = ViewData["OrderId"]?.ToString();
     var supplier = ViewData["Supplier"]?.ToString();
-    var instancesRes = User.IsInRole(Role.SuperAdmin) ?
-    await _instanceInterface.AllAsync()
-    : await _instanceInterface.ByClientIdAsync(userData.ClientId);
-    var instances = instancesRes.Data;
 }
 <div class="card card-primary">
     <div class="card-header">
@@ -27,30 +23,29 @@
             <div class="col-md-12">
                 <form asp-controller="Products" asp-action="GetPurchaseOrderDetails" method="get">
                     <div class="row">
-                        <div class="col-md-4"></div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label>Order No:</label>
-                                <select class="form-control select2" name="poId" style="width: 100%;">
-                                    <option value="">--Select Order No:--</option>
+                        <div class="col-md-8">
+                            <div class="form-group" style="display: flex;justify-content: space-between;">
+                                <label>Purchase Order: </label>
+                                <select class="form-control select2" name="poId" style="width: 80%;">
+                                    <option value="">--Select Purchase Order:--</option>
                                     @foreach (var item in orders)
                                     {
                                         @if (!string.IsNullOrEmpty(orderId) && item.Id.ToString().Equals(orderId))
                                         {
                                             <option selected="selected" value="@item.Id" title="@item.Notes">
-                                                @item.Code - @item.Name
+                                                @item.Code - @item.Name [@item.Supplier.Name]
                                             </option>
                                         }
                                         <option value="@item.Id" title="@item.Notes">
-                                            @item.Code - @item.Name
+                                            @item.Code - @item.Name [@item.Supplier.Name]
                                         </option>
                                     }
                                 </select>
-                                <span class="text-danger"></span>
                             </div>
-                            <button class="btn btn-info" type="submit"> Submit</button>
                         </div>
-                        <div class="col-md-4"></div>
+                        <div class="col-md-4">
+                            <button class="btn btn-primary" type="submit"><i class="fa fa-search"></i> Search</button>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -64,6 +59,7 @@
                     <input asp-for="InstanceId" value="@userData.InstanceId" />
                     <input asp-for="PoId" type="hidden" />
                     <input asp-for="Code" type="hidden" value="@userData.InstanceCode" />
+                    <input asp-for="Personnel" value="@userData.FullName" type="hidden" />
                     <input asp-for="SupplierId" type="hidden" />
                     <div class="row">
                         <div class="col-md-6">
@@ -73,14 +69,6 @@
                                 <span asp-validation-for="Name" class="text-danger"></span>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Supplier</label>
-                                <input class="form-control" placeholder="Supplier" value="@supplier" disabled>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label asp-for="Notes"></label>
@@ -95,11 +83,9 @@
                         <table class="table table-striped" id="tablePurchaseItems">
                             <thead>
                                 <tr>
+                                    <th>Product</th>
                                     <th>Quantity</th>
-                                    <th>Name</th>
-                                    <th>U.O.M</th>
                                     <th>Unit Price</th>
-                                    <th>Tax</th>
                                     <th>Total Amount</th>
                                     <th></th>
                                 </tr>
@@ -110,28 +96,23 @@
                                 }
                                 @foreach (var item in Model.GrnItems)
                                 {
-                                    <tr id="tr_grn@i">
+                                    <tr id="tr_@i">
+                                        <td>
+                                            <input type="hidden" asp-for="GrnItems[i].Id" />
+                                            <input type="hidden" asp-for="GrnItems[i].ProductId" />
+                                            <input class="" asp-for="GrnItems[i].ProductName" readonly />
+                                        </td>
                                         <td>
                                             <input class="" asp-for="GrnItems[i].Quantity" />
                                         </td>
                                         <td>
-                                            <input type="hidden" asp-for="GrnItems[i].ProductId" />
-                                            <input class="" asp-for="GrnItems[i].ProductName" />
-                                        </td>
-                                        <td>
-                                            <input class="" asp-for="GrnItems[i].UnitOfMeasure" />
-                                        </td>
-                                        <td>
-                                            <input class="" asp-for="GrnItems[i].UnitPrice" />
-                                        </td>
-                                        <td>
-                                            <input class="" asp-for="GrnItems[i].TaxType" />
+                                            <input class="" asp-for="GrnItems[i].UnitPrice" readonly />
                                         </td>
                                         <td>
                                             <input class="" asp-for="GrnItems[i].Amount" />
                                         </td>
-                                        <td><button type="button" class="btn btn-danger"
-                                            onclick="removeOrderItemRow(@i)">Remove</button></td>
+                                        <td><button type="button" class="btn btn-danger btn-sm"
+                                            onclick="removePoItemRow(@i)">Remove</button></td>
                                     </tr>
                                     i++;
                                 }

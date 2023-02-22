@@ -1153,6 +1153,8 @@ namespace PosMaster.Dal.Interfaces
                 {
                     var dbGrn = await _context.GoodReceivedNotes
                             .Include(r => r.Supplier)
+                            .Include(r => r.PoGrnProducts)
+                            .ThenInclude(r => r.Product)
                             .FirstOrDefaultAsync(p => p.Id.Equals(model.Id));
                     if (dbGrn == null)
                     {
@@ -1194,22 +1196,32 @@ namespace PosMaster.Dal.Interfaces
                     Personnel = model.Personnel
                 };
                 _context.GoodReceivedNotes.Add(grn);
+
                 foreach (var item in model.GrnItems)
                 {
-                    var dbProduct = await _context.Products.FirstOrDefaultAsync(d => d.Id.Equals(item.ProductId));
-                    dbProduct.AvailableQuantity = item.Quantity;
-                    var lineProduct = new PoGrnProduct
+                    var dbProduct = _context.Products.FirstOrDefault(d => d.Id.Equals(item.ProductId));
+                    dbProduct.AvailableQuantity += item.Quantity;
+                    dbProduct.BuyingPrice = item.UnitPrice;
+                    dbProduct.LastModifiedBy = model.Personnel;
+                    dbProduct.DateLastModified = DateTime.Now;
+
+                    var dbGrnProduct = _context.PoGrnProducts.FirstOrDefault(g => g.Id.Equals(item.Id));
+                    dbGrnProduct.GrnQuantity = item.Quantity;
+                    dbGrnProduct.GrnUnitPrice = item.UnitPrice;
+                    dbGrnProduct.GrnNotes = item.Notes;
+
+                    var log = new ProductStockAdjustmentLog
                     {
-                        PurchaseOrderId = grn.PoId,
+                        Code = $"{dbProduct.Code}",
                         ProductId = item.ProductId,
-                        GrnNotes = item.Notes,
-                        GrnQuantity = item.Quantity,
-                        GrnUnitPrice = item.UnitPrice,
-                        Personnel = model.Personnel,
+                        QuantityFrom = dbProduct.AvailableQuantity,
+                        QuantityTo = dbProduct.AvailableQuantity,
                         ClientId = model.ClientId,
-                        InstanceId = model.InstanceId
+                        InstanceId = model.InstanceId,
+                        Personnel = model.Personnel,
+                        Notes = model.Notes
                     };
-                    _context.PoGrnProducts.Add(lineProduct);
+                    _context.ProductStockAdjustmentLogs.Add(log);
                 }
 
                 await _context.SaveChangesAsync();
@@ -1244,7 +1256,7 @@ namespace PosMaster.Dal.Interfaces
                 result.Message = result.Success ? "Found" : "Not Found";
                 if (result.Success)
                     result.Data = grn;
-                _logger.LogInformation($"{tag} found purchase order {grn.Code}");
+                _logger.LogInformation($"{tag} found received goods");
                 return result;
             }
             catch (Exception ex)

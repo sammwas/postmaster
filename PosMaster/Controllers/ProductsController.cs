@@ -200,9 +200,9 @@ namespace PosMaster.Controllers
         public async Task<IActionResult> EditReceivedGoods(Guid? id)
         {
             var model = new GoodsReceivedNoteViewModel { Status = EntityStatus.Active };
-            if (string.IsNullOrEmpty(id.ToString()))
+            if (!id.HasValue)
                 return View(model);
-            ViewData["OrderId"] = id.Value.ToString();
+            ViewData["OrderId"] = id.Value;
             var result = await _productInterface.GrnByIdAsync(id.Value);
             if (result.Success)
             {
