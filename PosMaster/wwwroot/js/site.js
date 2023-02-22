@@ -529,8 +529,8 @@ function addPoItem() {
     $("#purchaseOrderItemList").append("<tr id='tr_" + product.id + "'>"
         + "<td><input class=''  value=" + product.id + " name='PurchaseOrderItems[" + length + "].ProductId' type='hidden'/>" +
         "<span class='' id='product-name' value=" + itemName + " name= 'PurchaseOrderItems[" + length + "].ProductName'>" + itemName + "</span></td>"
-        + "<td><input class='product-event' id='product-quantity' name= 'PurchaseOrderItems[" + length + "].Quantity' placeholder='0.00'/></td>"
-        + "<td><input class='product-event' id='product-price' name= 'PurchaseOrderItems[" + length + "].UnitPrice' placeholder='0.00'/></td>"
+        + "<td><input class='product-event numbers-only' id='product-quantity' name= 'PurchaseOrderItems[" + length + "].Quantity' placeholder='0.00'/></td>"
+        + "<td><input class='product-event numbers-only' id='product-price' name= 'PurchaseOrderItems[" + length + "].UnitPrice' placeholder='0.00'/></td>"
         + "<td><strong class='poTotalItems' name= 'PurchaseOrderItems[" + length + "].Amount'>---</strong></td>"
         + "<td><button type='button' class='btn bg-red btn-sm' onclick='removePoItemRow(" + productIdStr + ")'>Remove</button></td>"
         + "</tr>"

@@ -15,6 +15,7 @@ namespace PosMaster.Dal
         public string PoNotes { get; set; }
         public string GrnNotes { get; set; }
         public decimal PoAmount => PoUnitPrice * PoQuantity;
+        public decimal PoQtyBalance => PoQuantity - GrnQuantity;
         public decimal GrnAmount => GrnUnitPrice * GrnQuantity;
     }
 }

@@ -18,7 +18,8 @@ namespace PosMaster.Dal.Interfaces
         Task<ReturnData<List<Receipt>>> ReceiptsAsync(Guid? clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "");
         Task<ReturnData<ProductStockAdjustmentLog>> AdjustProductStockAsync(ProductStockAdjustmentViewModel model);
         Task<ReturnData<PurchaseOrder>> AddPurchaseOrderAsync(PoViewModel model);
-        Task<ReturnData<List<PurchaseOrder>>> PurchaseOrdersAsync(Guid? clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "", string personnel = "");
+        Task<ReturnData<List<PurchaseOrder>>> PurchaseOrdersAsync(Guid? clientId, Guid? instanceId, bool onlyActive = false, string dateFrom = "", string dateTo = "",
+            string search = "", string personnel = "");
         Task<ReturnData<List<GoodReceivedNote>>> GoodsReceivedAsync(Guid? clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "", string personnel = "");
         Task<ReturnData<List<GeneralLedgerEntry>>> GeneralLedgersAsync(Guid clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "");
         Task<ReturnData<PurchaseOrder>> PurchaseOrderByIdAsync(Guid id);
@@ -536,7 +537,8 @@ namespace PosMaster.Dal.Interfaces
             }
         }
 
-        public async Task<ReturnData<List<PurchaseOrder>>> PurchaseOrdersAsync(Guid? clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "", string personnel = "")
+        public async Task<ReturnData<List<PurchaseOrder>>> PurchaseOrdersAsync(Guid? clientId, Guid? instanceId, bool onlyActive = false, string dateFrom = "", string dateTo = "",
+            string search = "", string personnel = "")
         {
             var result = new ReturnData<List<PurchaseOrder>> { Data = new List<PurchaseOrder>() };
             var tag = nameof(PurchaseOrdersAsync);
@@ -562,6 +564,8 @@ namespace PosMaster.Dal.Interfaces
                     dataQuery = dataQuery.Where(r => r.Personnel.Equals(personnel));
                 if (!string.IsNullOrEmpty(search))
                     dataQuery = dataQuery.Where(r => r.Code.ToLower().Contains(search.ToLower()));
+                if (onlyActive)
+                    dataQuery = dataQuery.Where(d => d.Status.Equals(EntityStatus.Active));
                 var data = await dataQuery.OrderByDescending(r => r.DateCreated)
                     .ToListAsync();
                 result.Success = data.Any();
@@ -1108,6 +1112,7 @@ namespace PosMaster.Dal.Interfaces
             {
                 var dataQuery = _context.GoodReceivedNotes
                     .Include(r => r.Supplier)
+                    .Include(r => r.PoGrnProducts)
                     .AsQueryable();
                 if (clientId != null)
                     dataQuery = dataQuery.Where(r => r.ClientId.Equals(clientId.Value));
@@ -1146,75 +1151,51 @@ namespace PosMaster.Dal.Interfaces
         {
             var result = new ReturnData<GoodReceivedNote> { Data = new GoodReceivedNote() };
             var tag = nameof(EditGrnAsync);
-            _logger.LogInformation($"{tag} edit good received note");
+            _logger.LogInformation($"{tag} edit good received note for poid {model.PoId}");
             try
             {
-                if (model.IsEditMode)
+                var purchaseOrder = await _context.PurchaseOrders
+                             .Include(p => p.PoGrnProducts)
+                             .FirstOrDefaultAsync(p => p.Id.Equals(Guid.Parse(model.PoId)));
+                if (purchaseOrder == null)
                 {
-                    var dbGrn = await _context.GoodReceivedNotes
-                            .Include(r => r.Supplier)
-                            .Include(r => r.PoGrnProducts)
-                            .ThenInclude(r => r.Product)
-                            .FirstOrDefaultAsync(p => p.Id.Equals(model.Id));
-                    if (dbGrn == null)
-                    {
-                        result.Message = "Not Found";
-                        _logger.LogWarning($"{tag} update failed {model.Id} : {result.Message}");
-                        return result;
-                    }
-                    dbGrn.Code = model.Code;
-                    dbGrn.Name = model.Name;
-                    dbGrn.SupplierId = Guid.Parse(model.SupplierId);
-                    dbGrn.LastModifiedBy = model.Personnel;
-                    dbGrn.DateLastModified = DateTime.Now;
-                    dbGrn.Status = model.Status;
-                    if (!dbGrn.PoGrnProducts.Any())
-                    {
-                        result.Message = "Not Found";
-                        _logger.LogWarning($"{tag} update failed {model.Id} : {result.Message}");
-                        return result;
-                    }
-
-                    await _context.SaveChangesAsync();
-                    result.Success = true;
-                    result.Message = "Updated";
-                    result.Data = dbGrn;
-                    _logger.LogInformation($"{tag} updated {dbGrn.Name} {model.Id} : {result.Message}");
+                    result.Message = "Purchase order Not Found";
+                    _logger.LogWarning($"{tag} add GRN failed poId {model.PoId} : {result.Message}");
                     return result;
                 }
 
-                var poRef = DocumentRefNumber(Document.Grn, model.ClientId);
+                var gnrRef = DocumentRefNumber(Document.Grn, model.ClientId);
                 var grn = new GoodReceivedNote
                 {
                     Id = Guid.NewGuid(),
                     ClientId = model.ClientId,
                     InstanceId = model.InstanceId,
-                    Code = poRef,
+                    Code = gnrRef,
                     Name = model.Name,
                     Notes = model.Notes,
                     SupplierId = Guid.Parse(model.SupplierId),
-                    Personnel = model.Personnel
+                    Personnel = model.Personnel,
+                    PoCode = purchaseOrder.Code,
+                    PoId = purchaseOrder.Id,
                 };
                 _context.GoodReceivedNotes.Add(grn);
 
                 foreach (var item in model.GrnItems)
                 {
-                    var dbProduct = _context.Products.FirstOrDefault(d => d.Id.Equals(item.ProductId));
+                    var dbProduct = _context.Products
+                        .FirstOrDefault(d => d.Id.Equals(item.ProductId));
+                    if (dbProduct == null)
+                        continue;
+                    var currentQty = dbProduct.AvailableQuantity;
                     dbProduct.AvailableQuantity += item.Quantity;
                     dbProduct.BuyingPrice = item.UnitPrice;
                     dbProduct.LastModifiedBy = model.Personnel;
                     dbProduct.DateLastModified = DateTime.Now;
-
-                    var dbGrnProduct = _context.PoGrnProducts.FirstOrDefault(g => g.Id.Equals(item.Id));
-                    dbGrnProduct.GrnQuantity = item.Quantity;
-                    dbGrnProduct.GrnUnitPrice = item.UnitPrice;
-                    dbGrnProduct.GrnNotes = item.Notes;
-
                     var log = new ProductStockAdjustmentLog
                     {
-                        Code = $"{dbProduct.Code}",
+                        Code = $"{purchaseOrder.Code}_{dbProduct.Code}",
                         ProductId = item.ProductId,
-                        QuantityFrom = dbProduct.AvailableQuantity,
+                        QuantityFrom = currentQty,
                         QuantityTo = dbProduct.AvailableQuantity,
                         ClientId = model.ClientId,
                         InstanceId = model.InstanceId,
@@ -1222,11 +1203,55 @@ namespace PosMaster.Dal.Interfaces
                         Notes = model.Notes
                     };
                     _context.ProductStockAdjustmentLogs.Add(log);
+
+                    var poQtyLog = new ProductPoQuantityLog
+                    {
+                        ClientId = model.ClientId,
+                        InstanceId = model.InstanceId,
+                        Personnel = model.Personnel,
+                        ProductId = dbProduct.Id,
+                        PurchaseOrderId = purchaseOrder.Id,
+                        DeliveredQuantity = item.Quantity,
+                        AvailableQuantity = dbProduct.AvailableQuantity,
+                        BuyingPrice = item.UnitPrice,
+                        Code = $"{purchaseOrder.Code}_{dbProduct.Code}"
+                    };
+                    _context.ProductPoQuantityLogs.Add(poQtyLog);
+
+                    grn.PoGrnProducts.Add(new PoGrnProduct
+                    {
+                        ClientId = model.ClientId,
+                        InstanceId = model.InstanceId,
+                        Personnel = model.Personnel,
+                        ProductId = item.ProductId,
+                        GrnQuantity = item.Quantity,
+                        GrnUnitPrice = item.UnitPrice,
+                        GrnNotes = item.Notes,
+                        GoodReceivedNoteId = grn.Id
+                    });
+
+                    var dbGrnProduct = purchaseOrder.PoGrnProducts
+                        .FirstOrDefault(p => p.ProductId.Equals(item.ProductId));
+                    if (dbGrnProduct != null)
+                    {
+                        dbGrnProduct.GrnQuantity = item.Quantity;
+                        dbGrnProduct.GrnUnitPrice = item.UnitPrice;
+                        dbGrnProduct.LastModifiedBy = model.Personnel;
+                        dbGrnProduct.DateLastModified = DateTime.Now;
+                        dbGrnProduct.GrnNotes = item.Notes;
+                    }
+                    _context.SaveChanges();
                 }
 
-                await _context.SaveChangesAsync();
+                if (purchaseOrder.PoGrnProducts.Sum(p => p.PoQtyBalance) <= model.GrnItems.Sum(s => s.Quantity))
+                {
+                    purchaseOrder.Status = EntityStatus.Closed;
+                    purchaseOrder.LastModifiedBy = model.Personnel;
+                    purchaseOrder.DateLastModified = DateTime.Now;
+                    await _context.SaveChangesAsync();
+                }
                 result.Success = true;
-                result.Message = "Added";
+                result.Message = $"Added {grn.Code}";
                 result.Data = grn;
                 _logger.LogInformation($"{tag} added {grn.Name}  {grn.Id} : {result.Message}");
                 return result;
@@ -1284,8 +1309,8 @@ namespace PosMaster.Dal.Interfaces
                     return result;
                 }
                 var hasToDate = DateTime.TryParse(model.PriceEndDateStr, out var endDate);
+                var currentPrice = product.SellingPrice;
                 product.SellingPrice = model.SellingPrice;
-
                 var hasFromDate = DateTime.TryParse(model.PriceStartDateStr, out var startDate);
                 product.PriceStartDate = hasFromDate ? startDate : DateTime.Now;
                 product.PriceEndDate = hasToDate ? endDate : (DateTime?)null;
@@ -1293,7 +1318,7 @@ namespace PosMaster.Dal.Interfaces
                 {
                     Code = $"{product.Code}",
                     ProductId = product.Id,
-                    PriceFrom = product.SellingPrice,
+                    PriceFrom = currentPrice,
                     PriceTo = model.SellingPrice,
                     ClientId = model.ClientId,
                     InstanceId = model.InstanceId,

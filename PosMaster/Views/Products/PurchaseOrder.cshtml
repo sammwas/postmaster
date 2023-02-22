@@ -2,7 +2,7 @@
 @inject IClientInstanceInterface _instanceInterface;
 @model Invoice
 @{
-    ViewData["Active"] = "POS";
+    ViewData["Active"] = "Products";
     ViewData["Title"] = $"Invoice - {Model.Code}";
     var user = _cookies.Read();
     var instanceRes = await _instanceInterface.ByIdAsync(Model.InstanceId);

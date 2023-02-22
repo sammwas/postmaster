@@ -122,10 +122,7 @@ namespace PosMaster.Controllers
             ViewData["DtFrom"] = dtFrom;
             ViewData["DtTo"] = dtTo;
             ViewData["Search"] = search;
-            Guid? clientId = null;
             Guid? instanceId = null;
-            if (!User.IsInRole(Role.SuperAdmin))
-                clientId = _userData.ClientId;
             if (Guid.TryParse(insId, out var iId))
                 instanceId = iId;
             var personnel = "";
@@ -134,7 +131,7 @@ namespace PosMaster.Controllers
                 instanceId = _userData.InstanceId;
                 personnel = User.Identity.Name;
             }
-            var result = await _productInterface.PurchaseOrdersAsync(clientId, instanceId, dtFrom, dtTo, search, personnel);
+            var result = await _productInterface.PurchaseOrdersAsync(_userData.ClientId, instanceId, false, dtFrom, dtTo, search, personnel);
             if (!result.Success)
                 TempData.SetData(AlertLevel.Warning, "Purchase Orders", result.Message);
             return View(result.Data);
@@ -180,10 +177,7 @@ namespace PosMaster.Controllers
             ViewData["DtFrom"] = dtFrom;
             ViewData["DtTo"] = dtTo;
             ViewData["Search"] = search;
-            Guid? clientId = null;
             Guid? instanceId = null;
-            if (!User.IsInRole(Role.SuperAdmin))
-                clientId = _userData.ClientId;
             if (Guid.TryParse(insId, out var iId))
                 instanceId = iId;
             var personnel = "";
@@ -192,11 +186,12 @@ namespace PosMaster.Controllers
                 instanceId = _userData.InstanceId;
                 personnel = User.Identity.Name;
             }
-            var result = await _productInterface.GoodsReceivedAsync(clientId, instanceId, dtFrom, dtTo, search, personnel);
+            var result = await _productInterface.GoodsReceivedAsync(_userData.ClientId, instanceId, dtFrom, dtTo, search, personnel);
             if (!result.Success)
                 TempData.SetData(AlertLevel.Warning, "Received Goods", result.Message);
             return View(result.Data);
         }
+
         public async Task<IActionResult> EditReceivedGoods(Guid? id)
         {
             var model = new GoodsReceivedNoteViewModel { Status = EntityStatus.Active };
@@ -208,6 +203,8 @@ namespace PosMaster.Controllers
             {
                 var grnViewModel = new GoodsReceivedNoteViewModel(result.Data);
                 ViewData["Supplier"] = result.Data.Supplier.Name;
+                grnViewModel.SupplierId = result.Data.Supplier.Id.ToString();
+                grnViewModel.PoId = result.Data.PoId.ToString();
                 return View(grnViewModel);
             }
             var order = await _productInterface.PurchaseOrderByIdAsync(id.Value);
@@ -218,6 +215,7 @@ namespace PosMaster.Controllers
             ViewData["Supplier"] = po.Supplier.Name;
             return View(model);
         }
+
         public IActionResult GetPurchaseOrderDetails(string poId = "")
         {
             if (string.IsNullOrEmpty(poId))
@@ -228,6 +226,7 @@ namespace PosMaster.Controllers
             var purchaseOrderId = Guid.Parse(poId);
             return RedirectToAction(nameof(EditReceivedGoods), new { id = purchaseOrderId });
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditReceivedGoods(GoodsReceivedNoteViewModel model)

@@ -48,8 +48,10 @@ namespace PosMaster.ViewModels
             {
                 foreach (var item in purchaseOrder.PoGrnProducts)
                 {
-                    var product = new PoGrnProductViewModel(item, false);
-                    product.Quantity = item.PoQuantity;
+                    var product = new PoGrnProductViewModel(item, false)
+                    {
+                        Quantity = item.PoQtyBalance
+                    };
                     products.Add(product);
                 }
             }

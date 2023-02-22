@@ -49,11 +49,11 @@
                 </li>
             </ul>
             <form method="get" class="form-inline ml-3" autocomplete="off" asp-action="ViewProduct"
-                asp-controller="Products">
+                  asp-controller="Products">
                 <input type="hidden" name="Id" value="@userData.InstanceId" />
                 <div class="input-group input-group-sm">
                     <input class="form-control form-control-navbar" name="Code" value="@ViewData["ProductCode"]"
-                        placeholder="Search code in @userData.InstanceName" aria-label="Search">
+                           placeholder="Search code in @userData.InstanceName" aria-label="Search">
                     <div class="input-group-append">
                         <button class="btn btn-navbar" type="submit">
                             <i class="fas fa-search"></i>
@@ -83,7 +83,7 @@
                             else
                             {
                                 <img src="~/@userData.ImagePath" width="60" height="60" class="img-circle elevation-2"
-                                alt="@userData.FirstName">
+                                 alt="@userData.FirstName">
                             }
                         </div>
                         <span class="hidden-xs">@userData.FullName</span>
@@ -98,7 +98,7 @@
                                 else
                                 {
                                     <img src="~/@userData.ImagePath" width="160" height="160" class="img-circle elevation-2"
-                                    alt="@userData.FirstName">
+                                     alt="@userData.FirstName">
                                 }
                             </div>
                             <p>
@@ -109,7 +109,7 @@
                         <li class="card-footer form-inline">
                             <div>
                                 <a asp-controller="Users" asp-action="Edit" asp-route-id="@userData.UserId"
-                                    class="btn btn-primary btn-flat">Profile</a>
+                                   class="btn btn-primary btn-flat">Profile</a>
                             </div>
                             <span>&nbsp;</span>
                             <div class="mr-0">
@@ -132,7 +132,7 @@
                 else
                 {
                     <img src="~/@userData.ClientLogoPath" alt="@userData.ClientCode"
-                    class="brand-image img-circle elevation-3" style="opacity: .8">
+                     class="brand-image img-circle elevation-3" style="opacity: .8">
                 }
                 <span class="brand-text font-weight-light">@userData.ClientCode</span>
             </a>
@@ -171,24 +171,24 @@
                                 </li>
                                 <li class="nav-item">
                                     <a asp-controller="PointOfSale" asp-action="Receipts"
-                                        asp-route-dtFrom="@firstDayOfWeek"
-                                        asp-route-dtTo="@DateTime.Now.ToString("dd-MMM-yyyy")" class="nav-link">
+                                       asp-route-dtFrom="@firstDayOfWeek"
+                                       asp-route-dtTo="@DateTime.Now.ToString("dd-MMM-yyyy")" class="nav-link">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Sale Receipts</p>
                                     </a>
                                 </li>
                                 <li class="nav-item">
                                     <a asp-controller="PointOfSale" asp-action="Invoices"
-                                        asp-route-dtFrom="@firstDayOfWeek"
-                                        asp-route-dtTo="@DateTime.Now.ToString("dd-MMM-yyyy")" class="nav-link">
+                                       asp-route-dtFrom="@firstDayOfWeek"
+                                       asp-route-dtTo="@DateTime.Now.ToString("dd-MMM-yyyy")" class="nav-link">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Invoices</p>
                                     </a>
                                 </li>
                                 <li class="nav-item">
                                     <a asp-controller="PointOfSale" asp-action="GeneralLedgers"
-                                        asp-route-dtFrom="@DateTime.Now.ToString("dd-MMM-yyyy")"
-                                        asp-route-dtTo="@DateTime.Now.ToString("dd-MMM-yyyy")" class="nav-link">
+                                       asp-route-dtFrom="@DateTime.Now.ToString("dd-MMM-yyyy")"
+                                       asp-route-dtTo="@DateTime.Now.ToString("dd-MMM-yyyy")" class="nav-link">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>General Ledger</p>
                                     </a>
@@ -207,7 +207,7 @@
                                 </li>
                                 <li class="nav-item">
                                     <a asp-controller="Settings" asp-action="UploadExcel"
-                                        asp-route-id="@UploadExelOption.Customers" class="nav-link">
+                                       asp-route-id="@UploadExelOption.Customers" class="nav-link">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Upload Customers</p>
                                     </a>
@@ -223,15 +223,15 @@
                                     <ul class="nav nav-treeview">
                                         <li class="nav-item">
                                             <a asp-controller="Orders" asp-action="Index"
-                                                asp-route-dtFrom="@firstDayOfWeek"
-                                                asp-route-dtTo="@DateTime.Now.ToString("dd-MMM-yyyy")" class="nav-link">
+                                               asp-route-dtFrom="@firstDayOfWeek"
+                                               asp-route-dtTo="@DateTime.Now.ToString("dd-MMM-yyyy")" class="nav-link">
                                                 <i class="far fa-circle nav-icon"></i>
                                                 <p>View All</p>
                                             </a>
                                         </li>
                                         <li class="nav-item">
                                             <a asp-controller="Orders" asp-action="PlaceOrder" asp-route-id=""
-                                                class="nav-link">
+                                               class="nav-link">
                                                 <i class="far fa-circle nav-icon"></i>
                                                 <p>Place Order</p>
                                             </a>
@@ -271,8 +271,8 @@
                                     </li>
                                     <li class="nav-item">
                                         <a asp-controller="HumanResource" asp-action="LeaveApplications"
-                                        asp-route-dtFrom="@Helpers.firstDayOfYear.ToString("dd-MMM-yyyy")"
-                                        class="nav-link">
+                                       asp-route-dtFrom="@Helpers.firstDayOfYear.ToString("dd-MMM-yyyy")"
+                                       class="nav-link">
                                             <i class="far fa-circle nav-icon"></i>
                                             <p>Leave Applications</p>
                                         </a>
@@ -291,8 +291,8 @@
                                     </li>
                                     <li class="nav-item">
                                         <a asp-controller="HumanResource" asp-action="MonthlyPayments"
-                                        asp-route-year="@DateTime.Now.Year" asp-route-month="@DateTime.Now.Month"
-                                        class="nav-link">
+                                       asp-route-year="@DateTime.Now.Year" asp-route-month="@DateTime.Now.Month"
+                                       class="nav-link">
                                             <i class="far fa-circle nav-icon"></i>
                                             <p>Monthly Payments</p>
                                         </a>
@@ -323,7 +323,7 @@
                                             <p>Add New</p>
                                         </a>
                                     </li>
-                                    <li class="nav-item">
+                                    <li class="nav-item" style="display:none">
                                         <a asp-controller="Clients" asp-action="Summary" class="nav-link">
                                             <i class="far fa-circle nav-icon"></i>
                                             <p>Summary</p>
@@ -351,12 +351,12 @@
                                     </li>
                                     <li class="nav-item">
                                         <a asp-controller="ClientInstances" asp-action="Edit" asp-route-id=""
-                                        class="nav-link">
+                                       class="nav-link">
                                             <i class="far fa-circle nav-icon"></i>
                                             <p>Add New</p>
                                         </a>
                                     </li>
-                                    <li class="nav-item">
+                                    <li class="nav-item" style="display:none">
                                         <a asp-controller="ClientInstances" asp-action="All" class="nav-link">
                                             <i class="far fa-circle nav-icon"></i>
                                             <p>Summary</p>
@@ -388,21 +388,21 @@
                                 </li>
                                 <li class="nav-item">
                                     <a asp-controller="Products" asp-action="PurchaseOrders"
-                                        asp-route-dtFrom="@firstDayOfWeek"
-                                        asp-route-dtTo="@DateTime.Now.ToString("dd-MMM-yyyy")" class="nav-link">
+                                       asp-route-dtFrom="@firstDayOfWeek"
+                                       asp-route-dtTo="@DateTime.Now.ToString("dd-MMM-yyyy")" class="nav-link">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Purchase Orders</p>
                                     </a>
                                 </li>
                                 <li class="nav-item">
                                     <a asp-controller="Products" asp-action="ReceivedGoods"
-                                        asp-route-dtFrom="@firstDayOfWeek"
-                                        asp-route-dtTo="@DateTime.Now.ToString("dd-MMM-yyyy")" class="nav-link">
+                                       asp-route-dtFrom="@firstDayOfWeek"
+                                       asp-route-dtTo="@DateTime.Now.ToString("dd-MMM-yyyy")" class="nav-link">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Received Goods</p>
                                     </a>
                                 </li>
-                                @if (User.IsInRole(Role.Manager))
+                                @if (User.IsInRole(Role.SuperAdmin) || User.IsInRole(Role.Manager))
                                 {
                                     <li class="nav-item">
                                         <a asp-controller="Products" asp-action="ProductStockAdjustment" class="nav-link">
@@ -419,7 +419,7 @@
                                 </li>
                                 <li class="nav-item">
                                     <a asp-controller="Settings" asp-action="UploadExcel"
-                                        asp-route-id="@UploadExelOption.Products" class="nav-link">
+                                       asp-route-id="@UploadExelOption.Products" class="nav-link">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Upload Products</p>
                                     </a>
@@ -480,18 +480,18 @@
                                 <ul class="nav nav-treeview">
                                     <li class="nav-item">
                                         <a asp-controller="Reports" asp-action="SalesReport"
-                                        asp-route-dtFrom="@firstDayOfWeek"
-                                        asp-route-dtTo="@DateTime.Now.ToString("dd-MMM-yyyy")" asp-route-option="Weekly"
-                                        class="nav-link">
+                                       asp-route-dtFrom="@firstDayOfWeek"
+                                       asp-route-dtTo="@DateTime.Now.ToString("dd-MMM-yyyy")" asp-route-option="Weekly"
+                                       class="nav-link">
                                             <i class="far fa-circle nav-icon"></i>
                                             <p>Weekly Report</p>
                                         </a>
                                     </li>
                                     <li class="nav-item">
                                         <a asp-controller="Reports" asp-action="SalesReport"
-                                        asp-route-dtFrom="@Helpers.firstDayOfMonth.ToString("dd-MMM-yyyy")"
-                                        asp-route-dtTo="@Helpers.lastDayOfMonth.ToString("dd-MMM-yyyy")"
-                                        asp-route-option="Monthly" class="nav-link">
+                                       asp-route-dtFrom="@Helpers.firstDayOfMonth.ToString("dd-MMM-yyyy")"
+                                       asp-route-dtTo="@Helpers.lastDayOfMonth.ToString("dd-MMM-yyyy")"
+                                       asp-route-option="Monthly" class="nav-link">
                                             <i class="far fa-circle nav-icon"></i>
                                             <p>Monthly Report</p>
                                         </a>
@@ -524,7 +524,7 @@
                                     </li>
                                     <li class="nav-item">
                                         <a asp-controller="Settings" asp-action="SendTestEmail" asp-route-test="True"
-                                        class="nav-link">
+                                       class="nav-link">
                                             <i class="far fa-circle nav-icon"></i>
                                             <p>Test Email</p>
                                         </a>

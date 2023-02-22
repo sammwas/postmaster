@@ -2,108 +2,112 @@
 @inject ICookiesService _cookies;
 @model List<GoodReceivedNote>
 @{
-	ViewData["Active"] = "Products";
-	ViewData["Title"] = "Received Goods";
-	var userData = _cookies.Read();
-	var instancesRes = User.IsInRole(Role.SuperAdmin) ?
-		await _instanceInterface.AllAsync()
-		: await _instanceInterface.ByClientIdAsync(userData.ClientId);
-	var instances = instancesRes.Data;
-	var instanceId = ViewData["InstanceId"]?.ToString();
-	var dateToday = DateTime.Now.ToString("dd-MMM-yyyy");
+    ViewData["Active"] = "Products";
+    ViewData["Title"] = "Received Goods";
+    var userData = _cookies.Read();
+    var instancesRes = await _instanceInterface.ByClientIdAsync(userData.ClientId);
+    var instances = instancesRes.Data;
+    var instanceId = ViewData["InstanceId"]?.ToString();
+    var dateToday = DateTime.Now.ToString("dd-MMM-yyyy");
 }
 <div>
-	<div class="card">
-		<div class="row">
-			<div class="card-header">
-				<h3 class="card-title">@ViewData["Title"] <span class="text-right"><a asp-action="EditReceivedGoods" asp-route-id="" class="btn btn-sm btn-info">Add</a></span></h3>
-			</div>
-		</div>
-		<div class="card-body">
-			<form autocomplete="off">
-				<div class="row">
-					<div class="col-md-3">
-						<div class="form-group">
-							<label>Instance</label>
-							<select class="form-control select2" name="insId" style="width: 100%;">
-								<option value="">--Select Instance--</option>
-								@foreach (var item in instances)
-								{
-									if (!string.IsNullOrEmpty(instanceId) && item.Id.ToString().Equals(instanceId))
-									{
-										<option selected="selected" value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
-									}
-									else
-									{
-										<option value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
-									}
-								}
-							</select>
-						</div>
-					</div>
-					<div class="col-md-3">
-						<div class="form-group">
-							<label>Date From</label>
-							<div class="input-group date" id="dateFrom" data-target-input="nearest">
-								<input type="text" name="dtFrom" class="form-control datetimepicker-input" data-target="#dateFrom" value="@ViewData["dtFrom"]" placeholder="Date From (@dateToday)" />
-								<div class="input-group-append" data-target="#dateFrom" data-toggle="datetimepicker">
-									<div class="input-group-text"><i class="fa fa-calendar"></i></div>
-								</div>
-							</div>
-						</div>
-					</div>
-					<div class="col-md-3">
-						<div class="form-group">
-							<label>Date To</label>
-							<div class="input-group date" id="dateTo" data-target-input="nearest">
-								<input type="text" name="dtTo" class="form-control datetimepicker-input" data-target="#dateTo" value="@ViewData["dtTo"]" placeholder="Date To (@dateToday)" />
-								<div class="input-group-append" data-target="#dateTo" data-toggle="datetimepicker">
-									<div class="input-group-text"><i class="fa fa-calendar"></i></div>
-								</div>
-							</div>
-						</div>
-					</div>
-					<div class="col-md-3">
-						<div class="form-group">
-							<br />
-							<button type="submit" class="btn btn-primary">Submit</button>
-						</div>
-					</div>
-				</div>
-			</form>
-			<table id="dataTable" class="table table-bordered table-striped">
-				<thead>
-					<tr>
-						<th>Code</th>
-						<th>Date</th>
-						<th>Supplier</th>
-						<th>Status</th>
-					</tr>
-				</thead>
-				<tbody>
-					@if (Model.Any())
-					{
-						@foreach (var item in Model)
-						{
-							<tr>
-								<td>@item.Code</td>
-								<td>@item.DateCreated</td>
-								<td>@item.Supplier.Code - @item.Supplier.Name</td>
-								<td>@item.Status</td>
-							</tr>
-						}
+    <div class="card">
+        <div class="row">
+            <div class="card-header">
+                <h3 class="card-title">@ViewData["Title"] <span class="text-right"><a asp-action="EditReceivedGoods" asp-route-id="" class="btn btn-sm btn-info">Add</a></span></h3>
+            </div>
+        </div>
+        <div class="card-body">
+            <form autocomplete="off">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Instance</label>
+                            <select class="form-control select2" name="insId" style="width: 100%;">
+                                <option value="">--Select Instance--</option>
+                                @foreach (var item in instances)
+                                {
+                                    if (!string.IsNullOrEmpty(instanceId) && item.Id.ToString().Equals(instanceId))
+                                    {
+                                        <option selected="selected" value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Date From</label>
+                            <div class="input-group date" id="dateFrom" data-target-input="nearest">
+                                <input type="text" name="dtFrom" class="form-control datetimepicker-input" data-target="#dateFrom" value="@ViewData["dtFrom"]" placeholder="Date From (@dateToday)" />
+                                <div class="input-group-append" data-target="#dateFrom" data-toggle="datetimepicker">
+                                    <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Date To</label>
+                            <div class="input-group date" id="dateTo" data-target-input="nearest">
+                                <input type="text" name="dtTo" class="form-control datetimepicker-input" data-target="#dateTo" value="@ViewData["dtTo"]" placeholder="Date To (@dateToday)" />
+                                <div class="input-group-append" data-target="#dateTo" data-toggle="datetimepicker">
+                                    <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <br />
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <table id="dataTable" class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Date</th>
+                        <th>Supplier</th>
+                        <th>PO Ref</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Any())
+                    {
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.Code</td>
+                                <td>@item.DateCreated</td>
+                                <td>@item.Supplier.Code - @item.Supplier.Name</td>
+                                <td>@item.PoCode</td>
+                                <td>@item.PoGrnProducts.Sum(p=>p.GrnAmount)</td>
+                                <td>@item.Status</td>
+                            </tr>
+                        }
 
-					}
-				</tbody>
-				<tfoot>
-					<tr>
-						<th>Code</th>
-						<th>Date</th>
-						<th>Supplier</th>
-						<th>Status</th>
-					</tr>
-				</tfoot>
-			</table>
-		</div>
-	</div>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th>Code</th>
+                        <th>Date</th>
+                        <th>Supplier</th>
+                        <th>PO Ref</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
 </div>
