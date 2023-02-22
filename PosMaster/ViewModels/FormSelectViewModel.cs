@@ -16,7 +16,12 @@ namespace PosMaster.ViewModels
             Code = customer.Code;
             PinNo = customer.PinNo;
         }
-
+        public FormSelectViewModel(Supplier supplier)
+        {
+            Id = supplier.Id.ToString();
+            Text = $"{supplier.Code} - {supplier.Name} : {supplier.PrimaryTelephone}";
+            Code = supplier.Code;
+        }
         public string Id { get; set; }
         public string Text { get; set; }
         public string Code { get; set; }

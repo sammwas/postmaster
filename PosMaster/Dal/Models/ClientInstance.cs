@@ -19,5 +19,8 @@ namespace PosMaster.Dal
         public string PinNo { get; set; }
         public string InvoiceTerms { get; set; }
         public int InvoiceDurationDays { get; set; }
+        public string ReceiptFooterNotes { get; set; }
+        public BusinessShortCodeType BusinessShortCodeType { get; set; }
+        public string BusinessShortCode { get; set; }
     }
 }

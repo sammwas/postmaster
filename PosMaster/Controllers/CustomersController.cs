@@ -14,10 +14,13 @@ namespace PosMaster.Controllers
     public class CustomersController : Controller
     {
         private readonly ICustomerInterface _customerInterface;
+        private readonly ISupplierInterface _supplierInterface;
         private readonly UserCookieData _userData;
 
-        public CustomersController(ICookiesService cookiesService, ICustomerInterface customerInterface)
+        public CustomersController(ICookiesService cookiesService, ICustomerInterface customerInterface,
+        ISupplierInterface supplierInterface)
         {
+            _supplierInterface = supplierInterface;
             _userData = cookiesService.Read();
             _customerInterface = customerInterface;
         }
@@ -67,9 +70,9 @@ namespace PosMaster.Controllers
             return RedirectToAction(nameof(ByClientId));
         }
 
-        public async Task<JsonResult> Search(string term)
+        public async Task<JsonResult> Search(string term, bool isSupplier = false)
         {
-            var data = await _customerInterface.SearchClientCustomerAsync(_userData.ClientId, term, 10);
+            var data = isSupplier ? await _supplierInterface.SearchClientSupplierAsync(_userData.ClientId, term, 10) : await _customerInterface.SearchClientCustomerAsync(_userData.ClientId, term, 10);
             return Json(data);
         }
 

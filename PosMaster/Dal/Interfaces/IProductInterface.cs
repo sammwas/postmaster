@@ -1068,9 +1068,6 @@ namespace PosMaster.Dal.Interfaces
                 _context.PurchaseOrders.Add(purchaseOrder);
                 foreach (var item in model.PurchaseOrderItems)
                 {
-                    var dbProduct = await _context.Products.FirstOrDefaultAsync(d => d.Id.Equals(item.ProductId));
-                    dbProduct.BuyingPrice = item.UnitPrice;
-
                     var lineProduct = new PoGrnProduct
                     {
                         PurchaseOrderId = purchaseOrder.Id,
@@ -1276,7 +1273,9 @@ namespace PosMaster.Dal.Interfaces
                 }
                 var hasToDate = DateTime.TryParse(model.PriceEndDateStr, out var endDate);
                 product.SellingPrice = model.SellingPrice;
-                product.PriceStartDate = DateTime.Parse(model.PriceStartDateStr);
+
+                var hasFromDate = DateTime.TryParse(model.PriceStartDateStr, out var startDate);
+                product.PriceStartDate = hasFromDate ? startDate : DateTime.Now;
                 product.PriceEndDate = hasToDate ? endDate : (DateTime?)null;
                 var log = new ProductPriceLog
                 {
@@ -1329,7 +1328,7 @@ namespace PosMaster.Dal.Interfaces
                     .FirstOrDefaultAsync();
                 if (product == null)
                 {
-                    result.Message = result.Data.Message = $" {productCode } Not found";
+                    result.Message = result.Data.Message = $" {productCode} Not found";
                     _logger.LogWarning($"{tag} get product details failed {productCode} : {result.Message}");
                     return result;
                 }

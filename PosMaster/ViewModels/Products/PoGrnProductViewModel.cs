@@ -12,7 +12,7 @@ namespace PosMaster.ViewModels
         public PoGrnProductViewModel(PoGrnProduct product, bool isPo)
         {
             ProductId = product.ProductId;
-            DocumentId = isPo ? product.PurchaseOrderId : product.GoodReceivedNoteId;
+            DocumentId = isPo ? product.PurchaseOrderId.Value : product.GoodReceivedNoteId.Value;
             UnitPrice = product.PoUnitPrice;
             Quantity = isPo ? product.PoQuantity : product.GrnQuantity;
             Notes = isPo ? product.PoNotes : product.GrnNotes;

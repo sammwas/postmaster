@@ -4,131 +4,118 @@
 @model PurchaseOrderViewModel
 @{
 	ViewData["Active"] = "Products";
-	var title = Model.IsEditMode ? "Edit":"Add";
+	var title = Model.IsEditMode ? "Edit" : "Add";
 	ViewData["Title"] = $"{title} Purchase Order";
-	var userData = _cookies.Read();
-	var suppliersRes = await _supplierInterface.ByClientIdAsync(userData.ClientId);
-	var suppliers = suppliersRes.Data;
-	var productsRes = User.IsInRole(Role.Clerk) ?
-		await _productInterface.ByInstanceIdAsync(userData.ClientId,userData.InstanceId)
-		: await _productInterface.ByInstanceIdAsync(userData.ClientId,(Guid?)null);
-	var products = productsRes.Data;
 }
 <div class="card card-primary">
 	<div class="card-header">
 		<h3 class="card-title">Add Purchase Order</h3>
 	</div>
 	<div class="row">
-		<div class="col-md-8">
+		<div class="col-md-12">
 			<form role="form" method="post" autocomplete="off">
-				<div asp-validation-summary="All" class="text-danger"></div>
-				<input asp-for="Id" />
-				<input asp-for="ClientId" value="@userData.ClientId"/>
-				<input asp-for="InstanceId" value="@userData.InstanceId"/>
-				<input asp-for="Code" value="@userData.ClientCode" type="hidden" />
-				<input asp-for="IsEditMode" />
 				<div class="card-body">
-					<div class="col-12">
-						<div class="form-group">
-							<label asp-for="SupplierId"></label>
-							<select class="form-control select2" asp-for="SupplierId" style="width: 100%;">
-								<option value="">--Select Supplier--</option>
-								@foreach (var item in suppliers)
-								{
-									<option value="@item.Id" title="@item.Notes">@item.Code - @item.Name</option>
-								}
-							</select>
-							<span asp-validation-for="SupplierId" class="text-danger"></span>
+					<div asp-validation-summary="All" class="text-danger"></div>
+					<input asp-for="Id" />
+					<input asp-for="IsEditMode" />
+					<input id="inpIsSupplier" asp-for="Code" type="hidden" value="@DateTime.Now" />
+					<div class="row">
+						<div class="col-md-8">
+							<div class="col-12">
+								<div class="form-group">
+									<label asp-for="Name"></label>
+									<input asp-for="Name" class="form-control" placeholder="P O title">
+									<span asp-validation-for="Name" class="text-danger"></span>
+								</div>
+							</div>
+							<div class="col-12">
+								<div class="form-group">
+									<label>Supplier</label>
+									<select class="form-control select2" style="width: 100%;" id="customer-select"
+										asp-for="SupplierId">
+										<option value="">--Select Supplier--</option>
+									</select>
+								</div>
+							</div>
+							<div class="col-12">
+								<div class="form-group">
+									<label>Product</label>
+									<select class="form-control select2 product-select-search" style="width: 100%;"
+										id="selectedProductAdj">
+										<option value="">--Select Product--</option>
+									</select>
+								</div>
+							</div>
+							<div class="col-12">
+								<div class="text-right">
+									<button type="button" class="btn btn-primary btn-sm" onclick="addPoItem()">
+										<i class="fa fa-plus-circle"></i> Add to list
+									</button>
+								</div>
+							</div>
 						</div>
+						<div class="col-md-4">
+							<h4>Add Product</h4>
+							<div>
+								<p class="alert alert-info">
+									<i class="fa fa-info-circle fa-2x"></i><br /> Select product to add to P.O line
+									items.
+									<br />You can modify order price, quantity and note
+								</p>
+							</div>
+						</div>
+					</div>
 
-					</div>
 					<div class="col-12">
-						<div class="form-group">
-							<label asp-for="Name"></label>
-							<input asp-for="Name" class="form-control" placeholder="PO @userData.ClientCode">
-							<span asp-validation-for="Name" class="text-danger"></span>
-						</div>
-					</div>
-					<div class="col-12">
-						<div class="form-group">
-							<label>Select Product</label>
-							<select class="form-control select2" style="width: 100%;" id="select-poItems">
-								<option value="">--Select Product--</option>
-								@foreach (var item in products)
-								{
-									<option data-bp="@item.BuyingPrice" value="@item.Id" title="@item.Name-@item.Uom" data-po-name="@item.Name" data-po-uom="@item.Uom">@item.Code - @item.Name  (Qty @item.AvailableQuantity)</option>
-								}
-							</select>
-						</div>
-					</div>
-					<div class="col-12">
-						<div class="text-right">
-							<button type="button" onclick="addPoItem()">Add Item</button>
-						</div>
-					</div>
-					<div class="col-12 table-responsive">
-						<label>Purchase Order Products</label>
-						<table class="table table-striped" id="tablePurchaseItems">
-							<thead>
-								<tr>
-									<th>Quantity</th>
-									<th>Name</th>
-									<th>U.O.M</th>	
-									<th>Unit Price</th>
-									<th>Tax</th>
-									<th>Total Amount</th>
-									<th></th>
-								</tr>
-							</thead>
-							<tbody id="purchaseOrderItemList">
-								@{var i = 0;}								
-								@foreach (var item in Model.PurchaseOrderItems)
-								{
-									<tr id="tr_@i">
-									<td>
-										<input class="" asp-for="PurchaseOrderItems[i].Quantity" />
-									</td>
-									<td>
-										<input type="hidden" asp-for="PurchaseOrderItems[i].ProductId" />
-										<input class="" asp-for="PurchaseOrderItems[i].ProductName" />
-									</td>
-									<td>
-										<input class="" asp-for="PurchaseOrderItems[i].UnitOfMeasure" />
-									</td>
-									<td>
-										<input class="" asp-for="PurchaseOrderItems[i].UnitPrice" />
-									</td>
-									<td>
-										<input class="" asp-for="PurchaseOrderItems[i].TaxType" />
-									</td>
-									<td>
-										<input class="" asp-for="PurchaseOrderItems[i].Amount" />
-									</td>
+						<div class="col-12 table-responsive">
+							<label>Purchase Order Products</label>
+							<table class="table table-striped" id="tablePurchaseItems">
+								<thead>
+									<tr>
+										<th>Product</th>
+										<th>Quantity</th>
+										<th>Unit Price</th>
+										<th>Total Amount</th>
+										<th></th>
 									</tr>
-									i++;
-								}
-							</tbody>
-						</table>
+								</thead>
+								<tbody id="purchaseOrderItemList">
+									@{
+										var i = 0;
+									}
+									@foreach (var item in Model.PurchaseOrderItems)
+									{
+										<tr id="tr_@i">
+											<td>
+												<input type="hidden" asp-for="PurchaseOrderItems[i].ProductId" />
+												<input class="" asp-for="PurchaseOrderItems[i].ProductName" />
+											</td>
+											<td>
+												<input class="" asp-for="PurchaseOrderItems[i].Quantity" />
+											</td>
+											<td>
+												<input class="" asp-for="PurchaseOrderItems[i].UnitPrice" />
+											</td>
+											<td>
+												<input class="" asp-for="PurchaseOrderItems[i].Amount" />
+											</td>
+										</tr>
+										i++;
+									}
+								</tbody>
+							</table>
+							<div class="text-right"><span id="poTotalAmount"></span></div>
+						</div>
 					</div>
-				</div>
-				<div class="card-footer">
-					<button type="submit" class="btn btn-primary">Submit</button>
 				</div>
 
-			</form>
-		</div>
-		<div class="col-md-4">
-			<div class="card">
-				<div class="card-body">
-					<h4>Add Product</h4>
-					<div>
-						<p class="alert alert-info">
-							<i class="fa fa-info-circle fa-2x"></i><br /> Select product to add to P.O line items.
-							<br />You can modify order price, quantity and note
-						</p>
-					</div>
+				<div class="card-footer">
+					<button class="btn btn-primary" type="submit">
+						<i class="fa fa-save"></i>
+						Submit
+					</button>
 				</div>
-			</div>
+			</form>
 		</div>
 	</div>
 </div>

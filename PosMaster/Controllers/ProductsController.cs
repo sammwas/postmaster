@@ -165,6 +165,8 @@ namespace PosMaster.Controllers
                 TempData.SetData(AlertLevel.Warning, title, message);
                 return View(model);
             }
+            model.ClientId = _userData.ClientId;
+            model.InstanceId = _userData.InstanceId;
             var result = await _productInterface.EditPurchaseOrderAsync(model);
             TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, title, result.Message);
             if (!result.Success)
@@ -267,45 +269,6 @@ namespace PosMaster.Controllers
             var data = await _productInterface.TopSellingProductsByVolumeAsync(clientId, instanceId, 5);
             return Json(data);
         }
-        public async Task<IActionResult> ProductPrice(string instId = "")
-        {
-            var data = new ProductPriceViewModel();
-            ViewData["InstanceId"] = instId;
-            if (string.IsNullOrEmpty(instId))
-                return View(data);
-            var result = await _productInterface.ByInstanceIdAsync(_userData.ClientId, Guid.Parse(instId));
-            if (!result.Success)
-            {
-                TempData.SetData(AlertLevel.Warning, "Products", result.Message);
-                return View(data);
-            }
-
-            foreach (var item in result.Data)
-            {
-                data.ProductPriceMiniViewModels.Add(new ProductPriceMiniViewModel(item));
-            }
-            return View(data);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ProductPrice(ProductPriceViewModel model)
-        {
-            var title = "Edit Price";
-            ViewData["InstanceId"] = model.InstanceId;
-            if (!ModelState.IsValid)
-            {
-                var message = "Missing fields";
-                TempData.SetData(AlertLevel.Warning, title, message);
-                return View(model);
-            }
-            var result = await _productInterface.EditPriceAsync(model);
-            TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, title, result.Message);
-            if (!result.Success)
-                return RedirectToAction(nameof(ProductPrice), new { instId = model.InstanceId });
-            return View(model);
-        }
-
         public async Task<JsonResult> Search(string term = "", bool isPos = false)
         {
             var products = User.IsInRole(Role.Clerk) ?
@@ -325,14 +288,14 @@ namespace PosMaster.Controllers
             return View(result.Data);
         }
 
-        public IActionResult ItemPrice()
+        public IActionResult ProductPrice()
         {
             return View(new ItemPriceViewModel());
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ItemPrice(ItemPriceViewModel model)
+        public async Task<IActionResult> ProductPrice(ItemPriceViewModel model)
         {
             model.ClientId = _userData.ClientId;
             model.InstanceId = _userData.InstanceId;
@@ -348,7 +311,7 @@ namespace PosMaster.Controllers
             TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, title, result.Message);
             if (!result.Success)
                 return View(model);
-            return RedirectToAction(nameof(ItemPrice), new { });
+            return RedirectToAction(nameof(ProductPrice), new { });
         }
 
     }

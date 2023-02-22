@@ -1,121 +1,74 @@
-﻿@inject IClientInstanceInterface _instanceInterface;
-@inject ICookiesService _cookies;
-@model ProductPriceViewModel
+﻿@model ItemPriceViewModel;
 @{
     ViewData["Active"] = "Products";
-    ViewData["Title"] = "Product Price";
-    var userData = _cookies.Read();
-    var instancesRes = await _instanceInterface.ByClientIdAsync(userData.ClientId);
-    var instanceId = ViewData["instanceId"]?.ToString();
+    var statuses = Helpers.Statuses();
+    var title = $"Product Price";
+    ViewData["Title"] = title;
     var dateToday = DateTime.Now.ToString("dd-MMM-yyyy");
 }
 <div class="card card-primary">
     <div class="card-header">
         <h3 class="card-title">@ViewData["Title"]</h3>
     </div>
-    <div class="card-body">
-        <div class="row">
-            <div class="col-md-12">
-                <form method="get" class="form-inline" autocomplete="off">
-                    <div class="col-md-8">
-                        <div class="form-group">
-                            <label>Instance</label>
-                            <select class="form-control select2" name="instId" style="width: 100%;"
-                                    id="instance-select">
-                                <option value="">--Select Instance--</option>
-                                @foreach (var item in instancesRes.Data)
-                                {
-                                    if (item.Id.ToString().Equals(instanceId))
-                                    {
-                                        <option selected value="@item.Id" client-id="@item.ClientId" title="@item.Notes">
-                                            @item.Code - @item.Name
-                                            (@item.Client.Code - @item.Client.Name)
-                                        </option>
-                                    }
-                                    else
-                                    {
-                                        <option value="@item.Id" client-id="@item.ClientId" title="@item.Notes">
-                                            @item.Code -
-                                            @item.Name
-                                            (@item.Client.Code - @item.Client.Name)
-                                        </option>
-                                    }
-                                }
-                            </select>
+
+    <form role="form" method="post" autocomplete="off">
+        <div asp-validation-summary="All" class="text-danger"></div>
+        <input asp-for="Id" />
+        <input asp-for="IsEditMode" />
+        <input type="hidden" id="productCode" asp-for="Code" />
+        <div class="card-body">
+            <div class="row">
+                <div class="col-8">
+                    <div class="form-group">
+                        <label asp-for="ProductId"></label>
+                        <select class="form-control select2 product-select-search" asp-for="ProductId"
+                                style="width: 100%;" id="selectedProductAdj">
+                            <option value="">--Select Product--</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="form-group">
+                        <label asp-for="SellingPrice"></label>
+                        <input asp-for="SellingPrice" class="form-control currSellingPrice">
+                        <span asp-validation-for="SellingPrice" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label asp-for="PriceStartDateStr"></label>
+                        <div class="input-group date" id="dateFrom" data-target-input="nearest">
+                            <input type="text" class="form-control datetimepicker-input" data-target="#dateFrom"
+                                   asp-for="PriceStartDateStr" placeholder="Date From (@dateToday)" id="inpPriceDateFrom" />
+                            <div class="input-group-append" data-target="#dateFrom" data-toggle="datetimepicker">
+                                <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                            </div>
                         </div>
                     </div>
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label asp-for="PriceEndDateStr"></label>
+                        <div class="input-group date" id="dateTo" data-target-input="nearest">
+                            <input type="text" class="form-control datetimepicker-input" data-target="#dateTo" asp-for="PriceEndDateStr"
+                                   placeholder="Date To (@dateToday)" id="inpPriceDateTo" />
+                            <div class="input-group-append" data-target="#dateTo" data-toggle="datetimepicker">
+                                <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                            </div>
                         </div>
                     </div>
-                </form>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label asp-for="Notes"></label>
+                        <input asp-for="Notes" class="form-control" rows="3" placeholder="Notes" />
+                        <span asp-validation-for="Notes" class="text-danger"></span>
+                    </div>
+                </div>
             </div>
         </div>
-        <hr />
-        <div class="">
-            <form method="post" autocomplete="off" asp-action="ProductPrice">
-                <div class="">
-                    <table id="dataTable" class="table table-bordered table-striped">
-                        <thead class="bg-secondary">
-                            <tr>
-                                <th>Item</th>
-                                <th>Price</th>
-                                <th>Start Date</th>
-                                <th>End Date</th>
-                                <th>Option</th>
-                            </tr>
-                        </thead>
-                        <tbody id="item-price-list-table">
-                            @{
-                                var i = 0;
-                            }
-                            @foreach (var item in Model.ProductPriceMiniViewModels)
-                            {
-                                <tr id="tr_@item.Id">
-                                    <td>
-                                        <input type="hidden" asp-for="ProductPriceMiniViewModels[i].Id" />
-                                        <input type="hidden" asp-for="ProductPriceMiniViewModels[i].Name" />
-                                        <span>@item.Code - @item.Name</span>
-                                    </td>
-                                    <td>
-                                        <input class="" asp-for="ProductPriceMiniViewModels[i].SellingPrice" />
-                                    </td>
-                                    <td>
-                                        <input type="date" class="" required asp-for="ProductPriceMiniViewModels[i].PriceStartDate" />
-                                    </td>
-                                    <td>
-                                        <input type="date" class="" asp-for="ProductPriceMiniViewModels[i].PriceEndDate" />
-                                    </td>
-                                    <td>
-                                        <button type="button" class="btn bg-red btn-block waves-effect btn-sm"
-                                            onclick="removePriceItemRow('@item.Id')">
-                                            Remove
-                                        </button>
-                                    </td>
-                                </tr>
-                                i++;
-                            }
-                        </tbody>
-                        @* <tfoot class="bg-secondary">
-                            <tr>
-                            <th>Item</th>
-                            <th>Price</th>
-                            <th>Start Date</th>
-                            <th>End Date</th>
-                            <th>Option</th>
-                            </tr>
-                            </tfoot>*@
-                    </table>
-                </div>
-                <input asp-for="Code" type="hidden" value="@userData.InstanceCode" />
-                <input asp-for="InstanceId" type="hidden" value="@instanceId" />
-                <input asp-for="ClientId" id="clientId" type="hidden" value="@userData.ClientId" />
-                <button class="btn btn-primary" type="submit" id="item-submit-btn">
-                    <i class="fa fa-save"></i>
-                    Submit
-                </button>
-            </form>
+        <div class="card-footer">
+            <button type="submit" class="btn btn-primary">Submit</button>
         </div>
-    </div>
+    </form>
 </div>

@@ -223,12 +223,15 @@ $('#receiptsdt tbody').on('click', 'td.details-control', function () {
 
 $("input[value='credit']").prop('checked', false);
 
+var isSupplier = false;
+var x = $("#inpIsSupplier").val();
+if (x) isSupplier = true;
 $('#customer-select').select2({
     ajax: {
         dataType: 'json',
         delay: 250,
         url: function (params) {
-            return '/Customers/Search?term=' + params.term;
+            return '/Customers/Search?term=' + params.term + '&isSupplier=' + isSupplier;
         },
         processResults: function (data, params) {
             return {
@@ -519,25 +522,21 @@ $("#btnPrintReceipt").click(function () {
 });
 
 function addPoItem() {
-    var product = $('#select-poItems').select2('data')[0];
-    var itemName = product.title.split('-')[0];
-    var uom = product.title.split('-')[1];
-    var productId = product.id;
+    var product = $('#selectedProductAdj').select2('data')[0];
+    var itemName = product.name;
+    var productIdStr = '"' + product.id + '"';
     var length = document.getElementById("tablePurchaseItems").tBodies[0].rows.length;
-    var id = new Date().valueOf();
-    $("#purchaseOrderItemList").append("<tr id='tr_" + id + "'>"
-        + "<td><input class=''  value=" + productId + " name='PurchaseOrderItems[" + length + "].ProductId' type='hidden'/>" +
-        "<input class='product-event' id='product-quantity' name= 'PurchaseOrderItems[" + length + "].Quantity' placeholder='0.00'/></td>"
-        + "<td><input class='' id='product-name' value=" + itemName + " name= 'PurchaseOrderItems[" + length + "].ProductName'/></td>"
-        + "<td><input class='' id='product-uom' value=" + uom + " name= 'PurchaseOrderItems[" + length + "].UnitOfMeasure'/></td>"
+    $("#purchaseOrderItemList").append("<tr id='tr_" + product.id + "'>"
+        + "<td><input class=''  value=" + product.id + " name='PurchaseOrderItems[" + length + "].ProductId' type='hidden'/>" +
+        "<span class='' id='product-name' value=" + itemName + " name= 'PurchaseOrderItems[" + length + "].ProductName'>" + itemName + "</span></td>"
+        + "<td><input class='product-event' id='product-quantity' name= 'PurchaseOrderItems[" + length + "].Quantity' placeholder='0.00'/></td>"
         + "<td><input class='product-event' id='product-price' name= 'PurchaseOrderItems[" + length + "].UnitPrice' placeholder='0.00'/></td>"
-        + "<td><input class='' name= 'PurchaseOrderItems[" + length + "].TaxType'/></td>"
-        + "<td><input class='poTotalItems' name= 'PurchaseOrderItems[" + length + "].Amount' placeholder='0.00'/></td>"
-        + "<td><button type='button' class='btn bg-red btn-block' onclick='removePoItemRow(" + id + ")'>Remove</button></td>"
+        + "<td><strong class='poTotalItems' name= 'PurchaseOrderItems[" + length + "].Amount'>---</strong></td>"
+        + "<td><button type='button' class='btn bg-red btn-sm' onclick='removePoItemRow(" + productIdStr + ")'>Remove</button></td>"
         + "</tr>"
     );
 
-
+    $('#selectedProductAdj').empty();
 }
 
 $('#purchaseOrderItemList').on('change', 'input.product-event', function () {
@@ -548,7 +547,7 @@ $('#purchaseOrderItemList').on('change', 'input.product-event', function () {
         $(this).closest('tr').find('.poTotalItems').val(parseFloat(amount));
     }
     amount = price * quantity;
-    $(this).closest('tr').find('.poTotalItems').val(parseFloat(amount));
+    $(this).closest('tr').find('.poTotalItems').text(parseFloat(amount));
 
     updateTotal();
 })
@@ -556,7 +555,7 @@ $('#purchaseOrderItemList').on('change', 'input.product-event', function () {
 function updateTotal() {
     let total = 0;
     $('.poTotalItems').each((i, el) => total += parseFloat(el.textContent.trim() || 0));
-    $('#poTotalAmount').text('*settings: ' + total.toFixed(2));
+    $('#poTotalAmount').text(total.toFixed(2));
 }
 
 removePoItemRow = function (id) {

@@ -49,4 +49,9 @@
         Customer,
         Supplier
     }
+    public enum BusinessShortCodeType 
+    {
+        Till,
+        Paybill
+     }
 }

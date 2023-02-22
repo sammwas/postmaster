@@ -4,8 +4,8 @@ namespace PosMaster.Dal
 {
     public class PoGrnProduct : BaseEntity
     {
-        public Guid PurchaseOrderId { get; set; }
-        public Guid GoodReceivedNoteId { get; set; }
+        public Guid? PurchaseOrderId { get; set; }
+        public Guid? GoodReceivedNoteId { get; set; }
         public Guid ProductId { get; set; }
         public Product Product { get; set; }
         public decimal PoQuantity { get; set; }
