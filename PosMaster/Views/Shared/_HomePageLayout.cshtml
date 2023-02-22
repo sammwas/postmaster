@@ -25,31 +25,29 @@
     <nav class="navbar navbar-light bg-light static-top">
         <div class="container">
             <a class="navbar-brand" asp-controller="Home" asp-action="Index">
-                <h4>
-                    @if (!string.IsNullOrEmpty(settings.LogoPath))
-                    {
-                        <img id="clientLogo" src="~/@settings.LogoPath" alt="@settings.Code" width="40">
+                @if (!string.IsNullOrEmpty(settings.LogoPath))
+                {
+                    <img id="clientLogo" src="~/@settings.LogoPath" alt="@settings.Code" height="35">
 
-                    }
-                    else
-                    {
-                        <i class="icon-basket icons"></i>
-                    }
-                    @settings.Name
-                </h4>
+                }
+                else
+                {
+                    <h4><i class="icon-basket icons"></i> @settings.Name</h4>
+                }
             </a>
             @if (!_signInManager.IsSignedIn(User))
             {
                 <a asp-controller="Home" asp-action="Login" asp-route-returnUrl="@ViewData["ReturnUrl"]"
-               class="btn btn-primary"><i class="icon-login icons"></i> Login to System </a>
+                class="btn btn-primary"><i class="icon-login icons"></i> Login to System </a>
             }
             else
             {
                 <div class="">
-                    <a asp-controller="Dashboard" asp-action="Index"
-                   class="btn btn-primary"><i class="icon-speedometer icons"></i> Back to Dashboard </a>
+                    <a asp-controller="Dashboard" asp-action="Index" class="btn btn-primary"><i
+                        class="icon-speedometer icons"></i> Back to Dashboard </a>
                     <span>&nbsp;</span>
-                    <a asp-controller="Home" asp-action="Logout" class="btn btn-secondary"><i class="icon-logout icons"></i> Log out Now</a>
+                    <a asp-controller="Home" asp-action="Logout" class="btn btn-secondary"><i class="icon-logout icons"></i>
+                        Log out Now</a>
                 </div>
             }
         </div>
@@ -58,14 +56,13 @@
     <div class="content">
         @RenderBody()
     </div>
-    <footer class="container">
+    <footer class="footer">
         <div class="col-md-12">
             <p class="small text-right">
                 <span><a asp-controller="Home" asp-action="Terms">Terms of Use</a></span> &nbsp;|&nbsp;
                 <span><a asp-controller="Home" asp-action="Privacy">Privacy Policy</a></span>&nbsp;
                 <span>
-                    Copyright &copy; @DateTime.Now.Year <a asp-controller="Home"
-                                                           asp-action="Index">@settings.Name</a>.
+                    Copyright &copy; @DateTime.Now.Year <a asp-controller="Home" asp-action="Index">@settings.Name</a>.
                 </span> &nbsp;
                 <span>All rights reserved. &nbsp; Version @settings.Version</span>
             </p>
