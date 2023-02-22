@@ -91,7 +91,8 @@ namespace PosMaster.Dal.Interfaces
                         PoUnitPrice = item.UnitPrice,
                         Personnel = model.Personnel,
                         ClientId = model.ClientId,
-                        InstanceId = model.InstanceId
+                        InstanceId = model.InstanceId,
+                        Code = $"{poRef}_{item.ProductName}"
                     };
                     _context.PoGrnProducts.Add(lineProduct);
                 }
@@ -1227,7 +1228,8 @@ namespace PosMaster.Dal.Interfaces
                         GrnQuantity = item.Quantity,
                         GrnUnitPrice = item.UnitPrice,
                         GrnNotes = item.Notes,
-                        GoodReceivedNoteId = grn.Id
+                        GoodReceivedNoteId = grn.Id,
+                        Code = $"{purchaseOrder.Code}_{dbProduct.Code}"
                     });
 
                     var dbGrnProduct = purchaseOrder.PoGrnProducts

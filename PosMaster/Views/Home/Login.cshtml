@@ -31,28 +31,29 @@
                 <label for="remember" asp-for="RememberMe"></label>
                 </div>*@
         </div>
-        <div class="col-6">
+        <div class="col-12">
             <button type="submit" class="btn btn-primary btn-block">
                 <i class="fa fa-lock-open"></i> Login Now
             </button>
         </div>
     </div>
 </form>
-@if (Model.AuthenticationSchemes.Any())
-{
+@*@if (Model.AuthenticationSchemes.Any())
+    {
     if (Model.AuthenticationSchemes.Any(a => a.DisplayName.ToLower().Equals("google")))
     {
-        <div class="social-auth-links text-center mb-3">
-            <p>- OR -</p>
-            <form asp-action="ExternalLogin" asp-route-returnUrl="@ViewData["ReturnUrl"]">
-                <button class="btn btn-block btn-danger"
-                name="provider" value="@Model.AuthenticationSchemes.First().Name">
-                    <i class="fab fa-google-plus mr-2"></i> Sign in using Google
-                </button>
-            </form>
-        </div>
+    <div class="social-auth-links text-center mb-3">
+    <p>- OR -</p>
+    <form asp-action="ExternalLogin" asp-route-returnUrl="@ViewData["ReturnUrl"]">
+    <button class="btn btn-block btn-danger"
+    name="provider" value="@Model.AuthenticationSchemes.First().Name">
+    <i class="fab fa-google-plus mr-2"></i> Sign in using Google
+    </button>
+    </form>
+    </div>
     }
-}
+    }*@
 <p class="mb-1">
-    <a asp-action="ForgotPassword">I forgot my password</a>
+    <br />
+    <a asp-action="ForgotPassword" style="text-decoration:underline">I forgot my password</a>
 </p> 
