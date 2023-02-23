@@ -48,3 +48,7 @@ tr.shown td.details-control {
 .my-float {
     margin-top: 22px;
 }
+
+th {
+    white-space: nowrap;
+}

@@ -499,10 +499,30 @@ $('.product-select-search').select2({
 
 var printDiv = function (divName) {
     var printContents = document.getElementById(divName).innerHTML;
+    document.body.style.cssText = '#printReceiptDiv {  color: red }';
     document.body.innerHTML = printContents;
     window.print();
     location.reload();
 };
+
+function printElem(elem) {
+    var mywindow = window.open('', 'PRINT', 'height=400,width=600');
+    mywindow.document.write('<html><head><title>' + document.title + '</title>');
+    mywindow.document.write("<link rel=\"stylesheet\" href=\"~/dist/css/adminlte.min.css\" type=\"text/css\"/>");
+    mywindow.document.write('</head><body >');
+    mywindow.document.write('<h1>' + document.title + '</h1>');
+    mywindow.document.write(document.getElementById(elem).innerHTML);
+    mywindow.document.write('</body></html>');
+
+    mywindow.document.close(); // necessary for IE >= 10
+    mywindow.focus(); // necessary for IE >= 10*/
+
+    mywindow.print();
+    mywindow.close();
+
+    return true;
+}
+
 
 $("#btnPrint").click(function () {
     printDiv('printDiv');
@@ -513,12 +533,10 @@ $("#btnPrintReceipt").click(function () {
     var id = $(this).attr("data-id");
     if (isPrinted == 'False') {
         $.get("/PointOfSale/PrintReceipt/" + id, function (data) {
-            printDiv('printReceiptDiv');
+            console.log(id);
         });
     }
-    else {
-        printDiv('printReceiptDiv');
-    }
+    printElem('printReceiptDiv');
 });
 
 function addPoItem() {

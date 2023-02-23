@@ -582,6 +582,8 @@ namespace PosMaster.Controllers
                 userData.ClientName = client.Name;
                 userData.ClientLogoPath = client.LogoPath;
                 userData.ShowBuyingPrice = client.DisplayBuyingPrice;
+                userData.CurrencyShort = client.CurrencyShort;
+                userData.PinNo = instance.PinNo;
             }
             _cookiesService.Store(userData);
         }
