@@ -114,7 +114,8 @@
             <button class="btn btn-default" id="btnPrint"><i class="fas fa-print"></i> Print</button>
             @if (isActive)
             {
-                <button class="btn btn-success launch-modal text-right" data-toggle="modal" data-target="#posModal">
+                <button class="btn btn-success launch-modal float-right" data-toggle="modal" data-target="#posModal"><i
+                    class="fa fa-save"></i>
                     Fullfill Order
                 </button>
                 <div class="modal fade" id="posModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
@@ -134,8 +135,9 @@
                                     <input type="hidden" name="Id" value="@Model.Id">
                                     <input type="hidden" name="Code" value="@Model.Code">
                                     <div class="form-group">
-                                        <label>Payment Mode</label>
+                                        <label>Payment Mode:</label>
                                         <select name="PaymentModeIdStr" class="form-control select2">
+                                            <option value="">--select mode--</option>
                                             @foreach (var paymentMode in paymentModes)
                                             {
                                                 <option value="@paymentMode.Id">@paymentMode.Name</option>
