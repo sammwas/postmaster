@@ -496,6 +496,12 @@
                                         </a>
                                     </li>
                                     <li class="nav-item">
+                                        <a asp-controller="Reports" asp-action="CustomerBalances" class="nav-link">
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>Customer Balances</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
                                         <a asp-controller="Settings" asp-action="SendTestEmail" class="nav-link">
                                             <i class="far fa-circle nav-icon"></i>
                                             <p>Send Email</p>
@@ -584,7 +590,7 @@
                 </div>
             </section>
         </div>
-        <a asp-action="Index" asp-controller="PointOfSale" class="float">
+        <a asp-action="Index" asp-controller="PointOfSale" class="float d-print-none">
             <i class="fa fa-shopping-cart my-float"></i>
         </a>
         <footer class="main-footer">

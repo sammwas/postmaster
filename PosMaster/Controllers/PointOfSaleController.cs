@@ -61,16 +61,13 @@ namespace PosMaster.Controllers
             }
             ViewData["DtTo"] = dtTo;
             ViewData["Search"] = search;
-            Guid? clientId = null;
             Guid? instanceId = null;
-            if (!User.IsInRole(Role.SuperAdmin))
-                clientId = _userData.ClientId;
             if (Guid.TryParse(insId, out var iId))
                 instanceId = iId;
             if (User.IsInRole(Role.Clerk))
                 instanceId = _userData.InstanceId;
             ViewData["InstanceId"] = instanceId;
-            var result = await _productInterface.ReceiptsAsync(clientId, instanceId, dtFrom, dtTo, search);
+            var result = await _productInterface.ReceiptsAsync(_userData.ClientId, instanceId, dtFrom, dtTo, search);
             if (!result.Success)
                 TempData.SetData(AlertLevel.Warning, "Receipts", result.Message);
             return View(result.Data);
@@ -81,17 +78,14 @@ namespace PosMaster.Controllers
             ViewData["DtFrom"] = dtFrom;
             ViewData["DtTo"] = dtTo;
             ViewData["Search"] = search;
-            Guid? clientId = null;
             Guid? instanceId = null;
-            if (!User.IsInRole(Role.SuperAdmin))
-                clientId = _userData.ClientId;
             if (Guid.TryParse(insId, out var iId))
                 instanceId = iId;
             if (User.IsInRole(Role.Clerk))
                 instanceId = _userData.InstanceId;
 
             ViewData["InstanceId"] = instanceId;
-            var result = await _invoiceInterface.GetAsync(clientId, instanceId, dtFrom, dtTo, search);
+            var result = await _invoiceInterface.GetAsync(_userData.ClientId, instanceId, dtFrom, dtTo, search);
             if (!result.Success)
                 TempData.SetData(AlertLevel.Warning, "Invoices", result.Message);
             return View(result.Data);
@@ -102,10 +96,7 @@ namespace PosMaster.Controllers
             ViewData["DtFrom"] = dtFrom;
             ViewData["DtTo"] = dtTo;
             ViewData["Search"] = search;
-            Guid? clientId = null;
             Guid? instanceId = null;
-            if (!User.IsInRole(Role.SuperAdmin))
-                clientId = _userData.ClientId;
             if (Guid.TryParse(insId, out var iId))
                 instanceId = iId;
             var personnel = "";
@@ -115,7 +106,7 @@ namespace PosMaster.Controllers
                 personnel = User.Identity.Name;
             }
             ViewData["InstanceId"] = instanceId;
-            var result = await _expenseInterface.AllAsync(clientId, instanceId, dtFrom, dtTo, search, personnel);
+            var result = await _expenseInterface.AllAsync(_userData.ClientId, instanceId, dtFrom, dtTo, search, personnel);
             if (!result.Success)
                 TempData.SetData(AlertLevel.Warning, "Expenses", result.Message);
             return View(result.Data);
