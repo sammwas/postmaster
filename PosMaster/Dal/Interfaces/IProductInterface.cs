@@ -410,6 +410,7 @@ namespace PosMaster.Dal.Interfaces
                     IsWalkIn = model.IsWalkIn,
                     Notes = model.Notes,
                     Personnel = model.Personnel,
+                    PersonnelName = model.PersonnelName,
                     PinNo = model.PinNo,
                     PaymentModeNo = model.PaymentModeNo
                 };
@@ -715,6 +716,7 @@ namespace PosMaster.Dal.Interfaces
                     PaymentModeNo = model.PaymentModeNo,
                     Notes = model.Notes,
                     Personnel = model.Personnel,
+                    PersonnelName = model.PersonnelName,
                     AmountReceived = model.Amount,
                     ReceiptLineItems = new List<ReceiptLineItem>
                     {
@@ -1000,6 +1002,7 @@ namespace PosMaster.Dal.Interfaces
                     return result;
                 }
                 receipt.IsPrinted = true;
+                receipt.PrintCount += 1;
                 receipt.LastModifiedBy = personnel;
                 receipt.DateLastModified = DateTime.Now;
                 await _context.SaveChangesAsync();
@@ -1236,8 +1239,8 @@ namespace PosMaster.Dal.Interfaces
                         .FirstOrDefault(p => p.ProductId.Equals(item.ProductId));
                     if (dbGrnProduct != null)
                     {
-                        dbGrnProduct.GrnQuantity = item.Quantity;
-                        dbGrnProduct.GrnUnitPrice = item.UnitPrice;
+                        dbGrnProduct.GrnQuantity += item.Quantity;
+                        dbGrnProduct.GrnUnitPrice += item.UnitPrice;
                         dbGrnProduct.LastModifiedBy = model.Personnel;
                         dbGrnProduct.DateLastModified = DateTime.Now;
                         dbGrnProduct.GrnNotes = item.Notes;
@@ -1278,6 +1281,7 @@ namespace PosMaster.Dal.Interfaces
                 var grn = await _context.GoodReceivedNotes
                     .Include(r => r.Supplier)
                     .Include(p => p.PoGrnProducts)
+                    .ThenInclude(pr => pr.Product)
                     .FirstOrDefaultAsync(p => p.Id.Equals(id));
                 result.Success = grn != null;
                 result.Message = result.Success ? "Found" : "Not Found";

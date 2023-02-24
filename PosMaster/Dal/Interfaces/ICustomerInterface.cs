@@ -253,6 +253,7 @@ namespace PosMaster.Dal.Interfaces
                         Code = model.Code,
                         PaymentModeId = paymentModeId.ToString(),
                         Personnel = model.Personnel,
+                        PersonnelName = model.PersonnelName
                     };
                     await _productInterface.ReceiptExcessAmount(rcptModel);
                 }

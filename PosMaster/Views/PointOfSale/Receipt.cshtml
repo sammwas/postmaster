@@ -18,7 +18,7 @@
         <div class="col-6">
             <span class="pull-right text-right">
                 <button class="btn btn-secondary btn-block" data-printed="@Model.IsPrinted" data-id="@Model.Id"
-                        id="btnPrintReceipt">
+                    id="btnPrintReceipt">
                     <i class="fa fa-print"></i> Print Receipt
                 </button>
             </span>
@@ -33,11 +33,11 @@
                         font-size: 200%;
                     }
 
-                        #printReceiptDiv > div > div > h4 {
-                            color: red;
-                            text-decoration: underline
-                        }
-                } 
+                    #printReceiptDiv>div>div>h4 {
+                        color: red;
+                        text-decoration: underline
+                    }
+                }
             </style>
         }
         <div class="row">
@@ -45,10 +45,10 @@
                 <h4>@userData.ClientName</h4>
                 <h5>@userData.InstanceName</h5>
                 <h6>@userData.PinNo</h6>
-                <p>Served By : @Model.Personnel.Split('@')[0].ToUpper()</p>
+                <p>Served By : @Model.PersonnelName</p>
             </div>
             <div class="col-md-6">
-                <p><b>Receipt No.</b> @Model.Code  <span class="badge badge-info">@status</span> </p>
+                <p><b>Receipt No.</b> @Model.Code <span class="badge badge-info">@status</span> </p>
                 <p><b>Customer </b> @Model.Customer.FullName </p>
                 <p>
                     <b>Type </b> @saleType

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace PosMaster.Dal
 {
@@ -11,6 +12,7 @@ namespace PosMaster.Dal
         public Supplier Supplier { get; set; }
         public Guid SupplierId { get; set; }
         public List<PoGrnProduct> PoGrnProducts { get; set; }
+        public decimal Amount => PoGrnProducts.Sum(p => p.GrnAmount);
         public GoodReceivedNote()
         {
             PoGrnProducts = new List<PoGrnProduct>();

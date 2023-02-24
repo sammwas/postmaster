@@ -53,6 +53,7 @@ namespace PosMaster.Controllers
         {
             model.ClientId = _userData.ClientId;
             model.InstanceId = _userData.InstanceId;
+            model.PersonnelName = _userData.FullName;
             model.Personnel = User.Identity.Name;
             var option = model.IsEditMode ? "Update" : "Add";
             var title = $"{option} Customer";

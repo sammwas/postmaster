@@ -43,6 +43,7 @@ namespace PosMaster.Controllers
                 return View(model);
             }
             model.Personnel = User.Identity.Name;
+            model.PersonnelName = _userData.FullName;
             var result = await _productInterface.ProductsSaleAsync(model);
             TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, title, result.Message);
             if (!result.Success)
@@ -160,10 +161,14 @@ namespace PosMaster.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> PayInvoice(PayInvoiceViewModel model)
+        public async Task<IActionResult> PayInvoice(FulfillOrderViewModel model)
         {
             var returnUrl = Request.Headers[HeaderNames.Referer];
-            var result = await _invoiceInterface.PayAsync(model.Id, User.Identity.Name);
+            model.ClientId = _userData.ClientId;
+            model.InstanceId = _userData.InstanceId;
+            model.Personnel = User.Identity.Name;
+            model.PersonnelName = _userData.FullName;
+            var result = await _invoiceInterface.PayAsync(model);
             if (!result.Success)
                 TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, "Pay Invoice", result.Message);
             return Redirect(returnUrl);
@@ -220,7 +225,7 @@ namespace PosMaster.Controllers
             model.Personnel = User.Identity.Name;
             model.InstanceId = _userData.InstanceId;
             model.ClientId = _userData.ClientId;
-
+            model.PersonnelName = _userData.FullName;
             var result = await _productInterface.ReceiptUserAsync(model);
             if (!result.Success)
             {

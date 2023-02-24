@@ -22,6 +22,8 @@ namespace PosMaster.Dal
         public decimal AmountReceived { get; set; }
         public string PinNo { get; set; }
         public bool IsPrinted { get; set; }
+        public string PrintCount { get; set; }
+        public string PersonnelName { get; set; }
         public List<ReceiptLineItem> ReceiptLineItems { get; set; }
         public decimal Discount => ReceiptLineItems.Sum(i => i.Discount);
         public decimal Tax => ReceiptLineItems.Sum(i => i.TaxAmount);

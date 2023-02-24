@@ -54,6 +54,6 @@ namespace PosMaster.ViewModels
         public string OpeningBalanceAsAt { get; set; }
         [Display(Name = "ID Number")]
         public string IdNumber { get; set; }
-
+        public string PersonnelName { get; set; }
     }
 }

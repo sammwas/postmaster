@@ -253,13 +253,12 @@ $('#customer-select').select2({
 });
 
 
-let orderId;
 $('.launch-modal').click(function (event) {
     event.preventDefault();
     let modalTitle = $(this).attr('data-order-name');
-    orderId = $(this).attr('data-order-id');
     $('#modal-default .modal-title').text(modalTitle);
 })
+
 $("#fulfil-order").click(function () {
     $.post('/Orders/FulFilOrder', { id: orderId }, function (result) {
     });
@@ -531,12 +530,11 @@ $("#btnPrint").click(function () {
 $("#btnPrintReceipt").click(function () {
     var isPrinted = $(this).attr("data-printed");
     var id = $(this).attr("data-id");
-    if (isPrinted == 'False') {
-        $.get("/PointOfSale/PrintReceipt/" + id, function (data) {
-            console.log(id);
-        });
-    }
-    printElem('printReceiptDiv');
+    $.get("/PointOfSale/PrintReceipt/" + id, function (data) {
+
+    });
+    window.print();
+    location.reload();
 });
 
 function addPoItem() {

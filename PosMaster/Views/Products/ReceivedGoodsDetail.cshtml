@@ -1,9 +1,9 @@
 ﻿@inject ICookiesService _cookies;
 @inject IClientInstanceInterface _instanceInterface;
-@model PurchaseOrder
+@model GoodReceivedNote
 @{
     ViewData["Active"] = "Products";
-    ViewData["Title"] = $"Purchase Order - {Model.Code}";
+    ViewData["Title"] = $"Goods Received Note - {Model.Code}";
     var user = _cookies.Read();
     var instanceRes = await _instanceInterface.ByIdAsync(Model.InstanceId);
     var supplier = Model.Supplier;
@@ -43,7 +43,7 @@
             </address>
         </div>
         <div class="col-sm-4 invoice-col">
-            <b>Purchase Order: #@Model.Code</b><br>
+            <b>GRN: #@Model.Code</b><br>
             <br>
             <b>Status:</b> @Model.Status<br>
         </div>
@@ -72,9 +72,9 @@
                             <td>@i</td>
                             <td>@item.Product.Code</td>
                             <td>@item.Product.Name</td>
-                            <td>@item.PoQuantity</td>
-                            <td>@Helpers.FormatAmount(item.PoUnitPrice)</td>
-                            <td>@Helpers.FormatAmount(item.PoAmount)</td>
+                            <td>@item.GrnQuantity</td>
+                            <td>@Helpers.FormatAmount(item.GrnUnitPrice)</td>
+                            <td>@Helpers.FormatAmount(item.GrnAmount)</td>
                         </tr>
                     }
                 </tbody>
@@ -100,7 +100,7 @@
                     <tbody>
                         <tr>
                             <th>Total:</th>
-                            <td>@Helpers.FormatAmount(Model.Amount)</td>
+                            <td>@user.CurrencyShort @Helpers.FormatAmount(Model.Amount)</td>
                         </tr>
                     </tbody>
                 </table>

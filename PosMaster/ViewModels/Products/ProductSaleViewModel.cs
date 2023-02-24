@@ -17,5 +17,6 @@ namespace PosMaster.ViewModels
         public bool IsCredit { get; set; }
         public bool IsWalkIn { get; set; }
         public string LineItemListStr { get; set; }
+        public string PersonnelName { get; set; }
     }
 }

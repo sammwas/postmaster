@@ -137,6 +137,13 @@ namespace PosMaster.Controllers
             return View(result.Data);
         }
 
+        public async Task<IActionResult> PurchaseOrder(Guid id)
+        {
+            var result = await _productInterface.PurchaseOrderByIdAsync(id);
+            if (!result.Success)
+                TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, "Purchase Order", result.Message);
+            return View(result.Data);
+        }
         public async Task<IActionResult> EditPurchaseOrder(Guid? id)
         {
             if (id == null)
@@ -191,7 +198,13 @@ namespace PosMaster.Controllers
                 TempData.SetData(AlertLevel.Warning, "Received Goods", result.Message);
             return View(result.Data);
         }
-
+        public async Task<IActionResult> ReceivedGoodsDetail(Guid id)
+        {
+            var result = await _productInterface.GrnByIdAsync(id);
+            if (!result.Success)
+                TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, "Goods Received Note", result.Message);
+            return View(result.Data);
+        }
         public async Task<IActionResult> EditReceivedGoods(Guid? id)
         {
             var model = new GoodsReceivedNoteViewModel { Status = EntityStatus.Active };

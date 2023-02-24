@@ -326,6 +326,7 @@ namespace PosMaster.Controllers
                                     Notes = workSheet.Cells[i, 13]?.Value?.ToString() ?? "",
                                     InstanceId = _userData.InstanceId,
                                     ClientId = _userData.ClientId,
+                                    PersonnelName=_userData.FullName
                                 };
                                 var resultCustomer = await _customerInterface.EditAsync(customerViewModel);
                                 returnData.ErrorMessage = resultCustomer.ErrorMessage;

@@ -13,12 +13,12 @@ namespace PosMaster.Controllers
     [Authorize]
     public class OrdersController : Controller
     {
-        private readonly ICookiesService _cookieService;
+        private readonly UserCookieData _userData;
         private readonly IOrderInterface _orderInterface;
         private readonly string firstDayOfWeek;
         public OrdersController(ICookiesService cookiesService, IOrderInterface orderInterface)
         {
-            _cookieService = cookiesService;
+            _userData = cookiesService.Read();
             _orderInterface = orderInterface;
             firstDayOfWeek = Helpers.FirstDayOfWeek().ToString("dd-MMM-yyyy");
         }
@@ -27,17 +27,13 @@ namespace PosMaster.Controllers
             ViewData["DtFrom"] = dtFrom;
             ViewData["DtTo"] = dtTo;
             ViewData["Search"] = search;
-            var userData = _cookieService.Read();
-            Guid? clientId = null;
             Guid? instanceId = null;
-            if (!User.IsInRole(Role.SuperAdmin))
-                clientId = userData.ClientId;
             if (Guid.TryParse(insId, out var iId))
                 instanceId = iId;
             if (User.IsInRole(Role.Clerk))
-                instanceId = userData.InstanceId;
+                instanceId = _userData.InstanceId;
             ViewData["InstanceId"] = instanceId;
-            var result = await _orderInterface.OrdersAsync(clientId, instanceId, dtFrom, dtTo, search);
+            var result = await _orderInterface.OrdersAsync(_userData.ClientId, instanceId, dtFrom, dtTo, search);
             if (!result.Success)
                 TempData.SetData(AlertLevel.Warning, "Customer Orders", result.Message);
             return View(result.Data);
@@ -72,36 +68,30 @@ namespace PosMaster.Controllers
         }
 
         [HttpPost]
-        public async Task<JsonResult> FulFilOrder(Guid id)
+        public async Task<IActionResult> FulFillOrder(FulfillOrderViewModel model)
         {
             var title = "Fulfil order";
-            var orderExists = Guid.TryParse(id.ToString(), out var orderId);
-            if (!orderExists)
-            {
-                var message = "Order does not exist";
-                TempData.SetData(AlertLevel.Warning, title, message);
-                return Json(new Receipt());
-            }
             if (!ModelState.IsValid)
             {
                 var message = "Missing fields";
                 TempData.SetData(AlertLevel.Warning, title, message);
-                return Json(new Receipt());
+                return RedirectToAction(nameof(Details), new { id = model.Id });
             }
 
-            var result = await _orderInterface.FulfillOrder(orderId);
+            model.ClientId = _userData.ClientId;
+            model.InstanceId = _userData.InstanceId;
+            model.Personnel = User.Identity.Name;
+            model.PersonnelName = _userData.FullName;
+            var result = await _orderInterface.FulfillOrder(model);
             TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, "Customer Order", result.Message);
-            return Json(result);
+            return RedirectToAction(nameof(Index), new { dtFrom = Helpers.FirstDayOfWeek().ToString("dd-MMM-yyyy"), dtTo = DateTime.Now.ToString("dd-MMM-yyyy") });
         }
-        public async Task<IActionResult> FulfilOrder(Guid? id)
+        public async Task<IActionResult> Details(Guid id)
         {
-            if (id == null)
-                return View(new OrderViewModel { Status = EntityStatus.Active });
-            var result = await _orderInterface.OrderByIdAsync(id.Value);
+            var result = await _orderInterface.OrderByIdAsync(id);
             if (!result.Success)
-                TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, "Customer Order", result.Message);
-            var model = new OrderViewModel(result.Data);
-            return View(model);
+                TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, "Order Details", result.Message);
+            return View(result.Data);
         }
     }
 }

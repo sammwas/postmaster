@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using PosMaster.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,7 @@ namespace PosMaster.Dal.Interfaces
     {
         Task<ReturnData<List<Invoice>>> GetAsync(Guid? clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "");
         Task<ReturnData<Invoice>> ByIdAsync(Guid id);
-        Task<ReturnData<Invoice>> PayAsync(Guid id, string personnel);
+        Task<ReturnData<Invoice>> PayAsync(FulfillOrderViewModel model);
     }
 
     public class InvoiceImplementation : IInvoiceInterface
@@ -134,17 +135,17 @@ namespace PosMaster.Dal.Interfaces
             }
         }
 
-        public async Task<ReturnData<Invoice>> PayAsync(Guid id, string personnel)
+        public async Task<ReturnData<Invoice>> PayAsync(FulfillOrderViewModel model)
         {
             var result = new ReturnData<Invoice> { Data = new Invoice() };
             var tag = nameof(PayAsync);
-            _logger.LogInformation($"{tag} mark invoice {id} as paid by {personnel}");
+            _logger.LogInformation($"{tag} pay invoice {model.Id} as paid by {model.Personnel}");
             try
             {
                 var invoice = await _context.Invoices
                     .Include(i => i.Receipt)
                     .ThenInclude(r => r.ReceiptLineItems)
-                    .FirstOrDefaultAsync(i => i.Id.Equals(id));
+                    .FirstOrDefaultAsync(i => i.Id.Equals(model.Id));
                 if (invoice == null)
                 {
                     result.Message = "Provided invoice not Found";
@@ -154,16 +155,16 @@ namespace PosMaster.Dal.Interfaces
 
                 var balance = invoice.Balance;
                 invoice.Receipt.DateLastModified = DateTime.Now;
-                invoice.Receipt.LastModifiedBy = personnel;
+                invoice.Receipt.LastModifiedBy = model.Personnel;
                 invoice.Receipt.AmountReceived += balance;
                 invoice.Status = EntityStatus.Closed;
-                invoice.LastModifiedBy = personnel;
+                invoice.LastModifiedBy = model.Personnel;
                 invoice.DateLastModified = DateTime.Now;
                 var entry = new GeneralLedgerEntry
                 {
                     ClientId = invoice.ClientId,
                     InstanceId = invoice.InstanceId,
-                    Personnel = personnel,
+                    Personnel = model.Personnel,
                     UserId = invoice.Receipt.CustomerId,
                     UserType = GlUserType.Customer,
                     Document = Document.Receipt,
@@ -176,7 +177,7 @@ namespace PosMaster.Dal.Interfaces
                 result.Success = true;
                 result.Message = result.Success ? "Found" : "Not Found";
                 result.Data = invoice;
-                _logger.LogInformation($"{tag} invoice {id} {invoice.Code} payment updated for receipt {invoice.Receipt.Code}");
+                _logger.LogInformation($"{tag} invoice {invoice.Id} {invoice.Code} payment updated for receipt {invoice.Receipt.Code}");
                 return result;
             }
             catch (Exception ex)
