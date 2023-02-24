@@ -1,0 +1,120 @@
+﻿@inject IClientInstanceInterface _instanceInterface;
+@inject ICookiesService _cookies;
+@model List<CustomerBalanceViewModel>
+@{
+    ViewData["Active"] = "Reports";
+    ViewData["Title"] = $"Customer Balances";
+    var userData = _cookies.Read();
+    var instancesRes = await _instanceInterface.ByClientIdAsync(userData.ClientId);
+    var instances = instancesRes.Data;
+    var instanceId = ViewData["instanceId"]?.ToString();
+    var dateToday = DateTime.Now.ToString("dd-MMM-yyyy");
+}
+<div class="card card-primary">
+    <div class="card-header">
+        <h3 class="card-title">@ViewData["Title"]</h3>
+    </div>
+    <form role="form" autocomplete="off">
+        <div class="row">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Instance</label>
+                            <select class="form-control select2" name="InstanceId" style="width: 100%;">
+                                <option value="">--Select Instance--</option>
+                                @foreach (var item in instances)
+                                {
+                                    if (!string.IsNullOrEmpty(instanceId) && item.Id.ToString().Equals(instanceId))
+                                    {
+                                        <option selected="selected" value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Date From</label>
+                            <div class="input-group date" id="dateFrom" data-target-input="nearest">
+                                <input type="text" name="dtFrom" class="form-control datetimepicker-input" data-target="#dateFrom" value="@ViewData["dtFrom"]" placeholder="Date From (@dateToday)" />
+                                <div class="input-group-append" data-target="#dateFrom" data-toggle="datetimepicker">
+                                    <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Date To</label>
+                            <div class="input-group date" id="dateTo" data-target-input="nearest">
+                                <input type="text" name="dtTo" class="form-control datetimepicker-input" data-target="#dateTo" value="@ViewData["dtTo"]" placeholder="Date To (@dateToday)" />
+                                <div class="input-group-append" data-target="#dateTo" data-toggle="datetimepicker">
+                                    <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <br />
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </div>
+                    </div>
+                </div>
+
+                @if (Model.Any())
+                {
+                    <div class="row table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <td>#</td>
+                                    <td>Customer</td>
+                                    <td>Debit Amount</td>
+                                    <td>Credit Amout</td>
+                                    <td>Balance</td>
+                                    <td>Option</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    var i = 0;
+                                    decimal totalBalance = 0;
+                                }
+                                @foreach (var item in Model)
+                                {
+                                    i++;
+                                    var balance = (-1 * item.Credit) + item.Debit;
+                                    totalBalance += balance;
+                                    <tr>
+                                        <td>@i</td>
+                                        <td>@item.Customer.Code - @item.Customer.FullName</td>
+                                        <td>@Helpers.FormatAmount(item.Debit)</td>
+                                        <td>@Helpers.FormatAmount(item.Credit)</td>
+                                        <td>@Helpers.FormatAmount(balance)</td>
+                                        <td><a asp-action="CustomerStatement" asp-route-id="@item.Customer.Id">View</a></td>
+                                    </tr>
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="2"> Total customers : @Model.Count </td>
+                                    <td>@userData.CurrencyShort </td>
+                                    <td>@Helpers.FormatAmount(Model.Sum(x => x.Debit)) </td>
+                                    <td>@Helpers.FormatAmount(Model.Sum(x => x.Credit)) </td>
+                                    <td>@Helpers.FormatAmount( totalBalance) </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    </form>
+</div>
+
