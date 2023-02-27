@@ -21,13 +21,15 @@ namespace PosMaster.Dal.Interfaces
     {
         private readonly DatabaseContext _context;
         private readonly ICustomerInterface _customerInterface;
+        private readonly IProductInterface _productInterface;
         private readonly ILogger<ReportingImplementation> _logger;
         public ReportingImplementation(DatabaseContext context, ILogger<ReportingImplementation> logger,
-            ICustomerInterface customerInterface)
+            ICustomerInterface customerInterface, IProductInterface productInterface)
         {
             _context = context;
             _logger = logger;
             _customerInterface = customerInterface;
+            _productInterface = productInterface;
         }
 
         public async Task<ReturnData<List<DailySalesViewModel>>> DailySalesReportAsync(Guid instanceId, string dateFrom = "", string dateTo = "", string search = "")
@@ -138,7 +140,7 @@ namespace PosMaster.Dal.Interfaces
                     .ToListAsync();
                 foreach (var customer in customers)
                 {
-                    var balance = await _customerInterface.GlUserBalanceAsync(GlUserType.Customer, customer.Id);
+                    var balance = await _productInterface.GlUserBalanceAsync(GlUserType.Customer, customer.Id);
                     result.Data.Add(new CustomerBalanceViewModel
                     {
                         Customer = customer,

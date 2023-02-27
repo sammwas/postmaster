@@ -46,7 +46,7 @@ var addItemToList = function () {
     var taxAmount = item.tax;
     quantity = parseFloat(quantity)
     avQuantity = parseFloat(avQuantity)
-    var discount = sellingPrice - unitPrice;
+    var discount = (sellingPrice - unitPrice) * quantity;
     if (productId === "") {
         $("#issMsg").html('<i class="fa fa-times-circle"></i> ' + " Select an item first").addClass('text-danger');
         $("#issItemId").focus();
@@ -81,6 +81,8 @@ var addItemToList = function () {
         createIssueListTable();
         $("#issListRecords").val(JSON.stringify(issueListItems));
         $('#product-select').empty();
+        $("#quantityBought").val("");
+        $("#unitPrice").val("");
         $('#productListForm').trigger('reset');
     }
 };
@@ -412,11 +414,7 @@ function plotDoughnut(labels, data) {
     })
 }
 
-var creditCheck = $('#credit-sale-check').val();
-if (creditCheck) {
-    $('.cash-sale').hide();
-} else
-    $('.cash-sale').show();
+$(".hide-this").hide();
 
 $('#credit-sale-check').change(function () {
     $('#payment-mode').attr("required", !this.checked);
@@ -426,7 +424,6 @@ $('#credit-sale-check').change(function () {
         $('.cash-sale').show();
     }
 });
-
 
 $('#is-service').change(function () {
     if (this.checked) {

@@ -54,17 +54,22 @@ namespace PosMaster
             var user = Configuration["Database:UserName"] ?? "postgres";
             var password = Configuration["Database:Password"] ?? "123456";
             var database = Configuration["Database:Name"] ?? "posmater_db";
-            var from = string.IsNullOrEmpty(Configuration["Database:Name"]) ? "Hard-Coded" : "Config-File";
-
+            var from = "Docker-ENV";
+            if (!string.IsNullOrEmpty(Configuration["Database:Name"]))
+            {
+                from = "Config-File";
+                password = EncypterService.Decrypt(password);
+                user = EncypterService.Decrypt(user);
+            }
             var conString = $"Host={server};Port={int.Parse(port)};" +
                 $"Database={database};User Id={user};Password={password}";
-            Console.WriteLine($"DbConnection String : Src {from}  :- {conString}");
             var os = Environment.Is64BitOperatingSystem ? "64" : "32";
             Console.WriteLine($"PosMaster Running. OS:{os} BIT -{Environment.OSVersion.VersionString} {Environment.MachineName}");
 
             services.AddDbContext<DatabaseContext>(options =>
             {
                 var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+                Console.WriteLine($"{env} DbConnection String > Src {from}  :- {conString}");
                 options.UseNpgsql(conString);
             });
 

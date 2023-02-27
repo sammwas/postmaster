@@ -28,7 +28,8 @@ namespace PosMaster.Controllers
         }
         public IActionResult Index()
         {
-            return View();
+            return View(new ProductSaleViewModel()
+            { IsCredit = false });
         }
 
         [HttpPost]

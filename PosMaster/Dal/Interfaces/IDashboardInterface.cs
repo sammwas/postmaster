@@ -39,26 +39,14 @@ namespace PosMaster.Dal.Interfaces
                     TodayExpenses = await _context.Expenses
                     .Where(c => c.InstanceId.Equals(instanceId) && c.Personnel.Equals(personnel)
                       && c.DateCreated.Date.Equals(DateTime.Now.Date)).SumAsync(c => c.Amount),
-                    TodayTotalExpenses = await _context.Expenses
-                    .Where(c => c.InstanceId.Equals(instanceId)
-                      && c.DateCreated.Date.Equals(DateTime.Now.Date)).SumAsync(c => c.Amount),
                     TodaySales = await _context.ReceiptLineItems
                     .Where(c => c.InstanceId.Equals(instanceId) && c.Personnel.Equals(personnel)
-                      && c.DateCreated.Date.Equals(DateTime.Now.Date)).SumAsync(c => c.UnitPrice * c.Quantity),
-                    TodayTotalSales = await _context.ReceiptLineItems
-                    .Where(c => c.InstanceId.Equals(instanceId)
                       && c.DateCreated.Date.Equals(DateTime.Now.Date)).SumAsync(c => c.UnitPrice * c.Quantity),
                     WeeklySales = await _context.ReceiptLineItems
                     .Where(c => c.InstanceId.Equals(instanceId) && c.Personnel.Equals(personnel)
                       && c.DateCreated.Date >= firstWeekDay.Date && c.DateCreated.Date <= lastWeekDay.Date).SumAsync(c => c.UnitPrice * c.Quantity),
-                    WeeklyTotalSales = await _context.ReceiptLineItems
-                    .Where(c => c.InstanceId.Equals(instanceId)
-                      && c.DateCreated.Date >= firstWeekDay.Date && c.DateCreated.Date <= lastWeekDay.Date).SumAsync(c => c.UnitPrice * c.Quantity),
                     MonthlySales = await _context.ReceiptLineItems
                     .Where(c => c.InstanceId.Equals(instanceId) && c.Personnel.Equals(personnel)
-                    && c.DateCreated.Date >= Helpers.firstDayOfMonth.Date && c.DateCreated.Date <= Helpers.lastDayOfMonth.Date)
-                    .SumAsync(c => c.UnitPrice * c.Quantity),
-                    MonthlyTotalSales = await _context.ReceiptLineItems.Where(c => c.InstanceId.Equals(instanceId)
                     && c.DateCreated.Date >= Helpers.firstDayOfMonth.Date && c.DateCreated.Date <= Helpers.lastDayOfMonth.Date)
                     .SumAsync(c => c.UnitPrice * c.Quantity)
                 };

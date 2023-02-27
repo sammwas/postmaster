@@ -260,25 +260,19 @@ namespace PosMaster.Controllers
         }
         public async Task<IActionResult> LowStockProducts()
         {
-            Guid? clientId = null;
-            if (!User.IsInRole(Role.SuperAdmin))
-                clientId = _userData.ClientId;
             Guid? instanceId = null;
             if (User.IsInRole(Role.Clerk))
                 instanceId = _userData.InstanceId;
-            var data = await _productInterface.LowStockProductsAsync(clientId, instanceId, 5);
+            var data = await _productInterface.LowStockProductsAsync(_userData.ClientId, instanceId, 5);
             return Json(data);
         }
 
         public async Task<IActionResult> TopSellingByVolume()
         {
-            Guid? clientId = null;
-            if (!User.IsInRole(Role.SuperAdmin))
-                clientId = _userData.ClientId;
             Guid? instanceId = null;
             if (User.IsInRole(Role.Clerk))
                 instanceId = _userData.InstanceId;
-            var data = await _productInterface.TopSellingProductsByVolumeAsync(clientId, instanceId, 5);
+            var data = await _productInterface.TopSellingProductsByVolumeAsync(_userData.ClientId, instanceId, 5);
             return Json(data);
         }
         public async Task<JsonResult> Search(string term = "", bool isPos = false)

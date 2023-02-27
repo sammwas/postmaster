@@ -18,7 +18,6 @@ namespace PosMaster.Dal.Interfaces
         Task<ReturnData<Customer>> ByIdAsync(Guid id);
         Task<ReturnData<FormSelectViewModel>> DefaultClientCustomerAsync(Guid clientId, string customerId = "");
         Task<ReturnData<List<FormSelectViewModel>>> SearchClientCustomerAsync(Guid clientId, string term, int limit = 25);
-        Task<ReturnData<ReceiptUserViewModel>> GlUserBalanceAsync(GlUserType userType, Guid userId);
     }
 
     public class CustomerImplementation : ICustomerInterface
@@ -263,6 +262,7 @@ namespace PosMaster.Dal.Interfaces
                     var productId = _productInterface.DefaultClientProductId(model.ClientId);
                     if (!productId.Equals(Guid.Empty))
                     {
+                        var hasObDate = DateTime.TryParse(model.OpeningBalanceAsAt, out var obDate);
                         var rcptId = Guid.NewGuid();
                         var rCode = _productInterface.DocumentRefNumber(Document.Receipt, model.ClientId);
                         var receipt = new Receipt
@@ -275,6 +275,7 @@ namespace PosMaster.Dal.Interfaces
                             ClientId = model.ClientId,
                             InstanceId = model.InstanceId,
                             Personnel = model.Personnel,
+                            DateCreated = hasObDate ? obDate : DateTime.Now,
                             ReceiptLineItems = new List<ReceiptLineItem> {
                         new ReceiptLineItem
                         {
@@ -286,6 +287,7 @@ namespace PosMaster.Dal.Interfaces
                             ReceiptId=rcptId,
                             Personnel=model.Personnel,
                             ProductId=productId,
+                            DateCreated=hasObDate?obDate:DateTime.Now
                         }  }
                         };
                         _context.Receipts.Add(receipt);
@@ -300,43 +302,6 @@ namespace PosMaster.Dal.Interfaces
                 result.Message = "Added";
                 result.Data = customer;
                 _logger.LogInformation($"{tag} added {customer.FirstName} {customer.Code} - {customer.Id} : {result.Message}");
-                return result;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-                result.ErrorMessage = ex.Message;
-                result.Message = "Error occured";
-                _logger.LogError($"{tag} {result.Message} : {ex}");
-                return result;
-            }
-        }
-
-        public async Task<ReturnData<ReceiptUserViewModel>> GlUserBalanceAsync(GlUserType userType, Guid userId)
-        {
-            var tag = nameof(GlUserBalanceAsync);
-            _logger.LogInformation($"{tag} get {userType} {userId}  balance");
-            var result = new ReturnData<ReceiptUserViewModel>
-            {
-                Data = new ReceiptUserViewModel
-                {
-                    UserId = userId.ToString(),
-                    UserType = userType
-                }
-            };
-            try
-            {
-                var debit = await _context.GeneralLedgerEntries
-                    .Where(u => u.UserId.Equals(userId))
-                    .SumAsync(l => l.Debit);
-                var credit = await _context.GeneralLedgerEntries
-                    .Where(u => u.UserId.Equals(userId))
-                    .SumAsync(l => l.Credit);
-                result.Success = true;
-                result.Message = "Found";
-                result.Data.CreditAmount = credit;
-                result.Data.DebitAmount = debit;
-                _logger.LogInformation($"{tag} {result.Message} : credit= {credit} debit= {debit}");
                 return result;
             }
             catch (Exception ex)

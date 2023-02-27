@@ -15,14 +15,16 @@ namespace PosMaster.Controllers
     {
         private readonly ICustomerInterface _customerInterface;
         private readonly ISupplierInterface _supplierInterface;
+        private readonly IProductInterface _productInterface;
         private readonly UserCookieData _userData;
 
         public CustomersController(ICookiesService cookiesService, ICustomerInterface customerInterface,
-        ISupplierInterface supplierInterface)
+        ISupplierInterface supplierInterface, IProductInterface productInterface)
         {
             _supplierInterface = supplierInterface;
             _userData = cookiesService.Read();
             _customerInterface = customerInterface;
+            _productInterface = productInterface;
         }
         public async Task<IActionResult> ByClientId()
         {
@@ -79,7 +81,7 @@ namespace PosMaster.Controllers
 
         public async Task<JsonResult> Balance(Guid id, GlUserType type)
         {
-            var data = await _customerInterface.GlUserBalanceAsync(type, id);
+            var data = await _productInterface.GlUserBalanceAsync(type, id);
             return Json(data);
         }
     }

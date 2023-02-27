@@ -15,17 +15,17 @@ namespace PosMaster.Dal.Interfaces
         Task<ReturnData<List<Product>>> ByInstanceIdAsync(Guid clientId, Guid? instanceId = null, bool isPos = false, string search = "");
         Task<ReturnData<Product>> ByIdAsync(Guid id);
         Task<ReturnData<Receipt>> ProductsSaleAsync(ProductSaleViewModel model);
-        Task<ReturnData<List<Receipt>>> ReceiptsAsync(Guid? clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "");
+        Task<ReturnData<List<Receipt>>> ReceiptsAsync(Guid clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "");
         Task<ReturnData<ProductStockAdjustmentLog>> AdjustProductStockAsync(ProductStockAdjustmentViewModel model);
         Task<ReturnData<PurchaseOrder>> AddPurchaseOrderAsync(PoViewModel model);
-        Task<ReturnData<List<PurchaseOrder>>> PurchaseOrdersAsync(Guid? clientId, Guid? instanceId, bool onlyActive = false, string dateFrom = "", string dateTo = "",
+        Task<ReturnData<List<PurchaseOrder>>> PurchaseOrdersAsync(Guid clientId, Guid? instanceId, bool onlyActive = false, string dateFrom = "", string dateTo = "",
             string search = "", string personnel = "");
         Task<ReturnData<List<GoodReceivedNote>>> GoodsReceivedAsync(Guid? clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "", string personnel = "");
         Task<ReturnData<List<GeneralLedgerEntry>>> GeneralLedgersAsync(Guid clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "");
         Task<ReturnData<PurchaseOrder>> PurchaseOrderByIdAsync(Guid id);
         string DocumentRefNumber(Document document, Guid clientId);
-        Task<ReturnData<List<Product>>> LowStockProductsAsync(Guid? clientId, Guid? instanceId, int limit = 10);
-        Task<ReturnData<List<TopSellingProductViewModel>>> TopSellingProductsByVolumeAsync(Guid? clientId, Guid? instanceId, int limit = 10);
+        Task<ReturnData<List<Product>>> LowStockProductsAsync(Guid clientId, Guid? instanceId, int limit = 10);
+        Task<ReturnData<List<TopSellingProductViewModel>>> TopSellingProductsByVolumeAsync(Guid clientId, Guid? instanceId, int limit = 10);
         Task<ReturnData<ProductPriceViewModel>> EditPriceAsync(ProductPriceViewModel model);
         Task<ReturnData<Receipt>> ReceiptByIdAsync(Guid id);
         Task<ReturnData<PurchaseOrder>> EditPurchaseOrderAsync(PurchaseOrderViewModel model);
@@ -38,6 +38,8 @@ namespace PosMaster.Dal.Interfaces
         Task<string> ReceiptExcessAmount(ReceiptUserViewModel model);
         Task<string> AddInvoiceAsync(Receipt receipt);
         Guid DefaultClientProductId(Guid clientId);
+        Task<ReturnData<ReceiptUserViewModel>> GlUserBalanceAsync(GlUserType userType, Guid userId);
+
     }
 
     public class ProductImplementation : IProductInterface
@@ -464,12 +466,24 @@ namespace PosMaster.Dal.Interfaces
                     product.DateLastModified = DateTime.Now;
                     product.LastModifiedBy = model.Personnel;
                 }
-                var totalAmount = receipt.ReceiptLineItems.Sum(r => r.Amount);
-                if (model.IsCredit && totalAmount > customer.CreditLimit)
+
+                if (model.IsCredit)
                 {
-                    result.Message = $"{customer.Code} Limit is {customer.CreditLimit}";
-                    _logger.LogWarning($"{tag} sale failed {model.CustomerId} : {result.Message}");
-                    return result;
+                    var balancesRes = await GlUserBalanceAsync(GlUserType.Customer, customer.Id);
+                    if (!balancesRes.Success)
+                    {
+                        result.Message = $"{customer.Code} available Limit is {balancesRes.Message}";
+                        _logger.LogWarning($"{tag} sale failed {model.CustomerId} : {result.Message}");
+                        return result;
+                    }
+                    var totalAmount = receipt.ReceiptLineItems.Sum(r => r.Amount);
+                    var availableLimit = balancesRes.Data.ExpectedAmount - customer.CreditLimit;
+                    if (totalAmount > availableLimit)
+                    {
+                        result.Message = $"{customer.Code} Limit is {availableLimit}";
+                        _logger.LogWarning($"{tag} sale failed {model.CustomerId} : {result.Message}");
+                        return result;
+                    }
                 }
                 _context.Receipts.Add(receipt);
                 await _context.SaveChangesAsync();
@@ -539,7 +553,7 @@ namespace PosMaster.Dal.Interfaces
             }
         }
 
-        public async Task<ReturnData<List<PurchaseOrder>>> PurchaseOrdersAsync(Guid? clientId, Guid? instanceId, bool onlyActive = false, string dateFrom = "", string dateTo = "",
+        public async Task<ReturnData<List<PurchaseOrder>>> PurchaseOrdersAsync(Guid clientId, Guid? instanceId, bool onlyActive = false, string dateFrom = "", string dateTo = "",
             string search = "", string personnel = "")
         {
             var result = new ReturnData<List<PurchaseOrder>> { Data = new List<PurchaseOrder>() };
@@ -550,10 +564,7 @@ namespace PosMaster.Dal.Interfaces
                 var dataQuery = _context.PurchaseOrders
                     .Include(r => r.Supplier)
                     .Include(r => r.PoGrnProducts)
-                    //.ThenInclude(p => p.Product)
-                    .AsQueryable();
-                if (clientId != null)
-                    dataQuery = dataQuery.Where(r => r.ClientId.Equals(clientId.Value));
+                    .Where(r => r.ClientId.Equals(clientId));
                 if (instanceId != null)
                     dataQuery = dataQuery.Where(r => r.InstanceId.Equals(instanceId.Value));
                 var hasFromDate = DateTime.TryParse(dateFrom, out var dtFrom);
@@ -587,7 +598,7 @@ namespace PosMaster.Dal.Interfaces
             }
         }
 
-        public async Task<ReturnData<List<Receipt>>> ReceiptsAsync(Guid? clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "")
+        public async Task<ReturnData<List<Receipt>>> ReceiptsAsync(Guid clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "")
         {
             var result = new ReturnData<List<Receipt>> { Data = new List<Receipt>() };
             var tag = nameof(ReceiptsAsync);
@@ -599,9 +610,7 @@ namespace PosMaster.Dal.Interfaces
                     .ThenInclude(r => r.Product)
                     .ThenInclude(r => r.ProductCategory)
                     .Include(r => r.Customer)
-                    .AsQueryable();
-                if (clientId != null)
-                    dataQuery = dataQuery.Where(r => r.ClientId.Equals(clientId.Value));
+                    .Where(r => r.ClientId.Equals(clientId));
                 if (instanceId != null)
                     dataQuery = dataQuery.Where(r => r.InstanceId.Equals(instanceId.Value));
                 var hasFromDate = DateTime.TryParse(dateFrom, out var dtFrom);
@@ -849,7 +858,7 @@ namespace PosMaster.Dal.Interfaces
             }
         }
 
-        public async Task<ReturnData<List<Product>>> LowStockProductsAsync(Guid? clientId, Guid? instanceId, int limit = 10)
+        public async Task<ReturnData<List<Product>>> LowStockProductsAsync(Guid clientId, Guid? instanceId, int limit = 10)
         {
             var result = new ReturnData<List<Product>> { Data = new List<Product>() };
             var tag = nameof(LowStockProductsAsync);
@@ -860,9 +869,7 @@ namespace PosMaster.Dal.Interfaces
                     .Include(c => c.ProductCategory)
                     .Include(c => c.UnitOfMeasure)
                     .Where(p => p.AvailableQuantity <= p.ReorderLevel)
-                    .AsQueryable();
-                if (clientId != null)
-                    dataQry = dataQry.Where(d => d.ClientId.Equals(clientId));
+                    .Where(d => d.ClientId.Equals(clientId));
                 if (instanceId != null)
                     dataQry = dataQry.Where(p => p.InstanceId.Equals(instanceId));
                 var data = await dataQry.OrderBy(p => p.AvailableQuantity)
@@ -885,7 +892,7 @@ namespace PosMaster.Dal.Interfaces
             }
         }
 
-        public async Task<ReturnData<List<TopSellingProductViewModel>>> TopSellingProductsByVolumeAsync(Guid? clientId, Guid? instanceId, int limit = 10)
+        public async Task<ReturnData<List<TopSellingProductViewModel>>> TopSellingProductsByVolumeAsync(Guid clientId, Guid? instanceId, int limit = 10)
         {
             var result = new ReturnData<List<TopSellingProductViewModel>> { Data = new List<TopSellingProductViewModel>() };
             var tag = nameof(TopSellingProductsByVolumeAsync);
@@ -908,9 +915,7 @@ namespace PosMaster.Dal.Interfaces
                         InstanceId = p.InstanceId,
                         ClientId = p.ClientId
                     })
-                    .AsQueryable();
-                if (clientId != null)
-                    dataQry = dataQry.Where(p => p.ClientId.Equals(clientId));
+                    .Where(r => r.ClientId.Equals(clientId));
                 if (instanceId != null)
                     dataQry = dataQry.Where(p => p.InstanceId.Equals(instanceId));
                 var data = await dataQry.OrderByDescending(p => p.Volume)
@@ -1526,5 +1531,44 @@ namespace PosMaster.Dal.Interfaces
                         .Select(p => p.Id)
                         .FirstOrDefault();
         }
+
+
+        public async Task<ReturnData<ReceiptUserViewModel>> GlUserBalanceAsync(GlUserType userType, Guid userId)
+        {
+            var tag = nameof(GlUserBalanceAsync);
+            _logger.LogInformation($"{tag} get {userType} {userId}  balance");
+            var result = new ReturnData<ReceiptUserViewModel>
+            {
+                Data = new ReceiptUserViewModel
+                {
+                    UserId = userId.ToString(),
+                    UserType = userType
+                }
+            };
+            try
+            {
+                var debit = await _context.GeneralLedgerEntries
+                    .Where(u => u.UserId.Equals(userId))
+                    .SumAsync(l => l.Debit);
+                var credit = await _context.GeneralLedgerEntries
+                    .Where(u => u.UserId.Equals(userId))
+                    .SumAsync(l => l.Credit);
+                result.Success = true;
+                result.Message = "Found";
+                result.Data.CreditAmount = credit;
+                result.Data.DebitAmount = debit;
+                _logger.LogInformation($"{tag} {result.Message} : credit= {credit} debit= {debit}");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                result.ErrorMessage = ex.Message;
+                result.Message = "Error occured";
+                _logger.LogError($"{tag} {result.Message} : {ex}");
+                return result;
+            }
+        }
+
     }
 }

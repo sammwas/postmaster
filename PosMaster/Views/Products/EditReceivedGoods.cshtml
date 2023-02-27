@@ -103,7 +103,8 @@
                                             <span>@Model.GrnItems[i].ProductName</span>
                                         </td>
                                         <td>
-                                            <input asp-for="GrnItems[i].Quantity" class='product-event numbers-only' id='product-quantity' />
+                                            <input asp-for="GrnItems[i].Quantity" class='product-event numbers-only'
+                                               id='product-quantity' min="1" max="@Model.GrnItems[i].Quantity" />
                                         </td>
                                         <td>
                                             <input asp-for="GrnItems[i].UnitPrice" class='product-event numbers-only' id='product-price' />
