@@ -19,10 +19,12 @@ namespace PosMaster.Controllers
             _reportingInterface = reportingInterface;
             _userData = cookiesService.Read();
         }
-        public async Task<IActionResult> SalesReport(string instanceId = "", string dtFrom = "", string dtTo = "", string search = "", string option = "")
+        public async Task<IActionResult> SalesReport(Guid instanceId, string dtFrom = "", string dtTo = "", string search = "", string option = "")
         {
             ViewData["dtTo"] = dtTo;
             ViewData["dtFrom"] = dtFrom;
+            if (instanceId.Equals(Guid.Empty))
+                instanceId = _userData.InstanceId;
             ViewData["instanceId"] = instanceId;
             ViewData["option"] = option;
             var result = await _reportingInterface.DailySalesReportAsync(instanceId, dtFrom, dtTo, search);
@@ -31,12 +33,13 @@ namespace PosMaster.Controllers
             return View(result.Data);
         }
 
-        public async Task<JsonResult> MonthlySalesReport(string instanceId = "", string dtFrom = "", string dtTo = "")
+        public async Task<JsonResult> MonthlySalesReport(Guid instanceId, string dtFrom = "", string dtTo = "")
         {
             ViewData["dtTo"] = dtTo;
             ViewData["dtFrom"] = dtFrom;
-            ViewData["instanceId"] = instanceId;
-            var result = await _reportingInterface.MonthlySalesReportAsync(instanceId, dtFrom, dtTo);
+            if (instanceId.Equals(Guid.Empty))
+                instanceId = _userData.InstanceId;
+            ViewData["instanceId"] = instanceId; var result = await _reportingInterface.MonthlySalesReportAsync(instanceId, dtFrom, dtTo);
             return Json(result);
         }
 
@@ -47,17 +50,18 @@ namespace PosMaster.Controllers
             if (instanceId.Equals(Guid.Empty))
                 instanceId = _userData.InstanceId;
             ViewData["instanceId"] = instanceId;
-
             var result = await _reportingInterface.CustomerBalancesAsync(instanceId, dtFrom, dtTo);
             if (!result.Success)
                 TempData.SetData(AlertLevel.Warning, $"Customer Balances", result.Message);
             return View(result.Data);
         }
 
-
         public async Task<IActionResult> CustomerStatement(Guid id)
         {
-            return View();
+            var result = await _reportingInterface.CustomerStatementAsync(id);
+            if (!result.Success)
+                TempData.SetData(AlertLevel.Warning, $"Customer Statement", result.Message);
+            return View(result.Data);
         }
     }
 }

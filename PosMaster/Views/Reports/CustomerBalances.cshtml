@@ -70,7 +70,7 @@
                 @if (Model.Any())
                 {
                     <div class="row table-responsive">
-                        <table class="table table-striped">
+                        <table class="table table-striped" id="dataTable">
                             <thead>
                                 <tr>
                                     <td>#</td>
@@ -103,11 +103,12 @@
                             </tbody>
                             <tfoot>
                                 <tr>
-                                    <td colspan="2"> Total customers : @Model.Count </td>
+                                    <td>Total</td>
                                     <td>@userData.CurrencyShort </td>
                                     <td>@Helpers.FormatAmount(Model.Sum(x => x.Debit)) </td>
                                     <td>@Helpers.FormatAmount(Model.Sum(x => x.Credit)) </td>
                                     <td>@Helpers.FormatAmount( totalBalance) </td>
+                                    <td>@userData.ClientCode</td>
                                 </tr>
                             </tfoot>
                         </table>

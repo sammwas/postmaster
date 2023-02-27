@@ -1,1 +1,105 @@
-﻿
+﻿@inject ICookiesService _cookies;
+@model CustomerStatementViewModel
+@{
+    ViewData["Active"] = "Reports";
+    ViewData["Title"] = $"Customer Statement";
+    var userData = _cookies.Read();
+    var dateToday = DateTime.Now.ToString("dd-MMM-yyyy");
+}
+<div class="card card-primary">
+    <div class="card-header">
+        <h3 class="card-title">@ViewData["Title"]</h3>
+    </div>
+    <div class="row">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label>Code</label>
+                        <span>@Model.Customer.Code</span>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label>Customer Name</label>
+                        <span>@Model.Customer.FullName</span>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <span>@Model.Customer.PhoneNumber</span>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <span>@Model.Customer.EmailAddress</span>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label>ID Number</label>
+                        <span>@Model.Customer.IdNumber</span>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label>PIN Number</label>
+                        <span>@Model.Customer.PinNo</span>
+                    </div>
+                </div>
+            </div>
+            @if (Model.LedgerEntries.Any())
+            {
+                <div class="row table-responsive">
+                    <table class="table table-striped" id="dataTable">
+                        <thead>
+                            <tr>
+                                <td>#</td>
+                                <td>Document</td>
+                                <td>Document No</td>
+                                <td>Debit Amount</td>
+                                <td>Credit Amout</td>
+                                <td>Balance</td>
+                                <td>Notes</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                var i = 0;
+                                decimal totalBalance = 0;
+                            }
+                            @foreach (var item in Model.LedgerEntries)
+                            {
+                                i++;
+                                var balance = (-1 * item.Credit) + item.Debit;
+                                totalBalance += balance;
+                                <tr>
+                                    <td>@i</td>
+                                    <td>@item.Document</td>
+                                    <td>@item.DocumentNumber</td>
+                                    <td>@Helpers.FormatAmount(item.Debit)</td>
+                                    <td>@Helpers.FormatAmount(item.Credit)</td>
+                                    <td>@Helpers.FormatAmount(balance)</td>
+                                    <td>@item.Notes</td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="2">Total</td>
+                                <td>@userData.CurrencyShort</td>
+                                <td>@Helpers.FormatAmount(Model.LedgerEntries.Sum(x => x.Debit))</td>
+                                <td>@Helpers.FormatAmount(Model.LedgerEntries.Sum(x => x.Credit))</td>
+                                <td>@Helpers.FormatAmount( totalBalance) </td>
+                                <td>@userData.ClientCode</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+

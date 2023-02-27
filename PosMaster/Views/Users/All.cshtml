@@ -1,78 +1,77 @@
 ﻿@inject IClientInstanceInterface _clientInstance;
+@inject ICookiesService _cookies;
 @model List<UserViewModel>
 @{
-	ViewData["Active"] = "HR";
-	ViewData["Title"] = "Users";
+    ViewData["Active"] = "HR";
+    ViewData["Title"] = "Users";
+    var userData = _cookies.Read();
+    var instancesRes = await _clientInstance.ByClientIdAsync(userData.ClientId);
 }
 <div>
-	<div class="card">
-		<div class="card-header">
-			<h3 class="card-title">@ViewData["Title"] <span class="text-right"><a asp-action="Edit" asp-route-id=""
-						class="btn btn-sm btn-info">Add New</a></span></h3>
-		</div>
-		<div class="card-body table-responsive">
-			<table id="dataTable" class="table table-bordered table-striped">
-				<thead>
-					<tr>
-						<th>Full Name</th>
-						<th>Shop</th>
-						<th>Email Address</th>
-						<th>Phone Number</th>
-						<th>Id Number</th>
-						<th>Gender</th>
-						@*<th>Marital</th>*@
-						@*<th>Date of Birth</th>*@
-						<th>Confirmed</th>
-						<th>Role</th>
-						<th>Status</th>
-						<th>Options</th>
-					</tr>
-				</thead>
-				<tbody>
-					@foreach (var item in Model)
-					{
-						<tr>
-							<td><a asp-action="Edit" asp-route-id="@item.UserId">@item.FullName</a> </td>
-							<td>@item.EmailAddress</td>
-							@{
-								var instance = await _clientInstance.ByIdAsync(item.InstanceId);
-							}
-							<td>@instance.Data.Name</td>
-							<td>@item.PhoneNumber</td>
-							<td>@item.IdNumber</td>
-							<td>@item.Gender</td>
-							@*<td>@item.MaritalStatus</td>*@
-							@*<td>@item.DoB</td>*@
-							<td>@item.EmailConfirmedStr</td>
-							<td>@item.Role</td>
-							<td>@item.Status</td>
-							<td class="project-actions text-right">
-								<a asp-action="Edit" asp-route-id="@item.UserId" class="btn btn-info btn-xs">
-									<i class="fas fa-pencil-alt">
-									</i>
-									Edit
-								</a>
-							</td>
-						</tr>
-					}
-				</tbody>
-				<tfoot>
-					<tr>
-						<th>Full Name</th>
-						<th>Shop</th>
-						<th>Email Address</th>
-						<th>Phone Number</th>
-						<th>Id Number</th>
-						<th>Gender</th>
-						@*<th>Marital</th>*@
-						@*<th>Date of Birth</th>*@
-						<th>Confirmed</th>
-						<th>Role</th>
-						<th>Status</th>
-						<th>Options</th>
-					</tr>
-				</tfoot>
-			</table>
-		</div>
-	</div>
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">
+                @ViewData["Title"] <span class="text-right">
+                    <a asp-action="Edit" asp-route-id=""
+                       class="btn btn-sm btn-info">Add New</a>
+                </span>
+            </h3>
+        </div>
+        <div class="card-body table-responsive">
+            <table id="dataTable" class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>Full Name</th>
+                        <th>Shop</th>
+                        <th>Email Address</th>
+                        <th>Phone Number</th>
+                        <th>Id Number</th>
+                        <th>Gender</th>
+                        <th>Confirmed</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Options</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        var instance = instancesRes.Data.FirstOrDefault(i => i.Id == item.InstanceId);
+                        <tr>
+                            <td><a asp-action="Edit" asp-route-id="@item.UserId">@item.FullName</a> </td>
+                            <td>@instance?.Name</td>
+                            <td>@item.EmailAddress</td>
+                            <td>@item.PhoneNumber</td>
+                            <td>@item.IdNumber</td>
+                            <td>@item.Gender</td>
+                            <td>@item.EmailConfirmedStr</td>
+                            <td>@item.Role</td>
+                            <td>@item.Status</td>
+                            <td class="project-actions text-right">
+                                <a asp-action="Edit" asp-route-id="@item.UserId" class="btn btn-info btn-xs">
+                                    <i class="fas fa-pencil-alt">
+                                    </i>
+                                    Edit
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th>Full Name</th>
+                        <th>Shop</th>
+                        <th>Email Address</th>
+                        <th>Phone Number</th>
+                        <th>Id Number</th>
+                        <th>Gender</th>
+                        <th>Confirmed</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Options</th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
 </div>

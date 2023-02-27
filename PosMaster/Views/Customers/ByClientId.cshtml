@@ -1,6 +1,6 @@
 ﻿@model List<Customer>
 @{
-    ViewData["Active"] = "Customers";
+    ViewData["Active"] = "POS";
     ViewData["Title"] = "Customers";
 }
 <div>
@@ -27,7 +27,11 @@
                     @foreach (var item in Model)
                     {
                         <tr>
-                            <td>@item.Code</td>
+                            <td>
+                                <a asp-controller="Reports" asp-action="CustomerStatement" asp-route-id="@item.Id">
+                                    @item.Code
+                                </a>
+                            </td>
                             <td>@item.FullName </td>
                             <td>@item.PhoneNumber </td>
                             <td>@item.EmailAddress</td>
@@ -41,11 +45,11 @@
                                     </i>
                                     Edit
                                 </a>
-                              @*  <a asp-action="ById" asp-route-id="@item.Id" class="btn btn-danger btn-xs">
+                                @*  <a asp-action="ById" asp-route-id="@item.Id" class="btn btn-danger btn-xs">
                                     <i class="fas fa-trash">
                                     </i>
                                     Delete
-                                </a>*@
+                                    </a>*@
                             </td>
                         </tr>
                     }
