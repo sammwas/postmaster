@@ -6,16 +6,14 @@
     ViewData["Active"] = "Products";
     var statuses = Helpers.Statuses();
     var option = Model.IsEditMode ? "Update" : "Add";
+    var isProductDisp = Model.IsService ? "none" : "";
     var title = $"{option} Product";
     ViewData["Title"] = title;
     var userData = _cookies.Read();
     var productCategories = await _masterDataInterface.ProductCategoriesAsync(userData.ClientId);
     var unitsOfMeasure = await _masterDataInterface.UnitOfMeasuresAsync(userData.ClientId);
     var taxTypes = await _masterDataInterface.TaxTypesAsync(userData.ClientId);
-    var instancesRes = User.IsInRole(Role.SuperAdmin) ?
-    await _instanceInterface.AllAsync()
-    : await _instanceInterface.ByClientIdAsync(userData.ClientId);
-    var instances = instancesRes.Data;
+    var instancesRes = await _instanceInterface.ByClientIdAsync(userData.ClientId);
 }
 <div class="card card-primary">
     <div class="card-header">
@@ -33,7 +31,7 @@
                         <label asp-for="InstanceIdStr"></label>
                         <select class="form-control select2" asp-for="InstanceIdStr" style="width: 100%;">
                             <option value="">--Select Instance--</option>
-                            @foreach (var item in instances)
+                            @foreach (var item in instancesRes.Data)
                             {
                                 <option value="@item.Id" title="@item.Notes">
                                     @item.Code - @item.Name (@item.Client.Code -
@@ -73,20 +71,10 @@
                             </div>
                         </div>
                         <div class="col-md-6">
-                            @if (Model.IsEditMode)
-                            {
-                                <div class="form-check">
-                                    <input asp-for="IsService" class="form-check-input" id="is-service" disabled>
-                                    <label class="form-check-label" asp-for="IsService"></label>
-                                </div>
-                            }
-                            else
-                            {
-                                <div class="form-check">
-                                    <input asp-for="IsService" class="form-check-input" id="is-service">
-                                    <label class="form-check-label" asp-for="IsService"></label>
-                                </div>
-                            }
+                            <div class="form-check">
+                                <input asp-for="IsService" class="form-check-input" id="is-service">
+                                <label class="form-check-label" asp-for="IsService"></label>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -121,7 +109,7 @@
                     </div>
                 </div>
             </div>
-            <div class="row" id="product-related">
+            <div class="row" id="product-related" style="display:@isProductDisp">
                 <div class="col-md-6">
                     <div class="row">
                         <div class="col-md-6">
@@ -158,7 +146,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="row">
                 <div class="col-md-6">
                     <div class="form-group">

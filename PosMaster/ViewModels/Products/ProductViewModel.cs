@@ -51,8 +51,7 @@ namespace PosMaster.ViewModels
         public decimal AvailableQuantity { get; set; }
         [Display(Name = "Unit of Measure")]
         public string UnitOfMeasureId { get; set; }
-        [Display(Name = "Instance")]
-        [Required]
+        [Required, Display(Name = "Instance")]
         public string InstanceIdStr { get; set; }
         public bool IsNewImage { get; set; }
         [Display(Name = "Tax Type")]

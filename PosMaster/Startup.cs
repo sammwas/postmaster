@@ -132,7 +132,9 @@ namespace PosMaster
             else
                 app.UseExceptionHandler("/Home/Error");
 
-            //loggerFactory.AddFile("Logs/PosMaster-{Date}.txt");
+            var path = Configuration["LogsPath"] ?? "Logs";
+            //loggerFactory.AddFile($"{path}/PosMaster-{DateTime.Now.Date}.log");
+            loggerFactory.AddFile("Logs/PosMaster-{Date}.log");
             app.UseStaticFiles(new StaticFileOptions
             {
                 OnPrepareResponse = ctx =>

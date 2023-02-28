@@ -317,7 +317,8 @@ namespace PosMaster.Dal.Interfaces
                     .FirstOrDefault(),
                     ClientId = clientId,
                     InstanceId = instanceId,
-                    Personnel = Constants.SuperAdminEmail
+                    Personnel = Constants.SuperAdminEmail,
+                    Status = EntityStatus.Inactive
                 };
                 product.ProductInstanceStamp = $"{product.Code}_{instanceId}";
                 _context.Products.Add(product);
@@ -376,6 +377,20 @@ namespace PosMaster.Dal.Interfaces
                     Personnel = Constants.SuperAdminEmail
                 };
                 _context.EmployeeKinRelationships.Add(relationship);
+                _context.SaveChanges();
+            }
+
+            if (!_context.Suppliers.Any(c => c.ClientId.Equals(clientId)))
+            {
+                var supplier = new Supplier
+                {
+                    ClientId = clientId,
+                    InstanceId = instanceId,
+                    Code = "000",
+                    Name = "DEFAULT",
+                    Personnel = Constants.SuperAdminEmail
+                };
+                _context.Suppliers.Add(supplier);
                 _context.SaveChanges();
             }
         }

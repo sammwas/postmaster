@@ -210,6 +210,7 @@ namespace PosMaster.Dal.Interfaces
                     dataQry = dataQry.Where(d => d.InstanceId.Equals(instanceId.Value));
                 if (isPos)
                 {
+                    dataQry = dataQry.Where(d => d.Status.Equals(EntityStatus.Active));
                     dataQry = dataQry.Where(d => d.AvailableQuantity > 0 && d.SellingPrice > 0)
                     .Where(d => d.PriceStartDate.Date <= DateTime.Now.Date && (d.PriceEndDate == null
                     || d.PriceEndDate.Value.Date >= DateTime.Now.Date));
@@ -248,6 +249,7 @@ namespace PosMaster.Dal.Interfaces
             try
             {
                 var hasTaxTypeId = Guid.TryParse(model.TaxTypeId, out var taxTypeId);
+                var hasUom = Guid.TryParse(model.UnitOfMeasureId, out var uomId);
                 var hasStartDate = DateTime.TryParse(model.PriceStartDateStr, out var startDate);
                 var hasEndDate = DateTime.TryParse(model.PriceEndDateStr, out var endDate);
                 var dbProduct = model.IsExcelUpload ? await _context.Products
@@ -291,11 +293,13 @@ namespace PosMaster.Dal.Interfaces
                     dbProduct.Name = model.Name;
                     dbProduct.ReorderLevel = model.ReorderLevel;
                     dbProduct.AllowDiscount = model.AllowDiscount;
-                    dbProduct.UnitOfMeasureId = Guid.Parse(model.UnitOfMeasureId);
                     dbProduct.LastModifiedBy = model.Personnel;
                     dbProduct.DateLastModified = DateTime.Now;
                     dbProduct.Notes = model.Notes;
                     dbProduct.Status = model.Status;
+                    dbProduct.IsService = model.IsService;
+                    dbProduct.TaxTypeId = hasTaxTypeId ? taxTypeId : (Guid?)null;
+                    dbProduct.UnitOfMeasureId = hasUom ? uomId : (Guid?)null;
                     if (model.IsExcelUpload)
                     {
                         dbProduct.BuyingPrice = model.BuyingPrice;
@@ -304,7 +308,6 @@ namespace PosMaster.Dal.Interfaces
                         dbProduct.PriceStartDate = hasStartDate ? startDate : DateTime.Now;
                         dbProduct.PriceEndDate = hasEndDate ? endDate : (DateTime?)null;
                     }
-                    dbProduct.TaxTypeId = hasTaxTypeId ? taxTypeId : (Guid?)null;
                     if (model.IsNewImage)
                         dbProduct.ImagePath = model.ImagePath;
 
@@ -334,7 +337,7 @@ namespace PosMaster.Dal.Interfaces
                     SellingPrice = model.SellingPrice,
                     AllowDiscount = model.AllowDiscount,
                     AvailableQuantity = model.AvailableQuantity,
-                    UnitOfMeasureId = Guid.Parse(model.UnitOfMeasureId),
+                    UnitOfMeasureId = hasUom ? uomId : (Guid?)null,
                     Notes = model.Notes,
                     ClientId = model.ClientId,
                     InstanceId = model.InstanceId,
@@ -906,7 +909,8 @@ namespace PosMaster.Dal.Interfaces
                         ProductId = tp.Key,
                         Volume = tp.Count()
                     })
-                    .Join(_context.Products.Include(p => p.ProductCategory),
+                    .Join(_context.Products.Include(p => p.ProductCategory)
+                    .Where(p => p.Status.Equals(EntityStatus.Active)),
                     tp => tp.ProductId, p => p.Id, (tp, p) => new TopSellingProductViewModel
                     {
                         Product = p,

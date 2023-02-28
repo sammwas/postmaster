@@ -8,7 +8,7 @@ namespace PosMaster.ViewModels
     public class PurchaseOrderViewModel : BaseViewModel
     {
         [Required]
-        [Display(Name = "Title")]
+        [Display(Name = "Purchase Order Title")]
         public string Name { get; set; }
         [Required]
         [Display(Name = "Supplier")]

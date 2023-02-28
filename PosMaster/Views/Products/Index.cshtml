@@ -61,6 +61,7 @@
                         <th>Unit</th>
                         <th>Tax</th>
                         <th>Discount</th>
+                        <th>Service</th>
                         <th>Status</th>
                         <th>Options</th>
                     </tr>
@@ -88,6 +89,16 @@
                                     <span class="badge badge-danger">NO</span>
                                 }
                             </td>
+                            <td>
+                                @if (item.IsService)
+                                {
+                                    <span class="badge badge-success">YES</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-danger">NO</span>
+                                }
+                            </td>
                             <td>@item.Status.ToString()</td>
                             <td class="project-actions text-right">
                                 @if (!User.IsInRole(Role.Clerk))
@@ -98,11 +109,6 @@
                                         Edit
                                     </a>
                                 }
-                               @* <a asp-action="ById" asp-route-id="@item.Id" class="btn btn-danger btn-xs">
-                                    <i class="fas fa-trash">
-                                    </i>
-                                    Delete
-                                </a>*@
                             </td>
                         </tr>
                     }
@@ -117,6 +123,7 @@
                         <th>Unit</th>
                         <th>Tax</th>
                         <th>Discount</th>
+                        <th>Service</th>
                         <th>Status</th>
                         <th>Options</th>
                     </tr>
