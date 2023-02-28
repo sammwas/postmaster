@@ -144,6 +144,7 @@ namespace PosMaster.Dal.Interfaces
                     dbInstance.Notes = model.Notes;
                     dbInstance.Status = model.Status;
                     dbInstance.PinNo = model.PinNo;
+                    dbInstance.BusinessShortCode = model.ShortCodeNo;
                     dbInstance.ReceiptFooterNotes = model.ReceiptNotes;
                     await _context.SaveChangesAsync();
                     result.Success = true;
@@ -172,7 +173,8 @@ namespace PosMaster.Dal.Interfaces
                     Code = model.Code,
                     EmailAddress = model.EmailAddress,
                     PinNo = model.PinNo,
-                    ReceiptFooterNotes = model.ReceiptNotes
+                    ReceiptFooterNotes = model.ReceiptNotes,
+                    BusinessShortCode = model.ShortCodeNo
                 };
                 instance.InstanceId = instance.Id;
                 _context.ClientInstances.Add(instance);

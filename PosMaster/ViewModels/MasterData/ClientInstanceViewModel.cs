@@ -57,5 +57,7 @@ namespace PosMaster.ViewModels
         public string PinNo { get; set; }
         [Display(Name = "Receipt Notes")]
         public string ReceiptNotes { get; set; }
+        [Display(Name = "Business Short Code")]
+        public string ShortCodeNo { get; set; }
     }
 }

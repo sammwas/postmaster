@@ -27,12 +27,11 @@
                 <div class="col-md-6">
                     <div class="form-group">
                         <label asp-for="Name"></label>
-                        <input asp-for="Name" placeholder="Name" class="form-control">								<span asp-validation-for="Code" class="text-danger"></span>
+                        <input asp-for="Name" placeholder="Name" class="form-control">
+                        <span asp-validation-for="Code" class="text-danger"></span>
                         <span asp-validation-for="Name" class="text-danger"></span>
                     </div>
                 </div>
-            </div>
-            <div class="row">
                 <div class="col-md-6">
                     <div class="form-group">
                         <label asp-for="Town"></label>
@@ -40,15 +39,6 @@
                         <span asp-validation-for="Town" class="text-danger"></span>
                     </div>
                 </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label asp-for="Location"></label>
-                        <input asp-for="Location" class="form-control" placeholder="Location">
-                        <span asp-validation-for="Location" class="text-danger"></span>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
                 <div class="col-md-6">
                     <div class="form-group">
                         <label asp-for="PostalAddress"></label>
@@ -63,8 +53,6 @@
                         <span asp-validation-for="EmailAddress" class="text-danger"></span>
                     </div>
                 </div>
-            </div>
-            <div class="row">
                 <div class="col-md-6">
                     <div class="form-group">
                         <label asp-for="PrimaryTelephone"></label>
@@ -79,8 +67,6 @@
                         <span asp-validation-for="SecondaryTelephone" class="text-danger"></span>
                     </div>
                 </div>
-            </div>
-            <div class="row">
                 <div class="col-md-6">
                     <div class="form-group">
                         <label asp-for="PinNo"></label>
@@ -90,17 +76,22 @@
                 </div>
                 <div class="col-md-6">
                     <div class="form-group">
+                        <label asp-for="ShortCodeNo"></label>
+                        <input asp-for="ShortCodeNo" class="form-control" placeholder="Short Code">
+                        <span asp-validation-for="ShortCodeNo" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
                         <label asp-for="ReceiptNotes"></label>
                         <input asp-for="ReceiptNotes" class="form-control" placeholder="Receipt Footer Notes">
                         <span asp-validation-for="ReceiptNotes" class="text-danger"></span>
                     </div>
                 </div>
-            </div>
-            <div class="row">
                 <div class="col-md-6">
                     <div class="form-group">
                         <label asp-for="Notes"></label>
-                        <textarea asp-for="Notes" class="form-control" placeholder="Notes"></textarea>
+                        <input asp-for="Notes" class="form-control" placeholder="Notes" />
                         <span asp-validation-for="Notes" class="text-danger"></span>
                     </div>
                 </div>

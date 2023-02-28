@@ -1,12 +1,16 @@
 ﻿@model Receipt
+@inject IClientInstanceInterface _clientInterface;
 @inject ICookiesService _cookies;
 @{
     ViewData["Active"] = "POS";
     var title = $"Receipt {Model.Code}";
     ViewData["Title"] = title;
     var userData = _cookies.Read();
-    var status = Model.IsPrinted ? "COPY" : "ORIGINAL";
-    var saleType = Model.IsCredit ? "CREDIT SALE" : $"CASH SALE";
+    var status = Model.IsPrinted ? $"COPY - {Model.PrintCount}" : "ORIGINAL";
+    var saleType = Model.IsCredit ? "CREDIT SALE" : "CASH SALE";
+    var instance = _clientInterface.ByIdAsync(Model.InstanceId).Result.Data;
+    var cashier = string.IsNullOrEmpty(Model.PersonnelName) ? "" : Model.PersonnelName;
+    var names = cashier.Split(' ');
 }
 <div class="card card-primary">
     <div class="card-header row d-print-none">
@@ -18,7 +22,7 @@
         <div class="col-6">
             <span class="pull-right text-right">
                 <button class="btn btn-secondary btn-block" data-printed="@Model.IsPrinted" data-id="@Model.Id"
-                    id="btnPrintReceipt">
+                        id="btnPrintReceipt">
                     <i class="fa fa-print"></i> Print Receipt
                 </button>
             </span>
@@ -30,13 +34,11 @@
                 @@media print {
                     #printReceiptDiv {
                         height: auto;
-                        font-size: 200%;
+                        font-size: 250%;
                     }
 
-                    #printReceiptDiv>div>div>h4 {
-                        color: red;
-                        text-decoration: underline
-                    }
+                        #printReceiptDiv > div > div > h4 {
+                        }
                 }
             </style>
         }
@@ -44,18 +46,14 @@
             <div class="col-md-6">
                 <h4>@userData.ClientName</h4>
                 <h5>@userData.InstanceName</h5>
-                <h6>@userData.PinNo</h6>
-                <p>Served By : @Model.PersonnelName</p>
+                <h6>@instance.PostalAddress - @instance.Town</h6>
+                <p>@instance.PinNo</p>
             </div>
             <div class="col-md-6">
-                <p><b>Receipt No.</b> @Model.Code <span class="badge badge-info">@status</span> </p>
+                <p><b>Receipt No.</b> @Model.Code <span>[@status]</span> </p>
                 <p><b>Customer </b> @Model.Customer.FullName </p>
                 <p>
                     <b>Type </b> @saleType
-                    @if (Model.Balance > 0)
-                    {
-                        <span>Balance @Model.Balance</span>
-                    }
                     @if (Model.PaymentMode != null)
                     {
                         <span>(@Model.PaymentMode.Name)</span>
@@ -116,6 +114,17 @@
                     </tr>
                 </tfoot>
             </table>
+            <div>
+                @if (Model.AmountReceived > Model.Amount)
+                {
+                    <p>RECEIVED @userData.CurrencyShort @Model.AmountReceived . CHANGE @userData.CurrencyShort @(Model.AmountReceived-Model.Amount)</p>
+                }
+                <p>Served By : @names.FirstOrDefault() @names.Skip(1).FirstOrDefault()  </p>
+                <p>@instance.ReceiptFooterNotes</p>
+                <hr />
+                <p><b>Phone No :</b> @instance.PrimaryTelephone or @instance.SecondaryTelephone</p>
+                <p><b>@instance.BusinessShortCodeType :</b> @instance.BusinessShortCode</p>
+            </div>
         </div>
     </div>
     <div class="card-footer row d-print-none">
@@ -125,7 +134,7 @@
         <div class="col-4">
         </div>
         <div class="col-4">
-            <a asp-action="Index" class="btn btn-primary"><i class="fa fa-shopping-basket"></i> Make Sale Now</a>
+            <a asp-action="Index" class="btn btn-primary"><i class="fa fa-play"></i> Next Sale</a>
         </div>
     </div>
 </div>

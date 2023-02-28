@@ -472,18 +472,24 @@ namespace PosMaster.Dal.Interfaces
 
                 if (model.IsCredit)
                 {
-                    var balancesRes = await GlUserBalanceAsync(GlUserType.Customer, customer.Id);
-                    if (!balancesRes.Success)
-                    {
-                        result.Message = $"{customer.Code} available Limit is {balancesRes.Message}";
-                        _logger.LogWarning($"{tag} sale failed {model.CustomerId} : {result.Message}");
-                        return result;
-                    }
+                    //var balancesRes = await GlUserBalanceAsync(GlUserType.Customer, customer.Id);
+                    //if (!balancesRes.Success)
+                    //{
+                    //    result.Message = $"{customer.Code} available Limit is {balancesRes.Message}";
+                    //    _logger.LogWarning($"{tag} sale failed {model.CustomerId} : {result.Message}");
+                    //    return result;
+                    //}
+                    //var availableLimit = balancesRes.Data.ExpectedAmount - customer.CreditLimit;
+                    //if (totalAmount > availableLimit)
+                    //{
+                    //    result.Message = $"{customer.Code} Limit is {availableLimit}";
+                    //    _logger.LogWarning($"{tag} sale failed {model.CustomerId} : {result.Message}");
+                    //    return result;
+                    //}
                     var totalAmount = receipt.ReceiptLineItems.Sum(r => r.Amount);
-                    var availableLimit = balancesRes.Data.ExpectedAmount - customer.CreditLimit;
-                    if (totalAmount > availableLimit)
+                    if (totalAmount > customer.CreditLimit)
                     {
-                        result.Message = $"{customer.Code} Limit is {availableLimit}";
+                        result.Message = $"{customer.Code} Limit is {customer.CreditLimit}";
                         _logger.LogWarning($"{tag} sale failed {model.CustomerId} : {result.Message}");
                         return result;
                     }
@@ -1010,8 +1016,15 @@ namespace PosMaster.Dal.Interfaces
                     result.Message = "Not Found";
                     return result;
                 }
+                /*TODO
+                 * 
+                 * 
+                 * PRINT COUNT TO INT
+                 * 
+                 */
+                var count = int.Parse(receipt.PrintCount);
                 receipt.IsPrinted = true;
-                receipt.PrintCount += 1;
+                receipt.PrintCount = $"{count + 1}";
                 receipt.LastModifiedBy = personnel;
                 receipt.DateLastModified = DateTime.Now;
                 await _context.SaveChangesAsync();
