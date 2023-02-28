@@ -1,5 +1,5 @@
 ﻿@model Receipt
-@inject IClientInstanceInterface _clientInterface;
+@inject IClientInstanceInterface _instanceInterface;
 @inject ICookiesService _cookies;
 @{
     ViewData["Active"] = "POS";
@@ -8,7 +8,8 @@
     var userData = _cookies.Read();
     var status = Model.IsPrinted ? $"COPY - {Model.PrintCount}" : "ORIGINAL";
     var saleType = Model.IsCredit ? "CREDIT SALE" : "CASH SALE";
-    var instance = _clientInterface.ByIdAsync(Model.InstanceId).Result.Data;
+    var instance = _instanceInterface.ByIdAsync(Model.InstanceId).Result.Data;
+    var fontZoom = $"{instance.ReceiptFontPercent}%";
     var cashier = string.IsNullOrEmpty(Model.PersonnelName) ? "" : Model.PersonnelName;
     var names = cashier.Split(' ');
 }
@@ -34,20 +35,18 @@
                 @@media print {
                     #printReceiptDiv {
                         height: auto;
-                        font-size: 250%;
+                        font-size: @fontZoom;
+                        page-break-inside: avoid;
                     }
-
-                        #printReceiptDiv > div > div > h4 {
-                        }
                 }
             </style>
         }
         <div class="row">
             <div class="col-md-6">
-                <h4>@userData.ClientName</h4>
-                <h5>@userData.InstanceName</h5>
-                <h6>@instance.PostalAddress - @instance.Town</h6>
-                <p>@instance.PinNo</p>
+                <p><b>@userData.ClientName?.ToUpper()</b></p>
+                <p><b>@userData.InstanceName?.ToUpper()</b></p>
+                <p>@instance.PostalAddress - @instance.Town</p>
+                <p>PIN : @instance.PinNo</p>
             </div>
             <div class="col-md-6">
                 <p><b>Receipt No.</b> @Model.Code <span>[@status]</span> </p>
@@ -61,7 +60,7 @@
                 </p>
                 @if (!string.IsNullOrEmpty(Model.PinNo))
                 {
-                    <p><b>PIN No.</b> @Model.PinNo</p>
+                    <p><b>Customer PIN.</b> @Model.PinNo</p>
                 }
                 <p><b>Date </b>@Model.DateCreated</p>
             </div>
@@ -92,9 +91,7 @@
                             <td>@Helpers.FormatAmount(item.Amount)</td>
                         </tr>
                     }
-                </tbody>
-                <tfoot>
-                    <tr>
+                    <tr style="page-break-after:avoid">
                         <td colspan="3"></td>
                         <td>Tax</td>
                         <td>@Helpers.FormatAmount(Model.Tax)</td>
@@ -112,12 +109,15 @@
                         <td>Total</td>
                         <td><b>@userData.CurrencyShort @Helpers.FormatAmount(Model.Amount)</b></td>
                     </tr>
-                </tfoot>
+                </tbody>
             </table>
             <div>
                 @if (Model.AmountReceived > Model.Amount)
                 {
-                    <p>RECEIVED @userData.CurrencyShort @Model.AmountReceived . CHANGE @userData.CurrencyShort @(Model.AmountReceived-Model.Amount)</p>
+                    <p>
+                        RECEIVED @userData.CurrencyShort @Helpers.FormatAmount(Model.AmountReceived)
+                        . CHANGE @userData.CurrencyShort @Helpers.FormatAmount(Model.AmountReceived-Model.Amount)
+                    </p>
                 }
                 <p>Served By : @names.FirstOrDefault() @names.Skip(1).FirstOrDefault()  </p>
                 <p>@instance.ReceiptFooterNotes</p>

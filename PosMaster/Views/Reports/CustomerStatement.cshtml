@@ -1,18 +1,50 @@
 ﻿@inject ICookiesService _cookies;
 @model CustomerStatementViewModel
+@inject IClientInstanceInterface _instanceInterface;
 @{
     ViewData["Active"] = "Reports";
     ViewData["Title"] = $"Customer Statement";
     var userData = _cookies.Read();
     var dateToday = DateTime.Now.ToString("dd-MMM-yyyy");
+    var instance = _instanceInterface.ByIdAsync(Model.Customer.InstanceId).Result.Data;
+    var fontZoom = $"{instance.ReceiptFontPercent}%";
 }
 <div class="card card-primary">
-    <div class="card-header">
-        <h3 class="card-title">@ViewData["Title"]</h3>
+    <div class="card-header row d-print-none">
+        <div class="col-6">
+            <h3 class="card-title">
+                @ViewData["Title"]
+            </h3>
+        </div>
+        <div class="col-6">
+            <span class="pull-right text-right">
+                <button class="btn btn-secondary btn-block"
+                        id="btnPrintReceipt">
+                    <i class="fa fa-print"></i> Print Statement
+                </button>
+            </span>
+        </div>
     </div>
     <div class="row">
-        <div class="card-body">
+        <div class="card-body" id="printReceiptDiv">
+            @{
+                <style type="text/css">
+                    @@media print {
+                        #printReceiptDiv {
+                            height: auto;
+                            font-size: @fontZoom;
+                            page-break-inside: avoid;
+                        }
+                    }
+                </style>
+            }
             <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label>Instance</label>
+                        <span>@instance.Name</span>
+                    </div>
+                </div>
                 <div class="col-md-3">
                     <div class="form-group">
                         <label>Code</label>
@@ -53,7 +85,7 @@
             @if (Model.LedgerEntries.Any())
             {
                 <div class="row table-responsive">
-                    <table class="table table-striped" id="dataTable">
+                    <table class="table table-striped" id="dataTable_">
                         <thead>
                             <tr>
                                 <td>#</td>
@@ -78,7 +110,10 @@
                                 <tr>
                                     <td>@i</td>
                                     <td>@item.DateCreated.ToString("dd-MMM-yyyy")</td>
-                                    <td>@item.DocumentNumber</td>
+                                    <td>
+                                        <a asp-controller="PointOfSale" asp-action="@item.Document.ToString()"
+                                   asp-route-id="@item.Id">@item.DocumentNumber</a>
+                                    </td>
                                     <td>@Helpers.FormatAmount(item.Debit)</td>
                                     <td>@Helpers.FormatAmount(item.Credit)</td>
                                     <td>@Helpers.FormatAmount(balance)</td>

@@ -146,6 +146,7 @@ namespace PosMaster.Dal.Interfaces
                     dbInstance.PinNo = model.PinNo;
                     dbInstance.BusinessShortCode = model.ShortCodeNo;
                     dbInstance.ReceiptFooterNotes = model.ReceiptNotes;
+                    dbInstance.ReceiptFontPercent = model.FontZoom;
                     await _context.SaveChangesAsync();
                     result.Success = true;
                     result.Message = "Updated";
@@ -174,7 +175,8 @@ namespace PosMaster.Dal.Interfaces
                     EmailAddress = model.EmailAddress,
                     PinNo = model.PinNo,
                     ReceiptFooterNotes = model.ReceiptNotes,
-                    BusinessShortCode = model.ShortCodeNo
+                    BusinessShortCode = model.ShortCodeNo,
+                    ReceiptFontPercent = model.FontZoom
                 };
                 instance.InstanceId = instance.Id;
                 _context.ClientInstances.Add(instance);

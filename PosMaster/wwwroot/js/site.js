@@ -110,9 +110,9 @@ var createIssueListTable = function () {
     if (totalDiscount < 0)
         totalDiscount = 0;
     $("#IssueListTable").html(tr);
-    $("#issTotal").text((total).toFixed(2));
-    $("#issDiscount").text(totalDiscount.toFixed(2));
-    $("#issTax").text(totalTax.toFixed(2));
+    $("#issTotal").text((total).toLocaleString(2));
+    $("#issDiscount").text(totalDiscount.toLocaleString(2));
+    $("#issTax").text(totalTax.toLocaleString(2));
     var isCredit = $('#credit-sale-check').val();
     if (isCredit == true)
         $("#posAmountRcvd").val(0);

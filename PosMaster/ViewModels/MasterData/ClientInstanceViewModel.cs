@@ -32,6 +32,8 @@ namespace PosMaster.ViewModels
             EmailAddress = instance.EmailAddress;
             PinNo = instance.PinNo;
             ReceiptNotes = instance.ReceiptFooterNotes;
+            ShortCodeNo = instance.BusinessShortCode;
+            FontZoom = instance.ReceiptFontPercent;
         }
 
         [Display(Name = "Opening Time")]
@@ -59,5 +61,7 @@ namespace PosMaster.ViewModels
         public string ReceiptNotes { get; set; }
         [Display(Name = "Business Short Code")]
         public string ShortCodeNo { get; set; }
+        [Display(Name = "Receipt Zoom %")]
+        public int FontZoom { get; set; }
     }
 }

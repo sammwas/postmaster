@@ -22,5 +22,6 @@ namespace PosMaster.Dal
         public string ReceiptFooterNotes { get; set; }
         public BusinessShortCodeType BusinessShortCodeType { get; set; }
         public string BusinessShortCode { get; set; }
+        public int ReceiptFontPercent { get; set; }
     }
 }

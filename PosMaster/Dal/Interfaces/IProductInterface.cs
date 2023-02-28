@@ -1016,15 +1016,8 @@ namespace PosMaster.Dal.Interfaces
                     result.Message = "Not Found";
                     return result;
                 }
-                /*TODO
-                 * 
-                 * 
-                 * PRINT COUNT TO INT
-                 * 
-                 */
-                var count = int.Parse(receipt.PrintCount);
                 receipt.IsPrinted = true;
-                receipt.PrintCount = $"{count + 1}";
+                receipt.PrintCount += 1;
                 receipt.LastModifiedBy = personnel;
                 receipt.DateLastModified = DateTime.Now;
                 await _context.SaveChangesAsync();
