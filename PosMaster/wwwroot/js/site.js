@@ -477,7 +477,7 @@ $('.product-select-search').select2({
                         buyingPrice: item.buyingPrice,
                         id: item.id,
                         tax: item.taxRate,
-                        name: item.code + ' - ' + item.name,
+                        name: item.name,
                         allowDiscount: item.allowDiscount,
                         code: item.code,
                         priceStartDate: item.priceStartDateStr,
@@ -520,8 +520,10 @@ function printElem(elem) {
 }
 
 
-$("#btnPrint").click(function () {
-    printDiv('printDiv');
+$("#btnPrint").click(function (e) {
+    e.preventDefault();
+    window.print();
+    location.reload();
 });
 
 $("#btnPrintReceipt").click(function () {

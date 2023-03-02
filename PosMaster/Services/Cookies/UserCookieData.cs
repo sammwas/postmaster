@@ -38,8 +38,6 @@ namespace PosMaster.Services
         public string InstanceName { get; set; }
         public DateTime DateCreated { get; set; }
         public string EmailAddress { get; set; }
-        public bool ShowBuyingPrice { get; set; }
         public string Gender { get; set; }
-        public string PinNo { get; set; }
     }
 }
