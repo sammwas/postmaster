@@ -48,5 +48,22 @@ namespace PosMaster.Dal
         public DbSet<TaxType> TaxTypes { get; set; }
         public DbSet<ProductPoQuantityLog> ProductPoQuantityLogs { get; set; }
         public DbSet<GeneralLedgerEntry> GeneralLedgerEntries { get; set; }
-    }
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder); 
+
+            builder.Entity<User>(entity =>
+            {
+                entity.HasIndex(e => e.IdNumber).IsUnique();
+                entity.HasIndex(e => e.PhoneNumber).IsUnique(); 
+            }); 
+            
+            builder.Entity<Receipt>(entity =>
+            {
+                entity.HasIndex(e => e.Stamp).IsUnique(); 
+            });
+
+        }
+        }
 }

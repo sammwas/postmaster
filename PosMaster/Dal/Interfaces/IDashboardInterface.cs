@@ -44,7 +44,8 @@ namespace PosMaster.Dal.Interfaces
                       && c.DateCreated.Date.Equals(DateTime.Now.Date)).SumAsync(c => c.UnitPrice * c.Quantity),
                     WeeklySales = await _context.ReceiptLineItems
                     .Where(c => c.InstanceId.Equals(instanceId) && c.Personnel.Equals(personnel)
-                      && c.DateCreated.Date >= firstWeekDay.Date && c.DateCreated.Date <= lastWeekDay.Date).SumAsync(c => c.UnitPrice * c.Quantity),
+                      && c.DateCreated.Date >= firstWeekDay.Date && c.DateCreated.Date <= lastWeekDay.Date)
+                    .SumAsync(c => c.UnitPrice * c.Quantity),
                     MonthlySales = await _context.ReceiptLineItems
                     .Where(c => c.InstanceId.Equals(instanceId) && c.Personnel.Equals(personnel)
                     && c.DateCreated.Date >= Helpers.firstDayOfMonth.Date && c.DateCreated.Date <= Helpers.lastDayOfMonth.Date)

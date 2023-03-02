@@ -1,6 +1,7 @@
 ﻿using MailKit.Security;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using PosMaster.Services;
 using PosMaster.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -17,6 +18,7 @@ namespace PosMaster.Dal.Interfaces
         void SeedDefaultData(Guid clientId, Guid instanceId);
         Task<ReturnData<EmailSetting>> UpdateEmailSettingAsync(EmailSettingViewModel model);
         Task<ReturnData<EmailSetting>> ClientEmailSettingAsync(Guid clientId);
+        ReturnData<string> UpdateLicence(Guid clientId, string licence, string personnel);
     }
 
 
@@ -29,6 +31,44 @@ namespace PosMaster.Dal.Interfaces
             _context = context;
             _logger = logger;
         }
+
+        public ReturnData<string> UpdateLicence(Guid clientId, string licence, string personnel)
+        {
+            var res = new ReturnData<string>();
+            try
+            {
+                var client = _context.Clients.FirstOrDefault(c => c.Id.Equals(clientId));
+                if (client == null)
+                {
+                    res.Message = "Setting not Found";
+                    return res;
+                }
+
+                var licStatus = LicencingService.VerifyLicence(licence, clientId, client.Name);
+                if (!licStatus.Success)
+                {
+                    res.Message = licStatus.Message;
+                    return res;
+                }
+
+                client.DateLastModified = DateTime.Now;
+                client.Licence = licence;
+                client.LastModifiedBy = personnel;
+                _context.SaveChanges();
+
+                res.Success = true;
+                res.Message = "Licence Updated";
+                return res;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                res.Message = "Error Occured. Try again";
+                res.ErrorMessage = e.Message;
+                return res;
+            }
+        }
+
 
         public async Task<ReturnData<List<Client>>> AllAsync()
         {
@@ -134,7 +174,6 @@ namespace PosMaster.Dal.Interfaces
                     dbClient.CountryShort = model.CountryShort;
                     dbClient.Vision = model.Vision;
                     dbClient.Mission = model.Mission;
-                    dbClient.EnforcePassword = model.EnforcePassword;
                     dbClient.PasswordExpiryMonths = model.PasswordExpiryMonths;
                     dbClient.PostalAddress = model.PostalAddress;
                     dbClient.Town = model.Town;
@@ -169,7 +208,6 @@ namespace PosMaster.Dal.Interfaces
                     CurrencyShort = model.CurrencyShort,
                     Vision = model.Vision,
                     Mission = model.Mission,
-                    EnforcePassword = model.EnforcePassword,
                     PasswordExpiryMonths = model.PasswordExpiryMonths,
                     PostalAddress = model.PostalAddress,
                     Town = model.Town,

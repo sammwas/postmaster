@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using PosMaster.Services;
 using PosMaster.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -196,5 +197,6 @@ namespace PosMaster.Dal.Interfaces
                 return result;
             }
         }
+
     }
 }

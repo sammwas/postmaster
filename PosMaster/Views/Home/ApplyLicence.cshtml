@@ -1,0 +1,44 @@
+﻿@model ApplyLicenceViewModel
+@{
+    Layout = "_LoginLayout";
+    ViewData["Title"] = "Apply Licence";
+}
+
+<form method="post" autocomplete="off" asp-route-returnUrl="@ViewData["ReturnUrl"]">
+    <div asp-validation-summary="All" class="text-danger"></div>
+    <div class="input-group mb-3">
+        <input asp-for="UserName" class="form-control" placeholder="Email adress">
+        <div class="input-group-append">
+            <div class="input-group-text">
+                <span class="fas fa-envelope"></span>
+            </div>
+        </div>
+    </div>
+    <span asp-validation-for="Licence" class="text-danger"></span>
+    <div class="input-group mb-3">
+        <input asp-for="Licence" class="form-control" placeholder="Licence">
+        <div class="input-group-append">
+            <div class="input-group-text">
+                <span class="fas fa-lock"></span>
+            </div>
+        </div>
+    </div>
+    <span asp-validation-for="Licence" class="text-danger"></span>
+    <div class="row">
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary btn-block">
+                <i class="fa fa-key"></i> Submit
+            </button>
+        </div>
+    </div>
+    <div class="row">
+        <hr />
+        <environment include="Development">
+            <textarea>@ViewData["Licence"]</textarea>
+        </environment>
+    </div>
+</form>
+<p class="mb-1">
+    <br />
+    <a asp-action="Login" style="text-decoration:underline">Back to login</a>
+</p>  

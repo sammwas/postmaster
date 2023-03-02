@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace PosMaster.Services
@@ -134,6 +135,31 @@ namespace PosMaster.Services
         }
 
         public static List<string> userTitles = new List<string> { "Mr.", "Mrs.", "Ms." };
+
+        public static string EncryptSha256(string rawData)
+        {
+            using var sha256Hash = SHA256.Create();
+            byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(rawData));
+            var builder = new StringBuilder();
+            for (var i = 0; i < bytes.Length; i++)
+            {
+                builder.Append(bytes[i].ToString("X2"));
+            }
+            return builder.ToString();
+        }
+
+        public static string EncryptSha1(string plainText)
+        {
+            using var sha256Hash = SHA1.Create();
+            var bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(plainText));
+
+            var builder = new StringBuilder();
+            for (var i = 0; i < bytes.Length; i++)
+            {
+                builder.Append(bytes[i].ToString("X2"));
+            }
+            return builder.ToString();
+        }
 
         public static string RelativeTime(DateTime dateTime)
         {

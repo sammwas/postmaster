@@ -16,6 +16,8 @@ using System.Diagnostics;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 
 namespace PosMaster.Controllers
 {
@@ -28,10 +30,13 @@ namespace PosMaster.Controllers
         private readonly IClientInstanceInterface _instanceInterface;
         private readonly ILogger<HomeController> _logger;
         private readonly ICookiesService _cookiesService;
+        private readonly IWebHostEnvironment _hostEnvironment;
+        private readonly IClientInterface _clientInterface;
 
         public HomeController(UserManager<User> userManager, SignInManager<User> signInManager,
         IEmailService emailService, IUserInterface userInterface, ILogger<HomeController> logger,
-        IClientInstanceInterface instanceInterface, ICookiesService cookiesService)
+        IClientInstanceInterface instanceInterface, ICookiesService cookiesService,
+        IWebHostEnvironment hostEnvironment, IClientInterface clientInterface = null)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -40,6 +45,9 @@ namespace PosMaster.Controllers
             _logger = logger;
             _instanceInterface = instanceInterface;
             _cookiesService = cookiesService;
+            _hostEnvironment = hostEnvironment;
+            _clientInterface = clientInterface;
+
         }
 
         public IActionResult Index(string returnUrl = null)
@@ -65,6 +73,7 @@ namespace PosMaster.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model, string returnUrl = null)
         {
+            var msg = "";
             ViewData["ReturnUrl"] = returnUrl;
             var log = new UserLoginLog
             {
@@ -82,7 +91,7 @@ namespace PosMaster.Controllers
                 log.RefererUrl = Request.Headers[HeaderNames.Referer];
                 if (!ModelState.IsValid)
                 {
-                    var msg = "Invalid Request";
+                    msg = "Invalid Request";
                     TempData.SetData(AlertLevel.Warning, "Login Failed", msg);
                     log.Notes = msg;
                     await _userInterface.AddLoginLogAsync(log);
@@ -111,7 +120,7 @@ namespace PosMaster.Controllers
                     log.InstanceId = user.InstanceId;
                     if (!user.EmailConfirmed)
                     {
-                        var msg = "Your have not confirmed your email.";
+                        msg = "Your have not confirmed your email.";
                         TempData.SetData(AlertLevel.Warning, "Login Failed", msg);
                         log.Notes = msg;
                         await _userInterface.AddLoginLogAsync(log);
@@ -122,7 +131,7 @@ namespace PosMaster.Controllers
 
                     if (!user.Status.Equals(EntityStatus.Active))
                     {
-                        var msg = $"Account is not Active - {user.Status} .";
+                        msg = $"Account is not Active - {user.Status} .";
                         TempData.SetData(AlertLevel.Warning, "Login Failed", msg);
                         log.Notes = msg;
                         await _userInterface.AddLoginLogAsync(log);
@@ -131,13 +140,33 @@ namespace PosMaster.Controllers
                         return View(model);
                     }
 
-                    var msg_ = "User logged in success";
-                    _logger.LogInformation(msg_);
-                    TempData.SetData(AlertLevel.Success, "Login Success", msg_);
+                    var instanceResult = await _instanceInterface.ByIdAsync(user.InstanceId);
+                    var isValidRes = LicencingService.VerifyLicence(instanceResult.Data.Client.Licence,
+                        instanceResult.Data.Client.Id, instanceResult.Data.Client.Name);
+                    if (isValidRes.Success)
+                    {
+                        var licenceData = isValidRes.Data;
+                        if (licenceData.RemainingDays < 70)
+                            TempData["LicenceMsg"] = $"Licence Expires in {Math.Floor(licenceData.RemainingDays)} days.";
+
+                    }
+                    else
+                    {
+                        await _signInManager.SignOutAsync();
+                        log.Notes = $"{msg} - {isValidRes.Message}";
+                        await _userInterface.AddLoginLogAsync(log);
+                        ModelState.AddModelError(string.Empty, $"{msg} Kindly contact admin.");
+                        TempData.SetData(AlertLevel.Error, "Licence", isValidRes.Message);
+                        return RedirectToAction(nameof(ApplyLicence), new { id = user.ClientId });
+                    }
+
+                    msg = "User logged in success";
+                    _logger.LogInformation(msg);
+                    TempData.SetData(AlertLevel.Success, "Login Success", msg);
                     log.Success = true;
-                    log.Notes = msg_;
+                    log.Notes = msg;
                     await _userInterface.AddLoginLogAsync(log);
-                    await StoreCookiesDataAsync(user);
+                    await StoreCookiesDataAsync(user, instanceResult.Data);
                     return RedirectToLocal(returnUrl);
                 }
 
@@ -148,16 +177,16 @@ namespace PosMaster.Controllers
 
                 if (result.IsLockedOut)
                 {
-                    var msg_ = "User account locked out.";
-                    TempData.SetData(AlertLevel.Warning, "Login Failed", msg_);
-                    _logger.LogWarning(msg_);
-                    log.Notes = msg_;
+                    msg = "User account locked out.";
+                    TempData.SetData(AlertLevel.Warning, "Login Failed", msg);
+                    _logger.LogWarning(msg);
+                    log.Notes = msg;
                     await _userInterface.AddLoginLogAsync(log);
                     return RedirectToAction(nameof(Lockout));
                 }
                 else
                 {
-                    var msg = "Invalid login attempt.";
+                    msg = "Invalid login attempt.";
                     ModelState.AddModelError(string.Empty, msg);
                     TempData.SetData(AlertLevel.Error, "Login Failed", msg);
                     log.Notes = msg;
@@ -559,6 +588,73 @@ namespace PosMaster.Controllers
             }
         }
 
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> ApplyLicence(Guid id)
+        {
+            ViewData["Licence"] = "";
+            if (_hostEnvironment.IsDevelopment())
+            {
+                var clientRes = await _clientInterface.ByIdAsync(id);
+                var licence = LicencingService.GenerateLicence(clientRes.Data.Id, 1, 3745, clientRes.Data.Name);
+                ViewData["Licence"] = licence.Data.Licence;
+            }
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ApplyLicence(ApplyLicenceViewModel model)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    var msg = "Invalid Request";
+                    TempData.SetData(AlertLevel.Warning, "Licence", msg);
+                    return View(model);
+                }
+
+                var user = await _userManager.FindByNameAsync(model.UserName);
+                if (user == null)
+                {
+                    var uMsg = $"User {model.UserName} not Found";
+                    ModelState.AddModelError("UserName", uMsg);
+                    TempData.SetData(AlertLevel.Warning, "Licence", uMsg);
+                    return View(model);
+                }
+
+                var appStatus = _clientInterface.UpdateLicence(user.ClientId, model.Licence, model.UserName);
+                if (!appStatus.Success)
+                {
+                    TempData.SetData(AlertLevel.Warning, "Licence", appStatus.Message);
+                    return View(model);
+                }
+
+                TempData.SetData(AlertLevel.Success, "Licence", "Licence Applied");
+                return RedirectToAction(nameof(ApplyLicenceConfirmation), new { id = user.ClientId });
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                _logger.LogError($"Error applying licence :- {e.Message}");
+                var eMsg = "Error occured. Try later.";
+                ModelState.AddModelError(string.Empty, eMsg);
+                TempData.SetData(AlertLevel.Error, "Licence", eMsg);
+                return View(model);
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ApplyLicenceConfirmation(Guid id)
+        {
+            var clientRes = await _clientInterface.ByIdAsync(id);
+            var client = clientRes.Data;
+            var licenceStatus = LicencingService.VerifyLicence(client.Licence, client.Id, client.Name);
+            TempData.SetData(licenceStatus.Success ? AlertLevel.Success : AlertLevel.Warning, "Licence", licenceStatus.Message);
+            return View(licenceStatus.Data);
+        }
+
         #region Helpers 
         private void AddErrors(IdentityResult result)
         {
@@ -568,21 +664,23 @@ namespace PosMaster.Controllers
             }
         }
 
-        private async Task StoreCookiesDataAsync(User user)
+        private async Task StoreCookiesDataAsync(User user, ClientInstance clientInstance = null)
         {
             var userData = new UserCookieData(user);
-            var instanceResult = await _instanceInterface.ByIdAsync(user.InstanceId);
-            if (instanceResult.Success)
+            if (clientInstance == null)
             {
-                var instance = instanceResult.Data;
-                userData.InstanceCode = instance.Code;
-                userData.InstanceName = instance.Name;
-                var client = instance.Client;
-                userData.ClientCode = client.Code;
-                userData.ClientName = client.Name;
-                userData.ClientLogoPath = client.LogoPath;
-                userData.CurrencyShort = client.CurrencyShort;
+                var instanceResult = await _instanceInterface.ByIdAsync(user.InstanceId);
+                clientInstance = instanceResult.Data;
             }
+
+            userData.InstanceCode = clientInstance.Code;
+            userData.InstanceName = clientInstance.Name;
+            var client = clientInstance.Client;
+            userData.ClientCode = client.Code;
+            userData.ClientName = client.Name;
+            userData.ClientLogoPath = client.LogoPath;
+            userData.CurrencyShort = client.CurrencyShort;
+
             _cookiesService.Store(userData);
         }
 

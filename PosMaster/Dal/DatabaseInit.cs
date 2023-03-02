@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using PosMaster.Dal.Interfaces;
+using PosMaster.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -42,7 +43,7 @@ namespace PosMaster.Dal
                     CurrencyFull = "KENYA SHILLINGS",
                     CurrencyShort = "KES",
                     Code = "DEFAULT",
-                    EnforcePassword = true,
+                    MaxInstance = 2,
                     PasswordExpiryMonths = 1,
                     Town = "NAIROBI",
                     PhoneNumberLength = 10,
@@ -50,6 +51,7 @@ namespace PosMaster.Dal
                     DisplayBuyingPrice = true,
                     Personnel = Constants.SuperAdminEmail
                 };
+                client.Licence = LicencingService.GenerateLicence(clientId, 1, 3745, client.Name).Data.Licence;
                 context.Clients.Add(client);
                 context.SaveChanges();
 
