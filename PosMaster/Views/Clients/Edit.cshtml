@@ -96,43 +96,81 @@
             </div>
             <div class="row">
                 <div class="col-md-6">
-                    <div class="form-group">
-                        <label asp-for="CurrencyShort"></label>
-                        <input asp-for="CurrencyShort" class="form-control" placeholder="KES">
-                        <span asp-validation-for="CurrencyShort" class="text-danger"></span>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label asp-for="CurrencyShort"></label>
+                                <input asp-for="CurrencyShort" class="form-control" placeholder="KES">
+                                <span asp-validation-for="CurrencyShort" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="form-group">
+                                <label asp-for="CurrencyFull"></label>
+                                <input asp-for="CurrencyFull" class="form-control" placeholder="Kenya Shillings">
+                                <span asp-validation-for="CurrencyFull" class="text-danger"></span>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <div class="form-group">
-                        <label asp-for="CurrencyFull"></label>
-                        <input asp-for="CurrencyFull" class="form-control" placeholder="Kenya Shillings">
-                        <span asp-validation-for="CurrencyFull" class="text-danger"></span>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label asp-for="CountryShort"></label>
+                                <input asp-for="CountryShort" class="form-control" placeholder="KE">
+                                <span asp-validation-for="CountryShort" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="form-group">
+                                <label asp-for="CountryFull"></label>
+                                <input asp-for="CountryFull" class="form-control" placeholder="Kenya">
+                                <span asp-validation-for="CountryFull" class="text-danger"></span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="row">
                 <div class="col-md-6">
-                    <div class="form-group">
-                        <label asp-for="CountryShort"></label>
-                        <input asp-for="CountryShort" class="form-control" placeholder="KE">
-                        <span asp-validation-for="CountryShort" class="text-danger"></span>
+                    <div class="row">
+                        <div class="col-md-4">
+                            @if (User.IsInRole(Role.SuperAdmin))
+                            {
+                                <div class="form-group">
+                                    <label asp-for="MaxInstances"></label>
+                                    <input asp-for="MaxInstances" class="form-control" placeholder="1">
+                                    <span asp-validation-for="MaxInstances" class="text-danger"></span>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="form-group">
+                                    <label asp-for="MaxInstances"></label>
+                                    <input asp-for="MaxInstances" class="form-control readonly placeholder="1">
+                                    <span asp-validation-for="MaxInstances" class="text-danger"></span>
+                                </div>
+                            }
+
+                        </div>
+                        <div class="col-md-8">
+                            <br />
+                            <div class="form-check">
+                                <input class="form-check-input" asp-for="DisplayBuyingPrice">
+                                <label class="form-check-label" asp-for="DisplayBuyingPrice"></label>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label asp-for="CountryFull"></label>
-                        <input asp-for="CountryFull" class="form-control" placeholder="Kenya">
-                        <span asp-validation-for="CountryFull" class="text-danger"></span>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
                 <div class="col-md-6">
                     <div class="form-group">
                         <label asp-for="Notes"></label>
                         <input asp-for="Notes" class="form-control" placeholder="Notes" />
                     </div>
                 </div>
+            </div>
+            <div class="row">
                 <div class="col-md-6">
                     <div class="form-group">
                         <label asp-for="Status"></label>
@@ -149,22 +187,15 @@
                         </div>
                     </div>
                 </div>
-            </div>
-            @*<div class="row">
-                <div class="col-md-12">
-                <div class="form-check">
-                <input asp-for="EnforcePassword" class="form-check-input">
-                <label class="form-check-label" asp-for="EnforcePassword"></label>
-                </div>
-                </div>
-                </div>*@
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="form-check">
-                        <input class="form-check-input" asp-for="DisplayBuyingPrice">
-                        <label class="form-check-label" asp-for="DisplayBuyingPrice"></label>
+                @if (User.IsInRole(Role.SuperAdmin))
+                {
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Base ID</label>
+                            <input class="form-control" value="@EncypterService.Encrypt($"{Model.Id}")" />
+                        </div>
                     </div>
-                </div>
+                }
             </div>
         </div>
         @if (!User.IsInRole(Role.Clerk))

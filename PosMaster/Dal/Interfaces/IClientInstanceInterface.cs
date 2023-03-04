@@ -156,7 +156,8 @@ namespace PosMaster.Dal.Interfaces
                 }
 
                 var count = _context.ClientInstances.Count(c => c.ClientId.Equals(model.ClientId));
-                var maxCount = _context.Clients.Where(c => c.Id.Equals(model.Id)).Select(c => c.MaxInstance).First();
+                var maxCount = _context.Clients.Where(c => c.Id.Equals(model.ClientId))
+                    .Select(c => c.MaxInstance).First();
                 if (maxCount <= count)
                 {
                     result.Message = $"Instances limit is {maxCount}";

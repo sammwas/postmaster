@@ -7,7 +7,7 @@ namespace PosMaster.ViewModels
     {
         public ClientInstanceViewModel()
         {
-
+            FontZoom = 100;
         }
 
         public ClientInstanceViewModel(ClientInstance instance)

@@ -191,6 +191,8 @@ namespace PosMaster.Dal.Interfaces
                     dbClient.LastModifiedBy = model.Personnel;
                     if (model.IsNewImage)
                         dbClient.LogoPath = model.LogoPath;
+                    if (model.IsSuperAdmin)
+                        dbClient.MaxInstance = model.MaxInstances;
                     await _context.SaveChangesAsync();
                     result.Data = dbClient;
                     result.Success = true;
@@ -222,7 +224,8 @@ namespace PosMaster.Dal.Interfaces
                     Personnel = model.Personnel,
                     Status = model.Status,
                     LogoPath = model.LogoPath,
-                    Notes = model.Notes
+                    Notes = model.Notes,
+                    MaxInstance = model.MaxInstances
                 };
                 client.ClientId = client.InstanceId = client.Id;
                 var instance = new ClientInstance

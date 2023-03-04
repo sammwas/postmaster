@@ -8,7 +8,7 @@ namespace PosMaster.ViewModels
     {
         public ClientViewModel()
         {
-
+            MaxInstances = 1;
         }
 
         public ClientViewModel(Client client)
@@ -81,5 +81,8 @@ namespace PosMaster.ViewModels
         public bool DisplayBuyingPrice { get; set; }
         public bool IsNewImage { get; set; }
         public IFormFile File { get; set; }
+        [Display(Name = "Max Instances")]
+        public int MaxInstances { get; set; }
+        public bool IsSuperAdmin { get; set; }
     }
 }
