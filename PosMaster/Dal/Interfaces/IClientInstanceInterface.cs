@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using PosMaster.Services;
 using PosMaster.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -156,6 +155,14 @@ namespace PosMaster.Dal.Interfaces
                     return result;
                 }
 
+                var count = _context.ClientInstances.Count(c => c.ClientId.Equals(model.ClientId));
+                var maxCount = _context.Clients.Where(c => c.Id.Equals(model.Id)).Select(c => c.MaxInstance).First();
+                if (maxCount <= count)
+                {
+                    result.Message = $"Instances limit is {maxCount}";
+                    _logger.LogInformation($"{tag} adding failed {model.Id} : {result.Message}");
+                    return result;
+                }
                 var instance = new ClientInstance
                 {
                     OpeningTime = hasOpenTime ? oTime : DateTime.Now,

@@ -178,6 +178,7 @@ namespace PosMaster.Controllers
 
             return RedirectToAction(nameof(PurchaseOrders), new { dtFrom = Helpers.FirstDayOfWeek().ToString("dd-MMM-yyyy"), dtTo = DateTime.Now.ToString("dd-MMM-yyyy") });
         }
+
         public async Task<IActionResult> ReceivedGoods(string insId = "", string dtFrom = "", string dtTo = "", string search = "")
         {
             ViewData["InstanceId"] = insId;
@@ -198,6 +199,24 @@ namespace PosMaster.Controllers
                 TempData.SetData(AlertLevel.Warning, "Received Goods", result.Message);
             return View(result.Data);
         }
+        public async Task<IActionResult> StockAdjustmentLogs(string insId = "", string dtFrom = "", string dtTo = "", string search = "")
+        {
+            ViewData["InstanceId"] = insId;
+            ViewData["DtFrom"] = dtFrom;
+            ViewData["DtTo"] = dtTo;
+            ViewData["Search"] = search;
+            Guid? instanceId = null;
+            if (Guid.TryParse(insId, out var iId))
+                instanceId = iId;
+            if (User.IsInRole(Role.Clerk))
+                instanceId = _userData.InstanceId;
+
+            var result = await _productInterface.ProductPoQuantityLogAsync(_userData.ClientId, instanceId, dtFrom, dtTo, search);
+            if (!result.Success)
+                TempData.SetData(AlertLevel.Warning, "Logs", result.Message);
+            return View(result.Data);
+        }
+
         public async Task<IActionResult> ReceivedGoodsDetail(Guid id)
         {
             var result = await _productInterface.GrnByIdAsync(id);
@@ -205,6 +224,7 @@ namespace PosMaster.Controllers
                 TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, "Goods Received Note", result.Message);
             return View(result.Data);
         }
+
         public async Task<IActionResult> EditReceivedGoods(Guid? id)
         {
             var model = new GoodsReceivedNoteViewModel { Status = EntityStatus.Active };

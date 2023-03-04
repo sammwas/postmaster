@@ -146,7 +146,7 @@ namespace PosMaster.Controllers
                     if (isValidRes.Success)
                     {
                         var licenceData = isValidRes.Data;
-                        if (licenceData.RemainingDays < 70)
+                        if (licenceData.RemainingDays < 7)
                             TempData["LicenceMsg"] = $"Licence Expires in {Math.Floor(licenceData.RemainingDays)} days.";
 
                     }

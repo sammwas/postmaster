@@ -22,6 +22,7 @@ namespace PosMaster.Dal.Interfaces
             string search = "", string personnel = "");
         Task<ReturnData<List<GoodReceivedNote>>> GoodsReceivedAsync(Guid? clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "", string personnel = "");
         Task<ReturnData<List<GeneralLedgerEntry>>> GeneralLedgersAsync(Guid clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "");
+        Task<ReturnData<List<ProductPoQuantityLog>>> ProductPoQuantityLogAsync(Guid clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "");
         Task<ReturnData<PurchaseOrder>> PurchaseOrderByIdAsync(Guid id);
         string DocumentRefNumber(Document document, Guid clientId);
         Task<ReturnData<List<Product>>> LowStockProductsAsync(Guid clientId, Guid? instanceId, int limit = 10);
@@ -132,7 +133,7 @@ namespace PosMaster.Dal.Interfaces
                 }
                 var count = _context.ProductStockAdjustmentLogs
                     .Count(p => p.ProductId.Equals(product.Id));
-                if (product.AvailableQuantity.Equals(model.QuantityTo))
+                if (!product.AvailableQuantity.Equals(model.QuantityTo))
                 {
                     count += 1;
                     var log = new ProductStockAdjustmentLog
@@ -148,6 +149,33 @@ namespace PosMaster.Dal.Interfaces
                     };
                     _context.ProductStockAdjustmentLogs.Add(log);
                 }
+                var lastPoQty = await _context.ProductPoQuantityLogs
+                    .Where(p => p.ProductId.Equals(product.Id))
+                    .OrderByDescending(p => p.DateCreated)
+                    .FirstOrDefaultAsync();
+                if (lastPoQty != null)
+                {
+                    lastPoQty.AvailableQuantity = model.QuantityTo;
+                    lastPoQty.BuyingPrice = model.BuyingPriceTo;
+                    lastPoQty.LastModifiedBy = model.Personnel;
+                    lastPoQty.DateLastModified = DateTime.Now;
+                }
+                else
+                {
+                    var productPo = new ProductPoQuantityLog
+                    {
+                        ClientId = product.ClientId,
+                        InstanceId = product.InstanceId,
+                        ProductId = product.Id,
+                        Personnel = model.Personnel,
+                        AvailableQuantity = model.QuantityTo,
+                        BuyingPrice = model.BuyingPriceTo,
+                        Notes = model.Notes,
+                        Code = $"{product.Code}-{DateTime.Now}"
+                    };
+                    _context.ProductPoQuantityLogs.Add(productPo);
+                }
+
                 product.AvailableQuantity = model.QuantityTo;
                 product.BuyingPrice = model.BuyingPriceTo;
                 product.LastModifiedBy = model.Personnel;
@@ -450,6 +478,10 @@ namespace PosMaster.Dal.Interfaces
                         _logger.LogWarning($"{tag} sale failed {item.ProductId} : {result.Message}");
                         continue;
                     }
+
+                    var poLineQtyLogs = _context.ProductPoQuantityLogs
+                        .Where(p => p.ProductId.Equals(product.Id) && p.AvailableQuantity > 0)
+                        .OrderBy(p => p.DateCreated).ToList();
                     var lineItem = new ReceiptLineItem
                     {
                         ReceiptId = receipt.Id,
@@ -462,8 +494,25 @@ namespace PosMaster.Dal.Interfaces
                         Personnel = receipt.Personnel,
                         ClientId = product.ClientId,
                         InstanceId = product.InstanceId,
-                        BuyingPrice = product.BuyingPrice
+                        BuyingPrice = Math.Round(poLineQtyLogs.Sum(p => p.BuyingPrice * p.AvailableQuantity)
+                        / poLineQtyLogs.Sum(p => p.AvailableQuantity), 2)
                     };
+                    decimal remainingQty = item.Quantity;
+                    foreach (var quantityLog in poLineQtyLogs)
+                    {
+                        if (remainingQty <= 0)
+                            break;
+                        if (quantityLog.AvailableQuantity <= remainingQty)
+                        {
+                            remainingQty -= quantityLog.AvailableQuantity;
+                            quantityLog.AvailableQuantity = 0;
+                        }
+                        if (quantityLog.AvailableQuantity >= remainingQty)
+                        {
+                            quantityLog.AvailableQuantity -= remainingQty;
+                            remainingQty = 0;
+                        }
+                    }
                     receipt.ReceiptLineItems.Add(lineItem);
                     product.AvailableQuantity -= item.Quantity;
                     product.DateLastModified = DateTime.Now;
@@ -472,24 +521,19 @@ namespace PosMaster.Dal.Interfaces
 
                 if (model.IsCredit)
                 {
-                    //var balancesRes = await GlUserBalanceAsync(GlUserType.Customer, customer.Id);
-                    //if (!balancesRes.Success)
-                    //{
-                    //    result.Message = $"{customer.Code} available Limit is {balancesRes.Message}";
-                    //    _logger.LogWarning($"{tag} sale failed {model.CustomerId} : {result.Message}");
-                    //    return result;
-                    //}
-                    //var availableLimit = balancesRes.Data.ExpectedAmount - customer.CreditLimit;
-                    //if (totalAmount > availableLimit)
-                    //{
-                    //    result.Message = $"{customer.Code} Limit is {availableLimit}";
-                    //    _logger.LogWarning($"{tag} sale failed {model.CustomerId} : {result.Message}");
-                    //    return result;
-                    //}
-                    var totalAmount = receipt.ReceiptLineItems.Sum(r => r.Amount);
-                    if (totalAmount > customer.CreditLimit)
+                    var balancesRes = await GlUserBalanceAsync(GlUserType.Customer, customer.Id);
+                    if (!balancesRes.Success)
                     {
-                        result.Message = $"{customer.Code} Limit is {customer.CreditLimit}";
+                        result.Message = $"{customer.Code} available Limit is {balancesRes.Message}";
+                        _logger.LogWarning($"{tag} sale failed {model.CustomerId} : {result.Message}");
+                        return result;
+                    }
+                    var totalAmount = receipt.ReceiptLineItems.Sum(r => r.Amount);
+                    var availableLimit = customer.CreditLimit - balancesRes.Data.ExpectedAmount
+                        + balancesRes.Data.CreditAmount;
+                    if (totalAmount > availableLimit)
+                    {
+                        result.Message = $"{customer.Code} Limit available is {availableLimit}";
                         _logger.LogWarning($"{tag} sale failed {model.CustomerId} : {result.Message}");
                         return result;
                     }
@@ -1380,7 +1424,9 @@ namespace PosMaster.Dal.Interfaces
                 }
                 productCode = productCode.ToLower();
                 var product = await _context.Products
-                    .Include(p => p.ProductCategory).Include(p => p.TaxType)
+                    .Include(p => p.ProductCategory)
+                    .Include(p => p.TaxType)
+                    .Include(p => p.UnitOfMeasure)
                     .Where(p => p.InstanceId.Equals(instanceId))
                     .Where(p => p.Code.ToLower().Equals(productCode))
                     .FirstOrDefaultAsync();
@@ -1580,5 +1626,44 @@ namespace PosMaster.Dal.Interfaces
             }
         }
 
+        public async Task<ReturnData<List<ProductPoQuantityLog>>> ProductPoQuantityLogAsync(Guid clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "")
+        {
+            var result = new ReturnData<List<ProductPoQuantityLog>> { Data = new List<ProductPoQuantityLog>() };
+            var tag = nameof(ProductPoQuantityLogAsync);
+            _logger.LogInformation($"{tag} get p.o quantity log: clientId {clientId}, instanceId {instanceId}, duration {dateFrom}-{dateTo}, search {search}");
+            try
+            {
+                var dataQuery = _context.ProductPoQuantityLogs
+                    .Include(r => r.Product)
+                    .Include(r => r.PurchaseOrder)
+                    .Where(r => r.ClientId.Equals(clientId));
+                if (instanceId != null)
+                    dataQuery = dataQuery.Where(r => r.InstanceId.Equals(instanceId.Value));
+                var hasFromDate = DateTime.TryParse(dateFrom, out var dtFrom);
+                var hasToDate = DateTime.TryParse(dateTo, out var dtTo);
+                if (hasFromDate)
+                    dataQuery = dataQuery.Where(r => r.DateCreated.Date >= dtFrom.Date);
+                if (hasToDate)
+                    dataQuery = dataQuery.Where(r => r.DateCreated.Date <= dtTo.Date);
+                if (!string.IsNullOrEmpty(search))
+                    dataQuery = dataQuery.Where(r => r.Product.Code.ToLower().Contains(search.ToLower()));
+                var data = await dataQuery.OrderByDescending(r => r.DateCreated)
+                    .ToListAsync();
+                result.Success = data.Any();
+                result.Message = result.Success ? "Found" : "Not Found";
+                if (result.Success)
+                    result.Data = data;
+                _logger.LogInformation($"{tag} found {data.Count} logs");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                result.ErrorMessage = ex.Message;
+                result.Message = "Error occured";
+                _logger.LogError($"{tag} {result.Message} : {ex}");
+                return result;
+            }
+        }
     }
 }

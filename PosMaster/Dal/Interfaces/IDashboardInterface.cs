@@ -86,7 +86,7 @@ namespace PosMaster.Dal.Interfaces
                     && c.DateCreated.Date >= Helpers.firstDayOfMonth.Date && c.DateCreated.Date <= Helpers.lastDayOfMonth.Date)
                     .SumAsync(c => c.UnitPrice * c.Quantity),
                     Products = await _context.Products.CountAsync(p => p.ClientId.Equals(clientId)),
-                    TotalStockValue = await _context.Products.Where(p => p.ClientId.Equals(clientId))
+                    TotalStockValue = await _context.ProductPoQuantityLogs.Where(p => p.ClientId.Equals(clientId))
                     .SumAsync(p => p.BuyingPrice * p.AvailableQuantity),
                     TotalActualProfit = await _context.ReceiptLineItems.Where(p => p.ClientId.Equals(clientId))
                     .SumAsync(r => (r.UnitPrice * r.Quantity) - (r.BuyingPrice * r.Quantity)),
@@ -125,9 +125,10 @@ namespace PosMaster.Dal.Interfaces
                     ClientInstances = await _context.ClientInstances.CountAsync(),
                     Users = await _context.Users.CountAsync(),
                     Products = await _context.Products.CountAsync(),
-                    TotalStockValue = await _context.Products.Where(p => p.Status.Equals(EntityStatus.Active)).
-                    SumAsync(p => p.BuyingPrice * p.AvailableQuantity),
-                    TotalActualProfit = await _context.ReceiptLineItems.SumAsync(r => (r.UnitPrice * r.Quantity) - (r.BuyingPrice * r.Quantity)),
+                    TotalStockValue = await _context.ProductPoQuantityLogs
+                    .SumAsync(p => p.BuyingPrice * p.AvailableQuantity),
+                    TotalActualProfit = await _context.ReceiptLineItems
+                    .SumAsync(r => (r.UnitPrice * r.Quantity) - (r.BuyingPrice * r.Quantity)),
                     TotalExpectedProfit = await _context.ReceiptLineItems.SumAsync(r =>
                     (r.SellingPrice * r.Quantity) - (r.BuyingPrice * r.Quantity)),
                     TotalReceiptsAmount = await _context.ReceiptLineItems.SumAsync(r => r.Quantity * r.UnitPrice),

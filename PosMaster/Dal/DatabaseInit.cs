@@ -62,6 +62,7 @@ namespace PosMaster.Dal
                     ClientId = clientId,
                     Code = "DEFAULT",
                     Name = "DEFAULT INSTANCE",
+                    ReceiptFontPercent = 100,
                     Personnel = Constants.SuperAdminEmail
                 };
                 context.ClientInstances.Add(instance);
