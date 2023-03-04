@@ -1,0 +1,36 @@
+﻿@model AuthenticationLicence
+@{
+    ViewData["Active"] = "Reports";
+    ViewData["Title"] = "Licence Status";
+}
+<div class="card card-primary">
+    <div class="card-header">
+        <h3 class="card-title">@ViewData["Title"]</h3>
+    </div>
+    <div class="card-body">
+        <div class="body table-responsive">
+            @if (Model.IsValid)
+            {
+                <h4>
+                    <i class="fa fa-check-circle"></i>  Licence status <span class="badge badge-success">ACTIVE</span>
+                </h4>
+                <h6>
+                    The licence is valid for the next @Math.Floor(Model.RemainingDays) days
+                </h6>
+                <p>
+                    <i>Expiry Date : @Model.ExpiryDate </i>
+                </p>
+            }
+            else
+            {
+                <h4>
+                    <i class="fa fa-lock"></i>  Licence status <span class="badge badge-danger">INACTIVE</span>
+                </h4>
+                <p class="text-danger">NOTE: The applied licence has Expired.</p>
+                <p>
+                    <i>Contact Admin </i>
+                </p>
+            }
+        </div>
+    </div>
+</div>

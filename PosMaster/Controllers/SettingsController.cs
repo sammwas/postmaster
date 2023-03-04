@@ -212,7 +212,6 @@ namespace PosMaster.Controllers
             }
         }
 
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UploadExcel(UploadExcelViewModel model)
@@ -326,7 +325,7 @@ namespace PosMaster.Controllers
                                     Notes = workSheet.Cells[i, 13]?.Value?.ToString() ?? "",
                                     InstanceId = _userData.InstanceId,
                                     ClientId = _userData.ClientId,
-                                    PersonnelName=_userData.FullName
+                                    PersonnelName = _userData.FullName
                                 };
                                 var resultCustomer = await _customerInterface.EditAsync(customerViewModel);
                                 returnData.ErrorMessage = resultCustomer.ErrorMessage;
@@ -362,6 +361,16 @@ namespace PosMaster.Controllers
                 TempData.SetData(AlertLevel.Error, tag, "Error occured. Try later");
                 return View(model);
             }
+        }
+
+        public async Task<IActionResult> LicenceStatus()
+        {
+            var clientRes = await _clientInterface.ByIdAsync(_userData.ClientId);
+            if (!clientRes.Success)
+                TempData.SetData(AlertLevel.Warning, "Licence", clientRes.Message);
+            var client = clientRes.Data;
+            var licence = LicencingService.VerifyLicence(client.Licence, client.Id, client.Name);
+            return View(licence.Data);
         }
     }
 }
