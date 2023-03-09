@@ -69,7 +69,7 @@ namespace PosMaster
             services.AddDbContext<DatabaseContext>(options =>
             {
                 var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
-                Console.WriteLine($"{env} DbConnection String > Src {from}  :- {conString}");
+                Console.WriteLine($"{env} DbConnection String > Src {from}  :-Server: {server} Port: {port} Database: {database} User: {user}");
                 options.UseNpgsql(conString);
             });
 

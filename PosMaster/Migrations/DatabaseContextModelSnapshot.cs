@@ -1297,6 +1297,9 @@ namespace PosMaster.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
+                    b.Property<int>("UserType")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ReceiptId");
@@ -1982,6 +1985,9 @@ namespace PosMaster.Migrations
                         .HasColumnType("text");
 
                     b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("UserType")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
