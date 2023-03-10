@@ -351,7 +351,7 @@ namespace PosMaster.Dal.Interfaces
             {
                 var product = new Product
                 {
-                    Code = "D000",
+                    Code = Constants.DefaultProductCode,
                     Name = "DEFAULT",
                     ProductCategoryId = _context.ProductCategories
                     .Where(u => u.ClientId.Equals(clientId)).Select(u => u.Id)

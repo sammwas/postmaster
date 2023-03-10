@@ -230,6 +230,7 @@ namespace PosMaster.Dal.Interfaces
                     .Include(c => c.UnitOfMeasure)
                     .Include(p => p.TaxType)
                     .Where(c => c.ClientId.Equals(clientId))
+                    .Where(p => !p.Code.Equals(Constants.DefaultProductCode))
                     .AsQueryable();
                 if (instanceId != null)
                     dataQry = dataQry.Where(d => d.InstanceId.Equals(instanceId.Value));
@@ -934,7 +935,8 @@ namespace PosMaster.Dal.Interfaces
                     .Include(c => c.ProductCategory)
                     .Include(c => c.UnitOfMeasure)
                     .Where(p => p.AvailableQuantity <= p.ReorderLevel)
-                    .Where(d => d.ClientId.Equals(clientId));
+                    .Where(d => d.ClientId.Equals(clientId))
+                    .Where(p => !p.Code.Equals(Constants.DefaultProductCode));
                 if (instanceId != null)
                     dataQry = dataQry.Where(p => p.InstanceId.Equals(instanceId));
                 var data = await dataQry.OrderBy(p => p.AvailableQuantity)

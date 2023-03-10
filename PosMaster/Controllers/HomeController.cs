@@ -64,6 +64,7 @@ namespace PosMaster.Controllers
             _logger.LogInformation($"{nameof(Index)} application started {DateTime.Now}");
             return View(new LoginViewModel
             {
+                RememberMe = true,
                 AuthenticationSchemes = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList()
             });
         }

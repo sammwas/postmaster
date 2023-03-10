@@ -25,12 +25,13 @@
     </div>
     <span asp-validation-for="Password" class="text-danger"></span>
     <div class="row">
-        <div class="col-6">
-            @*<div class="icheck-primary">
+        <div class="col-12">
+            <div class="icheck-primary">
                 <input id="remember" asp-for="RememberMe">
-                <label for="remember" asp-for="RememberMe"></label>
-                </div>*@
+                <label for="remember"> <small>I Accept <a asp-action="Terms">Terms and Conditions</a></small></label>
+            </div>
         </div>
+        <br />
         <div class="col-12">
             <button type="submit" class="btn btn-primary btn-block">
                 <i class="fa fa-lock-open"></i> Login Now
