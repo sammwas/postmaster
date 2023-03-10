@@ -131,14 +131,11 @@ namespace PosMaster.Dal.Interfaces
                     _logger.LogWarning($"{tag} adjustment failed {model.ProductId} : {result.Message}");
                     return result;
                 }
-                var count = _context.ProductStockAdjustmentLogs
-                    .Count(p => p.ProductId.Equals(product.Id));
                 if (!product.AvailableQuantity.Equals(model.QuantityTo))
                 {
-                    count += 1;
                     var log = new ProductStockAdjustmentLog
                     {
-                        Code = $"{product.Code}-{count}",
+                        Code = $"{product.Code}-{DateTime.Now}",
                         ProductId = product.Id,
                         QuantityFrom = product.AvailableQuantity,
                         QuantityTo = model.QuantityTo,
@@ -288,17 +285,17 @@ namespace PosMaster.Dal.Interfaces
                 {
                     if (model.AvailableQuantity != dbProduct.AvailableQuantity)
                     {
-                        var adjustLog = new ProductStockAdjustmentLog
+                        var adjustModel = new ProductStockAdjustmentViewModel
                         {
-                            ClientId = dbProduct.ClientId,
-                            InstanceId = dbProduct.InstanceId,
-                            ProductId = dbProduct.Id,
-                            QuantityFrom = dbProduct.AvailableQuantity,
+                            ProductId = dbProduct.Id.ToString(),
                             QuantityTo = model.AvailableQuantity,
+                            BuyingPriceTo = dbProduct.BuyingPrice,
                             Personnel = model.Personnel,
-                            Notes = "Product Edit"
+                            ClientId = model.ClientId,
+                            InstanceId = model.InstanceId,
+                            Notes = model.Notes
                         };
-                        _context.ProductStockAdjustmentLogs.Add(adjustLog);
+                        await AdjustProductStockAsync(adjustModel);
                     }
                     if (model.SellingPrice != dbProduct.SellingPrice)
                     {
@@ -315,6 +312,7 @@ namespace PosMaster.Dal.Interfaces
                             Notes = "Product Edit"
                         };
                         _context.ProductPriceLogs.Add(priceLog);
+                        _context.SaveChanges();
                     }
                     dbProduct.Code = model.Code;
                     dbProduct.ProductCategoryId = Guid.Parse(model.ProductCategoryId);
@@ -357,6 +355,7 @@ namespace PosMaster.Dal.Interfaces
 
                 var product = new Product
                 {
+                    Id = Guid.NewGuid(),
                     Code = model.Code,
                     ProductCategoryId = Guid.Parse(model.ProductCategoryId),
                     Name = model.Name,
@@ -377,7 +376,19 @@ namespace PosMaster.Dal.Interfaces
                     PriceEndDate = hasEndDate ? endDate : (DateTime?)null,
                     ProductInstanceStamp = stamp
                 };
+                var productPo = new ProductPoQuantityLog
+                {
+                    ClientId = product.ClientId,
+                    InstanceId = product.InstanceId,
+                    ProductId = product.Id,
+                    Personnel = model.Personnel,
+                    AvailableQuantity = model.AvailableQuantity,
+                    BuyingPrice = model.BuyingPrice,
+                    Notes = model.Notes,
+                    Code = $"{product.Code}-{DateTime.Now}"
+                };
                 _context.Products.Add(product);
+                _context.ProductPoQuantityLogs.Add(productPo);
                 await _context.SaveChangesAsync();
                 result.Success = true;
                 result.Message = "Added";
@@ -494,8 +505,9 @@ namespace PosMaster.Dal.Interfaces
                         Personnel = receipt.Personnel,
                         ClientId = product.ClientId,
                         InstanceId = product.InstanceId,
-                        BuyingPrice = Math.Round(poLineQtyLogs.Sum(p => p.BuyingPrice * p.AvailableQuantity)
-                        / poLineQtyLogs.Sum(p => p.AvailableQuantity), 2)
+                        BuyingPrice = poLineQtyLogs.Any() ?
+                        Math.Round(poLineQtyLogs.Sum(p => p.BuyingPrice * p.AvailableQuantity)
+                        / poLineQtyLogs.Sum(p => p.AvailableQuantity), 2) : product.BuyingPrice
                     };
                     decimal remainingQty = item.Quantity;
                     foreach (var quantityLog in poLineQtyLogs)

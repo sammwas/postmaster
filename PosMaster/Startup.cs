@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -69,7 +68,7 @@ namespace PosMaster
             services.AddDbContext<DatabaseContext>(options =>
             {
                 var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
-                Console.WriteLine($"{env} DbConnection String > Src {from}  :-Server: {server} Port: {port} Database: {database} User: {user}");
+                Console.WriteLine($"{env} DbConnection String > Src: {from} Server: {server} Port: {port} Database: {database} User: {user}");
                 options.UseNpgsql(conString);
             });
 
