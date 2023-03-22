@@ -166,6 +166,7 @@ namespace PosMaster.Dal.Interfaces
                         ProductId = product.Id,
                         Personnel = model.Personnel,
                         AvailableQuantity = model.QuantityTo,
+                        DeliveredQuantity = model.QuantityTo,
                         BuyingPrice = model.BuyingPriceTo,
                         Notes = model.Notes,
                         Code = $"{product.Code}-{DateTime.Now}"
@@ -565,6 +566,7 @@ namespace PosMaster.Dal.Interfaces
                         UserType = GlUserType.Customer,
                         Document = Document.Receipt,
                         DocumentNumber = receipt.Code,
+                        DocumentId = receipt.Id,
                         Credit = receipt.Amount,
                         Notes = receipt.Notes,
                         Code = $"{receipt.Code}_{customer.Code}"
@@ -744,6 +746,7 @@ namespace PosMaster.Dal.Interfaces
             var invRef = DocumentRefNumber(Document.Invoice, receipt.ClientId);
             var invoice = new Invoice
             {
+                Id = Guid.NewGuid(),
                 Code = invRef,
                 ClientId = receipt.ClientId,
                 ReceiptId = receipt.Id,
@@ -763,6 +766,7 @@ namespace PosMaster.Dal.Interfaces
                 UserType = GlUserType.Customer,
                 Document = Document.Invoice,
                 DocumentNumber = invRef,
+                DocumentId = invoice.Id,
                 Debit = receipt.Amount,
                 Notes = receipt.Notes,
                 Code = $"{invRef}_{receipt.Code}"
@@ -817,6 +821,7 @@ namespace PosMaster.Dal.Interfaces
                     UserType = GlUserType.Customer,
                     Document = Document.Receipt,
                     DocumentNumber = receipt.Code,
+                    DocumentId = receipt.Id,
                     Credit = receipt.AmountReceived,
                     Notes = receipt.Notes,
                     Code = $"{receipt.Code}_{receipt.PaymentModeNo}"
@@ -1566,6 +1571,7 @@ namespace PosMaster.Dal.Interfaces
                             Credit = toSpend,
                             Document = Document.Receipt,
                             DocumentNumber = invoice.Receipt.Code,
+                            DocumentId = invoice.Receipt.Id,
                             Code = $"{invoice.Receipt.Code}_{invoice.Code}",
                             Personnel = model.Personnel
                         };

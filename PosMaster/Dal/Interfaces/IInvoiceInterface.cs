@@ -169,6 +169,7 @@ namespace PosMaster.Dal.Interfaces
                     UserType = GlUserType.Customer,
                     Document = Document.Receipt,
                     DocumentNumber = invoice.Receipt.Code,
+                    DocumentId = invoice.Receipt.Id,
                     Credit = balance,
                     Code = $"{invoice.Code}_{invoice.Receipt.Code}"
                 };

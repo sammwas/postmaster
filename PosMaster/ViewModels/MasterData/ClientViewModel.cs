@@ -38,6 +38,7 @@ namespace PosMaster.ViewModels
             IsEditMode = true;
             Notes = client.Notes;
             Status = client.Status;
+            MaxInstances = client.MaxInstance;
         }
 
         [Required]

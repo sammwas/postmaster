@@ -112,7 +112,7 @@
                                     <td>@item.DateCreated.ToString("dd-MMM-yyyy")</td>
                                     <td>
                                         <a asp-controller="PointOfSale" asp-action="@item.Document.ToString()"
-                                   asp-route-id="@item.Id">@item.DocumentNumber</a>
+                                   asp-route-id="@item.DocumentId">@item.DocumentNumber</a>
                                     </td>
                                     <td>@Helpers.FormatAmount(item.Debit)</td>
                                     <td>@Helpers.FormatAmount(item.Credit)</td>

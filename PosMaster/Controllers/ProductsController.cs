@@ -202,6 +202,8 @@ namespace PosMaster.Controllers
         public async Task<IActionResult> StockAdjustmentLogs(string insId = "", string dtFrom = "", string dtTo = "", string search = "")
         {
             ViewData["InstanceId"] = insId;
+            if (string.IsNullOrEmpty(dtFrom))
+                dtFrom = DateTime.Now.AddDays(-7).ToString("dd-MMM-yyyy");
             ViewData["DtFrom"] = dtFrom;
             ViewData["DtTo"] = dtTo;
             ViewData["Search"] = search;
