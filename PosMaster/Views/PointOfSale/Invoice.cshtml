@@ -13,10 +13,7 @@
     var fontZoom = $"{instanceRes.Data.ReceiptFontPercent}%";
 }
 <div class="invoice p-3 mb-3" id="printDiv">
-    @{
-        Html.Partial("FullName", new { fontZoom });
-    }
-    <partial></partial>
+    <partial name="_ReceiptPrintPartial" model="fontZoom"></partial>
     <div class="row">
         <div class="col-12">
             <h4>

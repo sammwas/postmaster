@@ -1,5 +1,6 @@
-﻿@{
-    string fontZoom = this.ViewData.ContainsKey("FontZoom") ? this.ViewData["FontZoom"].ToString() : "100";
+﻿@model string
+@{
+    string fontZoom = Model ?? "100%";
 }
 <style type="text/css">
     @@media print {

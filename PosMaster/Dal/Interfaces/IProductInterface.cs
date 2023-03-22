@@ -166,7 +166,7 @@ namespace PosMaster.Dal.Interfaces
                         ProductId = product.Id,
                         Personnel = model.Personnel,
                         AvailableQuantity = model.QuantityTo,
-                        DeliveredQuantity = model.QuantityTo,
+                        DeliveredQuantity = model.QuantityTo - product.AvailableQuantity,
                         BuyingPrice = model.BuyingPriceTo,
                         Notes = model.Notes,
                         Code = $"{product.Code}-{DateTime.Now}"
