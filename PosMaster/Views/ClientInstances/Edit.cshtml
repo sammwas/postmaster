@@ -16,6 +16,10 @@
         <input asp-for="IsEditMode" />
         <input asp-for="ClientId" />
         <div class="card-body">
+            @if (Model.IsEditMode)
+            {
+                <p class="alert alert-info"> You will need to login again to see some changes </p>
+            }
             <div class="row">
                 <div class="col-md-4">
                     <div class="form-group">
@@ -100,6 +104,13 @@
                         <label asp-for="Notes"></label>
                         <input asp-for="Notes" class="form-control" placeholder="Notes" />
                         <span asp-validation-for="Notes" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="icheck-primary">
+                        <br />
+                        <input id="remember" asp-for="ShowCardPosDisplay">
+                        <label for="remember"> Show Card POS </label>
                     </div>
                 </div>
                 <div class="col-md-4">
