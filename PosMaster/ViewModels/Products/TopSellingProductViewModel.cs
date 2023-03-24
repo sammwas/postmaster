@@ -11,5 +11,7 @@ namespace PosMaster.ViewModels
         public decimal Amount { get; set; }
         public Guid InstanceId { get; set; }
         public Guid ClientId { get; set; }
+        public string Personnel { get; set; }
+        public string ClerkNames { get; set; }
     }
 }

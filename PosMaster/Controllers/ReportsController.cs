@@ -39,8 +39,24 @@ namespace PosMaster.Controllers
             ViewData["dtFrom"] = dtFrom;
             if (instanceId.Equals(Guid.Empty))
                 instanceId = _userData.InstanceId;
-            ViewData["instanceId"] = instanceId; var result = await _reportingInterface.MonthlySalesReportAsync(instanceId, dtFrom, dtTo);
+            ViewData["instanceId"] = instanceId;
+            var result = await _reportingInterface.MonthlySalesReportAsync(instanceId, dtFrom, dtTo);
             return Json(result);
+        }
+
+        public async Task<IActionResult> SalesByClerk(Guid instanceId, string dtFrom = "", string dtTo = "")
+        {
+            ViewData["dtTo"] = dtTo;
+            if (string.IsNullOrEmpty(dtFrom))
+                dtFrom = DateTime.Now.ToString("dd-MMM-yyyy");
+            ViewData["dtFrom"] = dtFrom;
+            if (instanceId.Equals(Guid.Empty))
+                instanceId = _userData.InstanceId;
+            ViewData["instanceId"] = instanceId;
+            var result = await _reportingInterface.SalesByClerkAsync(instanceId, dtFrom, dtTo);
+            if (!result.Success)
+                TempData.SetData(AlertLevel.Warning, $"Clerk Sales", result.Message);
+            return View(result.Data);
         }
 
         public async Task<IActionResult> CustomerBalances(Guid instanceId, string dtFrom = "", string dtTo = "")

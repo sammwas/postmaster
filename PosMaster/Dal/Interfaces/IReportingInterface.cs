@@ -15,6 +15,7 @@ namespace PosMaster.Dal.Interfaces
         Task<ReturnData<List<MonthSaleViewModel>>> MonthlySalesReportAsync(Guid instanceId, string dateFrom = "", string dateTo = "");
         Task<ReturnData<List<CustomerBalanceViewModel>>> CustomerBalancesAsync(Guid instanceId, string dateFrom = "", string dateTo = "");
         Task<ReturnData<CustomerStatementViewModel>> CustomerStatementAsync(Guid customerId, string dateFrom = "", string dateTo = "");
+        Task<ReturnData<List<TopSellingProductViewModel>>> SalesByClerkAsync(Guid instanceId, string dateFrom = "", string dateTo = "");
 
     }
     public class ReportingImplementation : IReportingInterface
@@ -187,6 +188,55 @@ namespace PosMaster.Dal.Interfaces
                     result.Data.LedgerEntries = entries;
                 result.Success = true;
                 result.Message = "Found";
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                result.ErrorMessage = ex.Message;
+                result.Message = "Error occured";
+                _logger.LogError($"{tag} {result.Message} : {ex}");
+                return result;
+            }
+        }
+
+        public async Task<ReturnData<List<TopSellingProductViewModel>>> SalesByClerkAsync(Guid instanceId, string dateFrom = "", string dateTo = "")
+        {
+            var result = new ReturnData<List<TopSellingProductViewModel>> { Data = new List<TopSellingProductViewModel>() };
+            var tag = nameof(SalesByClerkAsync);
+            _logger.LogInformation($"{tag} from {dateFrom} to {dateTo}.  instace id {instanceId}");
+            try
+            {
+                var hasFromDate = DateTime.TryParse(dateFrom, out var dtFrom);
+                var hasToDate = DateTime.TryParse(dateTo, out var dtTo);
+                var dataQuery = _context.ReceiptLineItems.AsQueryable();
+                if (hasFromDate)
+                    dataQuery = dataQuery.Where(r => r.DateCreated.Date >= dtFrom.Date);
+                if (hasToDate)
+                    dataQuery = dataQuery.Where(r => r.DateCreated.Date <= dtTo.Date);
+
+                var dataQry = dataQuery.GroupBy(l => l.Personnel)
+                    .Select(tp => new TopSellingProductViewModel
+                    {
+                        Personnel = tp.Key,
+                        Amount = tp.Sum(s => s.UnitPrice * s.Quantity)
+                    }).Join(_context.Users,
+                    tp => tp.Personnel, u => u.UserName, (tp, u) => new TopSellingProductViewModel
+                    {
+                        ClerkNames = u.FullName,
+                        Personnel = u.UserName,
+                        Amount = tp.Amount,
+                        Volume = tp.Volume,
+                        InstanceId = u.InstanceId,
+                        ClientId = u.ClientId
+                    }).Where(r => r.InstanceId.Equals(instanceId));
+                var data = await dataQry.OrderByDescending(p => p.Amount)
+                    .ToListAsync();
+                result.Success = data.Any();
+                result.Message = result.Success ? "Found" : "Not Found";
+                if (result.Success)
+                    result.Data = data;
+                _logger.LogInformation($"{tag} found {data.Count} clerk sales");
                 return result;
             }
             catch (Exception ex)

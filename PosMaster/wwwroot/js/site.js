@@ -380,6 +380,9 @@ if (x) {
                 ul.append('<li><span class= "text">[' + element.code + ']' + element.name + ' [Qty ' + element.availableQuantity + ' ' + element.uom
                     + ']</span > <small class="badge badge-info">' + element.productCategory.name + '</small>  </li >');
             });
+        } else {
+            ul.append('<li><span class= "text"> No products below re-order level </span>'
+                + '<small class="badge badge-info">' + data.message + '</small>  </li> ');
         }
     });
 }
