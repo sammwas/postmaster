@@ -681,6 +681,7 @@ namespace PosMaster.Controllers
             userData.ClientName = client.Name;
             userData.ClientLogoPath = client.LogoPath;
             userData.CurrencyShort = client.CurrencyShort;
+            userData.ShowCardPos = clientInstance.ShowCardPosDisplay;
 
             _cookiesService.Store(userData);
         }

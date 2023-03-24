@@ -36,7 +36,11 @@ $('#issBtnAdd').click(function (event) {
 
 var addItemToList = function () {
     item = {};
-    item = $('#product-select').select2('data')[0];
+    var isCards = $("#inpShowCards").val();
+    if (isCards)
+        item = JSON.parse(atob($("#inpProductEncoded").val()));
+    else
+        item = $('#product-select').select2('data')[0];
     var productId = item.id;
     var itemName = item.name;
     var quantity = $("#quantityBought").val();
@@ -84,6 +88,8 @@ var addItemToList = function () {
         $("#quantityBought").val("");
         $("#unitPrice").val("");
         $('#productListForm').trigger('reset');
+        if (isCards)
+            $("#selectProductModal").modal('hide');
     }
 };
 var createIssueListTable = function () {
@@ -458,6 +464,78 @@ $("#item-price-select").change(function () {
 removeGradingSchemeRow = function (id) {
     document.getElementById("tr_" + id).remove();
 };
+
+$("#btnSearchProduct").click(function (e) {
+    e.preventDefault();
+    getPosCardProducts();
+});
+
+$("#inpSearchProduct").keyup(function (e) {
+    e.preventDefault();
+    getPosCardProducts();
+});
+
+var addCardProduct;
+var getPosCardProducts = function () {
+    var code = $("#inpSearchProduct").val();
+    var isPos = $("#inpIsPos").val();
+    var div = $("#divPosCard");
+    if (code === '') {
+        $("#inpSearchProduct").focus();
+        div.html('');
+    } else {
+        div.html('<p class="alert alert-info"><i class="fa fa-spinner fa-spin"></i> searching ' + code + '. please wait ...</p>')
+        $.get('/Products/Search?isPos=' + isPos + '&term=' + code + '&cardView=True', function (data) {
+            var message = data.message;
+            if (!data.success) {
+                var p = '<p class="alert alert-warning">' + message + '</p>';
+                div.html(p);
+            } else {
+                var cardBody = '';
+                $.each(data.data, function () {
+                    var product = {
+                        quantity: this.availableQuantity,
+                        sellingPrice: this.sellingPrice,
+                        buyingPrice: this.buyingPrice,
+                        id: this.id,
+                        tax: this.taxRate,
+                        name: this.name,
+                        allowDiscount: this.allowDiscount,
+                        code: this.code,
+                    };
+                    var card = '<div class="col-md-6" id="modal-product-' + this.id + '" data="' + btoa(JSON.stringify(product)) + '"'
+                        + 'onclick = "addCardProduct(`' + this.id + '`)" style="cursor: pointer"> <div class="small-box bg-info">'
+                        + '<div class="inner"><h4>' + this.code + '</h4>  <p>' + this.name + ' (' + this.availableQuantity + ' ' + this.uom + ')</p></div>'
+                        + '<div class="icon"><i class="fa fa-shopping-cart"></i> </div>'
+                        + '<p class="small-box-footer">Price: ' + this.sellingPrice.toFixed(2) + '</p></div></div>';
+                    cardBody += card;
+                });
+                div.html(cardBody);
+            }
+        });
+    }
+};
+
+addCardProduct = function (id) {
+    $("#inpProductEncoded").val("")
+    $("#unitPrice").val("")
+    $("#quantityBought").val("")
+    $("#hProductTitle").text("Product")
+    var productEncoded = $("#modal-product-" + id).attr("data");
+    var product = JSON.parse(atob(productEncoded))
+    var price = product.sellingPrice;
+    var allowDisc = product.allowDiscount;
+    $("#unitPrice").val(price);
+    $("#inpProductEncoded").val(productEncoded)
+    $('#unitPrice').attr("readonly", !allowDisc);
+    $("#hProductTitle").text(product.code + ' - ' + product.name);
+    $("#selectProductModal").modal('show');
+};
+
+$("#btnAddModalProduct").click(function (e) {
+    e.preventDefault();
+    addItemToList();
+});
 
 $('.product-select-search').select2({
     ajax: {

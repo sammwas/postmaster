@@ -39,5 +39,6 @@ namespace PosMaster.Services
         public DateTime DateCreated { get; set; }
         public string EmailAddress { get; set; }
         public string Gender { get; set; }
+        public bool ShowCardPos { get; set; }
     }
 }

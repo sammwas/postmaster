@@ -247,7 +247,7 @@ namespace PosMaster.Dal.Interfaces
                     search = search.ToLower();
                     dataQry = dataQry.Where(d => d.Code.ToLower().Contains(search)
                     || d.Name.ToLower().Contains(search))
-                    .Take(10);
+                    .Take(6);
                 }
                 var data = await dataQry.OrderByDescending(c => c.DateCreated)
                     .ToListAsync();
