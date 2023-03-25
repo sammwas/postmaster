@@ -51,23 +51,25 @@ var addItemToList = function () {
     quantity = parseFloat(quantity)
     avQuantity = parseFloat(avQuantity)
     var discount = (sellingPrice - unitPrice) * quantity;
+    var fa = '<i class="fa fa-times-circle"></i> ';
+    $("#issMsg").html('');
     if (productId === "") {
-        $("#issMsg").html('<i class="fa fa-times-circle"></i> ' + " Select an item first").addClass('text-danger');
+        $("#issMsg").html(fa + " Select an item first").addClass('text-danger');
         $("#issItemId").focus();
         return
     }
     else if (!quantity || quantity <= 0) {
-        $("#issMsg").html('<i class="fa fa-times-circle"></i> ' + " Quantity is required").addClass('text-danger');
+        $("#issMsg").html(fa + " Quantity is required").addClass('text-danger');
         $("#quantityBought").focus();
         return
     }
     else if (unitPrice === "") {
-        $("#issMsg").html('<i class="fa fa-times-circle"></i> ' + " Price is required").addClass('text-danger');
+        $("#issMsg").html(fa + " Price is required").addClass('text-danger');
         $("#issWarehouseId").focus();
         return
     }
     else if (quantity > avQuantity) {
-        $("#issMsg").html('<i class="fa fa-times-circle"></i> ' + " Available quantity is " + avQuantity).addClass('text-danger');
+        $("#issMsg").html(fa + " Available quantity is " + avQuantity).addClass('text-danger');
         $("#quantityBought").focus();
         return
     }

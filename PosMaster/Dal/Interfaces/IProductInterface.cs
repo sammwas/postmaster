@@ -223,7 +223,7 @@ namespace PosMaster.Dal.Interfaces
         {
             var result = new ReturnData<List<Product>> { Data = new List<Product>() };
             var tag = nameof(ByInstanceIdAsync);
-            _logger.LogInformation($"{tag} get all instance {instanceId} products");
+            _logger.LogInformation($"{tag} client {clientId} get all instance {instanceId} products, POS {isPos} , search {search} ");
             try
             {
                 var dataQry = _context.Products
@@ -247,7 +247,7 @@ namespace PosMaster.Dal.Interfaces
                     search = search.ToLower();
                     dataQry = dataQry.Where(d => d.Code.ToLower().Contains(search)
                     || d.Name.ToLower().Contains(search))
-                    .Take(6);
+                    .Take(10);
                 }
                 var data = await dataQry.OrderByDescending(c => c.DateCreated)
                     .ToListAsync();
