@@ -18,115 +18,115 @@
     </div>
     <div class="col-12 row">
         <div class="col-md-5">
-            <form autocomplete="off">
-                <div class="receipt-line-item">
-                    <div asp-validation-summary="All" class="text-danger"></div>
-                    <input id="inpIsPos" value="True" type="hidden" />
-                    <input id="inpShowCards" value="@showCards" type="hidden" />
-                    <div class="card-body">
-                        @if (showCards)
-                        {
-                            <div class="">
-                                <div class="form-group">
-                                    <label>Search Product</label>
-                                    <div class="input-group input-group-sm">
-                                        <input class="form-control form-control-navbar" id="inpSearchProduct"
-                                           placeholder="Enter code or name" aria-label="Search">
-                                        <div class="input-group-append">
-                                            <button class="btn btn-default" id="btnSearchProduct">
-                                                <i class="fas fa-search"></i>
-                                            </button>
-                                        </div>
+            <div class="receipt-line-item">
+                <div asp-validation-summary="All" class="text-danger"></div>
+                <input id="inpIsPos" value="True" type="hidden" />
+                <input id="inpShowCards" value="@showCards" type="hidden" />
+                <div class="card-body">
+                    @if (showCards)
+                    {
+                        <div class="">
+                            <div class="form-group">
+                                <label>Search Product</label>
+                                <div class="input-group input-group-sm">
+                                    <input class="form-control form-control-navbar" id="inpSearchProduct"
+                                       placeholder="Enter code or name" aria-label="Search">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-default" id="btnSearchProduct">
+                                            <i class="fas fa-search"></i>
+                                        </button>
                                     </div>
                                 </div>
-                                <div class="row" id="divPosCard">
-                                    <p class="alert alert-info"> -- type to search --</p>
-                                </div>
                             </div>
-                            <div class="modal fade" id="selectProductModal" tabindex="-1" role="dialog" aria-hidden="true">
-                                <div class="modal-dialog" role="document">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="hProductTitle">Product</h5>
-                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <div class="row">
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <label>Quantity</label>
-                                                        <input class="form-control numbers-only" value="" id="quantityBought"
-                                                           placeholder="0.00">
-                                                        <span class="text-danger" id="quantity-validate"></span>
-                                                    </div>
+                            <div class="row" id="divPosCard">
+                                <p class="alert alert-info"> -- type to search --</p>
+                            </div>
+                        </div>
+                        <div class="modal fade" id="selectProductModal" tabindex="-1" role="dialog" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="hProductTitle">Product</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label>Quantity</label>
+                                                    <input class="form-control numbers-only" value="" id="quantityBought"
+                                                       placeholder="0.00" autocomplete="off">
+                                                    <span class="text-danger" id="quantity-validate"></span>
                                                 </div>
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <label>Selling Price</label>
-                                                        <input class="form-control numbers-only" id="unitPrice" placeholder="0.00">
-                                                    </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label>Selling Price</label>
+                                                    <input class="form-control numbers-only" id="unitPrice" placeholder="0.00"
+                                                       autocomplete="off">
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="modal-footer">
-                                            <input type="hidden" id="inpProductEncoded">
-                                            <p><span id="issMsg"></span> </p>
-                                            <button type="button" class="btn btn-primary btn-sm" id="btnAddModalProduct"><i class="fa fa-check-circle"></i> Add to cart</button>
-                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <input type="hidden" id="inpProductEncoded">
+                                        <p><span id="issMsg"></span> </p>
+                                        <button type="button" class="btn btn-primary btn-sm" id="btnAddModalProduct"><i class="fa fa-check-circle"></i> Add to cart</button>
                                     </div>
                                 </div>
                             </div>
-                        }
-                        else
-                        {
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <div class="form-group">
-                                        <label>Product</label>
-                                        <select class="form-control select2 product-select-search" style="width: 100%;" id="product-select">
-                                            <option value="">--Select Product--</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label>Quantity</label>
-                                        <input class="form-control numbers-only" value="" id="quantityBought"
-                                           placeholder="0.00">
-                                        <span class="text-danger" id="quantity-validate"></span>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label>Selling Price</label>
-                                        <input class="form-control numbers-only" id="unitPrice" placeholder="0.00">
-                                    </div>
-                                </div>
-                            </div>
-                        }
-                    </div>
-                    @if (!showCards)
+                        </div>
+                    }
+                    else
                     {
                         <div class="row">
-                            <div class="col ml-4">
-                                <p><span id="issMsg"></span> </p>
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>Product</label>
+                                    <select class="form-control select2 product-select-search" style="width: 100%;" id="product-select">
+                                        <option value="">--Select Product--</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
                         <div class="row">
-                            <div class="ml-4">
-                                <button type="submit" class="btn btn-primary btn-sm btn-block"
-                                    id="issBtnAdd">
-                                    <i class="fa fa-plus-circle"></i>  Add to cart
-                                </button>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Quantity</label>
+                                    <input class="form-control numbers-only" value="" id="quantityBought"
+                                       placeholder="0.00" autocomplete="off">
+                                    <span class="text-danger" id="quantity-validate"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Selling Price</label>
+                                    <input class="form-control numbers-only" id="unitPrice" placeholder="0.00"
+                                       autocomplete="off">
+                                </div>
                             </div>
                         </div>
                     }
                 </div>
-            </form>
+                @if (!showCards)
+                {
+                    <div class="row">
+                        <div class="col ml-4">
+                            <p><span id="issMsg"></span> </p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="ml-4">
+                            <button type="submit" class="btn btn-primary btn-sm btn-block"
+                                id="issBtnAdd">
+                                <i class="fa fa-plus-circle"></i>  Add to cart
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
         </div>
         <div class="col-md-7">
             <div class="receipt-items">
@@ -172,7 +172,8 @@
                         <div class="col-md-4">
                             <div class="form-group" id="refNo">
                                 <label>PIN No.</label>
-                                <input asp-for="PinNo" class="form-control" id="refNoVal" placeholder="PIN No">
+                                <input asp-for="PinNo" class="form-control" id="refNoVal" placeholder="PIN No"
+                                       autocomplete="off">
                                 <span asp-validation-for="PinNo" class="text-danger"></span>
                             </div>
                         </div>
@@ -194,7 +195,8 @@
                         <div class="col-md-4 cash-sale @hideCls">
                             <div class="form-group">
                                 <label asp-for="PaymentModeNo"></label>
-                                <input asp-for="PaymentModeNo" class="form-control" placeholder="Mode Number">
+                                <input asp-for="PaymentModeNo" class="form-control" placeholder="Mode Number"
+                                       autocomplete="off">
                                 <span asp-validation-for="PaymentModeNo" class="text-danger"></span>
                             </div>
                         </div>
@@ -202,14 +204,14 @@
                             <div class="form-group">
                                 <label asp-for="AmountReceived"></label>
                                 <input asp-for="AmountReceived" class="form-control numbers-only"
-                                       placeholder="Amount" value="0" id="posAmountRcvd">
+                                       placeholder="Amount" value="0" id="posAmountRcvd" autocomplete="off">
                                 <span asp-validation-for="AmountReceived" class="text-danger"></span>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label asp-for="Notes"></label>
-                                <input asp-for="Notes" class="form-control" placeholder="Notes">
+                                <input asp-for="Notes" class="form-control" placeholder="Notes" autocomplete="off">
                                 <span asp-validation-for="Notes" class="text-danger"></span>
                             </div>
                         </div>
