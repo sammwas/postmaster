@@ -53,7 +53,6 @@
             @if (isActive)
             {
                 <b>Payment Due:</b> @Model.DueDate
-
                 <br>
             }
         </div>
@@ -93,9 +92,9 @@
     </div>
     <div class="row">
         <div class="col-6">
-            <p class="lead">Terms:</p>
+            <p class="lead">Notes:</p>
             <p class="text-muted well well-sm shadow-none" style="margin-top: 10px;">
-                @instanceRes.Data.InvoiceTerms
+                @Model.Notes
             </p>
         </div>
         <div class="col-6">
