@@ -1,0 +1,120 @@
+﻿@model CloseOfDayViewModel
+@inject IClientInstanceInterface _instanceInterface;
+@inject ICookiesService _cookies;
+@{
+    ViewData["Active"] = "Reports";
+    var title = $"Close of Day Report";
+    ViewData["Title"] = title;
+    var userData = _cookies.Read();
+    var instancesRes = User.IsInRole(Role.SuperAdmin) ?
+     await _instanceInterface.AllAsync()
+     : await _instanceInterface.ByClientIdAsync(userData.ClientId);
+    var instances = instancesRes.Data;
+    var instanceId = ViewData["instanceId"]?.ToString();
+    var inId = string.IsNullOrEmpty(instanceId) ? userData.InstanceId : Guid.Parse(instanceId);
+    var instance = _instanceInterface.ByIdAsync(inId).Result.Data;
+    var fontZoom = $"{instance.ReceiptFontPercent}%";
+    var dateToday = DateTime.Now.ToString("dd-MMM-yyyy");
+}
+<div class="card card-primary">
+    <div class="card-header row d-print-none">
+        <div class="col-6">
+            <h3 class="card-title">
+                @ViewData["Title"]
+            </h3>
+        </div>
+        <div class="col-6">
+            <span class="pull-right text-right">
+                <button class="btn btn-secondary btn-block" id="btnPrint">
+                    <i class="fa fa-print"></i> Print Report
+                </button>
+            </span>
+        </div>
+    </div>
+    <div class="card-body" id="printDiv">
+        <div class="row d-print-none">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Instance</label>
+                    <select class="form-control select2" name="inId" style="width: 100%;">
+                        <option value="">--Select Instance--</option>
+                        @foreach (var item in instances)
+                        {
+                            if (!string.IsNullOrEmpty(instanceId) && item.Id.ToString().Equals(instanceId))
+                            {
+                                <option selected="selected" value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
+                            }
+                            else
+                            {
+                                <option value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
+                            }
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Report date</label>
+                    <div class="input-group date" id="dateFrom" data-target-input="nearest">
+                        <input type="text" name="dt" class="form-control datetimepicker-input" data-target="#dateFrom" value="@ViewData["dtDay"]" placeholder="Date From (@dateToday)" />
+                        <div class="input-group-append" data-target="#dateFrom" data-toggle="datetimepicker">
+                            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary mt-4">Submit</button>
+                </div>
+            </div>
+        </div>
+        <hr />
+        <partial name="_ReceiptPrintPartial" model="fontZoom"></partial>
+        <div class="row">
+            <div class="col-md-6">
+                <p><b>@userData.ClientName?.ToUpper()</b></p>
+                <p><b>@userData.InstanceName?.ToUpper()</b></p>
+                <p>@instance.PostalAddress - @instance.Town</p>
+            </div>
+            <div class="col-md-6">
+                <p><b>@ViewData["Title"] </b></p>
+                <p><b>Date </b>@Model.Day</p>
+                <p><b>Cash returns </b>@Helpers.FormatAmount(Model.DailyCashReturn)</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <h5>Daily sales</h5>
+                <hr />
+                <p><b>Total sale</b> <span>@Helpers.FormatAmount(Model.TotalSale)</span></p>
+                <p><b>Total cash sale</b> <span>@Helpers.FormatAmount(Model.CashSale)</span></p>
+                <p><b>Total credit sale</b> <span>@Helpers.FormatAmount(Model.CreditSale)</span></p>
+                <h5>Sale by clerk</h5>
+                <hr />
+                @foreach (var item in Model.SalesByClerk)
+                {
+                    <p><b>@item.Key</b> <span>@Helpers.FormatAmount(item.Amount)</span></p>
+                }
+                <h5>Payments by mode</h5>
+                <hr />
+                @foreach (var item in Model.PaymentsByMode)
+                {
+                    <p><b>@item.Key</b> <span>@Helpers.FormatAmount(item.Amount)</span></p>
+                }
+            </div>
+            <div class="col-md-6">
+                <h5>Credit payment (Invoices paid)</h5>
+                <hr />
+                <p><b>Customers paid</b> <span>@Model.InvoiceCustomerServed</span></p>
+                <p><b>Total repayment</b> <span>@Helpers.FormatAmount(Model.TotalRepayment)</span></p>
+                <h5>Receipts by clerk</h5>
+                <hr />
+                @foreach (var item in Model.ReceiptsByClerk)
+                {
+                    <p><b>@item.Key</b> <span>@Helpers.FormatAmount(item.Amount)</span></p>
+                }
+            </div>
+        </div>
+    </div>
+</div>

@@ -72,6 +72,21 @@ namespace PosMaster.Controllers
             return View(result.Data);
         }
 
+        public async Task<IActionResult> CloseOfDay(Guid? inId, string dt = "")
+        {
+            var hasDate = DateTime.TryParse(dt, out var date);
+            if (!hasDate)
+                date = DateTime.Now;
+            ViewData["dtDay"] = date.ToString("dd-MMM-yyyy");
+            inId = User.IsInRole(Role.Clerk) ? _userData.InstanceId : inId;
+            var personnel = User.IsInRole(Role.Clerk) ? User.Identity.Name : "";
+            ViewData["instanceId"] = inId;
+            var result = await _reportingInterface.CloseOfDayAsync(_userData.ClientId, inId, date, personnel);
+            if (!result.Success)
+                TempData.SetData(AlertLevel.Warning, $"Day Report", result.Message);
+            return View(result.Data);
+        }
+
         public async Task<IActionResult> CustomerStatement(Guid id)
         {
             var result = await _reportingInterface.CustomerStatementAsync(id);

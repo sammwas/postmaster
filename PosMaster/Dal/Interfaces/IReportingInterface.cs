@@ -16,6 +16,7 @@ namespace PosMaster.Dal.Interfaces
         Task<ReturnData<List<CustomerBalanceViewModel>>> CustomerBalancesAsync(Guid instanceId, string dateFrom = "", string dateTo = "");
         Task<ReturnData<CustomerStatementViewModel>> CustomerStatementAsync(Guid customerId, string dateFrom = "", string dateTo = "");
         Task<ReturnData<List<TopSellingProductViewModel>>> SalesByClerkAsync(Guid instanceId, string dateFrom = "", string dateTo = "");
+        Task<ReturnData<CloseOfDayViewModel>> CloseOfDayAsync(Guid clientId, Guid? instanceId, DateTime date, string personnel = "");
 
     }
     public class ReportingImplementation : IReportingInterface
@@ -237,6 +238,120 @@ namespace PosMaster.Dal.Interfaces
                 if (result.Success)
                     result.Data = data;
                 _logger.LogInformation($"{tag} found {data.Count} clerk sales");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                result.ErrorMessage = ex.Message;
+                result.Message = "Error occured";
+                _logger.LogError($"{tag} {result.Message} : {ex}");
+                return result;
+            }
+        }
+
+        public async Task<ReturnData<CloseOfDayViewModel>> CloseOfDayAsync(Guid clientId, Guid? instanceId, DateTime date, string personnel = "")
+        {
+            var result = new ReturnData<CloseOfDayViewModel> { Data = new CloseOfDayViewModel() };
+            var tag = nameof(CloseOfDayAsync);
+            _logger.LogInformation($"{tag} on client {clientId} instance {instanceId} close of {date}");
+            try
+            {
+                var model = new CloseOfDayViewModel()
+                {
+                    Day = date.ToString("dd-MMM-yyyy")
+                };
+                var receiptsQuery = _context.Receipts.Where(r => r.ClientId.Equals(clientId))
+                    .Include(r => r.ReceiptLineItems).AsQueryable();
+                if (instanceId.HasValue)
+                    receiptsQuery = receiptsQuery.Where(r => r.InstanceId.Equals(instanceId.Value));
+                if (!string.IsNullOrEmpty(personnel))
+                {
+                    personnel = personnel.ToLower();
+                    receiptsQuery = receiptsQuery
+                        .Where(r => r.Personnel.ToLower().Equals(personnel));
+                }
+                var creditSales = await receiptsQuery.Where(r => r.IsCredit)
+                    .Where(r => r.DateCreated.Date.Equals(date.Date))
+                    .SelectMany(s => s.ReceiptLineItems)
+                    .SumAsync(r => r.UnitPrice * r.Quantity);
+                var dataQuery = receiptsQuery
+                    .SelectMany(s => s.ReceiptLineItems)
+                    .AsQueryable();
+                var totalSales = await dataQuery
+                     .Where(r => r.DateCreated.Date.Equals(date.Date))
+                     .SumAsync(r => r.UnitPrice * r.Quantity);
+                model.CreditSale = creditSales;
+                model.TotalSale = totalSales;
+                var salesByClerk = await dataQuery
+                     .Where(r => r.DateCreated.Date.Equals(date.Date))
+                     .GroupBy(l => l.Personnel)
+                    .Select(tp => new KeyAmountViewModel
+                    {
+                        Key = tp.Key,
+                        Amount = tp.Sum(s => s.Quantity * s.UnitPrice)
+                    }).Join(_context.Users.Select(u => new { u.UserName, u.FullName }),
+                  p => p.Key, u => u.UserName, (p, u) => new KeyAmountViewModel
+                  {
+                      Amount = p.Amount,
+                      Key = u.FullName
+                  }).ToListAsync();
+                model.SalesByClerk = salesByClerk;
+                var invoicesQry = receiptsQuery.Where(r => r.IsCredit
+                  && (r.DateLastModified.HasValue && r.DateLastModified.Value.Date.Equals(date.Date)))
+                    .AsQueryable();
+                model.InvoiceCustomerServed = await invoicesQry.CountAsync();
+                model.TotalRepayment = await invoicesQry.SumAsync(i => i.AmountReceived);
+                var receiptsByClerk = await invoicesQry
+                    .GroupBy(l => l.LastModifiedBy)
+                  .Select(tp => new KeyAmountViewModel
+                  {
+                      Key = tp.Key,
+                      Amount = tp.Sum(s => s.AmountReceived)
+                  }).Join(_context.Users.Select(u => new { u.UserName, u.FullName }),
+                  p => p.Key, u => u.UserName, (p, u) => new KeyAmountViewModel
+                  {
+                      Amount = p.Amount,
+                      Key = u.FullName
+                  }).ToListAsync();
+                model.ReceiptsByClerk = receiptsByClerk;
+
+                var paymentsByModeReceipts = await receiptsQuery
+                     .Where(r => r.DateCreated.Date.Equals(date.Date))
+                    .Include(p => p.PaymentMode)
+                   .GroupBy(r => r.PaymentMode.Name)
+                   .Select(r =>
+                  new KeyAmountViewModel
+                  {
+                      Key = r.Key,
+                      //Amount = r.Sum(s => s.ReceiptLineItems.Sum(x => x.UnitPrice * x.Quantity)),
+                      Amount = r.Sum(s => s.AmountReceived),
+                  }).ToListAsync();
+                model.PaymentsByMode.AddRange(paymentsByModeReceipts);
+                var paymentsByModeInvoices = await receiptsQuery
+                     .Where(r => r.DateCreated.Date.Equals(date.Date))
+                   .Include(r => r.PaymentMode).Where(r => r.IsCredit
+                   && (r.DateLastModified.HasValue && r.DateLastModified.Value.Date.Equals(date.Date)))
+                     .GroupBy(r => r.PaymentMode.Name)
+                   .Select(r =>
+                  new KeyAmountViewModel
+                  {
+                      Key = r.Key,
+                      Amount = r.Sum(s => s.AmountReceived),
+                  }).ToListAsync();
+                paymentsByModeReceipts.ForEach(p =>
+                {
+                    var mode = model.PaymentsByMode
+                    .FirstOrDefault(m => m.Key.Equals(p.Key));
+                    if (mode != null)
+                        mode.Amount += p.Amount;
+                    else
+                        model.PaymentsByMode.Add(mode);
+                });
+                result.Success = true;
+                result.Message = "Found";
+                result.Data = model;
+                _logger.LogInformation($"{tag} total sales {model.TotalSale} cash returns {model.DailyCashReturn}");
                 return result;
             }
             catch (Exception ex)
