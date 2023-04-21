@@ -32,43 +32,46 @@
         </div>
     </div>
     <div class="card-body" id="printDiv">
-        <div class="row d-print-none">
-            <div class="col-md-4">
-                <div class="form-group">
-                    <label>Instance</label>
-                    <select class="form-control select2" name="inId" style="width: 100%;">
-                        <option value="">--Select Instance--</option>
-                        @foreach (var item in instances)
-                        {
-                            if (!string.IsNullOrEmpty(instanceId) && item.Id.ToString().Equals(instanceId))
+
+        <form method="get" autocomplete="off" class="d-print-none">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label>Instance</label>
+                        <select class="form-control select2" name="inId" style="width: 100%;">
+                            <option value="">--Select Instance--</option>
+                            @foreach (var item in instances)
                             {
-                                <option selected="selected" value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
+                                if (!string.IsNullOrEmpty(instanceId) && item.Id.ToString().Equals(instanceId))
+                                {
+                                    <option selected="selected" value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
+                                }
+                                else
+                                {
+                                    <option value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
+                                }
                             }
-                            else
-                            {
-                                <option value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
-                            }
-                        }
-                    </select>
+                        </select>
+                    </div>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="form-group">
-                    <label>Report date</label>
-                    <div class="input-group date" id="dateFrom" data-target-input="nearest">
-                        <input type="text" name="dt" class="form-control datetimepicker-input" data-target="#dateFrom" value="@ViewData["dtDay"]" placeholder="Date From (@dateToday)" />
-                        <div class="input-group-append" data-target="#dateFrom" data-toggle="datetimepicker">
-                            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label>Report date</label>
+                        <div class="input-group date" id="dateFrom" data-target-input="nearest">
+                            <input type="text" name="dt" class="form-control datetimepicker-input" data-target="#dateFrom" value="@ViewData["dtDay"]" placeholder="Date From (@dateToday)" />
+                            <div class="input-group-append" data-target="#dateFrom" data-toggle="datetimepicker">
+                                <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="form-group">
-                    <button type="submit" class="btn btn-primary mt-4">Submit</button>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary mt-4">Submit</button>
+                    </div>
                 </div>
             </div>
-        </div>
+        </form>
         <hr />
         <partial name="_ReceiptPrintPartial" model="fontZoom"></partial>
         <div class="row">
@@ -80,39 +83,39 @@
             <div class="col-md-6">
                 <p><b>@ViewData["Title"] </b></p>
                 <p><b>Date </b>@Model.Day</p>
-                <p><b>Cash returns </b>@Helpers.FormatAmount(Model.DailyCashReturn)</p>
+                <p><b>Cash returns </b>@userData.CurrencyShort @Helpers.FormatAmount(Model.DailyCashReturn)</p>
             </div>
         </div>
         <div class="row">
             <div class="col-md-6">
                 <h5>Daily sales</h5>
                 <hr />
-                <p><b>Total sale</b> <span>@Helpers.FormatAmount(Model.TotalSale)</span></p>
-                <p><b>Total cash sale</b> <span>@Helpers.FormatAmount(Model.CashSale)</span></p>
-                <p><b>Total credit sale</b> <span>@Helpers.FormatAmount(Model.CreditSale)</span></p>
+                <p><b>Total sale</b> <span>@userData.CurrencyShort @Helpers.FormatAmount(Model.TotalSale)</span></p>
+                <p><b>Total cash sale</b> <span>@userData.CurrencyShort @Helpers.FormatAmount(Model.CashSale)</span></p>
+                <p><b>Total credit sale</b> <span>@userData.CurrencyShort @Helpers.FormatAmount(Model.CreditSale)</span></p>
                 <h5>Sale by clerk</h5>
                 <hr />
                 @foreach (var item in Model.SalesByClerk)
                 {
-                    <p><b>@item.Key</b> <span>@Helpers.FormatAmount(item.Amount)</span></p>
+                    <p><b>@item.Key</b> <span>@userData.CurrencyShort @Helpers.FormatAmount(item.Amount)</span></p>
                 }
                 <h5>Payments by mode</h5>
                 <hr />
                 @foreach (var item in Model.PaymentsByMode)
                 {
-                    <p><b>@item.Key</b> <span>@Helpers.FormatAmount(item.Amount)</span></p>
+                    <p><b>@item.Key</b> <span>@userData.CurrencyShort @Helpers.FormatAmount(item.Amount)</span></p>
                 }
             </div>
             <div class="col-md-6">
-                <h5>Credit payment (Invoices paid)</h5>
+                <h5>Credit payment</h5>
                 <hr />
                 <p><b>Customers paid</b> <span>@Model.InvoiceCustomerServed</span></p>
-                <p><b>Total repayment</b> <span>@Helpers.FormatAmount(Model.TotalRepayment)</span></p>
+                <p><b>Total repayment</b> <span>@userData.CurrencyShort @Helpers.FormatAmount(Model.TotalRepayment)</span></p>
                 <h5>Receipts by clerk</h5>
                 <hr />
                 @foreach (var item in Model.ReceiptsByClerk)
                 {
-                    <p><b>@item.Key</b> <span>@Helpers.FormatAmount(item.Amount)</span></p>
+                    <p><b>@item.Key</b> <span>@userData.CurrencyShort @Helpers.FormatAmount(item.Amount)</span></p>
                 }
             </div>
         </div>

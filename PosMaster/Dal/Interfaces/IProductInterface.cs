@@ -464,12 +464,10 @@ namespace PosMaster.Dal.Interfaces
                     receipt.AmountReceived = model.AmountReceived;
                 if (!model.IsWalkIn && !string.IsNullOrEmpty(model.PinNo))
                 {
-                    if (!customer.PinNo.Equals(model.PinNo))
-                    {
-                        customer.PinNo = model.PinNo;
-                        customer.DateLastModified = DateTime.Now;
-                        customer.LastModifiedBy = model.Personnel;
-                    }
+                    _logger.LogInformation($"{tag} update pin for customer {customer.Id}  {customer.Code} from {customer.PinNo} to {model.PinNo}");
+                    customer.PinNo = model.PinNo;
+                    customer.DateLastModified = DateTime.Now;
+                    customer.LastModifiedBy = model.Personnel;
                 }
                 var i = 0;
                 foreach (var item in lineItems)
@@ -1528,7 +1526,6 @@ namespace PosMaster.Dal.Interfaces
             var result = new ReturnData<string> { Data = "" };
             var tag = nameof(ReceiptUserAsync);
             _logger.LogInformation($"{tag} receipt {model.UserType} {model.UserId}: clientId {model.ClientId}, instanceId {model.InstanceId}, amount {model.Amount}");
-
             try
             {
                 var invoices = await _context.Invoices
@@ -1560,6 +1557,7 @@ namespace PosMaster.Dal.Interfaces
 
                         invoice.Receipt.AmountReceived += toSpend;
                         invoice.Receipt.LastModifiedBy = model.Personnel;
+                        invoice.Receipt.PaymentModeId = Guid.Parse(model.PaymentModeId);
                         invoice.Receipt.DateLastModified = DateTime.Now;
                         remainingAmount -= toSpend;
                         var entry = new GeneralLedgerEntry

@@ -300,7 +300,9 @@ namespace PosMaster.Dal.Interfaces
                 var invoicesQry = receiptsQuery.Where(r => r.IsCredit
                   && (r.DateLastModified.HasValue && r.DateLastModified.Value.Date.Equals(date.Date)))
                     .AsQueryable();
-                model.InvoiceCustomerServed = await invoicesQry.CountAsync();
+                model.InvoiceCustomerServed = await invoicesQry
+                    .Select(i => i.CustomerId).Distinct()
+                    .CountAsync();
                 model.TotalRepayment = await invoicesQry.SumAsync(i => i.AmountReceived);
                 var receiptsByClerk = await invoicesQry
                     .GroupBy(l => l.LastModifiedBy)
@@ -316,38 +318,17 @@ namespace PosMaster.Dal.Interfaces
                   }).ToListAsync();
                 model.ReceiptsByClerk = receiptsByClerk;
 
-                var paymentsByModeReceipts = await receiptsQuery
-                     .Where(r => r.DateCreated.Date.Equals(date.Date))
-                    .Include(p => p.PaymentMode)
-                   .GroupBy(r => r.PaymentMode.Name)
-                   .Select(r =>
-                  new KeyAmountViewModel
-                  {
-                      Key = r.Key,
-                      //Amount = r.Sum(s => s.ReceiptLineItems.Sum(x => x.UnitPrice * x.Quantity)),
-                      Amount = r.Sum(s => s.AmountReceived),
-                  }).ToListAsync();
-                model.PaymentsByMode.AddRange(paymentsByModeReceipts);
-                var paymentsByModeInvoices = await receiptsQuery
-                     .Where(r => r.DateCreated.Date.Equals(date.Date))
-                   .Include(r => r.PaymentMode).Where(r => r.IsCredit
-                   && (r.DateLastModified.HasValue && r.DateLastModified.Value.Date.Equals(date.Date)))
-                     .GroupBy(r => r.PaymentMode.Name)
-                   .Select(r =>
-                  new KeyAmountViewModel
-                  {
-                      Key = r.Key,
-                      Amount = r.Sum(s => s.AmountReceived),
-                  }).ToListAsync();
-                paymentsByModeReceipts.ForEach(p =>
-                {
-                    var mode = model.PaymentsByMode
-                    .FirstOrDefault(m => m.Key.Equals(p.Key));
-                    if (mode != null)
-                        mode.Amount += p.Amount;
-                    else
-                        model.PaymentsByMode.Add(mode);
-                });
+                var paymentsByModes = await _context.GeneralLedgerEntries
+                    .Where(g => g.Document.Equals(Document.Receipt) && g.DateCreated.Date.Equals(date.Date))
+                    .Join(_context.Receipts.Include(r => r.PaymentMode), g => g.DocumentId, r => r.Id, (g, r) =>
+                            new { r.PaymentMode.Name, g.Credit }
+                    ).GroupBy(c => c.Name)
+                    .Select(s => new KeyAmountViewModel
+                    {
+                        Key = s.Key,
+                        Amount = s.Sum(a => a.Credit)
+                    }).ToListAsync();
+                model.PaymentsByMode = paymentsByModes;
                 result.Success = true;
                 result.Message = "Found";
                 result.Data = model;
