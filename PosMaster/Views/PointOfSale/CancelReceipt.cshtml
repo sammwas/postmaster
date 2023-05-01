@@ -1,0 +1,44 @@
+﻿@model CancelReceiptViewModel
+@inject ICookiesService _cookies;
+@{
+    ViewData["Active"] = "POS";
+    var title = $"Cancel Receipt";
+    ViewData["Title"] = title;
+}
+<div class="card card-primary">
+    <div class="card-header">
+        <h3 class="card-title">@ViewData["Title"]</h3>
+    </div>
+    <form role="form" method="post" autocomplete="off">
+        <div asp-validation-summary="All"></div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="Code"></label>
+                        <input asp-for="Code" placeholder="Receipt No." id="inpRcptCode" class="form-control">
+                        <span asp-validation-for="Code" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="Amount"></label>
+                        <input asp-for="Amount" readonly class="form-control numbers-only" id="inpRcptAmt">
+                        <span asp-validation-for="Amount" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label asp-for="Notes"></label>
+                        <input asp-for="Notes" class="form-control" rows="3" placeholder="Notes">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+    </form>
+</div>

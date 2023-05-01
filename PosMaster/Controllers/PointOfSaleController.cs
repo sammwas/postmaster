@@ -176,7 +176,7 @@ namespace PosMaster.Controllers
 
         public async Task<IActionResult> Receipt(Guid id)
         {
-            var result = await _productInterface.ReceiptByIdAsync(id);
+            var result = await _productInterface.ReceiptByIdAsync(id.ToString());
             if (!result.Success)
                 TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, "Receipt", result.Message);
             return View(result.Data);
@@ -226,6 +226,34 @@ namespace PosMaster.Controllers
             }
             TempData.SetData(AlertLevel.Success, $"{model.UserType} Receipt", result.Message);
             return RedirectToAction(nameof(ReceivePayment));
+        }
+
+        public IActionResult CancelReceipt(string code = "")
+        {
+            return View(new CancelReceiptViewModel() { Code = code });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CancelReceipt(CancelReceiptViewModel model)
+        {
+            model.Personnel = User.Identity.Name;
+            model.ClientId = _userData.ClientId;
+            model.Personnel = User.Identity.Name;
+            var result = await _productInterface.CancelReceiptAsync(model);
+            if (!result.Success)
+            {
+                TempData.SetData(AlertLevel.Warning, "Cancel Receipt", result.Message);
+                return View(model);
+            }
+            TempData.SetData(AlertLevel.Success, $"Receipt {model.Code} ", result.Message);
+            return RedirectToAction(nameof(CancelReceipt));
+        }
+
+        public async Task<JsonResult> ReceiptByCode(string code = "")
+        {
+            var result = await _productInterface.ReceiptByIdAsync(code);
+            return Json(result);
         }
     }
 }

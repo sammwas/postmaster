@@ -28,7 +28,7 @@ namespace PosMaster.Dal.Interfaces
         Task<ReturnData<List<Product>>> LowStockProductsAsync(Guid clientId, Guid? instanceId, int limit = 10);
         Task<ReturnData<List<TopSellingProductViewModel>>> TopSellingProductsByVolumeAsync(Guid clientId, Guid? instanceId, int limit = 10);
         Task<ReturnData<ProductPriceViewModel>> EditPriceAsync(ProductPriceViewModel model);
-        Task<ReturnData<Receipt>> ReceiptByIdAsync(Guid id);
+        Task<ReturnData<Receipt>> ReceiptByIdAsync(string id);
         Task<ReturnData<PurchaseOrder>> EditPurchaseOrderAsync(PurchaseOrderViewModel model);
         Task<ReturnData<string>> PrintReceiptByIdAsync(Guid id, string personnel);
         Task<ReturnData<GoodReceivedNote>> EditGrnAsync(GoodsReceivedNoteViewModel model);
@@ -40,6 +40,7 @@ namespace PosMaster.Dal.Interfaces
         Task<string> AddInvoiceAsync(Receipt receipt);
         Guid DefaultClientProductId(Guid clientId);
         Task<ReturnData<ReceiptUserViewModel>> GlUserBalanceAsync(GlUserType userType, Guid userId);
+        Task<ReturnData<string>> CancelReceiptAsync(CancelReceiptViewModel model);
 
     }
 
@@ -707,19 +708,22 @@ namespace PosMaster.Dal.Interfaces
             }
         }
 
-        public async Task<ReturnData<Receipt>> ReceiptByIdAsync(Guid id)
+        public async Task<ReturnData<Receipt>> ReceiptByIdAsync(string id)
         {
             var result = new ReturnData<Receipt> { Data = new Receipt() };
             var tag = nameof(ReceiptByIdAsync);
-            _logger.LogInformation($"{tag} get receipt by id : {id}");
+            _logger.LogInformation($"{tag} get receipt by id or code : {id}");
             try
             {
-                var data = await _context.Receipts
+                var hasId = Guid.TryParse(id, out var rId);
+
+                var qry = _context.Receipts
                     .Include(r => r.ReceiptLineItems)
                     .ThenInclude(r => r.Product)
                     .ThenInclude(r => r.ProductCategory)
-                    .Include(r => r.Customer)
-                    .FirstOrDefaultAsync(i => i.Id.Equals(id));
+                    .Include(r => r.Customer).AsQueryable();
+                var data = hasId ? await qry.FirstOrDefaultAsync(i => i.Id.Equals(rId))
+                   : await qry.FirstOrDefaultAsync(i => i.Code.ToLower().Equals(id.ToLower()));
                 result.Success = data != null;
                 result.Message = result.Success ? "Found" : "Not Found";
                 if (result.Success)
@@ -1679,6 +1683,64 @@ namespace PosMaster.Dal.Interfaces
                 Console.WriteLine(ex);
                 result.ErrorMessage = ex.Message;
                 result.Message = "Error occured";
+                _logger.LogError($"{tag} {result.Message} : {ex}");
+                return result;
+            }
+        }
+
+        public async Task<ReturnData<string>> CancelReceiptAsync(CancelReceiptViewModel model)
+        {
+            var result = new ReturnData<string>();
+            var tag = nameof(CancelReceiptAsync);
+            _logger.LogInformation($"{tag} client {model.ClientId} cancel receipt {model.Code} by {model.Personnel}");
+
+            try
+            {
+                if (string.IsNullOrEmpty(model.Code))
+                {
+                    result.Message = "Receipt number required";
+                    return result;
+                }
+                var receiptNo = model.Code.Trim().ToLower();
+                var receipt = await _context.Receipts
+                    .Include(r => r.ReceiptLineItems)
+                    .FirstOrDefaultAsync(r => r.Code.ToLower().Equals(receiptNo));
+                if (receipt == null)
+                {
+                    result.Message = "Provided receipt not Found";
+                    return result;
+                }
+
+                foreach (var item in receipt.ReceiptLineItems)
+                {
+                    var product = _context.Products.FirstOrDefault(p => p.Id.Equals(item.ProductId));
+                    if (product != null)
+                    {
+                        product.AvailableQuantity += item.Quantity;
+                        product.LastModifiedBy = model.Personnel;
+                        product.DateLastModified = DateTime.Now;
+                    }
+                }
+                var ledgers = _context.GeneralLedgerEntries
+                    .Where(g => g.DocumentId.Equals(receipt.Id)).ToList();
+                _context.GeneralLedgerEntries.RemoveRange(ledgers);
+
+                receipt.Status = EntityStatus.Inactive;
+                receipt.LastModifiedBy = model.Personnel;
+                receipt.Notes += $"CANCELLED::{model.Notes}";
+                receipt.DateLastModified = DateTime.Now;
+                _context.ReceiptLineItems.RemoveRange(receipt.ReceiptLineItems);
+                await _context.SaveChangesAsync();
+                result.Success = true;
+                result.Message = "Receipt cancelled";
+                result.Data = receiptNo;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                result.ErrorMessage = ex.Message;
+                result.Message = "Error occurred";
                 _logger.LogError($"{tag} {result.Message} : {ex}");
                 return result;
             }

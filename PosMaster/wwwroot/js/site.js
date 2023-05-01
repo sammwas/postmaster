@@ -466,6 +466,16 @@ $("#item-price-select").change(function () {
     });
 })
 
+
+$("#inpRcptCode").blur(function () {
+    var code = $(this).val();
+    $.get(`/PointOfSale/ReceiptByCode?code=${code}`).done(function (data) {
+        if (data.success) {
+            $("#inpRcptAmt").val(data.data.amount);
+        }
+    });
+})
+
 removeGradingSchemeRow = function (id) {
     document.getElementById("tr_" + id).remove();
 };

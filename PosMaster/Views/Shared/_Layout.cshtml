@@ -177,6 +177,12 @@
                                     </a>
                                 </li>
                                 <li class="nav-item">
+                                    <a asp-controller="PointOfSale" asp-action="CancelReceipt" class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Cancel Receipt</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
                                     <a asp-controller="PointOfSale" asp-action="Invoices"
                                        asp-route-dtFrom="@firstDayOfWeek"
                                        asp-route-dtTo="@DateTime.Now.ToString("dd-MMM-yyyy")" class="nav-link">
