@@ -11,7 +11,7 @@ namespace PosMaster.Dal
             IsWalkIn = true;
             IsCredit = false;
             ReceiptLineItems = new List<ReceiptLineItem>();
-            Customer = new Customer();
+            //Customer = new Customer();
         }
         public Customer Customer { get; set; }
         public Guid CustomerId { get; set; }

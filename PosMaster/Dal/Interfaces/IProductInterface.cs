@@ -1610,7 +1610,6 @@ namespace PosMaster.Dal.Interfaces
                         .FirstOrDefault();
         }
 
-
         public async Task<ReturnData<ReceiptUserViewModel>> GlUserBalanceAsync(GlUserType userType, Guid userId)
         {
             var tag = nameof(GlUserBalanceAsync);
@@ -1727,9 +1726,13 @@ namespace PosMaster.Dal.Interfaces
 
                 receipt.Status = EntityStatus.Inactive;
                 receipt.LastModifiedBy = model.Personnel;
-                receipt.Notes += $"CANCELLED::{model.Notes}";
+                receipt.Notes += $"{model.Notes}";
                 receipt.DateLastModified = DateTime.Now;
                 _context.ReceiptLineItems.RemoveRange(receipt.ReceiptLineItems);
+                var glEntries = _context.GeneralLedgerEntries
+                    .Join(_context.Invoices.Where(i => i.ReceiptId.Equals(receipt.Id)), l => l.DocumentId,
+                    i => i.Id, (l, i) => l).ToList();
+                _context.GeneralLedgerEntries.RemoveRange(glEntries);
                 await _context.SaveChangesAsync();
                 result.Success = true;
                 result.Message = "Receipt cancelled";

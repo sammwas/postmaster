@@ -230,7 +230,11 @@ namespace PosMaster.Controllers
 
         public IActionResult CancelReceipt(string code = "")
         {
-            return View(new CancelReceiptViewModel() { Code = code });
+            return View(new CancelReceiptViewModel()
+            {
+                Code = code,
+                Notes = "CANCELLED"
+            });
         }
 
         [HttpPost]
