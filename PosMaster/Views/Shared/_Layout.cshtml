@@ -176,12 +176,15 @@
                                         <p>Sale Receipts</p>
                                     </a>
                                 </li>
-                                <li class="nav-item">
-                                    <a asp-controller="PointOfSale" asp-action="CancelReceipt" class="nav-link">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Cancel Receipt</p>
-                                    </a>
-                                </li>
+                                @if (User.IsInRole(Role.SuperAdmin) || User.IsInRole(Role.Manager))
+                                {
+                                    <li class="nav-item">
+                                        <a asp-controller="PointOfSale" asp-action="CancelReceipt" class="nav-link">
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>Cancel Receipt</p>
+                                        </a>
+                                    </li>
+                                }
                                 <li class="nav-item">
                                     <a asp-controller="PointOfSale" asp-action="Invoices"
                                        asp-route-dtFrom="@firstDayOfWeek"
@@ -680,55 +683,62 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
 
     <script>
-        $(function () {
-            bsCustomFileInput.init();
-        });
-        $('.rich-text').summernote();
-        //$(".numbers-only").click(function () {
-        //	this.setSelectionRange(0, this.value.length)
-        //});
-        $(".numbers-only").keypress(function (evt) {
-            var iKeyCode = (evt.which) ? evt.which : evt.keyCode;
-            if (iKeyCode !== 46 && iKeyCode > 31 && (iKeyCode < 48 || iKeyCode > 57))
-                return false;
-            return true;
-        });
+                $(function () {
+                    bsCustomFileInput.init();
+                });
+                $('.rich-text').summernote();
+                //$(".numbers-only").click(function () {
+                //	this.setSelectionRange(0, this.value.length)
+                //});
+                $(".numbers-only").keypress(function (evt) {
+                    var iKeyCode = (evt.which) ? evt.which : evt.keyCode;
+                    if (iKeyCode !== 46 && iKeyCode > 31 && (iKeyCode < 48 || iKeyCode > 57))
+                        return false;
+                    return true;
+                });
 
-        $('.nav-sidebar>.nav-item>.nav-link').click(function () {
-            $('.nav-sidebar>.nav-item>.nav-link.active').removeClass("active");
-            $(this).addClass("active");
-        });
+                $('.nav-sidebar>.nav-item>.nav-link').click(function () {
+                    $('.nav-sidebar>.nav-item>.nav-link.active').removeClass("active");
+                    $(this).addClass("active");
+                });
 
-        $('.nav-treeview>.nav-item>.nav-link').click(function (e) {
-            $('.nav-treeview>.nav-item>.nav-link.active').removeClass("active");
-            $(this).closest('.nav-treeview').parent().removeClass("menu-open");
-            $(this).addClass("active");
-            $(this).closest('.nav-treeview').parent().addClass("menu-open");
+                $('.nav-treeview>.nav-item>.nav-link').click(function (e) {
+                    $('.nav-treeview>.nav-item>.nav-link.active').removeClass("active");
+                    $(this).closest('.nav-treeview').parent().removeClass("menu-open");
+                    $(this).addClass("active");
+                    $(this).closest('.nav-treeview').parent().addClass("menu-open");
 
-        });
+                });
 
-        $(document).ready(function () {
-            var opt = "@ViewData["Active"]";
-            $("#Menu" + opt).addClass("active").addClass("menu-open");
-            $("#Menu" + opt + ">.nav-link").addClass("active")
+                $(document).ready(function () {
+                    var opt = "@ViewData["Active"]";
+                    $("#Menu" + opt).addClass("active").addClass("menu-open");
+                    $("#Menu" + opt + ">.nav-link").addClass("active")
 
-            var pathName = window.location.pathname;
-            //var currLink = document.querySelectorAll("a[href^='"+pathName+"']");
-            var currLink = document.querySelectorAll("a[href='" + pathName + "']");
-            if (currLink) {
-                currLink.forEach((el) => { el.classList.add('active'); });
-            }
+                    var pathName = window.location.pathname;
+                    //var currLink = document.querySelectorAll("a[href^='"+pathName+"']");
+                    var currLink = document.querySelectorAll("a[href='" + pathName + "']");
+                    if (currLink) {
+                        currLink.forEach((el) => { el.classList.add('active'); });
+                    }
 
-            var message = '@TempData["Message"]';
-            var title = '@TempData["Title"]';
-            var type = '@TempData["Type"]';
-            if (message.length > 0) {
-                if (type === 'Success')
-                    toastr.success(message, title);
-                else if (type === 'Error')
-                    toastr.error(message, title);
-                else
-                    toastr.warning(message, title);
+                    var message = '@TempData["Message"]';
+                    var title = '@TempData["Title"]';
+                    var type = '@TempData["Type"]';
+                    if (message.length > 0) {
+                        if (type === 'Success')
+                            toastr.success(message, title);
+                        else if (type === 'Error')
+                            toastr.error(message, title);
+                        else
+                            toastr.warning(message, title);
+                    }
+                });
+
+         $(document).keyup(function(evt){
+            evt = evt || window.event;
+            if (evt.keyCode == 27) {
+                history.back();
             }
         });
     </script>

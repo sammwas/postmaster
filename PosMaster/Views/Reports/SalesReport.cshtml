@@ -86,7 +86,10 @@
                                 @foreach (var item in Model)
                                 {
                                     <tr>
-                                        <td>@item.DayStr</td>
+                                        <td>
+                                            <a asp-action="CloseOfDay" asp-route-dt="@item.DayStr"
+                                       asp-route-inId="@instanceId">@item.DayStr</a>
+                                        </td>
                                         <td>@Helpers.FormatAmount(item.TotalSales, 2)</td>
                                         <td>@Helpers.FormatAmount(item.ExpectedProfit, 2)</td>
                                         <td>@Helpers.FormatAmount(item.ActualProfit, 2)</td>
