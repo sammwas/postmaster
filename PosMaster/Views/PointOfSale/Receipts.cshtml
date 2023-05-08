@@ -1,4 +1,6 @@
-﻿@inject IClientInstanceInterface _instanceInterface;
+﻿@inject IMasterDataInterface _masterDataInterface;
+@inject IClientInstanceInterface _instanceInterface;
+@inject IUserInterface _userInterface;
 @inject ICookiesService _cookies;
 @model List<Receipt>
 @{
@@ -10,7 +12,12 @@
     : await _instanceInterface.ByClientIdAsync(userData.ClientId);
     var instances = instancesRes.Data;
     var instanceId = ViewData["InstanceId"]?.ToString();
+    var modeId = ViewData["PaymentModeId"]?.ToString();
+    var type = ViewData["SaleType"]?.ToString();
+    var personnel = ViewData["Personnel"]?.ToString();
     var dateToday = DateTime.Now.ToString("dd-MMM-yyyy");
+    var paymentModes = await _masterDataInterface.PaymentModesAsync(userData.ClientId);
+    var users = await _userInterface.ByInstanceIdAsync(userData.InstanceId);
 }
 <div>
     <div class="card">
@@ -30,7 +37,7 @@
             </div>
         </div>
         <div class="card-body">
-            <form autocomplete="off">
+            <form autocomplete="off" method="get">
                 <div class="row">
                     <div class="col-md-3">
                         <div class="form-group">
@@ -85,6 +92,76 @@
                     </div>
                     <div class="col-md-3">
                         <div class="form-group">
+                            <label>Payment Mode</label>
+                            <select class="form-control select2" name="modeId" style="width: 100%;">
+                                <option value="">--Select Mode--</option>
+                                @foreach (var item in paymentModes.Data)
+                                {
+                                    if (!string.IsNullOrEmpty(modeId) && item.Id.ToString().Equals(modeId))
+                                    {
+                                        <option selected="selected" value="@item.Id" title="@item.Notes">
+                                            @item.Code - @item.Name
+                                        </option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@item.Id" title="@item.Notes">@item.Code - @item.Name    </option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Sale Type</label>
+                            <select class="form-control select2" name="type" style="width: 100%;">
+                                <option value="">--Select Type--</option>
+                                @foreach (var item in new List<string> { "CASH", "CREDIT" })
+                                {
+                                    if (!string.IsNullOrEmpty(type) && item.Equals(type))
+                                    {
+                                        <option selected="selected" value="@item" title="@item">
+                                            @item SALE
+                                        </option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@item" title="@item">    @item SALE    </option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Personnel</label>
+                            <select class="form-control select2" name="personnel" style="width: 100%;">
+                                <option value="">--Select Personnel--</option>
+                                @foreach (var item in users.Data)
+                                {
+                                    if (!string.IsNullOrEmpty(personnel)
+                                    && item.EmailAddress.ToLower().Equals(personnel.ToLower()))
+                                    {
+                                        <option selected="selected" value="@item.EmailAddress" title="@item.Notes">
+                                            @item.FullName (@item.EmailAddress)
+                                        </option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@item.EmailAddress" title="@item.Notes">  @item.FullName (@item.EmailAddress)   </option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Search</label>
+                            <input type="text" name="search" class="form-control" value="@ViewData["Search"]" placeholder="Search" />
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
                             <br />
                             <button type="submit" class="btn btn-primary">Submit</button>
                         </div>
@@ -97,6 +174,8 @@
                         <th></th>
                         <th>Code</th>
                         <th>Date</th>
+                        <th>Customer</th>
+                        <th>Credit</th>
                         <th>Personnel</th>
                         <th>Amount</th>
                         <th>Notes</th>
@@ -107,11 +186,14 @@
                     {
                         @foreach (var item in Model)
                         {
+                            var saleType = item.IsCredit ? "CREDIT" : "CASH";
                             var receiptItems = Newtonsoft.Json.JsonConvert.SerializeObject(item.ReceiptLineItems);
                             <tr data-items="@receiptItems">
                                 <td class="details-control"></td>
                                 <td><a asp-action="Receipt" asp-route-id="@item.Id" title="View Receipt @item.Code">@item.Code</a></td>
                                 <td>@item.DateCreated</td>
+                                <td>@item.Customer.FullName</td>
+                                <td>@saleType</td>
                                 <td>@item.PersonnelName</td>
                                 <td>@item.Amount</td>
                                 <td>@item.Notes</td>
@@ -125,6 +207,8 @@
                         <th></th>
                         <th>Code</th>
                         <th>Date</th>
+                        <th>Customer</th>
+                        <th>Credit</th>
                         <th>Personnel</th>
                         <th>Amount</th>
                         <th>Notes</th>

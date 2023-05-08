@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
 namespace PosMaster.ViewModels
 {
     public class FulfillOrderViewModel : BaseViewModel
@@ -10,5 +5,6 @@ namespace PosMaster.ViewModels
         public string PaymentModeIdStr { get; set; }
         public string PaymentModeNo { get; set; }
         public string PersonnelName { get; set; }
+        public decimal Amount { get; set; }
     }
 }

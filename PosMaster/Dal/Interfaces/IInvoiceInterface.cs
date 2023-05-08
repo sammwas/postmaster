@@ -153,10 +153,16 @@ namespace PosMaster.Dal.Interfaces
                     return result;
                 }
 
-                var balance = invoice.Balance;
+                if (model.Amount > invoice.Balance)
+                {
+                    result.Message = $"Invoice balance is {invoice.Balance}";
+                    _logger.LogInformation($"{tag} unable to update invoice details : {result.Message}");
+                    return result;
+                }
+
                 invoice.Receipt.DateLastModified = DateTime.Now;
                 invoice.Receipt.LastModifiedBy = model.Personnel;
-                invoice.Receipt.AmountReceived += balance;
+                invoice.Receipt.AmountReceived = model.Amount;
                 invoice.Status = EntityStatus.Closed;
                 invoice.LastModifiedBy = model.Personnel;
                 invoice.DateLastModified = DateTime.Now;
@@ -170,7 +176,7 @@ namespace PosMaster.Dal.Interfaces
                     Document = Document.Receipt,
                     DocumentNumber = invoice.Receipt.Code,
                     DocumentId = invoice.Receipt.Id,
-                    Credit = balance,
+                    Credit = model.Amount,
                     Code = $"{invoice.Code}_{invoice.Receipt.Code}"
                 };
                 _context.GeneralLedgerEntries.Add(entry);

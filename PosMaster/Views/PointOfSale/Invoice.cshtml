@@ -15,6 +15,8 @@
     var fontZoom = $"{instance.ReceiptFontPercent}%";
     var cashier = string.IsNullOrEmpty(Model.Receipt.PersonnelName) ? "" : Model.Receipt.PersonnelName;
     var names = cashier.Split(' ');
+    var notes = string.IsNullOrEmpty(Model.Notes) ? Model.Receipt.Notes : Model.Notes;
+
 }
 @if (instance.ReceiptFontPercent > 100)
 {
@@ -42,7 +44,7 @@
                     <p><b>@user.InstanceName?.ToUpper()</b></p>
                     <p>@instance.PostalAddress - @instance.Town</p>
                     <p>PIN  @instance.PinNo</p>
-                    <p>Notes  @Model.Notes</p>
+                    <p>Notes  @notes</p>
                 </div>
                 <div class="col-md-6">
                     <p><b>Invoice No.</b> @Model.Code <span>[@status]</span></p>
@@ -115,12 +117,18 @@
             </div>
         </div>
         <div class="card-footer row d-print-none">
-            <div class="col-4">
+            <div class="col-md-4">
                 <a asp-action="Invoices" class="btn btn-secondary"><i class="fa fa-list"></i> View Invoices </a>
             </div>
-            <div class="col-4">
+            <div class="col-md-4">
+                @if (isActive)
+                {
+                    <button class="btn btn-success launch-modal float-right" data-toggle="modal" data-target="#posModal">
+                        <i class="fa fa-credit-card"></i> Pay Invoice Now
+                    </button>
+                }
             </div>
-            <div class="col-4">
+            <div class="col-md-4">
                 <a asp-action="Index" class="btn btn-primary"><i class="fa fa-paper-plane"></i> Next POS Sale</a>
             </div>
         </div>
@@ -252,46 +260,55 @@ else
                     <button class="btn btn-success launch-modal float-right" data-toggle="modal" data-target="#posModal">
                         <i class="fa fa-save"></i>Submit Payment
                     </button>
-                    <div class="modal fade" id="posModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-                 aria-hidden="true">
-                        <div class="modal-dialog" role="document">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="exampleModalLabel">Invoice: #@Model.Code</h5>
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
-                                </div>
-                                <div class="modal-body">
-                                    <p>Pay Invoice @Model.Code of amount @user.CurrencyShort @Model.TotalAmount</p>
-
-                                    <form method="post" asp-action="PayInvoice">
-                                        <input type="hidden" name="Id" value="@Model.Id">
-                                        <input type="hidden" name="Code" value="@Model.Code">
-                                        <div class="form-group">
-                                            <label>Payment Mode:</label>
-                                            <select name="PaymentModeIdStr" class="form-control select2">
-                                                <option>--select mode--</option>
-                                                @foreach (var paymentMode in paymentModes)
-                                                {
-                                                    <option value="@paymentMode.Id">@paymentMode.Name</option>
-                                                }
-                                            </select>
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Payment Mode No:</label>
-                                            <input type="text" class="form-control" name="PaymentModeNo" placeholder="Mode Number">
-                                        </div>
-                                        <div class="text-right">
-                                            <button type="submit" class="btn btn-primary">Submit</button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 }
             </div>
         </div>
     </div>
 }
+<div class="modal fade" id="posModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Invoice: #@Model.Code</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Pay Invoice @Model.Code of amount @user.CurrencyShort @Model.TotalAmount</p>
+                <form method="post" asp-action="PayInvoice">
+                    <input type="hidden" name="Id" value="@Model.Id">
+                    <input type="hidden" name="Code" value="@Model.Code">
+                    <div class="form-group">
+                        <label>Payment Mode:</label>
+                        <select name="PaymentModeIdStr" class="form-control select2">
+                            <option>--select mode--</option>
+                            @foreach (var paymentMode in paymentModes)
+                            {
+                                <option value="@paymentMode.Id">@paymentMode.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Payment Mode No:</label>
+                                <input type="text" class="form-control" name="PaymentModeNo" placeholder="Mode Number">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Amount:</label>
+                                <input type="text" class="form-control numbers-only" name="Amount" placeholder="Amount Paid">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

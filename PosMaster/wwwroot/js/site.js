@@ -34,6 +34,13 @@ $('#issBtnAdd').click(function (event) {
     addItemToList();
 })
 
+$(".posForm-number").keyup(function (evt) {
+    evt = evt || window.event;
+    if (evt.keyCode == 13) {
+        addItemToList();
+    }
+});
+
 var addItemToList = function () {
     item = {};
     var isCards = $("#inpShowCards").val();
@@ -90,8 +97,13 @@ var addItemToList = function () {
         $("#quantityBought").val("");
         $("#unitPrice").val("");
         $('#productListForm').trigger('reset');
-        if (isCards)
+        if (isCards) {
+            $("#inpSearchProduct").val('');
             $("#selectProductModal").modal('hide');
+        } else {
+            $('#product-select').select2('open');;
+        }
+
     }
 };
 var createIssueListTable = function () {

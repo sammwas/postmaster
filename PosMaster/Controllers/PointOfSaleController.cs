@@ -52,7 +52,8 @@ namespace PosMaster.Controllers
             return RedirectToAction(nameof(Receipt), new { result.Data.Id });
         }
 
-        public async Task<IActionResult> Receipts(string insId = "", string dtFrom = "", string dtTo = "", string search = "")
+        public async Task<IActionResult> Receipts(string insId = "", string dtFrom = "", string dtTo = "", string search = "",
+            string personnel = "", string modeId = "", string type = "")
         {
             ViewData["DtFrom"] = dtFrom;
             if (string.IsNullOrEmpty(dtFrom))
@@ -62,13 +63,22 @@ namespace PosMaster.Controllers
             }
             ViewData["DtTo"] = dtTo;
             ViewData["Search"] = search;
+            ViewData["PaymentModeId"] = modeId;
+            ViewData["SaleType"] = type;
+
             Guid? instanceId = null;
             if (Guid.TryParse(insId, out var iId))
                 instanceId = iId;
             if (User.IsInRole(Role.Clerk))
+            {
                 instanceId = _userData.InstanceId;
+                personnel = User.Identity.Name;
+            }
             ViewData["InstanceId"] = instanceId;
-            var result = await _productInterface.ReceiptsAsync(_userData.ClientId, instanceId, dtFrom, dtTo, search);
+            ViewData["Personnel"] = personnel;
+
+            var result = await _productInterface.ReceiptsAsync(_userData.ClientId, instanceId, dtFrom, dtTo, search,
+                personnel, modeId, type);
             if (!result.Success)
                 TempData.SetData(AlertLevel.Warning, "Receipts", result.Message);
             return View(result.Data);

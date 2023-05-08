@@ -15,7 +15,8 @@ namespace PosMaster.Dal.Interfaces
         Task<ReturnData<List<Product>>> ByInstanceIdAsync(Guid clientId, Guid? instanceId = null, bool isPos = false, string search = "");
         Task<ReturnData<Product>> ByIdAsync(Guid id);
         Task<ReturnData<Receipt>> ProductsSaleAsync(ProductSaleViewModel model);
-        Task<ReturnData<List<Receipt>>> ReceiptsAsync(Guid clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "");
+        Task<ReturnData<List<Receipt>>> ReceiptsAsync(Guid clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "",
+            string personnel = "", string modeId = "", string type = "");
         Task<ReturnData<ProductStockAdjustmentLog>> AdjustProductStockAsync(ProductStockAdjustmentViewModel model);
         Task<ReturnData<PurchaseOrder>> AddPurchaseOrderAsync(PoViewModel model);
         Task<ReturnData<List<PurchaseOrder>>> PurchaseOrdersAsync(Guid clientId, Guid? instanceId, bool onlyActive = false, string dateFrom = "", string dateTo = "",
@@ -665,11 +666,13 @@ namespace PosMaster.Dal.Interfaces
             }
         }
 
-        public async Task<ReturnData<List<Receipt>>> ReceiptsAsync(Guid clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "")
+        public async Task<ReturnData<List<Receipt>>> ReceiptsAsync(Guid clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "",
+            string personnel = "", string modeId = "", string type = "")
         {
             var result = new ReturnData<List<Receipt>> { Data = new List<Receipt>() };
             var tag = nameof(ReceiptsAsync);
-            _logger.LogInformation($"{tag} get receipts: clientId {clientId}, instanceId {instanceId}, duration {dateFrom}-{dateTo}, search {search}");
+            _logger.LogInformation($"{tag} get receipts: clientId {clientId}, instanceId {instanceId}, duration {dateFrom}-{dateTo}," +
+                $" search {search}, personnel {personnel}, payment mode {modeId}, type {type}");
             try
             {
                 var dataQuery = _context.Receipts
@@ -687,7 +690,28 @@ namespace PosMaster.Dal.Interfaces
                 if (hasToDate)
                     dataQuery = dataQuery.Where(r => r.DateCreated.Date <= dtTo.Date);
                 if (!string.IsNullOrEmpty(search))
-                    dataQuery = dataQuery.Where(r => r.Code.ToLower().Contains(search.ToLower()));
+                {
+                    search = search.ToLower();
+                    dataQuery = dataQuery.Where(r => r.Code.ToLower().Contains(search)
+                    || r.Customer.Code.ToLower().Contains(search)
+                    || r.Customer.FirstName.ToLower().Contains(search)
+                    || r.Customer.LastName.ToLower().Contains(search));
+                }
+                if (!string.IsNullOrEmpty(personnel))
+                {
+                    personnel = personnel.ToLower();
+                    dataQuery = dataQuery.Where(r => r.Personnel.ToLower().Equals(personnel));
+                }
+                if (!string.IsNullOrEmpty(type))
+                {
+                    var isCredit = type.ToLower().Equals("credit");
+                    dataQuery = dataQuery.Where(r => r.IsCredit.Equals(isCredit));
+                }
+                var hasMode = Guid.TryParse(modeId, out var mId);
+                if (hasMode)
+                    dataQuery = dataQuery.Where(r => r.PaymentModeId.HasValue &&
+                    r.PaymentModeId.Value.Equals(mId));
+
                 dataQuery.Where(d => d.ReceiptLineItems.Any());
                 var data = await dataQuery.OrderByDescending(r => r.DateCreated)
                     .ToListAsync();
