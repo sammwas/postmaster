@@ -78,7 +78,7 @@ namespace PosMaster.ViewModels
         public int PhoneNumberLength { get; set; }
         [Display(Name = "Telephone Code")]
         public string TelephoneCode { get; set; }
-        [Display(Name = "Display Product Buying Price")]
+        [Display(Name = "Show Clerk Dashboard")]
         public bool DisplayBuyingPrice { get; set; }
         public bool IsNewImage { get; set; }
         public IFormFile File { get; set; }
