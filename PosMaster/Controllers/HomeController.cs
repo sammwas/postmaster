@@ -114,7 +114,7 @@ namespace PosMaster.Controllers
                     lockoutOnFailure: true);
                 if (result.Succeeded)
                 {
-                    var user = await _userManager.FindByEmailAsync(model.EmailAddress);
+                    var user = await _userManager.FindByNameAsync(model.EmailAddress);
                     log.UserRole = user.Role;
                     log.Personnel = user.UserName;
                     log.ClientId = user.ClientId;
