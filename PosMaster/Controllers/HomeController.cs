@@ -109,12 +109,24 @@ namespace PosMaster.Controllers
                 //	await _userInterface.AddLoginLogAsync(log);
                 //	return View(model);
                 //}
+                model.EmailAddress = model.EmailAddress.Trim();
+                var user = model.EmailAddress.Contains('@') ?
+                     await _userManager.FindByEmailAsync(model.EmailAddress)
+                     : await _userManager.FindByNameAsync(model.EmailAddress);
+                if (user == null)
+                {
+                    ModelState.AddModelError(string.Empty, msg);
+                    TempData.SetData(AlertLevel.Warning, "Login Failed", "Invalid credentials");
+                    log.Notes = $"Provided email or username not found [{model.EmailAddress}]";
+                    await _userInterface.AddLoginLogAsync(log);
+                    return View(model);
+                }
                 var result = await _signInManager
-                    .PasswordSignInAsync(model.EmailAddress, model.Password, model.RememberMe,
+                    .CheckPasswordSignInAsync(user, model.Password,
                     lockoutOnFailure: true);
                 if (result.Succeeded)
                 {
-                    var user = await _userManager.FindByNameAsync(model.EmailAddress);
+                    await _signInManager.SignInAsync(user, isPersistent: model.RememberMe);
                     log.UserRole = user.Role;
                     log.Personnel = user.UserName;
                     log.ClientId = user.ClientId;
@@ -149,7 +161,6 @@ namespace PosMaster.Controllers
                         var licenceData = isValidRes.Data;
                         if (licenceData.RemainingDays < 7)
                             TempData["LicenceMsg"] = $"Licence Expires in {Math.Floor(licenceData.RemainingDays)} days.";
-
                     }
                     else
                     {
@@ -682,6 +693,7 @@ namespace PosMaster.Controllers
             userData.ClientLogoPath = client.LogoPath;
             userData.CurrencyShort = client.CurrencyShort;
             userData.ShowCardPos = clientInstance.ShowCardPosDisplay;
+            userData.ShowClerkDashboard = clientInstance.Client.ShowClerkDashboard;
 
             _cookiesService.Store(userData);
         }

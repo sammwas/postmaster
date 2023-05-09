@@ -1,7 +1,13 @@
 ﻿@model List<Expense>
+@inject IClientInstanceInterface _clientInstance;
+@inject ICookiesService _cookies;
 @{
     ViewData["Active"] = "POS";
     ViewData["Title"] = "Expenses";
+    var instanceId = ViewData["InstanceId"]?.ToString();
+    var userData = _cookies.Read();
+    var instancesRes = await _clientInstance.ByClientIdAsync(userData.ClientId);
+    var dateToday = DateTime.Now.ToString("dd-MMM-yyyy");
 }
 <div>
     <div class="card">
@@ -22,14 +28,66 @@
                 }
             </div>
         </div>
-
-        <!-- /.card-header -->
         <div class="card-body">
+            <form autocomplete="off">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Instance</label>
+                            <select class="form-control select2" name="insId" style="width: 100%;">
+                                <option value="">--Select Instance--</option>
+                                @foreach (var item in instancesRes.Data)
+                                {
+                                    if (!string.IsNullOrEmpty(instanceId) && item.Id.ToString().Equals(instanceId))
+                                    {
+                                        <option selected="selected" value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Date From</label>
+                            <div class="input-group date" id="dateFrom" data-target-input="nearest">
+                                <input type="text" name="dtFrom" class="form-control datetimepicker-input" data-target="#dateFrom" value="@ViewData["DtFrom"]" placeholder="Date From (@dateToday)" />
+                                <div class="input-group-append" data-target="#dateFrom" data-toggle="datetimepicker">
+                                    <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Date To</label>
+                            <div class="input-group date" id="dateTo" data-target-input="nearest">
+                                <input type="text" name="dtTo" class="form-control datetimepicker-input" data-target="#dateTo" value="@ViewData["DtTo"]" placeholder="Date To (@dateToday)" />
+                                <div class="input-group-append" data-target="#dateTo" data-toggle="datetimepicker">
+                                    <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <br />
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
             <table id="dataTable" class="table table-bordered table-striped">
                 <thead>
                     <tr>
                         <th>Code</th>
                         <th>Type</th>
+                        <th>Payment Mode</th>
+                        <th>Mode No.</th>
+                        <th>Supplier</th>
                         <th>Date</th>
                         <th>Amount</th>
                         <th>Options</th>
@@ -43,6 +101,9 @@
                             <tr>
                                 <td>@item.Code</td>
                                 <td>@item.ExpenseType.Name</td>
+                                <td>@item.PaymentMode?.Name</td>
+                                <td>@item.ModeNumber</td>
+                                <td>@item.Supplier?.Name</td>
                                 <td>@item.DateCreated</td>
                                 <td>@item.Amount</td>
                                 <td class="project-actions text-right">
@@ -61,13 +122,15 @@
                     <tr>
                         <th>Code</th>
                         <th>Type</th>
+                        <th>Payment Mode</th>
+                        <th>Mode No.</th>
+                        <th>Supplier</th>
                         <th>Date</th>
                         <th>Amount</th>
+                        <th>Options</th>
                     </tr>
                 </tfoot>
             </table>
         </div>
-        <!-- /.card-body -->
     </div>
-    <!-- /.card -->
 </div>

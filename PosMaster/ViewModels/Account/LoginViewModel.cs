@@ -11,7 +11,7 @@ namespace PosMaster.ViewModels
         public string Password { get; set; }
         public bool RememberMe { get; set; }
         [Required]
-        [Display(Name = "Account username")]
+        [Display(Name = "Email or Username")]
         [DataType(DataType.Text)]
         public string EmailAddress { get; set; }
         public List<AuthenticationScheme> AuthenticationSchemes { get; set; }

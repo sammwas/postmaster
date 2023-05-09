@@ -185,6 +185,7 @@ namespace PosMaster.Dal.Interfaces
                     dbClient.PhoneNumberLength = model.PhoneNumberLength;
                     dbClient.TelephoneCode = model.TelephoneCode;
                     dbClient.DisplayBuyingPrice = model.DisplayBuyingPrice;
+                    dbClient.ShowClerkDashboard = model.ShowClerkDashboard;
                     dbClient.Notes = model.Notes;
                     dbClient.Status = model.Status;
                     dbClient.DateLastModified = DateTime.UtcNow;
@@ -221,6 +222,7 @@ namespace PosMaster.Dal.Interfaces
                     PhoneNumberLength = model.PhoneNumberLength,
                     TelephoneCode = model.TelephoneCode,
                     DisplayBuyingPrice = model.DisplayBuyingPrice,
+                    ShowClerkDashboard = model.ShowClerkDashboard,
                     Personnel = model.Personnel,
                     Status = model.Status,
                     LogoPath = model.LogoPath,

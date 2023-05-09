@@ -90,13 +90,17 @@ namespace PosMaster.Controllers
             ViewData["DtTo"] = dtTo;
             ViewData["Search"] = search;
             Guid? instanceId = null;
+            var personnel = "";
             if (Guid.TryParse(insId, out var iId))
                 instanceId = iId;
             if (User.IsInRole(Role.Clerk))
+            {
+                personnel = User.Identity.Name;
                 instanceId = _userData.InstanceId;
-
+            }
             ViewData["InstanceId"] = instanceId;
-            var result = await _invoiceInterface.GetAsync(_userData.ClientId, instanceId, dtFrom, dtTo, search);
+            var result = await _invoiceInterface
+                .GetAsync(_userData.ClientId, instanceId, dtFrom, dtTo, search, personnel);
             if (!result.Success)
                 TempData.SetData(AlertLevel.Warning, "Invoices", result.Message);
             return View(result.Data);

@@ -10,7 +10,8 @@ namespace PosMaster.Dal.Interfaces
 {
     public interface IInvoiceInterface
     {
-        Task<ReturnData<List<Invoice>>> GetAsync(Guid? clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "");
+        Task<ReturnData<List<Invoice>>> GetAsync(Guid? clientId, Guid? instanceId, string dateFrom = "",
+            string dateTo = "", string search = "", string personnel = "");
         Task<ReturnData<Invoice>> ByIdAsync(Guid id);
         Task<ReturnData<Invoice>> PayAsync(FulfillOrderViewModel model);
     }
@@ -92,7 +93,8 @@ namespace PosMaster.Dal.Interfaces
             }
         }
 
-        public async Task<ReturnData<List<Invoice>>> GetAsync(Guid? clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "")
+        public async Task<ReturnData<List<Invoice>>> GetAsync(Guid? clientId, Guid? instanceId, string dateFrom = "",
+            string dateTo = "", string search = "", string personnel = "")
         {
             var result = new ReturnData<List<Invoice>> { Data = new List<Invoice>() };
             var tag = nameof(GetAsync);
@@ -116,6 +118,10 @@ namespace PosMaster.Dal.Interfaces
                     dataQuery = dataQuery.Where(r => r.DateCreated.Date <= dtTo.Date);
                 if (!string.IsNullOrEmpty(search))
                     dataQuery = dataQuery.Where(r => r.Code.ToLower().Contains(search.ToLower()));
+                if (!string.IsNullOrEmpty(personnel))
+                {
+                    dataQuery = dataQuery.Where(d => d.Personnel.Equals(personnel));
+                }
                 var data = await dataQuery.OrderByDescending(r => r.DateCreated)
                     .ToListAsync();
                 result.Success = data.Any();

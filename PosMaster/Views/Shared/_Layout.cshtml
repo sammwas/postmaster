@@ -139,14 +139,17 @@
                 <nav class="mt-2">
                     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
                         data-accordion="false">
-                        <li class="nav-item">
-                            <a asp-controller="Dashboard" asp-action="Index" class="nav-link" id="MenuDashboard">
-                                <i class="nav-icon fas fa-tachometer-alt"></i>
-                                <p>
-                                    Dashboard
-                                </p>
-                            </a>
-                        </li>
+                        @if (!User.IsInRole(Role.Clerk) || userData.ShowClerkDashboard)
+                        {
+                            <li class="nav-item">
+                                <a asp-controller="Dashboard" asp-action="Index" class="nav-link" id="MenuDashboard">
+                                    <i class="nav-icon fas fa-tachometer-alt"></i>
+                                    <p>
+                                        Dashboard
+                                    </p>
+                                </a>
+                            </li>
+                        }
                         <li class="nav-item has-treeview" id="MenuPOS">
                             <a href="#" class="nav-link">
                                 <i class="nav-icon fa fa-calculator"></i>
@@ -202,7 +205,9 @@
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a asp-controller="PointOfSale" asp-action="Expenses" class="nav-link">
+                                    <a asp-controller="PointOfSale" asp-action="Expenses"
+                                       asp-route-dtFrom="@firstDayOfWeek"
+                                       asp-route-dtTo="@DateTime.Now.ToString("dd-MMM-yyyy")" class="nav-link">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Expenses</p>
                                     </a>

@@ -23,7 +23,7 @@
                     <tr>
                         <th>Full Name</th>
                         <th>Shop</th>
-                        <th>Email Address</th>
+                        <th>Email / Username</th>
                         <th>Phone Number</th>
                         <th>Id Number</th>
                         <th>Gender</th>
@@ -37,10 +37,11 @@
                     @foreach (var item in Model)
                     {
                         var instance = instancesRes.Data.FirstOrDefault(i => i.Id == item.InstanceId);
+                        var username = item.Username.Equals(item.EmailAddress) ? "" : $"/{item.Username}";
                         <tr>
                             <td><a asp-action="Edit" asp-route-id="@item.UserId">@item.FullName</a> </td>
                             <td>@instance?.Name</td>
-                            <td>@item.EmailAddress</td>
+                            <td>@item.EmailAddress<span>@username</span></td>
                             <td>@item.PhoneNumber</td>
                             <td>@item.IdNumber</td>
                             <td>@item.Gender</td>
@@ -61,7 +62,7 @@
                     <tr>
                         <th>Full Name</th>
                         <th>Shop</th>
-                        <th>Email Address</th>
+                        <th>Email / Username</th>
                         <th>Phone Number</th>
                         <th>Id Number</th>
                         <th>Gender</th>

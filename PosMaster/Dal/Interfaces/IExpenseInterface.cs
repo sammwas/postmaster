@@ -32,7 +32,10 @@ namespace PosMaster.Dal.Interfaces
             _logger.LogInformation($"{tag} get expenses : clientId {clientId}, instanceId {instanceId}, duration {dateFrom}-{dateTo}, search {search}");
             try
             {
-                var dataQuery = _context.Expenses.Include(r => r.ExpenseType)
+                var dataQuery = _context.Expenses
+                    .Include(r => r.ExpenseType)
+                    .Include(tag => tag.PaymentMode)
+                    .Include(tag => tag.Supplier)
                     .AsQueryable();
                 if (clientId != null)
                     dataQuery = dataQuery.Where(r => r.ClientId.Equals(clientId.Value));
@@ -83,6 +86,8 @@ namespace PosMaster.Dal.Interfaces
                     _logger.LogWarning($"{tag} edit failed {model.Id} : {result.Message}");
                     return result;
                 }
+                var hasSupplierId = Guid.TryParse(model.SupplierId, out var supplierId);
+                var hasModeId = Guid.TryParse(model.PaymentModeId, out var modeId);
                 if (model.IsEditMode)
                 {
                     var dbExpense = await _context.Expenses
@@ -93,13 +98,15 @@ namespace PosMaster.Dal.Interfaces
                         _logger.LogWarning($"{tag} update failed {model.Id} : {result.Message}");
                         return result;
                     }
-                    dbExpense.Code = model.Code;
                     dbExpense.ExpenseTypeId = expenseType.Id;
                     dbExpense.Amount = model.Amount;
                     dbExpense.LastModifiedBy = model.Personnel;
                     dbExpense.DateLastModified = DateTime.Now;
                     dbExpense.Notes = model.Notes;
                     dbExpense.Status = model.Status;
+                    dbExpense.ModeNumber = model.ModeNumber;
+                    dbExpense.PaymentModeId = hasModeId ? modeId : (Guid?)null;
+                    dbExpense.SupplierId = hasSupplierId ? supplierId : (Guid?)null;
                     await _context.SaveChangesAsync();
                     result.Success = true;
                     result.Message = "Updated";
@@ -118,9 +125,49 @@ namespace PosMaster.Dal.Interfaces
                     Personnel = model.Personnel,
                     Status = model.Status,
                     Amount = model.Amount,
-                    ExpenseTypeId = Guid.Parse(model.ExpenseTypeId)
+                    ExpenseTypeId = expenseType.Id,
+                    ModeNumber = model.ModeNumber
                 };
+                if (hasModeId)
+                    expense.PaymentModeId = modeId;
+                if (hasSupplierId)
+                    expense.SupplierId = supplierId;
                 _context.Expenses.Add(expense);
+                await _context.SaveChangesAsync();
+                var expenseEntry = new GeneralLedgerEntry
+                {
+                    ClientId = model.ClientId,
+                    InstanceId = model.InstanceId,
+                    Personnel = model.Personnel,
+                    UserId = supplierId,
+                    UserType = GlUserType.Payee,
+                    Document = Document.Voucher,
+                    DocumentNumber = expense.Code,
+                    DocumentId = expense.Id,
+                    Debit = model.Amount,
+                    Notes = model.Notes,
+                    Code = $"{expense.Code}_{expenseType.Name}"
+                };
+                var paymentMode = _context.PaymentModes.FirstOrDefault(x => x.Id == expense.PaymentModeId);
+                if (paymentMode != null)
+                {
+                    var modeEntry = new GeneralLedgerEntry
+                    {
+                        ClientId = model.ClientId,
+                        InstanceId = model.InstanceId,
+                        Personnel = model.Personnel,
+                        UserId = supplierId,
+                        UserType = GlUserType.Payee,
+                        Document = Document.Voucher,
+                        DocumentNumber = expense.Code,
+                        DocumentId = expense.Id,
+                        Credit = model.Amount,
+                        Notes = model.Notes,
+                        Code = $"{expense.Code}_{paymentMode.Name}"
+                    };
+                    _context.GeneralLedgerEntries.Add(modeEntry);
+                }
+                _context.GeneralLedgerEntries.Add(expenseEntry);
                 await _context.SaveChangesAsync();
                 result.Success = true;
                 result.Message = "Added";

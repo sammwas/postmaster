@@ -23,7 +23,7 @@ namespace PosMaster.Controllers
             _dashboardInterface = dashboardInterface;
             _clientInterface = clientInterface;
         }
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
             if (User.IsInRole(Role.SuperAdmin))
                 return RedirectToAction(nameof(SuperAdmin));
@@ -31,8 +31,7 @@ namespace PosMaster.Controllers
                 return RedirectToAction(nameof(Manager));
             if (User.IsInRole(Role.Clerk))
             {
-                var clientRes = await _clientInterface.ByIdAsync(_cookiesService.Read().ClientId);
-                return clientRes.Data.DisplayBuyingPrice ?
+                return _cookiesService.Read().ShowClerkDashboard ?
                  RedirectToAction(nameof(Clerk)) : RedirectToAction("Index", "PointOfSale");
             }
             return RedirectToAction(nameof(Clerk));
