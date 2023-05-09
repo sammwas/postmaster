@@ -231,6 +231,9 @@
                             @if (User.IsInRole(Role.Manager))
                             {
                                 <p>
+                                    <a asp-route-id="@Model.UserId" asp-action="ChangeUsername">Change Username</a>
+                                </p>
+                                <p>
                                     <a asp-controller="HumanResource" asp-route-userId="@Model.UserId" asp-action="EditEmployeeKin">Next of Kin</a>
                                 </p>
                                 <p>

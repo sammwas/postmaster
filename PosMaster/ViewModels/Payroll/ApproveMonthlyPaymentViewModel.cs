@@ -9,6 +9,7 @@ namespace PosMaster.ViewModels
         public int Year { get; set; }
         public Guid ClientId { get; set; }
         [Display(Name = "Select Instance")]
+        [Required]
         public Guid? InstanceId { get; set; }
         public string Personnel { get; set; }
     }

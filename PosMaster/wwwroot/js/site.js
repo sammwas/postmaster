@@ -61,27 +61,32 @@ var addItemToList = function () {
     var fa = '<i class="fa fa-times-circle"></i> ';
     $("#issMsg").html('');
     if (productId === "") {
-        $("#issMsg").html(fa + " Select an item first").addClass('text-danger');
+        $("#issMsg").html(fa + " Select an item first")
+            .addClass('text-danger breadcrumb');
         $("#issItemId").focus();
         return
     }
     else if (!quantity || quantity <= 0) {
-        $("#issMsg").html(fa + " Quantity is required").addClass('text-danger');
+        $("#issMsg").html(fa + " Quantity is required")
+            .addClass('text-danger breadcrumb');
         $("#quantityBought").focus();
         return
     }
     else if (unitPrice === "") {
-        $("#issMsg").html(fa + " Price is required").addClass('text-danger');
+        $("#issMsg").html(fa + " Price is required")
+            .addClass('text-danger breadcrumb');
         $("#issWarehouseId").focus();
         return
     }
     else if (quantity > avQuantity) {
-        $("#issMsg").html(fa + " Available quantity is " + avQuantity).addClass('text-danger');
+        $("#issMsg").html(fa + " Available quantity is " + avQuantity)
+            .addClass('text-danger breadcrumb');
         $("#quantityBought").focus();
         return
     }
     else {
         $("#issMsg").text("");
+        $("#issMsg").removeClass("breadcrumb");
         var listItem = {
             "productId": productId,
             "quantity": quantity,
