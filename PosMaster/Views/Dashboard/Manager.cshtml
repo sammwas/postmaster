@@ -21,7 +21,7 @@
             <div class="col-lg-3 col-6">
                 <div class="small-box bg-success">
                     <div class="inner">
-                        <h3>@Helpers.FormatAmount(Model.MonthlySales, 2)</h3>
+                        <h3>@Helpers.FormatAmount(Model.MonthlySales)</h3>
                         <p>Monthly Sales</p>
                     </div>
                     <div class="icon">
@@ -33,7 +33,7 @@
             <div class="col-lg-3 col-6">
                 <div class="small-box bg-warning">
                     <div class="inner">
-                        <h3>@Helpers.FormatAmount(Model.WeeklySales, 2)</h3>
+                        <h3>@Helpers.FormatAmount(Model.WeeklySales)</h3>
                         <p>Weekly Sales</p>
                     </div>
                     <div class="icon">
@@ -45,7 +45,7 @@
             <div class="col-lg-3 col-6">
                 <div class="small-box bg-danger">
                     <div class="inner">
-                        <h3>@Helpers.FormatAmount(Model.TodaySales, 2)</h3>
+                        <h3>@Helpers.FormatAmount(Model.TodaySales)</h3>
                         <p>Daily Sales</p>
                     </div>
                     <div class="icon">
@@ -59,7 +59,7 @@
             <div class="col-lg-3 col-6">
                 <div class="small-box bg-purple">
                     <div class="inner">
-                        <h3>@Helpers.FormatAmount(Model.TotalStockValue, 2)</h3>
+                        <h3>@Helpers.FormatAmount(Model.TotalStockValue)</h3>
                         <p>Total Stock Value</p>
                     </div>
                     <div class="icon">
@@ -70,7 +70,7 @@
             <div class="col-lg-3 col-6">
                 <div class="small-box bg-pink">
                     <div class="inner">
-                        <h3>@Helpers.FormatAmount(Model.TotalReceiptsAmount, 2)</h3>
+                        <h3>@Helpers.FormatAmount(Model.TotalReceiptsAmount)</h3>
                         <p>Total Receipts Amount</p>
                     </div>
                     <div class="icon">
@@ -81,7 +81,7 @@
             <div class="col-lg-3 col-6">
                 <div class="small-box bg-olive">
                     <div class="inner">
-                        <h3>@Helpers.FormatAmount(Model.TotalExpectedProfit, 2)</h3>
+                        <h3>@Helpers.FormatAmount(Model.TotalExpectedProfit-Model.TotalExpenses)</h3>
                         <p>Total Expected Profit</p>
                     </div>
                     <div class="icon">
@@ -92,7 +92,7 @@
             <div class="col-lg-3 col-6">
                 <div class="small-box bg-lime">
                     <div class="inner">
-                        <h3>@Helpers.FormatAmount(Model.TotalActualProfit, 2)</h3>
+                        <h3>@Helpers.FormatAmount(Model.TotalActualProfit-Model.TotalExpenses)</h3>
                         <p>Total Actual Profit</p>
                     </div>
                     <div class="icon">

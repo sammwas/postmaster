@@ -16,7 +16,7 @@ namespace PosMaster.Dal.Interfaces
         Task<ReturnData<List<CustomerBalanceViewModel>>> CustomerBalancesAsync(Guid instanceId, string dateFrom = "", string dateTo = "");
         Task<ReturnData<CustomerStatementViewModel>> CustomerStatementAsync(Guid customerId, string dateFrom = "", string dateTo = "");
         Task<ReturnData<List<TopSellingProductViewModel>>> SalesByClerkAsync(Guid instanceId, string dateFrom = "", string dateTo = "");
-        Task<ReturnData<CloseOfDayViewModel>> CloseOfDayAsync(Guid clientId, Guid? instanceId, DateTime date, string personnel = "");
+        Task<ReturnData<CloseOfDayViewModel>> CloseOfDayAsync(Guid clientId, Guid? instanceId, DateTime dateFrom, DateTime dateTo, string personnel = "");
 
     }
     public class ReportingImplementation : IReportingInterface
@@ -250,16 +250,18 @@ namespace PosMaster.Dal.Interfaces
             }
         }
 
-        public async Task<ReturnData<CloseOfDayViewModel>> CloseOfDayAsync(Guid clientId, Guid? instanceId, DateTime date, string personnel = "")
+        public async Task<ReturnData<CloseOfDayViewModel>> CloseOfDayAsync(Guid clientId, Guid? instanceId, DateTime dateFrom, DateTime dateTo, string personnel = "")
         {
             var result = new ReturnData<CloseOfDayViewModel> { Data = new CloseOfDayViewModel() };
             var tag = nameof(CloseOfDayAsync);
-            _logger.LogInformation($"{tag} on client {clientId} instance {instanceId} close of {date}");
             try
             {
+                var from = dateFrom.ToString("dd-MMM-yyyy");
+                var to = dateTo.ToString("dd-MMM-yyyy");
+                _logger.LogInformation($"{tag} on client {clientId} instance {instanceId}  from {from} to {to}");
                 var model = new CloseOfDayViewModel()
                 {
-                    Day = date.ToString("dd-MMM-yyyy")
+                    Day = $"{from} to {to}"
                 };
                 var receiptsQuery = _context.Receipts.Where(r => r.ClientId.Equals(clientId))
                     .Include(r => r.ReceiptLineItems).AsQueryable();
@@ -272,19 +274,19 @@ namespace PosMaster.Dal.Interfaces
                         .Where(r => r.Personnel.ToLower().Equals(personnel));
                 }
                 var creditSales = await receiptsQuery.Where(r => r.IsCredit)
-                    .Where(r => r.DateCreated.Date.Equals(date.Date))
+                    .Where(r => r.DateCreated.Date >= dateFrom.Date && r.DateCreated.Date <= dateTo.Date)
                     .SelectMany(s => s.ReceiptLineItems)
                     .SumAsync(r => r.UnitPrice * r.Quantity);
                 var dataQuery = receiptsQuery
                     .SelectMany(s => s.ReceiptLineItems)
                     .AsQueryable();
                 var totalSales = await dataQuery
-                     .Where(r => r.DateCreated.Date.Equals(date.Date))
+                    .Where(r => r.DateCreated.Date >= dateFrom.Date && r.DateCreated.Date <= dateTo.Date)
                      .SumAsync(r => r.UnitPrice * r.Quantity);
                 model.CreditSale = creditSales;
                 model.TotalSale = totalSales;
                 var salesByClerk = await dataQuery
-                     .Where(r => r.DateCreated.Date.Equals(date.Date))
+                    .Where(r => r.DateCreated.Date >= dateFrom.Date && r.DateCreated.Date <= dateTo.Date)
                      .GroupBy(l => l.Personnel)
                     .Select(tp => new KeyAmountViewModel
                     {
@@ -298,7 +300,8 @@ namespace PosMaster.Dal.Interfaces
                   }).ToListAsync();
                 model.SalesByClerk = salesByClerk;
                 var invoicesQry = receiptsQuery.Where(r => r.IsCredit
-                  && (r.DateLastModified.HasValue && r.DateLastModified.Value.Date.Equals(date.Date)))
+                  && (r.DateLastModified.HasValue
+                  && r.DateLastModified.Value.Date >= dateFrom.Date && r.DateLastModified.Value.Date <= dateTo.Date))
                     .AsQueryable();
                 model.InvoiceCustomerServed = await invoicesQry
                     .Select(i => i.CustomerId).Distinct()
@@ -317,9 +320,9 @@ namespace PosMaster.Dal.Interfaces
                       Key = u.FullName
                   }).ToListAsync();
                 model.ReceiptsByClerk = receiptsByClerk;
-
                 var paymentsByModes = await _context.GeneralLedgerEntries
-                    .Where(g => g.Document.Equals(Document.Receipt) && g.DateCreated.Date.Equals(date.Date))
+                    .Where(g => g.Document.Equals(Document.Receipt) &&
+                    g.DateCreated.Date >= dateFrom.Date && g.DateCreated.Date <= dateTo.Date)
                     .Join(_context.Receipts.Include(r => r.PaymentMode), g => g.DocumentId, r => r.Id, (g, r) =>
                             new { r.PaymentMode.Name, g.Credit }
                     ).GroupBy(c => c.Name)
@@ -329,10 +332,21 @@ namespace PosMaster.Dal.Interfaces
                         Amount = s.Sum(a => a.Credit)
                     }).ToListAsync();
                 model.PaymentsByMode = paymentsByModes;
+                var expenses = await _context.Expenses
+                    .Include(e => e.ExpenseType).DefaultIfEmpty()
+                   .Where(g => g.DateCreated.Date >= dateFrom.Date && g.DateCreated.Date <= dateTo.Date)
+                    .Select(r => new { r.ExpenseType.Name, r.Amount }
+                   ).GroupBy(c => c.Name)
+                   .Select(s => new KeyAmountViewModel
+                   {
+                       Key = s.Key,
+                       Amount = s.Sum(a => a.Amount)
+                   }).ToListAsync();
+                model.Expenses = expenses;
                 result.Success = true;
                 result.Message = "Found";
                 result.Data = model;
-                _logger.LogInformation($"{tag} total sales {model.TotalSale} cash returns {model.DailyCashReturn}");
+                _logger.LogInformation($"{tag} total sales {model.TotalSale} cash returns {model.DailyCashReturn} expenses {model.TotalExpenses}");
                 return result;
             }
             catch (Exception ex)

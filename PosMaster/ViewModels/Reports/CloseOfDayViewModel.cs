@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace PosMaster.ViewModels
 {
@@ -6,7 +7,7 @@ namespace PosMaster.ViewModels
     {
         public CloseOfDayViewModel()
         {
-            SalesByClerk = ReceiptsByClerk = PaymentsByMode
+            SalesByClerk = ReceiptsByClerk = PaymentsByMode = Expenses
                 = new List<KeyAmountViewModel>();
         }
         public string Day { get; set; }
@@ -17,9 +18,12 @@ namespace PosMaster.ViewModels
         public int InvoiceCustomerServed { get; set; }
         public decimal TotalRepayment { get; set; }
         public List<KeyAmountViewModel> ReceiptsByClerk { get; set; }
+        public List<KeyAmountViewModel> Expenses { get; set; }
+        public List<KeyAmountViewModel> PaymentsByMode { get; set; }
+
 
         public decimal DailyCashReturn => CashSale + TotalRepayment;
-        public List<KeyAmountViewModel> PaymentsByMode { get; set; }
+        public decimal TotalExpenses => Expenses.Sum(e => e.Amount);
     }
 
     public class KeyAmountViewModel

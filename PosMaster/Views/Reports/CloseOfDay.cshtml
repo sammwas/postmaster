@@ -35,7 +35,7 @@
 
         <form method="get" autocomplete="off" class="d-print-none">
             <div class="row">
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <div class="form-group">
                         <label>Instance</label>
                         <select class="form-control select2" name="inId" style="width: 100%;">
@@ -54,9 +54,9 @@
                         </select>
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <div class="form-group">
-                        <label>Report date</label>
+                        <label>From</label>
                         <div class="input-group date" id="dateFrom" data-target-input="nearest">
                             <input type="text" name="dt" class="form-control datetimepicker-input" data-target="#dateFrom" value="@ViewData["dtDay"]" placeholder="Date From (@dateToday)" />
                             <div class="input-group-append" data-target="#dateFrom" data-toggle="datetimepicker">
@@ -65,7 +65,18 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label>To</label>
+                        <div class="input-group date" id="dateTo" data-target-input="nearest">
+                            <input type="text" name="dtTo" class="form-control datetimepicker-input" data-target="#dateTo" value="@ViewData["dtDayTo"]" placeholder="Date From (@dateToday)" />
+                            <div class="input-group-append" data-target="#dateTo" data-toggle="datetimepicker">
+                                <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
                     <div class="form-group">
                         <button type="submit" class="btn btn-primary mt-4">Submit</button>
                     </div>
@@ -114,6 +125,16 @@
                 <h5>Receipts by clerk</h5>
                 <hr />
                 @foreach (var item in Model.ReceiptsByClerk)
+                {
+                    <p><b>@item.Key</b> <span>@userData.CurrencyShort @Helpers.FormatAmount(item.Amount)</span></p>
+                }
+            </div>
+            <div class="col-md-6">
+                <h5>Expenses</h5>
+                <hr />
+                <p><b>Total Expenses</b> <span>@userData.CurrencyShort @Helpers.FormatAmount(Model.TotalExpenses)</span></p>
+                <h5>Expenses by type</h5>
+                @foreach (var item in Model.Expenses)
                 {
                     <p><b>@item.Key</b> <span>@userData.CurrencyShort @Helpers.FormatAmount(item.Amount)</span></p>
                 }

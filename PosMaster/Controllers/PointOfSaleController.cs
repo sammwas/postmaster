@@ -120,6 +120,12 @@ namespace PosMaster.Controllers
                 instanceId = _userData.InstanceId;
                 personnel = User.Identity.Name;
             }
+            if (string.IsNullOrEmpty(dtFrom))
+            {
+                var dateFrom = DateTime.Now.ToString("dd-MMM-yyyy");
+                ViewData["DtFrom"] = dateFrom;
+                dtFrom = dateFrom;
+            }
             ViewData["InstanceId"] = instanceId;
             var result = await _expenseInterface.AllAsync(_userData.ClientId, instanceId, dtFrom, dtTo, search, personnel);
             if (!result.Success)

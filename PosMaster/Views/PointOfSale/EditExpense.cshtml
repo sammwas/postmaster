@@ -1,5 +1,6 @@
 ﻿@model ExpenseViewModel
 @inject IMasterDataInterface _masterDataInterface;
+@inject ISupplierInterface _supplierInterface;
 @inject ICookiesService _cookies;
 @{
     ViewData["Active"] = "POS";
@@ -10,6 +11,13 @@
     var userData = _cookies.Read();
     var expenseTypes = await _masterDataInterface.ExpenseTypesAsync(userData.ClientId);
     var paymentModes = await _masterDataInterface.PaymentModesAsync(userData.ClientId);
+    var supplier = new Supplier();
+    if (!string.IsNullOrEmpty(Model.SupplierId))
+    {
+        var res = await _supplierInterface.ByIdAsync(Guid.Parse(Model.SupplierId));
+        if (res.Success)
+            supplier = res.Data;
+    }
 }
 <div class="card card-primary">
     <div class="card-header">
@@ -67,7 +75,14 @@
                         <label>Supplier</label>
                         <select class="form-control select2" style="width: 100%;" id="customer-select"
                                 asp-for="SupplierId">
-                            <option value="">--Select Supplier--</option>
+                            @if (supplier.Id.Equals(Guid.Empty))
+                            {
+                                <option value="">--Select Supplier--</option>
+                            }
+                            else
+                            {
+                                <option selected value="@supplier.Id">@supplier.Code - @supplier.Name - @supplier.PrimaryTelephone</option>
+                            }
                         </select>
                     </div>
                 </div>
