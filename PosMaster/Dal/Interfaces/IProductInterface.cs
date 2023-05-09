@@ -904,7 +904,7 @@ namespace PosMaster.Dal.Interfaces
                         }
                         break;
                     case Document.Grn:
-                        prefix = "GRN";
+                        prefix = "SPINV/GRN";
                         while (exists)
                         {
                             var nextCount = _context.GoodReceivedNotes.Where(p => p.ClientId.Equals(clientId)).Count() + 1;

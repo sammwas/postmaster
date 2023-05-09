@@ -90,6 +90,7 @@ namespace PosMaster.Controllers
                 return View(model);
             return RedirectToAction(nameof(Index));
         }
+
         public IActionResult ProductStockAdjustment()
         {
             return View(new ProductStockAdjustmentViewModel());
@@ -144,6 +145,7 @@ namespace PosMaster.Controllers
                 TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, "Purchase Order", result.Message);
             return View(result.Data);
         }
+
         public async Task<IActionResult> EditPurchaseOrder(Guid? id)
         {
             if (id == null)
@@ -158,17 +160,19 @@ namespace PosMaster.Controllers
             var model = new PurchaseOrderViewModel(result.Data);
             return View(model);
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditPurchaseOrder(PurchaseOrderViewModel model)
         {
-            var title = "Add Purchase Order";
+            var title = "Purchase Order";
             if (!ModelState.IsValid)
             {
                 var message = "Missing fields";
                 TempData.SetData(AlertLevel.Warning, title, message);
                 return View(model);
             }
+            model.Personnel = User.Identity.Name;
             model.ClientId = _userData.ClientId;
             model.InstanceId = _userData.InstanceId;
             var result = await _productInterface.EditPurchaseOrderAsync(model);
@@ -273,6 +277,7 @@ namespace PosMaster.Controllers
                 TempData.SetData(AlertLevel.Warning, title, message);
                 return View(model);
             }
+            model.Personnel = User.Identity.Name;
             var result = await _productInterface.EditGrnAsync(model);
             TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, title, result.Message);
             if (!result.Success)

@@ -22,6 +22,7 @@
         public int PhoneNumberLength { get; set; }
         public string TelephoneCode { get; set; }
         public bool DisplayBuyingPrice { get; set; }
+        public bool ShowClerkDashboard { get; set; }
         public int MaxInstance { get; set; }
         public string Licence { get; set; }
     }
