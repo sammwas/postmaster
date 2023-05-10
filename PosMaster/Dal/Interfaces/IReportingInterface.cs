@@ -90,7 +90,7 @@ namespace PosMaster.Dal.Interfaces
             {
                 var hasDtFrom = DateTime.TryParse(dateFrom, out var dtFrom);
                 var hasDtTo = DateTime.TryParse(dateFrom, out var dtTo);
-                var months = Helpers.MonthsBetween(hasDtFrom ? dtFrom : DateTime.Parse($"01-01-{DateTime.Now.Year}"),
+                var months = Helpers.MonthsBetween(hasDtFrom ? dtFrom : DateTime.Now.AddMonths(-6),
                     hasDtTo ? dtTo : DateTime.Now);
                 var dataQuery = _context.ReceiptLineItems
                    .Where(i => i.InstanceId.Equals(instanceId));

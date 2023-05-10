@@ -1,16 +1,79 @@
 ﻿@model ManagerDashboardViewModel
+@inject IClientInstanceInterface _instanceInterface;
+@inject ICookiesService _cookies;
 @{
     ViewData["Active"] = "Dashboard";
     ViewData["Title"] = "Dashboard";
+    var userData = _cookies.Read();
+    var instancesRes = User.IsInRole(Role.SuperAdmin) ?
+     await _instanceInterface.AllAsync()
+     : await _instanceInterface.ByClientIdAsync(userData.ClientId);
+    var instances = instancesRes.Data;
+    var instanceId = ViewData["InstanceId"]?.ToString();
+    var dateFrom = DateTime.Now.AddMonths(-1).ToString("dd-MMM-yyyy");
+    var dateToday = DateTime.Now.ToString("dd-MMM-yyyy");
 }
 <section class="content">
     <div class="container-fluid">
+
+        <form method="get" autocomplete="off" class="d-print-none">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label>Instance</label>
+                        <select class="form-control select2" name="inId" id="inpInstanceId" style="width: 100%;">
+                            <option value="">--Select Instance--</option>
+                            @foreach (var item in instances)
+                            {
+                                if (!string.IsNullOrEmpty(instanceId) && item.Id.ToString().Equals(instanceId))
+                                {
+                                    <option selected="selected" value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
+                                }
+                                else
+                                {
+                                    <option value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label>From</label>
+                        <div class="input-group date" id="dateFrom" data-target-input="nearest">
+                            <input type="text" id="inpDateFrom" name="dtFrom" class="form-control datetimepicker-input" data-target="#dateFrom" value="@ViewData["DtFrom"]" placeholder="Date From (@dateFrom)" />
+                            <div class="input-group-append" data-target="#dateFrom" data-toggle="datetimepicker">
+                                <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label>To</label>
+                        <div class="input-group date" id="dateTo" data-target-input="nearest">
+                            <input type="text" id="inpDateTo" name="dtTo" class="form-control datetimepicker-input" data-target="#dateTo" value="@ViewData["DtTo"]" placeholder="Date From (@dateToday)" />
+                            <div class="input-group-append" data-target="#dateTo" data-toggle="datetimepicker">
+                                <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group mt-2">
+                        <button type="submit" class="btn btn-primary mt-4">Submit</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+        <hr />
+
         <div class="row">
             <div class="col-lg-3 col-6">
                 <div class="small-box bg-info">
                     <div class="inner">
-                        <h3>@Model.Products</h3>
-                        <p>Products</p>
+                        <h3>@Helpers.FormatAmount(Model.TotalStockValue)</h3>
+                        <p>Current Stock Value</p>
                     </div>
                     <div class="icon">
                         <i class="ion ion-bag"></i>
@@ -56,8 +119,8 @@
             <div class="col-lg-3 col-6">
                 <div class="small-box bg-purple">
                     <div class="inner">
-                        <h3>@Helpers.FormatAmount(Model.TotalStockValue)</h3>
-                        <p>Total Stock Value</p>
+                        <h3>@Helpers.FormatAmount(Model.TotalExpenses)</h3>
+                        <p>Total Expenses</p>
                     </div>
                     <div class="icon">
                         <i class="ion ion-bag"></i>

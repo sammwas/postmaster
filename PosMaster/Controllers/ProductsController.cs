@@ -299,23 +299,25 @@ namespace PosMaster.Controllers
 
             return RedirectToAction(nameof(ReceivedGoods), new { dtFrom = Helpers.FirstDayOfWeek().ToString("dd-MMM-yyyy"), dtTo = DateTime.Now.ToString("dd-MMM-yyyy") });
         }
-        public async Task<IActionResult> LowStockProducts()
+
+        public async Task<IActionResult> LowStockProducts(Guid? inId = null)
         {
-            Guid? instanceId = null;
-            if (User.IsInRole(Role.Clerk))
-                instanceId = _userData.InstanceId;
+            var instanceId = User.IsInRole(Role.Clerk) ? _userData.InstanceId : inId;
             var data = await _productInterface.LowStockProductsAsync(_userData.ClientId, instanceId, 5);
             return Json(data);
         }
 
-        public async Task<IActionResult> TopSellingByVolume()
+        public async Task<IActionResult> TopSellingByVolume(Guid? inId = null, string dtFrom = "", string dtTo = "")
         {
-            Guid? instanceId = null;
-            if (User.IsInRole(Role.Clerk))
-                instanceId = _userData.InstanceId;
-            var data = await _productInterface.TopSellingProductsByVolumeAsync(_userData.ClientId, instanceId, 5);
+            if (string.IsNullOrEmpty(dtFrom))
+                dtFrom = DateTime.Now.AddMonths(-1).ToString("dd-MMM-yyyy");
+            if (string.IsNullOrEmpty(dtTo))
+                dtTo = DateTime.Now.ToString("dd-MMM-yyyy");
+            var instanceId = User.IsInRole(Role.Clerk) ? _userData.InstanceId : inId;
+            var data = await _productInterface.TopSellingProductsByVolumeAsync(_userData.ClientId, instanceId, dtFrom  ,  dtTo , 5);
             return Json(data);
         }
+
         public async Task<JsonResult> Search(string term = "", bool isPos = false)
         {
             var products = User.IsInRole(Role.Clerk) ?

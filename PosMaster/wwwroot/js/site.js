@@ -295,8 +295,11 @@ $("#fulfil-order").click(function () {
 var ul = $("#low-stock-ul");
 var x = document.getElementById('revenue-chart-canvas');
 if (x) {
+    var dFrom = $("#inpDateFrom").val();
+    var dTo = $("#inpDateTo").val();
+    var inId = $("#inpInstanceId").val();
     var salesChartCanvas = document.getElementById('revenue-chart-canvas').getContext('2d')
-    $.get('/Reports/MonthlySalesReport').done(function (data) {
+    $.get('/Reports/MonthlySalesReport?dtFrom=&dtTo=' + dTo + '&instanceId=' + inId).done(function (data) {
         let sales = new Object();
         sales = getSales(data);
         plot(sales);
@@ -393,7 +396,8 @@ $(".day").click(function () {
 });
 
 if (x) {
-    $.get('/Products/LowStockProducts').done(function (data) {
+    var inId = $("#inpInstanceId").val();
+    $.get('/Products/LowStockProducts?inId=' + inId).done(function (data) {
         if (data.success) {
             data.data.forEach(element => {
                 ul.append('<li><span class= "text">[' + element.code + ']' + element.name + ' [Qty ' + element.availableQuantity + ' ' + element.uom
@@ -409,7 +413,10 @@ if (x) {
 if (x) {
     var labels = [];
     var donutData = [];
-    $.get('/Products/TopSellingByVolume').done(function (data) {
+    var dFrom = $("#inpDateFrom").val();
+    var dTo = $("#inpDateTo").val();
+    var inId = $("#inpInstanceId").val();
+    $.get('/Products/TopSellingByVolume?dtFrom=' + dFrom + '&dtTo=' + dTo + '&inId=' + inId).done(function (data) {
         if (data.success) {
             data.data.forEach(element => {
                 labels.push(element.product.code + '-' + element.product.name + ' [' + element.product.productCategory.name + ']');

@@ -27,7 +27,7 @@ namespace PosMaster.Dal.Interfaces
         Task<ReturnData<PurchaseOrder>> PurchaseOrderByIdAsync(Guid id);
         string DocumentRefNumber(Document document, Guid clientId);
         Task<ReturnData<List<Product>>> LowStockProductsAsync(Guid clientId, Guid? instanceId, int limit = 10);
-        Task<ReturnData<List<TopSellingProductViewModel>>> TopSellingProductsByVolumeAsync(Guid clientId, Guid? instanceId, int limit = 10);
+        Task<ReturnData<List<TopSellingProductViewModel>>> TopSellingProductsByVolumeAsync(Guid clientId, Guid? instanceId, string dtFrom = "", string dtTo = "", int limit = 10);
         Task<ReturnData<ProductPriceViewModel>> EditPriceAsync(ProductPriceViewModel model);
         Task<ReturnData<Receipt>> ReceiptByIdAsync(string id);
         Task<ReturnData<PurchaseOrder>> EditPurchaseOrderAsync(PurchaseOrderViewModel model);
@@ -992,14 +992,17 @@ namespace PosMaster.Dal.Interfaces
             }
         }
 
-        public async Task<ReturnData<List<TopSellingProductViewModel>>> TopSellingProductsByVolumeAsync(Guid clientId, Guid? instanceId, int limit = 10)
+        public async Task<ReturnData<List<TopSellingProductViewModel>>> TopSellingProductsByVolumeAsync(Guid clientId, Guid? instanceId, string dtFrom = "", string dtTo = "", int limit = 10)
         {
             var result = new ReturnData<List<TopSellingProductViewModel>> { Data = new List<TopSellingProductViewModel>() };
             var tag = nameof(TopSellingProductsByVolumeAsync);
             _logger.LogInformation($"{tag} top {limit} selling products by volume. client id {clientId} and instace id {instanceId}");
             try
             {
+                var dateFrom = DateTime.Parse(dtFrom);
+                var dateTo = DateTime.Parse(dtTo);
                 var dataQry = _context.ReceiptLineItems
+                    .Where(r => r.DateCreated.Date >= dateFrom.Date && r.DateCreated.Date <= dateTo.Date)
                     .GroupBy(l => l.ProductId)
                     .Select(tp => new TopSellingProductViewModel
                     {

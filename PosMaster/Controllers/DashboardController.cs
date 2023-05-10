@@ -36,6 +36,8 @@ namespace PosMaster.Controllers
             }
             return RedirectToAction(nameof(Clerk));
         }
+
+        [Authorize(Roles = "SuperAdmin")]
         public async Task<IActionResult> SuperAdmin()
         {
             var result = await _dashboardInterface.SuperAdminDashboardAsync();
@@ -45,10 +47,20 @@ namespace PosMaster.Controllers
             return View(model);
         }
 
-        public async Task<IActionResult> Manager()
+        [Authorize(Roles = "Manager")]
+        public async Task<IActionResult> Manager(string inId = "", string dtFrom = "", string dtTo = "")
         {
             var userData = _cookiesService.Read();
-            var result = await _dashboardInterface.ManagerDashboardAsync(userData.ClientId);
+            if (string.IsNullOrEmpty(dtFrom))
+                dtFrom = System.DateTime.Now.AddMonths(-1).ToString("dd-MMM-yyyy");
+            if (string.IsNullOrEmpty(dtTo))
+                dtTo = System.DateTime.Now.ToString("dd-MMM-yyyy");
+            ViewData["DtFrom"] = dtFrom;
+            ViewData["DtTo"] = dtTo;
+            var hasInsId = System.Guid.TryParse(inId, out var insId);
+            var instanceId = hasInsId ? insId : userData.InstanceId;
+            ViewData["InstanceId"] = instanceId;
+            var result = await _dashboardInterface.ManagerDashboardAsync(instanceId, dtFrom, dtTo);
             if (!result.Success)
                 TempData.SetData(AlertLevel.Warning, _tag, result.Message);
             var model = result.Success ? result.Data : new ManagerDashboardViewModel();
