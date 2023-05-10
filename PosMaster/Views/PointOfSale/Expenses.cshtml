@@ -83,6 +83,7 @@
             <table id="dataTable" class="table table-bordered table-striped">
                 <thead>
                     <tr>
+                        <th>#</th>
                         <th>Code</th>
                         <th>Type</th>
                         <th>Payment Mode</th>
@@ -96,9 +97,12 @@
                 <tbody>
                     @if (Model.Any())
                     {
+                        var i = 0;
                         @foreach (var item in Model)
                         {
+                            i++;
                             <tr>
+                                <td>@i</td>
                                 <td>@item.Code</td>
                                 <td>@item.ExpenseType.Name</td>
                                 <td>@item.PaymentMode?.Name</td>
@@ -120,6 +124,7 @@
                 </tbody>
                 <tfoot>
                     <tr>
+                        <th>#</th>
                         <th>Code</th>
                         <th>Type</th>
                         <th>Payment Mode</th>

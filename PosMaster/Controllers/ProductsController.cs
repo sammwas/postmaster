@@ -135,6 +135,11 @@ namespace PosMaster.Controllers
                 instanceId = _userData.InstanceId;
                 personnel = User.Identity.Name;
             }
+            if (string.IsNullOrEmpty(dtFrom))
+            {
+                dtFrom = DateTime.Now.ToString("dd-MMM-yyyy");
+                ViewData["DtFrom"] = dtFrom;
+            }
             var result = await _productInterface.PurchaseOrdersAsync(_userData.ClientId, instanceId, false, dtFrom, dtTo, search, personnel);
             if (!result.Success)
                 TempData.SetData(AlertLevel.Warning, "Purchase Orders", result.Message);
@@ -188,8 +193,13 @@ namespace PosMaster.Controllers
 
         public async Task<IActionResult> ReceivedGoods(string insId = "", string dtFrom = "", string dtTo = "", string search = "")
         {
-            ViewData["InstanceId"] = insId;
             ViewData["DtFrom"] = dtFrom;
+            if (string.IsNullOrEmpty(dtFrom))
+            {
+                dtFrom = DateTime.Now.ToString("dd-MMM-yyyy");
+                ViewData["DtFrom"] = dtFrom;
+            }
+            ViewData["InstanceId"] = insId;
             ViewData["DtTo"] = dtTo;
             ViewData["Search"] = search;
             Guid? instanceId = null;
@@ -206,6 +216,7 @@ namespace PosMaster.Controllers
                 TempData.SetData(AlertLevel.Warning, "Received Goods", result.Message);
             return View(result.Data);
         }
+
         public async Task<IActionResult> StockAdjustmentLogs(string insId = "", string dtFrom = "", string dtTo = "", string search = "")
         {
             ViewData["InstanceId"] = insId;

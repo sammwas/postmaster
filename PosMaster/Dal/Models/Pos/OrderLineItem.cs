@@ -12,10 +12,10 @@ namespace PosMaster.Dal
         public decimal UnitPrice { get; set; }
         public decimal Discount { get; set; }
         public decimal TaxRate { get; set; }
-        public decimal Amount => SellingPrice * Quantity;
-        public decimal ActualProfit => (UnitPrice * Quantity) - (BuyingPrice * Quantity);
-        public decimal ExpectedProfit => (SellingPrice * Quantity) - (BuyingPrice * Quantity);
         public decimal BuyingPrice { get; set; }
+        public decimal Amount => SellingPrice * Quantity;
+        public decimal TaxAmount => TaxRate > 0 ?
+          Math.Round(TaxRate * 100 * Amount / (TaxRate * 100 + 100), 2) : 0;
         public string ItemName => $"{Product.Name} {Product.Uom} (Qty {Product.AvailableQuantity})";
     }
 }

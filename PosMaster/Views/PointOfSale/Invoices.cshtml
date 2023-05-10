@@ -78,61 +78,68 @@
                     </div>
                 </div>
             </form>
-            <table id="dataTable" class="table table-bordered table-striped">
-                <thead>
-                    <tr>
-                        <th>Code</th>
-                        <th>Customer</th>
-                        <th>Receipt No.</th>
-                        <th>Date</th>
-                        <th>Personnel</th>
-                        <th>Status</th>
-                        <th>Amount</th>
-                        <th>Notes</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (Model.Any())
-                    {
-                        @foreach (var item in Model)
+            <div class="table-responsive">
+                <table id="dataTable" class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Code</th>
+                            <th>Customer</th>
+                            <th>Receipt No.</th>
+                            <th>Date</th>
+                            <th>Personnel</th>
+                            <th>Status</th>
+                            <th>Amount</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Any())
                         {
-                            var notes = string.IsNullOrEmpty(item.Notes) ? item.Receipt.Notes : item.Notes;
-                            <tr>
-                                <td><a asp-action="Invoice" asp-route-id="@item.Id" title="View Invoice @item.Code">@item.Code</a></td>
-                                <td>@item.Receipt.Customer.FullName</td>
-                                <td><a asp-action="Receipt" asp-route-id="@item.Receipt.Id" title="View Receipt @item.Receipt.Code">@item.Receipt.Code</a></td>
-                                <td>@item.DateCreated</td>
-                                <td>@item.Personnel</td>
-                                <td>
-                                    @if (item.Balance > 0)
-                                    {
-                                        <span class="badge badge-danger"><i class="fa fa-times-circle"></i> Not fully Paid</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge badge-success"><i class="fa fa-check-circle"></i> Paid</span>
-                                    }
-                                </td>
-                                <td>@Helpers.FormatAmount(item.TotalAmount)</td>
-                                <td>@notes</td>
-                            </tr>
-                        }
+                            var i = 0;
+                            @foreach (var item in Model)
+                            {
+                                i++;
+                                var notes = string.IsNullOrEmpty(item.Notes) ? item.Receipt.Notes : item.Notes;
+                                <tr>
+                                    <td>@i</td>
+                                    <td><a asp-action="Invoice" asp-route-id="@item.Id" title="View Invoice @item.Code">@item.Code</a></td>
+                                    <td>@item.Receipt.Customer.FullName</td>
+                                    <td><a asp-action="Receipt" asp-route-id="@item.Receipt.Id" title="View Receipt @item.Receipt.Code">@item.Receipt.Code</a></td>
+                                    <td>@item.DateCreated</td>
+                                    <td>@item.PersonnelStr</td>
+                                    <td>
+                                        @if (item.Balance > 0)
+                                        {
+                                            <span class="badge badge-danger"><i class="fa fa-times-circle"></i> Not fully Paid</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-success"><i class="fa fa-check-circle"></i> Paid</span>
+                                        }
+                                    </td>
+                                    <td>@Helpers.FormatAmount(item.TotalAmount)</td>
+                                    <td>@notes</td>
+                                </tr>
+                            }
 
-                    }
-                </tbody>
-                <tfoot>
-                    <tr>
-                        <th>Code</th>
-                        <th>Customer</th>
-                        <th>Receipt No.</th>
-                        <th>Date</th>
-                        <th>Personnel</th>
-                        <th>Status</th>
-                        <th>Amount</th>
-                        <th>Notes</th>
-                    </tr>
-                </tfoot>
-            </table>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th>#</th>
+                            <th>Code</th>
+                            <th>Customer</th>
+                            <th>Receipt No.</th>
+                            <th>Date</th>
+                            <th>Personnel</th>
+                            <th>Status</th>
+                            <th>Amount</th>
+                            <th>Notes</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
         </div>
     </div>
 </div>

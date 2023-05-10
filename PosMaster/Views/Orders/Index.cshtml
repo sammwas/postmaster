@@ -17,8 +17,12 @@
         <div class="row">
             <div class="col-md-8">
                 <div class="card-header">
-                    <h3 class="card-title">@ViewData["Title"] <span class="text-right"><a asp-controller="Orders"
-                                asp-action="PlaceOrder" asp-route-id="" class="btn btn-sm btn-info">Add</a></span></h3>
+                    <h3 class="card-title">
+                        @ViewData["Title"] <span class="text-right">
+                            <a asp-controller="Orders"
+                               asp-action="PlaceOrder" asp-route-id="" class="btn btn-sm btn-info">Add</a>
+                        </span>
+                    </h3>
                 </div>
             </div>
             <div class="col-md-4">
@@ -37,13 +41,17 @@
                                 {
                                     if (!string.IsNullOrEmpty(instanceId) && item.Id.ToString().Equals(instanceId))
                                     {
-                                        <option selected="selected" value="@item.Id" title="@item.Notes">@item.Code - @item.Name
-                                            (@item.Client.Code - @item.Client.Name)</option>
+                                        <option selected="selected" value="@item.Id" title="@item.Notes">
+                                            @item.Code - @item.Name
+                                            (@item.Client.Code - @item.Client.Name)
+                                        </option>
                                     }
                                     else
                                     {
-                                        <option value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code
-                                            - @item.Client.Name)</option>
+                                        <option value="@item.Id" title="@item.Notes">
+                                            @item.Code - @item.Name (@item.Client.Code
+                                            - @item.Client.Name)
+                                        </option>
                                     }
                                 }
                             </select>
@@ -54,8 +62,8 @@
                             <label>Date From</label>
                             <div class="input-group date" id="dateFrom" data-target-input="nearest">
                                 <input type="text" name="dtFrom" class="form-control datetimepicker-input"
-                                    data-target="#dateFrom" value="@ViewData["dtFrom"]"
-                                    placeholder="Date From (@dateToday)" />
+                                       data-target="#dateFrom" value="@ViewData["dtFrom"]"
+                                       placeholder="Date From (@dateToday)" />
                                 <div class="input-group-append" data-target="#dateFrom" data-toggle="datetimepicker">
                                     <div class="input-group-text"><i class="fa fa-calendar"></i></div>
                                 </div>
@@ -67,8 +75,8 @@
                             <label>Date To</label>
                             <div class="input-group date" id="dateTo" data-target-input="nearest">
                                 <input type="text" name="dtTo" class="form-control datetimepicker-input"
-                                    data-target="#dateTo" value="@ViewData["dtTo"]"
-                                    placeholder="Date To (@dateToday)" />
+                                       data-target="#dateTo" value="@ViewData["dtTo"]"
+                                       placeholder="Date To (@dateToday)" />
                                 <div class="input-group-append" data-target="#dateTo" data-toggle="datetimepicker">
                                     <div class="input-group-text"><i class="fa fa-calendar"></i></div>
                                 </div>
@@ -105,7 +113,7 @@
                                 <td class="details-control"></td>
                                 <td><a asp-action="Details" asp-route-id="@item.Id">@item.Code</a></td>
                                 <td>@item.DateCreated</td>
-                                <td>@item.Personnel</td>
+                                <td>@item.PersonnelStr</td>
                                 <td>
                                     @if (item.Status.Equals(EntityStatus.Active))
                                     {
@@ -120,10 +128,12 @@
                                 @if (item.Status.Equals(EntityStatus.Active))
                                 {
                                     <td>
-                                    <a asp-action="PlaceOrder" asp-route-id="@item.Id" class="btn btn-info btn-sm">
-                                    <i class="fas fa-pencil-alt">
-                                    </i>
-                                    Edit</a></td>
+                                        <a asp-action="PlaceOrder" asp-route-id="@item.Id" class="btn btn-info btn-sm">
+                                            <i class="fas fa-pencil-alt">
+                                            </i>
+                                            Edit
+                                        </a>
+                                    </td>
                                 }
                                 @if (item.Status.Equals(EntityStatus.Closed))
                                 {

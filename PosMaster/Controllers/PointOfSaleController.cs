@@ -87,6 +87,11 @@ namespace PosMaster.Controllers
         public async Task<IActionResult> Invoices(string insId = "", string dtFrom = "", string dtTo = "", string search = "")
         {
             ViewData["DtFrom"] = dtFrom;
+            if (string.IsNullOrEmpty(dtFrom))
+            {
+                dtFrom = DateTime.Now.ToString("dd-MMM-yyyy");
+                ViewData["DtFrom"] = dtFrom;
+            }
             ViewData["DtTo"] = dtTo;
             ViewData["Search"] = search;
             Guid? instanceId = null;

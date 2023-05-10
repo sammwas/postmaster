@@ -50,7 +50,7 @@
                     <p><b>Invoice No.</b> @Model.Code <span>[@status]</span></p>
                     <p><b>Customer </b> @Model.Receipt.Customer.FullName </p>
                     <p>  <b>Contact </b> @Model.Receipt.Customer.PhoneNumber</p>
-                    @if (!string.IsNullOrEmpty(Model.Receipt.PinNo))
+                    @if (!string.IsNullOrEmpty(Model.Receipt.Customer.PinNo))
                     {
                         <p><b>Customer PIN </b> @Model.Receipt.Customer.PinNo</p>
                     }
