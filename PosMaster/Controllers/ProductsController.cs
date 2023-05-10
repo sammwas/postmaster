@@ -19,15 +19,18 @@ namespace PosMaster.Controllers
         private readonly FileUploadService _fileUploadService;
         private readonly IWebHostEnvironment _hostingEnvironment;
         private readonly IMasterDataInterface _masterDataInterface;
+        private readonly IExpenseInterface _expenseInterface;
 
         public ProductsController(IProductInterface productInterface, ICookiesService cookiesService,
-            FileUploadService fileUploadService, IWebHostEnvironment hostingEnvironment, IMasterDataInterface masterDataInterface)
+            FileUploadService fileUploadService, IWebHostEnvironment hostingEnvironment, IExpenseInterface expenseInterface,
+            IMasterDataInterface masterDataInterface)
         {
             _productInterface = productInterface;
             _fileUploadService = fileUploadService;
             _userData = cookiesService.Read();
             _hostingEnvironment = hostingEnvironment;
             _masterDataInterface = masterDataInterface;
+            _expenseInterface = expenseInterface;
         }
         public async Task<IActionResult> Index(string insId = "", string search = "")
         {
@@ -347,5 +350,24 @@ namespace PosMaster.Controllers
             return RedirectToAction(nameof(ProductPrice), new { });
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> PayGrnSupplierInvoice(ExpenseViewModel model)
+        {
+            model.ClientId = _userData.ClientId;
+            model.InstanceId = _userData.InstanceId;
+            model.Personnel = User.Identity.Name;
+            var expenseRes = await _expenseInterface.EditAsync(model);
+            if (!expenseRes.Success)
+            {
+                TempData.SetData(AlertLevel.Warning, "Edit Expense", expenseRes.Message);
+                return RedirectToAction(nameof(ReceivedGoodsDetail),
+                    new { id = model.GrnId });
+            }
+            var result = await _productInterface.PaySupplierGrnAsync(model);
+            TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, "Pay supplier", result.Message);
+            return RedirectToAction(nameof(ReceivedGoodsDetail),
+                   new { id = model.GrnId });
+        }
     }
 }

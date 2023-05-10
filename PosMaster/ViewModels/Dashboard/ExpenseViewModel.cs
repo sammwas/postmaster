@@ -37,5 +37,6 @@ namespace PosMaster.ViewModels
         public string PaymentModeId { get; set; }
         [Display(Name = "Supplier")]
         public string SupplierId { get; set; }
+        public System.Guid GrnId { get; set; }
     }
 }

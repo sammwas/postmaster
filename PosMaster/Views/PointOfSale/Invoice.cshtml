@@ -258,7 +258,7 @@ else
                 @if (isActive)
                 {
                     <button class="btn btn-success launch-modal float-right" data-toggle="modal" data-target="#posModal">
-                        <i class="fa fa-save"></i>Submit Payment
+                        <i class="fa fa-credit-card"></i>Submit Payment
                     </button>
                 }
             </div>
@@ -277,7 +277,7 @@ else
             </div>
             <div class="modal-body">
                 <p>Pay Invoice @Model.Code of amount @user.CurrencyShort @Model.TotalAmount</p>
-                <form method="post" asp-action="PayInvoice">
+                <form method="post" asp-action="PayInvoice" autocomplete="off">
                     <input type="hidden" name="Id" value="@Model.Id">
                     <input type="hidden" name="Code" value="@Model.Code">
                     <div class="form-group">

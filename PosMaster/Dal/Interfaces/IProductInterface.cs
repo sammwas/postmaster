@@ -42,6 +42,7 @@ namespace PosMaster.Dal.Interfaces
         Guid DefaultClientProductId(Guid clientId);
         Task<ReturnData<ReceiptUserViewModel>> GlUserBalanceAsync(GlUserType userType, Guid userId);
         Task<ReturnData<string>> CancelReceiptAsync(CancelReceiptViewModel model);
+        Task<ReturnData<string>> PaySupplierGrnAsync(ExpenseViewModel model);
 
     }
 
@@ -1761,6 +1762,45 @@ namespace PosMaster.Dal.Interfaces
                 result.Success = true;
                 result.Message = "Receipt cancelled";
                 result.Data = receiptNo;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                result.ErrorMessage = ex.Message;
+                result.Message = "Error occurred";
+                _logger.LogError($"{tag} {result.Message} : {ex}");
+                return result;
+            }
+        }
+
+        public async Task<ReturnData<string>> PaySupplierGrnAsync(ExpenseViewModel model)
+        {
+            var result = new ReturnData<string>();
+            var tag = nameof(PaySupplierGrnAsync);
+            _logger.LogInformation($"{tag} client {model.ClientId} pay supplier {model.SupplierId} for {model.Code}  amount {model.Amount} by {model.Personnel}");
+            try
+            {
+
+                var grn = await _context.GoodReceivedNotes
+                    .Include(g => g.PoGrnProducts)
+                    .FirstOrDefaultAsync(g => g.Id.Equals(model.GrnId));
+                if (grn == null)
+                {
+                    result.Message = "Provided document not Found";
+                    return result;
+                }
+
+                grn.AmountReceived += model.Amount;
+                grn.LastModifiedBy = model.Personnel;
+                grn.DateLastModified = DateTime.Now;
+                if (grn.AmountReceived >= grn.Amount)
+                    grn.Status = EntityStatus.Closed;
+
+                await _context.SaveChangesAsync();
+                result.Success = true;
+                result.Message = "Payment success";
+                result.Data = grn.Code;
                 return result;
             }
             catch (Exception ex)

@@ -412,7 +412,7 @@
                                        asp-route-dtFrom="@firstDayOfWeek"
                                        asp-route-dtTo="@DateTime.Now.ToString("dd-MMM-yyyy")" class="nav-link">
                                         <i class="far fa-circle nav-icon"></i>
-                                        <p>Received Goods</p>
+                                        <p>Received Goods &amp; Invoices</p>
                                     </a>
                                 </li>
                                 @if (User.IsInRole(Role.SuperAdmin) || User.IsInRole(Role.Manager))

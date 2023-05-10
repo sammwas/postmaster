@@ -1,13 +1,15 @@
 ﻿@inject ICookiesService _cookies;
 @inject IClientInstanceInterface _instanceInterface;
+@inject IMasterDataInterface _masterData;
 @model GoodReceivedNote
 @{
     ViewData["Active"] = "Products";
-    ViewData["Title"] = $"Goods Received Note - {Model.Code}";
+    ViewData["Title"] = $"Details - {Model.Code}";
     var user = _cookies.Read();
     var instanceRes = await _instanceInterface.ByIdAsync(Model.InstanceId);
     var supplier = Model.Supplier;
-    var isActive = Model.Amount > 0;
+    var balance = Model.Amount - Model.AmountReceived;
+    var isActive = balance > 0;
 }
 <div class="invoice p-3 mb-3" id="printDiv">
     <div class="row">
@@ -43,7 +45,7 @@
             </address>
         </div>
         <div class="col-sm-4 invoice-col">
-            <b>GRN: #@Model.Code</b><br>
+            <b>REF: #@Model.Code</b><br>
             <br>
             <b>Status:</b> @Model.Status<br>
         </div>
@@ -89,12 +91,6 @@
             </p>
         </div>
         <div class="col-6">
-            <p class="lead">
-                Amount @if (isActive)
-                {
-                    <span>Due</span>
-                }
-            </p>
             <div class="table-responsive">
                 <table class="table">
                     <tbody>
@@ -102,14 +98,102 @@
                             <th>Total:</th>
                             <td>@user.CurrencyShort @Helpers.FormatAmount(Model.Amount)</td>
                         </tr>
+                        <tr>
+                            <th>Balance:</th>
+                            <td>@user.CurrencyShort @Helpers.FormatAmount(balance)</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
     <div class="row no-print">
+        <hr />
         <div class="col-12">
-            <button class="btn btn-default" id="btnPrint"><i class="fas fa-print"></i> Print</button>
+            <button class="btn btn-default" id="btnPrint"><i class="fas fa-print"></i> Print Document</button>
+            @if (isActive)
+            {
+                <button class="btn btn-success launch-modal float-right" data-toggle="modal" data-target="#posModal">
+                    <i class="fa fa-credit-card"></i> Pay Supplier
+                </button>
+            }
         </div>
     </div>
 </div>
+@if (isActive)
+{
+    var paymentModesRes = await _masterData.PaymentModesAsync(Model.ClientId);
+    var expenseTypeRes = await _masterData.ExpenseTypesAsync(Model.ClientId);
+    <div class="modal fade" id="posModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">REF: #@Model.Code</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Pay # @Model.Code of amount @user.CurrencyShort @balance</p>
+                    <form method="post" asp-action="PayGrnSupplierInvoice" autocomplete="off">
+                        <input type="hidden" name="Id" value="@Model.Id">
+                        <input type="hidden" name="Code" value="@Model.Code">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Expense Type:</label>
+                                    <select name="ExpenseTypeId" class="form-control select2">
+                                        <option>--Select type--</option>
+                                        @foreach (var type in expenseTypeRes.Data)
+                                        {
+                                            <option value="@type.Id">@type.Name</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Payment Mode:</label>
+                                    <select name="PaymentModeId" class="form-control select2">
+                                        <option>--Select mode--</option>
+                                        @foreach (var paymentMode in paymentModesRes.Data)
+                                        {
+                                            <option value="@paymentMode.Id">@paymentMode.Name</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Payment Mode No:</label>
+                                    <input type="text" class="form-control" name="ModeNumber" placeholder="Mode Number">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Amount:</label>
+                                    <input type="text" class="form-control numbers-only" name="Amount" placeholder="Amount @balance">
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>Notes:</label>
+                                    <input type="text" class="form-control" name="Notes" placeholder="Notes">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <input type="hidden" name="SupplierId" value="@Model.SupplierId">
+                            <input type="hidden" name="GrnId" value="@Model.Id">
+                            <input type="hidden" name="Status" value="@Model.Status">
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+}
