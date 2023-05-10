@@ -84,48 +84,55 @@
                     </div>
                 </div>
             </form>
-            <table id="dataTable" class="table table-bordered table-striped">
-                <thead>
-                    <tr>
-                        <th>Code</th>
-                        <th>Date</th>
-                        <th>Supplier</th>
-                        <th>PO Ref</th>
-                        <th>Amount</th>
-                        <th>Paid</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (Model.Any())
-                    {
-                        @foreach (var item in Model)
+            <div class="table-responsive">
+                <table id="dataTable" class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Code</th>
+                            <th>Date</th>
+                            <th>Supplier</th>
+                            <th>PO Ref</th>
+                            <th>Amount</th>
+                            <th>Paid</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Any())
                         {
-                            <tr>
-                                <td><a asp-action="ReceivedGoodsDetail" asp-route-id="@item.Id">@item.Code</a></td>
-                                <td>@item.DateCreated</td>
-                                <td>@item.Supplier.Code - @item.Supplier.Name</td>
-                                <td>@item.PoCode</td>
-                                <td>@item.Amount</td>
-                                <td>@item.AmountReceived</td>
-                                <td>@item.Status</td>
-                            </tr>
-                        }
+                            var i = 0;
+                            @foreach (var item in Model)
+                            {
+                                i++;
+                                <tr>
+                                    <td>@i</td>
+                                    <td><a asp-action="ReceivedGoodsDetail" asp-route-id="@item.Id">@item.Code</a></td>
+                                    <td>@item.DateCreated</td>
+                                    <td>@item.Supplier.Code - @item.Supplier.Name</td>
+                                    <td>@item.PoCode</td>
+                                    <td>@item.Amount</td>
+                                    <td>@item.AmountReceived</td>
+                                    <td>@item.Status</td>
+                                </tr>
+                            }
 
-                    }
-                </tbody>
-                <tfoot>
-                    <tr>
-                        <th>Code</th>
-                        <th>Date</th>
-                        <th>Supplier</th>
-                        <th>PO Ref</th>
-                        <th>Amount</th>
-                        <th>Paid</th>
-                        <th>Status</th>
-                    </tr>
-                </tfoot>
-            </table>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th>#</th>
+                            <th>Code</th>
+                            <th>Date</th>
+                            <th>Supplier</th>
+                            <th>PO Ref</th>
+                            <th>Amount</th>
+                            <th>Paid</th>
+                            <th>Status</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
         </div>
     </div>
 </div>

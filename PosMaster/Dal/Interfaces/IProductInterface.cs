@@ -532,6 +532,7 @@ namespace PosMaster.Dal.Interfaces
                     product.AvailableQuantity -= item.Quantity;
                     product.DateLastModified = DateTime.Now;
                     product.LastModifiedBy = model.Personnel;
+                    product.BuyingPrice = lineItem.BuyingPrice;
                 }
 
                 if (model.IsCredit)

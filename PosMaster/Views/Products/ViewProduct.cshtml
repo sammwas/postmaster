@@ -1,8 +1,11 @@
 ﻿@model ProductDataViewModel
+@inject ICookiesService _cookies;
+@inject IClientInterface _client;
 @{
     ViewData["Active"] = "Products";
     var title = $"Product {Model.Product?.Code}";
     ViewData["Title"] = title;
+    var clientRes = await _client.ByIdAsync(_cookies.Read().ClientId);
 }
 <div class="card card-primary">
     <div class="card-header">
@@ -65,6 +68,15 @@
                                 <div class="form-group">
                                     <label>Selling Price</label>
                                     <span>@Model.Product.SellingPrice</span>
+                                </div>
+                            </div>
+                        }
+                        @if (clientRes.Data.DisplayBuyingPrice)
+                        {
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Last buying Price</label>
+                                    <span>@Model.Product.BuyingPrice</span>
                                 </div>
                             </div>
                         }

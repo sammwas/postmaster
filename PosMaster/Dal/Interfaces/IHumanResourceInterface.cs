@@ -28,7 +28,7 @@ namespace PosMaster.Dal.Interfaces
         Task<ReturnData<EmployeeLeaveApplication>> LeaveApplicationByIdAsync(Guid id);
         Task<ReturnData<Guid>> ApproveLeaveApplicationAsync(ApproveLeaveViewModel model);
         Task<ReturnData<List<MonthlyPayViewModel>>> MonthlyPaymentsAsync(int month, int year, Guid clientId, Guid? instanceId);
-        Task<ReturnData<string>> ApproveMonthPaymentAsync(ApproveMonthlyPaymentViewModel model);
+        Task<ReturnData<decimal>> ApproveMonthPaymentAsync(ApproveMonthlyPaymentViewModel model);
     }
 
     public class HumanResourceImplementation : IHumanResourceInterface
@@ -78,9 +78,9 @@ namespace PosMaster.Dal.Interfaces
             }
         }
 
-        public async Task<ReturnData<string>> ApproveMonthPaymentAsync(ApproveMonthlyPaymentViewModel model)
+        public async Task<ReturnData<decimal>> ApproveMonthPaymentAsync(ApproveMonthlyPaymentViewModel model)
         {
-            var result = new ReturnData<string>();
+            var result = new ReturnData<decimal>();
             var tag = nameof(ApproveMonthPaymentAsync);
             _logger.LogInformation($"{tag} approve monthly payments for clientId {model.ClientId}, instanceId {model.InstanceId}, month {model.Month} and year {model.Year}");
             try
@@ -130,7 +130,8 @@ namespace PosMaster.Dal.Interfaces
                 }
                 result.Success = true;
                 result.Message = "Approved";
-                _logger.LogInformation($"{tag} approved {sData.Count} monthly salaries");
+                result.Data = sData.Sum(s => s.NetAmount);
+                _logger.LogInformation($"{tag} approved {sData.Count} monthly salaries of {result.Data}");
                 return result;
             }
             catch (Exception ex)

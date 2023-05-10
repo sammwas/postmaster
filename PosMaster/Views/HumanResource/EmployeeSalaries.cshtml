@@ -58,6 +58,7 @@
             <table id="dataTable" class="table table-bordered table-striped">
                 <thead>
                     <tr>
+                        <th>#</th>
                         <th>Employee</th>
                         <th>Phone Number</th>
                         <th>Basic Pay</th>
@@ -68,9 +69,14 @@
                     </tr>
                 </thead>
                 <tbody>
+                    @{
+                        var i = 0;
+                    }
                     @foreach (var item in Model)
                     {
+                        i++;
                         <tr>
+                            <td>@i</td>
                             <td><a asp-action="EditEmployeeSalary" asp-route-userId="@item.UserId">@item.User.FullName</a></td>
                             <td>@item.User.PhoneNumber</td>
                             <td>@Helpers.FormatAmount(item.BasicPay, 2)</td>
@@ -89,6 +95,7 @@
                 </tbody>
                 <tfoot>
                     <tr>
+                        <th>#</th>
                         <th>Employee</th>
                         <th>Phone Number</th>
                         <th>Basic Pay</th>
