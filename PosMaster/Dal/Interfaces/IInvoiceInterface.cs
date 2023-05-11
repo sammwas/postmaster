@@ -12,6 +12,8 @@ namespace PosMaster.Dal.Interfaces
     {
         Task<ReturnData<List<Invoice>>> GetAsync(Guid? clientId, Guid? instanceId, string dateFrom = "",
             string dateTo = "", string search = "", string personnel = "");
+        Task<ReturnData<List<Receipt>>> RepaymentsAsync(Guid clientId, Guid? instanceId, DateTime dateFrom,
+           DateTime dateTo, string search = "", string personnel = "");
         Task<ReturnData<Invoice>> ByIdAsync(Guid id);
         Task<ReturnData<Invoice>> PayAsync(FulfillOrderViewModel model);
     }
@@ -191,6 +193,47 @@ namespace PosMaster.Dal.Interfaces
                 result.Message = result.Success ? "Found" : "Not Found";
                 result.Data = invoice;
                 _logger.LogInformation($"{tag} invoice {invoice.Id} {invoice.Code} payment updated for receipt {invoice.Receipt.Code}");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                result.ErrorMessage = ex.Message;
+                result.Message = "Error occured";
+                _logger.LogError($"{tag} {result.Message} : {ex}");
+                return result;
+            }
+        }
+
+        public async Task<ReturnData<List<Receipt>>> RepaymentsAsync(Guid clientId, Guid? instanceId, DateTime dateFrom, DateTime dateTo, string search = "", string personnel = "")
+        {
+            var result = new ReturnData<List<Receipt>> { Data = new List<Receipt>() };
+            var tag = nameof(RepaymentsAsync);
+            _logger.LogInformation($"{tag} get repayments: clientId {clientId}, instanceId {instanceId}, duration {dateFrom}-{dateTo}, search {search}");
+            try
+            {
+                var dataQuery = _context.Receipts
+                    .Include(u => u.Customer)
+                    .Include(r => r.ReceiptLineItems)
+                    .Where(r => r.ClientId.Equals(clientId) && r.AmountReceived > 0)
+                    .Where(r => r.IsCredit
+                    && (r.DateLastModified.HasValue
+                    && r.DateLastModified.Value.Date >= dateFrom.Date && r.DateLastModified.Value.Date <= dateTo.Date))
+                         .AsQueryable();
+                if (instanceId != null)
+                    dataQuery = dataQuery.Where(r => r.InstanceId.Equals(instanceId.Value));
+                if (!string.IsNullOrEmpty(search))
+                    dataQuery = dataQuery.Where(r => r.Code.ToLower().Contains(search.ToLower()));
+                if (!string.IsNullOrEmpty(personnel))
+                    dataQuery = dataQuery.Where(d => d.Personnel.Equals(personnel));
+
+                var data = await dataQuery.OrderByDescending(r => r.DateCreated)
+                    .ToListAsync();
+                result.Success = data.Any();
+                result.Message = result.Success ? "Found" : "Not Found";
+                if (result.Success)
+                    result.Data = data;
+                _logger.LogInformation($"{tag} found {data.Count} repayment records");
                 return result;
             }
             catch (Exception ex)

@@ -43,22 +43,17 @@ namespace PosMaster.Controllers
             var user = _cookiesService.Read();
             if (User.IsInRole(Role.SuperAdmin))
             {
-                var result = await _userInterface.AllAsync();
-                if (!result.Success)
-                    TempData.SetData(AlertLevel.Warning, tag, result.Message);
-                return View(result.Data);
+                var allResult = await _userInterface.AllAsync();
+                if (!allResult.Success)
+                    TempData.SetData(AlertLevel.Warning, tag, allResult.Message);
+                return View(allResult.Data);
             }
             Guid? instanceId = (User.IsInRole(Role.Manager) || User.IsInRole(Role.Admin))
-                ? (Guid?)null : user.InstanceId;          
-
-            if (User.IsInRole(Role.Clerk))
-            {
-                var result = await _userInterface.ByClientIdAsync(user.ClientId,instanceId);
-                if (!result.Success)
-                    TempData.SetData(AlertLevel.Warning, tag, result.Message);
-                return View(result.Data);
-            }
-            return View(new List<UserViewModel>());
+                ? (Guid?)null : user.InstanceId;
+            var result = await _userInterface.ByClientIdAsync(user.ClientId, instanceId);
+            if (!result.Success)
+                TempData.SetData(AlertLevel.Warning, tag, result.Message);
+            return View(result.Data);
         }
 
         public async Task<IActionResult> Edit(string id = null)

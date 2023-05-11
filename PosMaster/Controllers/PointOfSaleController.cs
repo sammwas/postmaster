@@ -111,6 +111,33 @@ namespace PosMaster.Controllers
             return View(result.Data);
         }
 
+        public async Task<IActionResult> Repayments(string insId = "", string dtFrom = "", string dtTo = "", string search = "")
+        {
+            ViewData["DtFrom"] = dtFrom;
+            if (string.IsNullOrEmpty(dtFrom))
+            {
+                dtFrom = DateTime.Now.ToString("dd-MMM-yyyy");
+                ViewData["DtFrom"] = dtFrom;
+            }
+            ViewData["DtTo"] = dtTo;
+            ViewData["Search"] = search;
+            Guid? instanceId = null;
+            var personnel = "";
+            if (Guid.TryParse(insId, out var iId))
+                instanceId = iId;
+            if (User.IsInRole(Role.Clerk))
+            {
+                personnel = User.Identity.Name;
+                instanceId = _userData.InstanceId;
+            }
+            ViewData["InstanceId"] = instanceId;
+            var result = await _invoiceInterface
+                .RepaymentsAsync(_userData.ClientId, instanceId, DateTime.Parse(dtFrom), DateTime.Parse(dtTo), search, personnel);
+            if (!result.Success)
+                TempData.SetData(AlertLevel.Warning, "Repayments", result.Message);
+            return View(result.Data);
+        }
+
         public async Task<IActionResult> Expenses(string insId = "", string dtFrom = "", string dtTo = "", string search = "")
         {
             ViewData["DtFrom"] = dtFrom;

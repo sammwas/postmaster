@@ -98,7 +98,8 @@ namespace PosMaster.Dal.Interfaces
             try
             {
                 var dataQry = _context.Users
-                    .Where(c => c.ClientId.Equals(clientId)).AsQueryable();
+                    .Where(c => !c.Email.Equals(Constants.SuperAdminEmail) && c.ClientId.Equals(clientId))
+                    .AsQueryable();
                 if (instanceId.HasValue)
                     dataQry = dataQry.Where(u => u.InstanceId.Equals(instanceId));
                 var data = await dataQry.Select(u => new UserViewModel(u))

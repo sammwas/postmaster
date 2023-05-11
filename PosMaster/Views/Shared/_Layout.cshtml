@@ -196,6 +196,14 @@
                                         <p>Invoices</p>
                                     </a>
                                 </li>
+                                <li class="nav-item">
+                                    <a asp-controller="PointOfSale" asp-action="Repayments"
+                                       asp-route-dtFrom=""
+                                       asp-route-dtTo="@DateTime.Now.ToString("dd-MMM-yyyy")" class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Repayments</p>
+                                    </a>
+                                </li>
                                 @if (User.IsInRole(Role.SuperAdmin) || User.IsInRole(Role.Manager))
                                 {
                                     <li class="nav-item">
