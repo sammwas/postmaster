@@ -183,7 +183,8 @@ namespace PosMaster.Controllers
             if (id == null)
                 return View(new LeaveApplicationViewModel
                 {
-                    Status = EntityStatus.Active
+                    Status = EntityStatus.Active,
+                    UserId = _userData.UserId
                 });
 
             var result = await _humanResourceInterface.LeaveApplicationByIdAsync(id.Value);

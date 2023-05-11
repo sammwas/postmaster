@@ -2,11 +2,11 @@
 @inject IHumanResourceInterface _hrInterface;
 @model LeaveApplicationViewModel
 @{
-    ViewData["Active"] = "HR";
+    var userData = _cookies.Read();
+    ViewData["Active"] = userData.UserId.Equals(Model.UserId) ? "Profile" : "HR";
     var option = Model.IsEditMode ? "Update" : "Add";
     var title = $"{option} Leave";
     ViewData["Title"] = title;
-    var userData = _cookies.Read();
     var returnData = await _hrInterface.EmployeeLeaveBalancesAsync(userData.ClientId, userData.UserId, userData.Gender, null);
     var dateToday = DateTime.Now.ToString("dd-MMM-yyyy");
 }
@@ -75,7 +75,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div> 
+                    </div>
                     <div class="row">
                         <div class="col-md-12">
                             <div class="form-group">

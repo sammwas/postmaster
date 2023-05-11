@@ -2,11 +2,11 @@
 @inject ICookiesService _cookies;
 @model UserViewModel
 @{
-    ViewData["Active"] = "HR";
+    var userData = _cookies.Read();
+    ViewData["Active"] = userData.UserId.Equals(Model.UserId) ? "Profile" : "HR";
     var option = Model.IsEditMode ? "Update" : "Add";
     var title = $"{option} User";
     ViewData["Title"] = title;
-    var userData = _cookies.Read();
 
     var statuses = Helpers.Statuses();
     var userRoles = Helpers.UserRoles(userData.Role);

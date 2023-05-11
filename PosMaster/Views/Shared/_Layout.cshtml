@@ -593,13 +593,36 @@
                                 </ul>
                             </li>
                         }
-                        <li class="nav-item">
-                            <a asp-controller="Users" asp-action="Edit" asp-route-id="@userData.UserId" class="nav-link">
+                        <li class="nav-item has-treeview" id="MenuProfile">
+                            <a href="#" class="nav-link">
                                 <i class="nav-icon fas fa-user"></i>
                                 <p>
-                                    My Profile
+                                    My Account
+                                    <i class="right fas fa-angle-left"></i>
                                 </p>
                             </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a asp-controller="Users" asp-action="Edit" asp-route-id="@userData.UserId" class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Profile</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a asp-controller="Users" asp-route-id="@userData.UserId" asp-action="ResetPassword"
+                                       class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Change Password</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a asp-controller="HumanResource" asp-route-dtFrom="@Helpers.firstDayOfYear.ToString("dd-MMM-yyyy")"
+                                       asp-action="MyApplications" class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Leave Applications</p>
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
                         <li class="nav-item">
                             <a asp-controller="Home" asp-action="Logout" class="nav-link">
