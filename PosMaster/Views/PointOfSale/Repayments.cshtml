@@ -102,7 +102,7 @@
                                     <td><a asp-action="Receipt" asp-route-id="@item.Id" title="View Receipt @item.Code">@item.Code</a></td>
                                     <td>@item.Customer.FullName</td>
                                     <td>@item.DateLastModified</td>
-                                    <td>@item.LastModifiedBy?.Split('@').FirstOrDefault()</td>
+                                    <td>@item.PersonnelStr</td>
                                     <td>@Helpers.FormatAmount(item.AmountReceived)</td>
                                 </tr>
                             }

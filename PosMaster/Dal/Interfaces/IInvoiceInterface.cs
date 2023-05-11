@@ -226,8 +226,19 @@ namespace PosMaster.Dal.Interfaces
                     dataQuery = dataQuery.Where(r => r.Code.ToLower().Contains(search.ToLower()));
                 if (!string.IsNullOrEmpty(personnel))
                     dataQuery = dataQuery.Where(d => d.Personnel.Equals(personnel));
-
-                var data = await dataQuery.OrderByDescending(r => r.DateCreated)
+                var data = await dataQuery.Join(_context.GeneralLedgerEntries
+                    .Where(l => l.DateCreated.Date >= dateFrom.Date && l.DateCreated.Date <= dateTo.Date)
+                    , r => r.Id, gl => gl.DocumentId, (r, gl) => new Receipt
+                    {
+                        Code = r.Code,
+                        Id = r.Id,
+                        Customer = r.Customer,
+                        DateLastModified = r.DateLastModified,
+                        Personnel = gl.Personnel,
+                        AmountReceived = gl.Credit,
+                        DateCreated = gl.DateCreated,
+                        Notes = gl.Notes
+                    }).OrderByDescending(r => r.DateCreated)
                     .ToListAsync();
                 result.Success = data.Any();
                 result.Message = result.Success ? "Found" : "Not Found";

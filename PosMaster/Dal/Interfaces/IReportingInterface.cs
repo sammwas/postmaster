@@ -303,7 +303,15 @@ namespace PosMaster.Dal.Interfaces
                 var invoicesQry = receiptsQuery.Where(r => r.IsCredit
                   && (r.DateLastModified.HasValue
                   && r.DateLastModified.Value.Date >= dateFrom.Date && r.DateLastModified.Value.Date <= dateTo.Date))
-                    .AsQueryable();
+                    .Join(_context.GeneralLedgerEntries
+                    .Where(l => l.DateCreated.Date >= dateFrom.Date && l.DateCreated.Date <= dateTo.Date)
+                    , r => r.Id, gl => gl.DocumentId, (r, gl) => new
+                    {
+                        r.LastModifiedBy,
+                        gl.Personnel,
+                        AmountReceived = gl.Credit,
+                        r.CustomerId
+                    }).AsQueryable();
                 model.InvoiceCustomerServed = await invoicesQry
                     .Select(i => i.CustomerId).Distinct()
                     .CountAsync();
@@ -322,7 +330,8 @@ namespace PosMaster.Dal.Interfaces
                   }).ToListAsync();
                 model.ReceiptsByClerk = receiptsByClerk;
 
-                var paymentsByModesQry = _context.GeneralLedgerEntries.Where(e => e.ClientId.Equals(clientId));
+                var paymentsByModesQry = _context.GeneralLedgerEntries
+                    .Where(e => e.ClientId.Equals(clientId));
                 if (instanceId.HasValue)
                     paymentsByModesQry = paymentsByModesQry.Where(e => e.InstanceId.Equals(instanceId.Value));
                 var paymentsByModes = await paymentsByModesQry
@@ -337,6 +346,7 @@ namespace PosMaster.Dal.Interfaces
                         Amount = s.Sum(a => a.Credit)
                     }).ToListAsync();
                 model.PaymentsByMode = paymentsByModes;
+
                 var expensesQry = _context.Expenses.Where(e => e.ClientId.Equals(clientId));
                 if (instanceId.HasValue)
                     expensesQry = expensesQry.Where(e => e.InstanceId.Equals(instanceId.Value));
