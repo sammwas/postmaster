@@ -1,0 +1,57 @@
+﻿@model List<EmployeeMonthPayment>
+@{
+    ViewData["Active"] = "Profile";
+    ViewData["Title"] = "Salary History";
+}
+<div>
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">@ViewData["Title"]</h3>
+        </div>
+        <div class="card-body">
+            <table id="dataTable" class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Year</th>
+                        <th>Month</th>
+                        <th>Basic Pay</th>
+                        <th>Allowances</th>
+                        <th>Deductions</th>
+                        <th>Net Pay</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        var i = 0;
+                    }
+                    @foreach (var item in Model)
+                    {
+                        var month = DateTime.Parse($"01-{item.Month}-{DateTime.Now.Year}").ToString("MMM");
+                        i++;
+                        <tr>
+                            <td>@i</td>
+                            <td>@item.Year </td>
+                            <td>@month </td>
+                            <td>@item.BasicPay</td>
+                            <td>@item.Allowance</td>
+                            <td>@item.Deduction</td>
+                            <td>@item.Netpay</td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th>#</th>
+                        <th>Year</th>
+                        <th>Month</th>
+                        <th>Basic Pay</th>
+                        <th>Allowances</th>
+                        <th>Deductions</th>
+                        <th>Net Pay</th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>

@@ -14,8 +14,7 @@ namespace PosMaster.Dal.Interfaces
         Task<ReturnData<string>> AddLoginLogAsync(UserLoginLog log);
         Task<ReturnData<string>> LogOutAsync(string personnel);
         Task<ReturnData<List<UserViewModel>>> AllAsync();
-        Task<ReturnData<List<UserViewModel>>> ByClientIdAsync(Guid clientId);
-        Task<ReturnData<List<UserViewModel>>> ByInstanceIdAsync(Guid instanceId);
+        Task<ReturnData<List<UserViewModel>>> ByClientIdAsync(Guid clientId, Guid? instanceId = null);
         Task<ReturnData<UserViewModel>> UpdateAsync(UserViewModel model);
         Task<ReturnData<string>> ConfirmEmailAsync(string userId, string personnel);
         Task<ReturnData<string>> UpdateImageAsync(UploadImageViewModel model);
@@ -91,45 +90,19 @@ namespace PosMaster.Dal.Interfaces
             }
         }
 
-        public async Task<ReturnData<List<UserViewModel>>> ByClientIdAsync(Guid clientId)
+        public async Task<ReturnData<List<UserViewModel>>> ByClientIdAsync(Guid clientId, Guid? instanceId = null)
         {
             var result = new ReturnData<List<UserViewModel>> { Data = new List<UserViewModel>() };
             var tag = nameof(ByClientIdAsync);
-            _logger.LogInformation($"{tag} get all client {clientId} users");
+            _logger.LogInformation($"{tag} get all client {clientId} and instance {instanceId} users");
             try
             {
-                var data = await _context.Users
-                    .Where(c => c.ClientId.Equals(clientId))
-                    .Select(u => new UserViewModel(u))
-                    .ToListAsync();
-                result.Success = data.Any();
-                result.Message = result.Success ? "Found" : "Not Found";
-                if (result.Success)
-                    result.Data = data;
-                _logger.LogInformation($"{tag} found {data.Count} users");
-                return result;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-                result.ErrorMessage = ex.Message;
-                result.Message = "Error occured";
-                _logger.LogError($"{tag} {result.Message} : {ex}");
-                return result;
-            }
-        }
-
-        public async Task<ReturnData<List<UserViewModel>>> ByInstanceIdAsync(Guid instanceId)
-        {
-            var result = new ReturnData<List<UserViewModel>> { Data = new List<UserViewModel>() };
-            var tag = nameof(ByInstanceIdAsync);
-            _logger.LogInformation($"{tag} get all instance {instanceId} users");
-            try
-            {
-                var data = await _context.Users
-                    .Where(c => c.InstanceId.Equals(instanceId))
-                    .Select(u => new UserViewModel(u))
-                    .ToListAsync();
+                var dataQry = _context.Users
+                    .Where(c => c.ClientId.Equals(clientId)).AsQueryable();
+                if (instanceId.HasValue)
+                    dataQry = dataQry.Where(u => u.InstanceId.Equals(instanceId));
+                var data = await dataQry.Select(u => new UserViewModel(u))
+                  .ToListAsync();
                 result.Success = data.Any();
                 result.Message = result.Success ? "Found" : "Not Found";
                 if (result.Success)

@@ -325,5 +325,12 @@ namespace PosMaster.Controllers
                 TempData.SetData(AlertLevel.Warning, "Monthly Payments", result.Message);
             return View(result.Data);
         }
+
+        public async Task<IActionResult> SalaryHistory()
+        {
+            var result = await _humanResourceInterface.EmployeeMonthPaymentAsync(_userData.ClientId, _userData.InstanceId, _userData.UserId);
+            TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, "Monthly Salary", result.Message);
+            return View(result.Data);
+        }
     }
 }

@@ -48,17 +48,12 @@ namespace PosMaster.Controllers
                     TempData.SetData(AlertLevel.Warning, tag, result.Message);
                 return View(result.Data);
             }
-            if (User.IsInRole(Role.Manager) || User.IsInRole(Role.Admin))
-            {
-                var result = await _userInterface.ByClientIdAsync(user.ClientId);
-                if (!result.Success)
-                    TempData.SetData(AlertLevel.Warning, tag, result.Message);
-                return View(result.Data);
-            }
+            Guid? instanceId = (User.IsInRole(Role.Manager) || User.IsInRole(Role.Admin))
+                ? (Guid?)null : user.InstanceId;          
 
             if (User.IsInRole(Role.Clerk))
             {
-                var result = await _userInterface.ByInstanceIdAsync(user.InstanceId);
+                var result = await _userInterface.ByClientIdAsync(user.ClientId,instanceId);
                 if (!result.Success)
                     TempData.SetData(AlertLevel.Warning, tag, result.Message);
                 return View(result.Data);

@@ -18,7 +18,8 @@
     var dateToday = DateTime.Now.ToString("dd-MMM-yyyy");
     var paymentModes = await _masterDataInterface.PaymentModesAsync(userData.ClientId);
     var users = string.IsNullOrEmpty(instanceId) ?
-    await _userInterface.ByInstanceIdAsync(userData.InstanceId) : await _userInterface.ByInstanceIdAsync(Guid.Parse(instanceId));
+    await _userInterface.ByClientIdAsync(userData.ClientId, userData.InstanceId)
+    : await _userInterface.ByClientIdAsync(userData.ClientId, Guid.Parse(instanceId));
 }
 <div>
     <div class="card">
