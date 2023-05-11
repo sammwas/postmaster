@@ -115,6 +115,29 @@ namespace PosMaster.Controllers
                 TempData.SetData(updateRes.Success ? AlertLevel.Success : AlertLevel.Warning, $"{tag}", updateRes.Message);
                 return RedirectToAction(nameof(Edit), new { id = model.UserId });
             }
+
+            var phoneRes = await _userInterface.PhoneIdNumberExistsAsync(model.PhoneNumber, true);
+            if (phoneRes.Success)
+            {
+                if (phoneRes.Data)
+                {
+                    TempData.SetData(AlertLevel.Warning, $"{tag}", phoneRes.Message);
+                    ModelState.AddModelError("", phoneRes.Message);
+                    return View(model);
+                }
+            }
+
+            var idRes = await _userInterface.PhoneIdNumberExistsAsync(model.IdNumber, false);
+            if (idRes.Success)
+            {
+                if (idRes.Data)
+                {
+                    TempData.SetData(AlertLevel.Warning, $"{tag}", idRes.Message);
+                    ModelState.AddModelError("", idRes.Message);
+                    return View(model);
+                }
+            }
+
             var user = new User
             {
                 Status = EntityStatus.Active,
@@ -136,10 +159,14 @@ namespace PosMaster.Controllers
             };
             user.NormalizedEmail = user.NormalizedUserName = model.EmailAddress.ToUpper();
             var result = await _userManager.CreateAsync(user);
-            if (result.Succeeded)
-                await _userManager.AddToRoleAsync(user, model.Role);
-            else
+            if (!result.Succeeded)
+            {
+                TempData.SetData(AlertLevel.Warning, $"{tag}", $"User creation Failed");
                 AddErrors(result);
+                return View(model);
+            }
+            await _userManager.AddToRoleAsync(user, model.Role);
+
             var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             var callbackUrl = Url.EmailConfirmationLink(user.Id, code, Request.Scheme);
             await _emailService.SendEmailConfirmationAsync(new EmailAddress(user), callbackUrl);

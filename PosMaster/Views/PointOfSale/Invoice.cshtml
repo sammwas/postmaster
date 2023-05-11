@@ -282,7 +282,7 @@ else
                     <input type="hidden" name="Code" value="@Model.Code">
                     <div class="form-group">
                         <label>Payment Mode:</label>
-                        <select name="PaymentModeIdStr" class="form-control select2">
+                        <select name="PaymentModeIdStr" class="form-control select2" required>
                             <option>--select mode--</option>
                             @foreach (var paymentMode in paymentModes)
                             {

@@ -143,7 +143,7 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Expense Type:</label>
-                                    <select name="ExpenseTypeId" class="form-control select2">
+                                    <select name="ExpenseTypeId" class="form-control select2" required>
                                         <option>--Select type--</option>
                                         @foreach (var type in expenseTypeRes.Data)
                                         {
@@ -155,7 +155,7 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Payment Mode:</label>
-                                    <select name="PaymentModeId" class="form-control select2">
+                                    <select name="PaymentModeId" class="form-control select2" required>
                                         <option>--Select mode--</option>
                                         @foreach (var paymentMode in paymentModesRes.Data)
                                         {

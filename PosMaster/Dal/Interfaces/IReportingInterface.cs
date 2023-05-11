@@ -321,7 +321,11 @@ namespace PosMaster.Dal.Interfaces
                       Key = u.FullName
                   }).ToListAsync();
                 model.ReceiptsByClerk = receiptsByClerk;
-                var paymentsByModes = await _context.GeneralLedgerEntries
+
+                var paymentsByModesQry = _context.GeneralLedgerEntries.Where(e => e.ClientId.Equals(clientId));
+                if (instanceId.HasValue)
+                    paymentsByModesQry = paymentsByModesQry.Where(e => e.InstanceId.Equals(instanceId.Value));
+                var paymentsByModes = await paymentsByModesQry
                     .Where(g => g.Document.Equals(Document.Receipt) &&
                     g.DateCreated.Date >= dateFrom.Date && g.DateCreated.Date <= dateTo.Date)
                     .Join(_context.Receipts.Include(r => r.PaymentMode), g => g.DocumentId, r => r.Id, (g, r) =>
@@ -333,7 +337,10 @@ namespace PosMaster.Dal.Interfaces
                         Amount = s.Sum(a => a.Credit)
                     }).ToListAsync();
                 model.PaymentsByMode = paymentsByModes;
-                var expenses = await _context.Expenses
+                var expensesQry = _context.Expenses.Where(e => e.ClientId.Equals(clientId));
+                if (instanceId.HasValue)
+                    expensesQry = expensesQry.Where(e => e.InstanceId.Equals(instanceId.Value));
+                var expenses = await expensesQry
                     .Include(e => e.ExpenseType).DefaultIfEmpty()
                    .Where(g => g.DateCreated.Date >= dateFrom.Date && g.DateCreated.Date <= dateTo.Date)
                     .Select(r => new { r.ExpenseType.Name, r.Amount }

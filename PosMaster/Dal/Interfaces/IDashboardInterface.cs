@@ -101,12 +101,12 @@ namespace PosMaster.Dal.Interfaces
                     .Where(r => r.DateCreated.Date >= dateFrom.Date && r.DateCreated.Date <= dateTo.Date)
                     .SumAsync(r => r.UnitPrice * r.Quantity),
 
-                    TotalExpenses = await _context.Expenses
+                    TotalExpenses = await _context.Expenses.Where(c => c.InstanceId.Equals(instanceId))
                      .Where(r => r.DateCreated.Date >= dateFrom.Date && r.DateCreated.Date <= dateTo.Date)
                     .SumAsync(e => e.Amount),
 
                     SupplierExpenses = await _context.Expenses
-                    .Where(s => s.SupplierId.HasValue)
+                      .Where(s => s.SupplierId.HasValue).Where(c => c.InstanceId.Equals(instanceId))
                      .Where(r => r.DateCreated.Date >= dateFrom.Date && r.DateCreated.Date <= dateTo.Date)
                     .SumAsync(e => e.Amount)
                 };

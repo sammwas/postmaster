@@ -19,6 +19,7 @@ namespace PosMaster.Dal.Interfaces
         Task<ReturnData<UserViewModel>> UpdateAsync(UserViewModel model);
         Task<ReturnData<string>> ConfirmEmailAsync(string userId, string personnel);
         Task<ReturnData<string>> UpdateImageAsync(UploadImageViewModel model);
+        Task<ReturnData<bool>> PhoneIdNumberExistsAsync(string number, bool isPhone);
     }
     public class UserInterface : IUserInterface
     {
@@ -201,6 +202,39 @@ namespace PosMaster.Dal.Interfaces
                 result.Success = true;
                 result.Message = "Logged out";
                 _logger.LogInformation($"{tag} user account log out {personnel} {result.Message}");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                result.ErrorMessage = ex.Message;
+                result.Message = "Error occured";
+                _logger.LogError($"{tag} {result.Message} : {ex}");
+                return result;
+            }
+        }
+
+        public async Task<ReturnData<bool>> PhoneIdNumberExistsAsync(string number, bool isPhone)
+        {
+
+            var result = new ReturnData<bool>();
+            var tag = nameof(PhoneIdNumberExistsAsync);
+            var option = isPhone ? "Phone number" : "National ID number";
+            _logger.LogInformation($"{tag} check if {option} {number} exists");
+            try
+            {
+                if (string.IsNullOrEmpty(number))
+                {
+                    result.Message = $"{option} is required";
+                    return result;
+                }
+                number = number.Trim();
+                var exists = isPhone ? await _context.Users.AnyAsync(u => u.PhoneNumber.Equals(number))
+                 : await _context.Users.AnyAsync(u => u.IdNumber.Equals(number));
+                result.Success = true;
+                result.Message = exists ? $"{option} Exists" : $"{option} Does not exist";
+                result.Data = exists;
+                _logger.LogInformation($"{tag} {option} {number} {result.Message}");
                 return result;
             }
             catch (Exception ex)
