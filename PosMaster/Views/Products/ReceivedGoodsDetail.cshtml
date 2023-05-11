@@ -8,7 +8,7 @@
     var user = _cookies.Read();
     var instanceRes = await _instanceInterface.ByIdAsync(Model.InstanceId);
     var supplier = Model.Supplier;
-    var balance = Model.Amount - Model.AmountReceived;
+    var balance = Model.Balance;
     var isActive = balance > 0;
 }
 <div class="invoice p-3 mb-3" id="printDiv">
@@ -173,7 +173,7 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Amount:</label>
-                                    <input type="text" class="form-control numbers-only" name="Amount" placeholder="Amount @balance">
+                                    <input type="text" class="form-control numbers-only" max="@balance" name="Amount" placeholder="Amount @balance">
                                 </div>
                             </div>
                             <div class="col-md-12">

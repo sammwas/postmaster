@@ -5,17 +5,14 @@
     ViewData["Active"] = "Dashboard";
     ViewData["Title"] = "Dashboard";
     var userData = _cookies.Read();
-    var instancesRes = User.IsInRole(Role.SuperAdmin) ?
-     await _instanceInterface.AllAsync()
-     : await _instanceInterface.ByClientIdAsync(userData.ClientId);
+    var instancesRes = await _instanceInterface.ByClientIdAsync(userData.ClientId);
     var instances = instancesRes.Data;
     var instanceId = ViewData["InstanceId"]?.ToString();
-    var dateFrom = DateTime.Now.AddMonths(-1).ToString("dd-MMM-yyyy");
+    var dateFrom = Helpers.firstDayOfMonth.ToString("dd-MMM-yyyy");
     var dateToday = DateTime.Now.ToString("dd-MMM-yyyy");
 }
 <section class="content">
     <div class="container-fluid">
-
         <form method="get" autocomplete="off" class="d-print-none">
             <div class="row">
                 <div class="col-md-3">
@@ -27,11 +24,11 @@
                             {
                                 if (!string.IsNullOrEmpty(instanceId) && item.Id.ToString().Equals(instanceId))
                                 {
-                                    <option selected="selected" value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
+                                            <option selected="selected" value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
                                 }
                                 else
                                 {
-                                    <option value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
+                                            <option value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
                                 }
                             }
                         </select>
@@ -141,7 +138,7 @@
             <div class="col-lg-3 col-6">
                 <div class="small-box bg-olive">
                     <div class="inner">
-                        <h3>@Helpers.FormatAmount(Model.TotalExpectedProfit-Model.TotalExpenses)</h3>
+                        <h3>@Helpers.FormatAmount(Model.TotalExpectedProfit-Model.ProfitExpenses)</h3>
                         <p>Total Expected Profit</p>
                     </div>
                     <div class="icon">
@@ -152,7 +149,7 @@
             <div class="col-lg-3 col-6">
                 <div class="small-box bg-lime">
                     <div class="inner">
-                        <h3>@Helpers.FormatAmount(Model.TotalActualProfit-Model.TotalExpenses)</h3>
+                        <h3>@Helpers.FormatAmount(Model.TotalActualProfit-Model.ProfitExpenses)</h3>
                         <p>Total Actual Profit</p>
                     </div>
                     <div class="icon">

@@ -5,6 +5,7 @@ using PosMaster.Dal.Interfaces;
 using PosMaster.Extensions;
 using PosMaster.Services;
 using PosMaster.ViewModels;
+using System;
 using System.Threading.Tasks;
 
 namespace PosMaster.Controllers
@@ -31,16 +32,27 @@ namespace PosMaster.Controllers
                 return RedirectToAction(nameof(Manager));
             if (User.IsInRole(Role.Clerk))
             {
-                return _cookiesService.Read().ShowClerkDashboard ?
+                var allowDash = _cookiesService.Read().ShowClerkDashboard;
+                return allowDash ?
                  RedirectToAction(nameof(Clerk)) : RedirectToAction("Index", "PointOfSale");
             }
             return RedirectToAction(nameof(Clerk));
         }
 
         [Authorize(Roles = "SuperAdmin")]
-        public async Task<IActionResult> SuperAdmin()
+        public async Task<IActionResult> SuperAdmin(string inId = "", string dtFrom = "", string dtTo = "")
         {
-            var result = await _dashboardInterface.SuperAdminDashboardAsync();
+            var userData = _cookiesService.Read();
+            if (string.IsNullOrEmpty(dtFrom))
+                dtFrom = Helpers.firstDayOfMonth.ToString("dd-MMM-yyyy");
+            if (string.IsNullOrEmpty(dtTo))
+                dtTo = DateTime.Now.ToString("dd-MMM-yyyy");
+            ViewData["DtFrom"] = dtFrom;
+            ViewData["DtTo"] = dtTo;
+            var hasInsId = Guid.TryParse(inId, out var insId);
+            var instanceId = hasInsId ? insId : userData.InstanceId;
+            ViewData["InstanceId"] = instanceId;
+            var result = await _dashboardInterface.SuperAdminDashboardAsync(instanceId, DateTime.Parse(dtFrom), DateTime.Parse(dtTo));
             if (!result.Success)
                 TempData.SetData(AlertLevel.Warning, _tag, result.Message);
             var model = result.Success ? result.Data : new SuperAdminDashboardViewModel();
@@ -52,15 +64,15 @@ namespace PosMaster.Controllers
         {
             var userData = _cookiesService.Read();
             if (string.IsNullOrEmpty(dtFrom))
-                dtFrom = System.DateTime.Now.AddMonths(-1).ToString("dd-MMM-yyyy");
+                dtFrom = Helpers.firstDayOfMonth.ToString("dd-MMM-yyyy");
             if (string.IsNullOrEmpty(dtTo))
-                dtTo = System.DateTime.Now.ToString("dd-MMM-yyyy");
+                dtTo = DateTime.Now.ToString("dd-MMM-yyyy");
             ViewData["DtFrom"] = dtFrom;
             ViewData["DtTo"] = dtTo;
-            var hasInsId = System.Guid.TryParse(inId, out var insId);
+            var hasInsId = Guid.TryParse(inId, out var insId);
             var instanceId = hasInsId ? insId : userData.InstanceId;
             ViewData["InstanceId"] = instanceId;
-            var result = await _dashboardInterface.ManagerDashboardAsync(instanceId, dtFrom, dtTo);
+            var result = await _dashboardInterface.ManagerDashboardAsync(instanceId, DateTime.Parse(dtFrom), DateTime.Parse(dtTo));
             if (!result.Success)
                 TempData.SetData(AlertLevel.Warning, _tag, result.Message);
             var model = result.Success ? result.Data : new ManagerDashboardViewModel();

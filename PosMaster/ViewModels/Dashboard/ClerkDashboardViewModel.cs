@@ -4,7 +4,7 @@
     {
         public decimal TodayExpenses { get; set; }
         public decimal TodaySales { get; set; }
-        public decimal WeeklySales { get; set; }
-        public decimal MonthlySales { get; set; }
+        public decimal CashSales { get; set; }
+        public decimal CreditSales => TodaySales - CashSales;
     }
 }

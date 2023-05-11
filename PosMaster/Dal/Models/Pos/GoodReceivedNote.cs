@@ -14,6 +14,7 @@ namespace PosMaster.Dal
         public List<PoGrnProduct> PoGrnProducts { get; set; }
         public decimal Amount => PoGrnProducts.Sum(p => p.GrnAmount);
         public decimal AmountReceived { get; set; }
+        public decimal Balance => Amount - AmountReceived;
         public GoodReceivedNote()
         {
             PoGrnProducts = new List<PoGrnProduct>();

@@ -96,6 +96,7 @@ namespace PosMaster.Dal.Interfaces
                     _logger.LogInformation($"{tag} not approved: {result.Message}");
                     return result;
                 }
+                decimal spentAmount = 0;
                 foreach (var salary in sData)
                 {
                     var approved = _context.EmployeeMonthPayments
@@ -117,6 +118,7 @@ namespace PosMaster.Dal.Interfaces
                             Code = $"{salary.UserId}_{model.Month}{model.Year}"
                         };
                         _context.EmployeeMonthPayments.Add(mPayment);
+                        spentAmount += mPayment.Netpay;
                     }
                     else
                     {
@@ -130,7 +132,7 @@ namespace PosMaster.Dal.Interfaces
                 }
                 result.Success = true;
                 result.Message = "Approved";
-                result.Data = sData.Sum(s => s.NetAmount);
+                result.Data = spentAmount;
                 _logger.LogInformation($"{tag} approved {sData.Count} monthly salaries of {result.Data}");
                 return result;
             }

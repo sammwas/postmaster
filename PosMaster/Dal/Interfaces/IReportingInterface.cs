@@ -81,6 +81,7 @@ namespace PosMaster.Dal.Interfaces
                 return result;
             }
         }
+
         public async Task<ReturnData<List<MonthSaleViewModel>>> MonthlySalesReportAsync(Guid instanceId, string dateFrom = "", string dateTo = "")
         {
             var result = new ReturnData<List<MonthSaleViewModel>> { Data = new List<MonthSaleViewModel>() };
@@ -261,7 +262,7 @@ namespace PosMaster.Dal.Interfaces
                 _logger.LogInformation($"{tag} on client {clientId} instance {instanceId}  from {from} to {to}");
                 var model = new CloseOfDayViewModel()
                 {
-                    Day = $"{from} to {to}"
+                    Day = from.Equals(to) ? $"{from}" : $"{from} to {to}"
                 };
                 var receiptsQuery = _context.Receipts.Where(r => r.ClientId.Equals(clientId))
                     .Include(r => r.ReceiptLineItems).AsQueryable();

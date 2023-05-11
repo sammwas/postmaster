@@ -1,10 +1,69 @@
 ﻿@model SuperAdminDashboardViewModel
+@inject IClientInstanceInterface _instanceInterface;
+@inject ICookiesService _cookies;
 @{
     ViewData["Active"] = "Dashboard";
     ViewData["Title"] = "Dashboard";
+    var userData = _cookies.Read();
+    var instancesRes = await _instanceInterface.AllAsync();
+    var instances = instancesRes.Data;
+    var instanceId = ViewData["InstanceId"]?.ToString();
+    var dateFrom = Helpers.firstDayOfMonth.ToString("dd-MMM-yyyy");
+    var dateToday = DateTime.Now.ToString("dd-MMM-yyyy");
 }
 <section class="content">
     <div class="container-fluid">
+        <form method="get" autocomplete="off" class="d-print-none">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label>Instance</label>
+                        <select class="form-control select2" name="inId" id="inpInstanceId" style="width: 100%;">
+                            <option value="">--Select Instance--</option>
+                            @foreach (var item in instances)
+                            {
+                                if (!string.IsNullOrEmpty(instanceId) && item.Id.ToString().Equals(instanceId))
+                                {
+                                    <option selected="selected" value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
+                                }
+                                else
+                                {
+                                    <option value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label>From</label>
+                        <div class="input-group date" id="dateFrom" data-target-input="nearest">
+                            <input type="text" id="inpDateFrom" name="dtFrom" class="form-control datetimepicker-input" data-target="#dateFrom" value="@ViewData["DtFrom"]" placeholder="Date From (@dateFrom)" />
+                            <div class="input-group-append" data-target="#dateFrom" data-toggle="datetimepicker">
+                                <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label>To</label>
+                        <div class="input-group date" id="dateTo" data-target-input="nearest">
+                            <input type="text" id="inpDateTo" name="dtTo" class="form-control datetimepicker-input" data-target="#dateTo" value="@ViewData["DtTo"]" placeholder="Date From (@dateToday)" />
+                            <div class="input-group-append" data-target="#dateTo" data-toggle="datetimepicker">
+                                <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group mt-2">
+                        <button type="submit" class="btn btn-primary mt-4">Submit</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+        <hr />
         <div class="row">
             <div class="col-lg-3 col-6">
                 <div class="small-box bg-info">
@@ -15,7 +74,7 @@
                     <div class="icon">
                         <i class="ion ion-bag"></i>
                     </div>
-                    <a asp-controller="Clients" asp-action="All" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                    @*<a asp-controller="Clients" asp-action="All" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>*@
                 </div>
             </div>
             <div class="col-lg-3 col-6">
@@ -27,7 +86,6 @@
                     <div class="icon">
                         <i class="ion ion-stats-bars"></i>
                     </div>
-                    <a asp-controller="ClientInstances" asp-action="All" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
                 </div>
             </div>
             <div class="col-lg-3 col-6">
@@ -39,7 +97,6 @@
                     <div class="icon">
                         <i class="ion ion-person-add"></i>
                     </div>
-                    <a asp-controller="Users" asp-action="All" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
                 </div>
             </div>
             <div class="col-lg-3 col-6">
@@ -51,7 +108,6 @@
                     <div class="icon">
                         <i class="ion ion-pie-graph"></i>
                     </div>
-                    <a asp-controller="Products" asp-action="Index" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
                 </div>
             </div>
         </div>

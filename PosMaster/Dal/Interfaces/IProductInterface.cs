@@ -27,7 +27,8 @@ namespace PosMaster.Dal.Interfaces
         Task<ReturnData<PurchaseOrder>> PurchaseOrderByIdAsync(Guid id);
         string DocumentRefNumber(Document document, Guid clientId);
         Task<ReturnData<List<Product>>> LowStockProductsAsync(Guid clientId, Guid? instanceId, int limit = 10);
-        Task<ReturnData<List<TopSellingProductViewModel>>> TopSellingProductsByVolumeAsync(Guid clientId, Guid? instanceId, string dtFrom = "", string dtTo = "", int limit = 10);
+        Task<ReturnData<List<TopSellingProductViewModel>>> TopSellingProductsByVolumeAsync(Guid clientId, Guid? instanceId, string dtFrom = "", string dtTo = "",
+           string personnel = "", int limit = 10);
         Task<ReturnData<ProductPriceViewModel>> EditPriceAsync(ProductPriceViewModel model);
         Task<ReturnData<Receipt>> ReceiptByIdAsync(string id);
         Task<ReturnData<PurchaseOrder>> EditPurchaseOrderAsync(PurchaseOrderViewModel model);
@@ -992,7 +993,7 @@ namespace PosMaster.Dal.Interfaces
             }
         }
 
-        public async Task<ReturnData<List<TopSellingProductViewModel>>> TopSellingProductsByVolumeAsync(Guid clientId, Guid? instanceId, string dtFrom = "", string dtTo = "", int limit = 10)
+        public async Task<ReturnData<List<TopSellingProductViewModel>>> TopSellingProductsByVolumeAsync(Guid clientId, Guid? instanceId, string dtFrom = "", string dtTo = "", string personnel = "", int limit = 10)
         {
             var result = new ReturnData<List<TopSellingProductViewModel>> { Data = new List<TopSellingProductViewModel>() };
             var tag = nameof(TopSellingProductsByVolumeAsync);
@@ -1003,10 +1004,11 @@ namespace PosMaster.Dal.Interfaces
                 var dateTo = DateTime.Parse(dtTo);
                 var dataQry = _context.ReceiptLineItems
                     .Where(r => r.DateCreated.Date >= dateFrom.Date && r.DateCreated.Date <= dateTo.Date)
-                    .GroupBy(l => l.ProductId)
+                    .GroupBy(l => new { l.ProductId, l.Personnel })
                     .Select(tp => new TopSellingProductViewModel
                     {
-                        ProductId = tp.Key,
+                        ProductId = tp.Key.ProductId,
+                        Personnel = tp.Key.Personnel,
                         Volume = tp.Count()
                     })
                     .Join(_context.Products.Include(p => p.ProductCategory)
@@ -1017,11 +1019,14 @@ namespace PosMaster.Dal.Interfaces
                         ProductId = tp.ProductId,
                         Volume = tp.Volume,
                         InstanceId = p.InstanceId,
-                        ClientId = p.ClientId
+                        ClientId = p.ClientId,
+                        Personnel = tp.Personnel,
                     })
                     .Where(r => r.ClientId.Equals(clientId));
                 if (instanceId != null)
                     dataQry = dataQry.Where(p => p.InstanceId.Equals(instanceId));
+                if (!string.IsNullOrEmpty(personnel))
+                    dataQry = dataQry.Where(p => p.Personnel.Equals(personnel));
                 var data = await dataQry.OrderByDescending(p => p.Volume)
                     .Take(limit).ToListAsync();
                 result.Success = data.Any();
@@ -1792,6 +1797,12 @@ namespace PosMaster.Dal.Interfaces
                 if (grn == null)
                 {
                     result.Message = "Provided document not Found";
+                    return result;
+                }
+
+                if (model.Amount > grn.Balance)
+                {
+                    result.Message = $"Available balance is {grn.Balance}";
                     return result;
                 }
 

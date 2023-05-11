@@ -196,14 +196,17 @@
                                         <p>Invoices</p>
                                     </a>
                                 </li>
-                                <li class="nav-item">
-                                    <a asp-controller="PointOfSale" asp-action="GeneralLedgers"
+                                @if (User.IsInRole(Role.SuperAdmin) || User.IsInRole(Role.Manager))
+                                {
+                                    <li class="nav-item">
+                                        <a asp-controller="PointOfSale" asp-action="GeneralLedgers"
                                        asp-route-dtFrom="@DateTime.Now.ToString("dd-MMM-yyyy")"
                                        asp-route-dtTo="@DateTime.Now.ToString("dd-MMM-yyyy")" class="nav-link">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>General Ledger</p>
-                                    </a>
-                                </li>
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>General Ledger</p>
+                                        </a>
+                                    </li>
+                                }
                                 <li class="nav-item">
                                     <a asp-controller="PointOfSale" asp-action="Expenses"
                                        asp-route-dtFrom="@firstDayOfWeek"

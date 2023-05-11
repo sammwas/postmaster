@@ -392,7 +392,7 @@ $(".day").click(function () {
     var str = date[0] + '-' + date[1] + '-' + date[2];
     var date_ = new Date(str).toString().split(" ");
     var xstr = date_[2] + '-' + date_[1] + '-' + date_[3];
-    window.location.href = '/Reports/SalesReport?dtFrom=' + xstr + '&dtTo=' + xstr + '&option=Weekly';
+    //window.location.href = '/Reports/SalesReport?dtFrom=' + xstr + '&dtTo=' + xstr + '&option=Weekly';
 });
 
 if (x) {
@@ -410,7 +410,8 @@ if (x) {
     });
 }
 
-if (x) {
+var donut = document.getElementById('donutChart');
+if (donut) {
     var labels = [];
     var donutData = [];
     var dFrom = $("#inpDateFrom").val();

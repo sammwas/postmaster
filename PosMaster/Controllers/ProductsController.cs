@@ -314,7 +314,8 @@ namespace PosMaster.Controllers
             if (string.IsNullOrEmpty(dtTo))
                 dtTo = DateTime.Now.ToString("dd-MMM-yyyy");
             var instanceId = User.IsInRole(Role.Clerk) ? _userData.InstanceId : inId;
-            var data = await _productInterface.TopSellingProductsByVolumeAsync(_userData.ClientId, instanceId, dtFrom  ,  dtTo , 5);
+            var personnel = User.IsInRole(Role.Clerk) ? User.Identity.Name : "";
+            var data = await _productInterface.TopSellingProductsByVolumeAsync(_userData.ClientId, instanceId, dtFrom, dtTo, personnel, 5);
             return Json(data);
         }
 
@@ -370,15 +371,15 @@ namespace PosMaster.Controllers
             model.ClientId = _userData.ClientId;
             model.InstanceId = _userData.InstanceId;
             model.Personnel = User.Identity.Name;
-            var expenseRes = await _expenseInterface.EditAsync(model);
-            if (!expenseRes.Success)
+            var supplierRes = await _productInterface.PaySupplierGrnAsync(model);
+            if (!supplierRes.Success)
             {
-                TempData.SetData(AlertLevel.Warning, "Edit Expense", expenseRes.Message);
+                TempData.SetData(AlertLevel.Warning, "Pay Supplier", supplierRes.Message);
                 return RedirectToAction(nameof(ReceivedGoodsDetail),
                     new { id = model.GrnId });
             }
-            var result = await _productInterface.PaySupplierGrnAsync(model);
-            TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, "Pay supplier", result.Message);
+            var result = await _expenseInterface.EditAsync(model);
+            TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, "Edit Expense", result.Message);
             return RedirectToAction(nameof(ReceivedGoodsDetail),
                    new { id = model.GrnId });
         }
