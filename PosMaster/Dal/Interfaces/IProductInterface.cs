@@ -242,8 +242,8 @@ namespace PosMaster.Dal.Interfaces
                 if (isPos)
                 {
                     dataQry = dataQry.Where(d => d.Status.Equals(EntityStatus.Active));
-                    dataQry = dataQry.Where(d => d.AvailableQuantity > 0 && d.SellingPrice > 0)
-                    .Where(d => d.PriceStartDate.Date <= DateTime.Now.Date && (d.PriceEndDate == null
+                    dataQry = dataQry.Where(d => d.IsService || (d.AvailableQuantity > 0 && d.SellingPrice > 0))
+                    .Where(d => d.AvailableQuantity > 0 && d.SellingPrice > 0 && d.PriceStartDate.Date <= DateTime.Now.Date && (d.PriceEndDate == null
                     || d.PriceEndDate.Value.Date >= DateTime.Now.Date));
                 }
                 if (!string.IsNullOrEmpty(search))
@@ -251,10 +251,10 @@ namespace PosMaster.Dal.Interfaces
                     search = search.ToLower();
                     dataQry = dataQry.Where(d => d.Code.ToLower().Contains(search)
                     || d.Name.ToLower().Contains(search))
+                    .OrderBy(d => d.Code)
                     .Take(10);
                 }
-                var data = await dataQry.OrderByDescending(c => c.DateCreated)
-                    .ToListAsync();
+                var data = await dataQry.ToListAsync();
                 result.Success = data.Any();
                 result.Message = result.Success ? "Found" : "Not Found";
                 if (result.Success)
@@ -289,37 +289,6 @@ namespace PosMaster.Dal.Interfaces
                         .FirstOrDefaultAsync(c => c.Id.Equals(model.Id));
                 if (dbProduct != null)
                 {
-                    if (model.AvailableQuantity != dbProduct.AvailableQuantity)
-                    {
-                        var adjustModel = new ProductStockAdjustmentViewModel
-                        {
-                            ProductId = dbProduct.Id.ToString(),
-                            QuantityTo = model.AvailableQuantity,
-                            BuyingPriceTo = dbProduct.BuyingPrice,
-                            Personnel = model.Personnel,
-                            ClientId = model.ClientId,
-                            InstanceId = model.InstanceId,
-                            Notes = model.Notes
-                        };
-                        await AdjustProductStockAsync(adjustModel);
-                    }
-                    if (model.SellingPrice != dbProduct.SellingPrice)
-                    {
-                        var priceLog = new ProductPriceLog
-                        {
-                            ClientId = dbProduct.ClientId,
-                            InstanceId = dbProduct.InstanceId,
-                            ProductId = dbProduct.Id,
-                            PriceFrom = dbProduct.SellingPrice,
-                            PriceTo = model.SellingPrice,
-                            PriceStartDate = hasStartDate ? startDate : DateTime.Now,
-                            PriceEndDate = hasEndDate ? endDate : (DateTime?)null,
-                            Personnel = model.Personnel,
-                            Notes = "Product Edit"
-                        };
-                        _context.ProductPriceLogs.Add(priceLog);
-                        _context.SaveChanges();
-                    }
                     dbProduct.Code = model.Code;
                     dbProduct.ProductCategoryId = Guid.Parse(model.ProductCategoryId);
                     dbProduct.Name = model.Name;
@@ -530,7 +499,8 @@ namespace PosMaster.Dal.Interfaces
                         }
                     }
                     receipt.ReceiptLineItems.Add(lineItem);
-                    product.AvailableQuantity -= item.Quantity;
+                    if (!product.IsService)
+                        product.AvailableQuantity -= item.Quantity;
                     product.DateLastModified = DateTime.Now;
                     product.LastModifiedBy = model.Personnel;
                     product.BuyingPrice = lineItem.BuyingPrice;
@@ -826,6 +796,7 @@ namespace PosMaster.Dal.Interfaces
                     Personnel = model.Personnel,
                     PersonnelName = model.PersonnelName,
                     AmountReceived = model.Amount,
+                    DateLastModified = DateTime.Now,
                     ReceiptLineItems = new List<ReceiptLineItem>
                     {
                         new ReceiptLineItem
@@ -970,7 +941,7 @@ namespace PosMaster.Dal.Interfaces
                     .Include(c => c.UnitOfMeasure)
                     .Where(p => p.AvailableQuantity <= p.ReorderLevel)
                     .Where(d => d.ClientId.Equals(clientId))
-                    .Where(p => !p.Code.Equals(Constants.DefaultProductCode));
+                    .Where(p => !p.Code.Equals(Constants.DefaultProductCode) && !p.IsService);
                 if (instanceId != null)
                     dataQry = dataQry.Where(p => p.InstanceId.Equals(instanceId));
                 var data = await dataQry.OrderBy(p => p.AvailableQuantity)
@@ -1569,7 +1540,7 @@ namespace PosMaster.Dal.Interfaces
                 var invoices = await _context.Invoices
                     .Include(i => i.Receipt)
                     .ThenInclude(i => i.ReceiptLineItems)
-                     .Where(u => u.Receipt.CustomerId.Equals(Guid.Parse(model.UserId)))
+                    .Where(u => u.Receipt.CustomerId.Equals(Guid.Parse(model.UserId)))
                     .Where(i => i.Status.Equals(EntityStatus.Active))
                     .OrderBy(i => i.DateCreated)
                     .ToListAsync();

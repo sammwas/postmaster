@@ -214,12 +214,9 @@ namespace PosMaster.Dal.Interfaces
             {
                 var dataQuery = _context.Receipts
                     .Include(u => u.Customer)
-                    .Include(r => r.ReceiptLineItems)
-                    .Where(r => r.ClientId.Equals(clientId) && r.AmountReceived > 0)
-                    .Where(r => r.IsCredit
-                    && (r.DateLastModified.HasValue
-                    && r.DateLastModified.Value.Date >= dateFrom.Date && r.DateLastModified.Value.Date <= dateTo.Date))
-                         .AsQueryable();
+                     .Where(r => r.ClientId.Equals(clientId) && r.AmountReceived > 0)
+                    .Where(r => r.IsCredit && r.DateCreated.Date >= dateFrom.Date && r.DateCreated.Date <= dateTo.Date)
+                    .AsQueryable();
                 if (instanceId != null)
                     dataQuery = dataQuery.Where(r => r.InstanceId.Equals(instanceId.Value));
                 if (!string.IsNullOrEmpty(search))

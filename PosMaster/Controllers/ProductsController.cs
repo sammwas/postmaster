@@ -39,7 +39,7 @@ namespace PosMaster.Controllers
 
             ViewData["InstanceId"] = insId;
             ViewData["Search"] = search;
-            var result = await _productInterface.ByInstanceIdAsync(_userData.ClientId, Guid.Parse(insId));
+            var result = await _productInterface.ByInstanceIdAsync(_userData.ClientId, Guid.Parse(insId), false, search);
             if (!result.Success)
                 TempData.SetData(AlertLevel.Warning, "Products", result.Message);
             return View(result.Data);
@@ -91,7 +91,10 @@ namespace PosMaster.Controllers
             TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, title, result.Message);
             if (!result.Success)
                 return View(model);
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Index), new
+            {
+                search = model.IsEditMode ? model.Code : ""
+            });
         }
 
         public IActionResult ProductStockAdjustment()
