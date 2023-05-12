@@ -824,7 +824,8 @@ namespace PosMaster.Dal.Interfaces
                     DocumentId = receipt.Id,
                     Credit = receipt.AmountReceived,
                     Notes = receipt.Notes,
-                    Code = $"{receipt.Code}_{receipt.PaymentModeNo}"
+                    Code = $"{receipt.Code}_{receipt.PaymentModeNo}",
+                    IsRepayment = true
                 };
                 _context.GeneralLedgerEntries.Add(entry);
                 await _context.SaveChangesAsync();
@@ -1580,7 +1581,8 @@ namespace PosMaster.Dal.Interfaces
                             DocumentNumber = invoice.Receipt.Code,
                             DocumentId = invoice.Receipt.Id,
                             Code = $"{invoice.Receipt.Code}_{invoice.Code}",
-                            Personnel = model.Personnel
+                            Personnel = model.Personnel,
+                            IsRepayment = true
                         };
                         _context.GeneralLedgerEntries.Add(entry);
                     }

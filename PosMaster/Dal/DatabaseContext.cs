@@ -29,6 +29,8 @@ namespace PosMaster.Dal
         public DbSet<PoGrnProduct> PoGrnProducts { get; set; }
         public DbSet<EmailSetting> EmailSettings { get; set; }
         public DbSet<SmsSetting> SmsSettings { get; set; }
+        public DbSet<SmsMessageTemplate> SmsMessageTemplates { get; set; }
+        public DbSet<SmsSentMessage> SmsSentMessages { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<Invoice> Invoices { get; set; }
         public DbSet<ReceiptLineItem> ReceiptLineItems { get; set; }
@@ -51,19 +53,24 @@ namespace PosMaster.Dal
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
-            base.OnModelCreating(builder); 
+            base.OnModelCreating(builder);
 
             builder.Entity<User>(entity =>
             {
                 entity.HasIndex(e => e.IdNumber).IsUnique();
-                entity.HasIndex(e => e.PhoneNumber).IsUnique(); 
-            }); 
-            
+                entity.HasIndex(e => e.PhoneNumber).IsUnique();
+            });
+
             builder.Entity<Receipt>(entity =>
             {
-                entity.HasIndex(e => e.Stamp).IsUnique(); 
+                entity.HasIndex(e => e.Stamp).IsUnique();
+            });
+
+            builder.Entity<SmsSentMessage>(entity =>
+            {
+                entity.HasIndex(e => e.Stamp).IsUnique();
             });
 
         }
-        }
+    }
 }

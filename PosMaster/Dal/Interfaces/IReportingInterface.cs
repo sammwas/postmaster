@@ -302,27 +302,27 @@ namespace PosMaster.Dal.Interfaces
                 model.SalesByClerk = salesByClerk;
 
                 var invoicesQry = _context.Receipts
-                     .Where(r => r.ClientId.Equals(clientId) && r.AmountReceived > 0)
-                    .Where(r => r.IsCredit && r.DateCreated.Date >= dateFrom.Date && r.DateCreated.Date <= dateTo.Date)
+                     .Where(r => r.ClientId.Equals(clientId) && r.AmountReceived > 0 && r.IsCredit
+                    && r.DateLastModified.HasValue && r.DateLastModified.Value.Date >= dateFrom.Date && r.DateLastModified.Value.Date <= dateTo.Date)
                     .AsQueryable();
                 if (instanceId.HasValue)
                     invoicesQry = invoicesQry.Where(i => i.InstanceId.Equals(instanceId));
-                var repaymentsQry = invoicesQry
-                   .Join(_context.GeneralLedgerEntries
-                       .Where(l => l.DateCreated.Date >= dateFrom.Date && l.DateCreated.Date <= dateTo.Date)
-                        , r => r.Id, gl => gl.DocumentId, (r, gl) => new
-                        {
-                            gl.Personnel,
-                            AmountReceived = gl.Credit
-                        }).AsQueryable();
+                var repaymentsQry = invoicesQry.Join(_context.GeneralLedgerEntries, i => i.Id, gl => gl.DocumentId, (i, gl) => gl)
+                   .GroupBy(g => new { g.DocumentId, g.Personnel })
+                   .Select(gl => new
+                   {
+                       gl.Key.DocumentId,
+                       gl.Key.Personnel,
+                       Amount = gl.Sum(s => s.Credit)
+                   }).AsQueryable();
                 model.InvoiceCustomerServed = await repaymentsQry.CountAsync();
-                model.TotalRepayment = await repaymentsQry.SumAsync(i => i.AmountReceived);
+                model.TotalRepayment = await repaymentsQry.SumAsync(i => i.Amount);
                 var receiptsByClerk = await repaymentsQry
                     .GroupBy(l => l.Personnel)
                   .Select(tp => new KeyAmountViewModel
                   {
                       Key = tp.Key,
-                      Amount = tp.Sum(s => s.AmountReceived)
+                      Amount = tp.Sum(s => s.Amount)
                   }).Join(_context.Users.Select(u => new { u.UserName, u.FullName }),
                   p => p.Key, u => u.UserName, (p, u) => new KeyAmountViewModel
                   {

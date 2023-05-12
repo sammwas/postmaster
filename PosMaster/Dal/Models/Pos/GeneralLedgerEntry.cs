@@ -12,5 +12,6 @@ namespace PosMaster.Dal
         public Guid DocumentId { get; set; }
         public Guid UserId { get; set; }
         public GlUserType UserType { get; set; }
+        public bool IsRepayment { get; set; }
     }
 }

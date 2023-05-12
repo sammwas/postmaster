@@ -213,9 +213,8 @@ namespace PosMaster.Dal.Interfaces
             try
             {
                 var dataQuery = _context.Receipts
-                    .Include(u => u.Customer)
-                     .Where(r => r.ClientId.Equals(clientId) && r.AmountReceived > 0)
-                    .Where(r => r.IsCredit && r.DateCreated.Date >= dateFrom.Date && r.DateCreated.Date <= dateTo.Date)
+                   .Where(r => r.ClientId.Equals(clientId) && r.AmountReceived > 0 && r.IsCredit
+                    && r.DateLastModified.HasValue && r.DateLastModified.Value.Date >= dateFrom.Date && r.DateLastModified.Value.Date <= dateTo.Date)
                     .AsQueryable();
                 if (instanceId != null)
                     dataQuery = dataQuery.Where(r => r.InstanceId.Equals(instanceId.Value));
@@ -223,19 +222,28 @@ namespace PosMaster.Dal.Interfaces
                     dataQuery = dataQuery.Where(r => r.Code.ToLower().Contains(search.ToLower()));
                 if (!string.IsNullOrEmpty(personnel))
                     dataQuery = dataQuery.Where(d => d.Personnel.Equals(personnel));
-                var data = await dataQuery.Join(_context.GeneralLedgerEntries
-                    .Where(l => l.DateCreated.Date >= dateFrom.Date && l.DateCreated.Date <= dateTo.Date)
-                    , r => r.Id, gl => gl.DocumentId, (r, gl) => new Receipt
-                    {
-                        Code = r.Code,
-                        Id = r.Id,
-                        Customer = r.Customer,
-                        DateLastModified = r.DateLastModified,
-                        Personnel = gl.Personnel,
-                        AmountReceived = gl.Credit,
-                        DateCreated = gl.DateCreated,
-                        Notes = gl.Notes
-                    }).OrderByDescending(r => r.DateCreated)
+                var data = await dataQuery
+                    .Join(_context.GeneralLedgerEntries, r => r.Id, gl => gl.DocumentId, (i, gl) => gl)
+                   .GroupBy(g => new { g.DocumentId, g.Personnel, g.DateCreated })
+                   .Select(gl => new
+                   {
+                       DocumentId = gl.Key.DocumentId,
+                       Personnel = gl.Key.Personnel,
+                       DateCreated = gl.Key.DateCreated,
+                       Amount = gl.Sum(s => s.Credit),
+
+                   }).Join(_context.Receipts.Include(u => u.Customer), gb => gb.DocumentId, r => r.Id, (gb, r) =>
+                         new Receipt
+                         {
+                             Code = r.Code,
+                             Id = r.Id,
+                             Customer = r.Customer,
+                             DateLastModified = r.DateLastModified,
+                             Personnel = gb.Personnel,
+                             AmountReceived = gb.Amount,
+                             DateCreated = gb.DateCreated,
+                         }
+                   ).OrderByDescending(r => r.DateCreated)
                     .ToListAsync();
                 result.Success = data.Any();
                 result.Message = result.Success ? "Found" : "Not Found";

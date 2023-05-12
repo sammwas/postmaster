@@ -14,6 +14,7 @@
         public string EmailAddress { get; set; }
         public string Website { get; set; }
         public string PinNo { get; set; }
+        public bool ShowInvoiceBalance { get; set; }
         public string FullName => $"{FirstName} {LastName}";
     }
 }
