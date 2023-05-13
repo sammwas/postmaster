@@ -18,13 +18,16 @@ namespace PosMaster.Controllers
         private readonly UserCookieData _userData;
         private readonly IExpenseInterface _expenseInterface;
         private readonly IInvoiceInterface _invoiceInterface;
+        private readonly IReportingInterface _reportingInterface;
         public PointOfSaleController(IProductInterface productInterface, ICookiesService cookieService,
-            IExpenseInterface expenseInterface, IInvoiceInterface invoiceInterface)
+            IExpenseInterface expenseInterface, IInvoiceInterface invoiceInterface, IReportingInterface reportingInterface)
         {
             _productInterface = productInterface;
             _userData = cookieService.Read();
             _expenseInterface = expenseInterface;
             _invoiceInterface = invoiceInterface;
+            _reportingInterface = reportingInterface;
+
         }
         public IActionResult Index()
         {
@@ -131,7 +134,7 @@ namespace PosMaster.Controllers
                 instanceId = _userData.InstanceId;
             }
             ViewData["InstanceId"] = instanceId;
-            var result = await _invoiceInterface
+            var result = await _reportingInterface
                 .RepaymentsAsync(_userData.ClientId, instanceId, DateTime.Parse(dtFrom), DateTime.Parse(dtTo), search, personnel);
             if (!result.Success)
                 TempData.SetData(AlertLevel.Warning, "Repayments", result.Message);
@@ -251,7 +254,7 @@ namespace PosMaster.Controllers
                 instanceId = iId;
             if (User.IsInRole(Role.Clerk))
                 instanceId = _userData.InstanceId;
-            var result = await _productInterface.GeneralLedgersAsync(_userData.ClientId, instanceId, dtFrom, dtTo, search);
+            var result = await _productInterface.GeneralLedgersAsync(instanceId, dtFrom, dtTo, search);
             if (!result.Success)
                 TempData.SetData(AlertLevel.Warning, "General Ledgers", result.Message);
             return View(result.Data);

@@ -72,7 +72,7 @@ namespace PosMaster.Controllers
             var hasInsId = Guid.TryParse(inId, out var insId);
             var instanceId = hasInsId ? insId : userData.InstanceId;
             ViewData["InstanceId"] = instanceId;
-            var result = await _dashboardInterface.ManagerDashboardAsync(instanceId, DateTime.Parse(dtFrom), DateTime.Parse(dtTo));
+            var result = await _dashboardInterface.ManagerDashboardAsync(userData.ClientId, instanceId, DateTime.Parse(dtFrom), DateTime.Parse(dtTo));
             if (!result.Success)
                 TempData.SetData(AlertLevel.Warning, _tag, result.Message);
             var model = result.Success ? result.Data : new ManagerDashboardViewModel();

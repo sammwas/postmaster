@@ -17,6 +17,9 @@ namespace PosMaster.Dal.Interfaces
         Task<ReturnData<CustomerStatementViewModel>> CustomerStatementAsync(Guid customerId, string dateFrom = "", string dateTo = "");
         Task<ReturnData<List<TopSellingProductViewModel>>> SalesByClerkAsync(Guid instanceId, string dateFrom = "", string dateTo = "");
         Task<ReturnData<CloseOfDayViewModel>> CloseOfDayAsync(Guid clientId, Guid? instanceId, DateTime dateFrom, DateTime dateTo, string personnel = "");
+        Task<ReturnData<List<Receipt>>> RepaymentsAsync(Guid clientId, Guid? instanceId, DateTime dateFrom,
+         DateTime dateTo, string search = "", string personnel = "");
+        IQueryable<RepaymentQueryableViewModel> RepaymentIQueryable(Guid clientId, Guid? instanceId, DateTime dateFrom, DateTime dateTo, string personnel = "");
 
     }
     public class ReportingImplementation : IReportingInterface
@@ -251,6 +254,68 @@ namespace PosMaster.Dal.Interfaces
             }
         }
 
+        public IQueryable<RepaymentQueryableViewModel> RepaymentIQueryable(Guid clientId, Guid? instanceId, DateTime dateFrom, DateTime dateTo, string personnel = "")
+        {
+            var invoicesQry = _context.Receipts
+                   .Where(r => r.ClientId.Equals(clientId) && r.AmountReceived > 0 && r.IsCredit
+                  && r.DateLastModified.HasValue && r.DateLastModified.Value.Date >= dateFrom.Date && r.DateLastModified.Value.Date <= dateTo.Date)
+                  .AsQueryable();
+            if (instanceId.HasValue)
+                invoicesQry = invoicesQry.Where(i => i.InstanceId.Equals(instanceId));
+
+            var repaymentsQry = invoicesQry.Join(_context.GeneralLedgerEntries, i => i.Id, gl => gl.DocumentId, (i, gl) => gl)
+               .GroupBy(g => new { g.DocumentId, g.Personnel, g.DateCreated })
+               .Select(gl => new RepaymentQueryableViewModel
+               {
+                   DocumentId = gl.Key.DocumentId,
+                   DateCreated = gl.Key.DateCreated,
+                   Personnel = gl.Key.Personnel,
+                   Amount = gl.Sum(s => s.Credit)
+               }).AsQueryable();
+            if (!string.IsNullOrEmpty(personnel))
+                repaymentsQry = repaymentsQry.Where(r => r.Personnel.Equals(personnel));
+            return repaymentsQry;
+        }
+
+        public async Task<ReturnData<List<Receipt>>> RepaymentsAsync(Guid clientId, Guid? instanceId, DateTime dateFrom, DateTime dateTo, string search = "", string personnel = "")
+        {
+            var result = new ReturnData<List<Receipt>> { Data = new List<Receipt>() };
+            var tag = nameof(RepaymentsAsync);
+            _logger.LogInformation($"{tag} get repayments: clientId {clientId}, instanceId {instanceId}, duration {dateFrom}-{dateTo}, search {search}");
+            try
+            {
+
+                var data = await RepaymentIQueryable(clientId, instanceId, dateFrom, dateTo, personnel)
+                   .Join(_context.Receipts.Include(u => u.Customer), gb => gb.DocumentId, r => r.Id, (gb, r) =>
+                         new Receipt
+                         {
+                             Code = r.Code,
+                             Id = r.Id,
+                             Customer = r.Customer,
+                             DateLastModified = r.DateLastModified,
+                             Personnel = gb.Personnel,
+                             AmountReceived = gb.Amount,
+                             DateCreated = gb.DateCreated,
+                         }
+                   ).OrderByDescending(r => r.DateCreated)
+                    .ToListAsync();
+                result.Success = data.Any();
+                result.Message = result.Success ? "Found" : "Not Found";
+                if (result.Success)
+                    result.Data = data;
+                _logger.LogInformation($"{tag} found {data.Count} repayment records");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                result.ErrorMessage = ex.Message;
+                result.Message = "Error occured";
+                _logger.LogError($"{tag} {result.Message} : {ex}");
+                return result;
+            }
+        }
+
         public async Task<ReturnData<CloseOfDayViewModel>> CloseOfDayAsync(Guid clientId, Guid? instanceId, DateTime dateFrom, DateTime dateTo, string personnel = "")
         {
             var result = new ReturnData<CloseOfDayViewModel> { Data = new CloseOfDayViewModel() };
@@ -301,20 +366,7 @@ namespace PosMaster.Dal.Interfaces
                   }).ToListAsync();
                 model.SalesByClerk = salesByClerk;
 
-                var invoicesQry = _context.Receipts
-                     .Where(r => r.ClientId.Equals(clientId) && r.AmountReceived > 0 && r.IsCredit
-                    && r.DateLastModified.HasValue && r.DateLastModified.Value.Date >= dateFrom.Date && r.DateLastModified.Value.Date <= dateTo.Date)
-                    .AsQueryable();
-                if (instanceId.HasValue)
-                    invoicesQry = invoicesQry.Where(i => i.InstanceId.Equals(instanceId));
-                var repaymentsQry = invoicesQry.Join(_context.GeneralLedgerEntries, i => i.Id, gl => gl.DocumentId, (i, gl) => gl)
-                   .GroupBy(g => new { g.DocumentId, g.Personnel })
-                   .Select(gl => new
-                   {
-                       gl.Key.DocumentId,
-                       gl.Key.Personnel,
-                       Amount = gl.Sum(s => s.Credit)
-                   }).AsQueryable();
+                var repaymentsQry = RepaymentIQueryable(clientId, instanceId, dateFrom, dateTo, personnel);
                 model.InvoiceCustomerServed = await repaymentsQry.CountAsync();
                 model.TotalRepayment = await repaymentsQry.SumAsync(i => i.Amount);
                 var receiptsByClerk = await repaymentsQry

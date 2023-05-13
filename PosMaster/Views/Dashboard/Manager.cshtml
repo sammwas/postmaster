@@ -24,11 +24,11 @@
                             {
                                 if (!string.IsNullOrEmpty(instanceId) && item.Id.ToString().Equals(instanceId))
                                 {
-                                            <option selected="selected" value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
+                                    <option selected="selected" value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
                                 }
                                 else
                                 {
-                                            <option value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
+                                    <option value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
                                 }
                             }
                         </select>
@@ -104,7 +104,7 @@
                 <div class="small-box bg-danger">
                     <div class="inner">
                         <h3>@Helpers.FormatAmount(Model.TodaySales)</h3>
-                        <p>Daily Sales</p>
+                        <p>Today Sales (Repaid @Helpers.FormatAmount(Model.TodayRepayments))</p>
                     </div>
                     <div class="icon">
                         <i class="ion ion-pie-graph"></i>
@@ -150,7 +150,7 @@
                 <div class="small-box bg-lime">
                     <div class="inner">
                         <h3>@Helpers.FormatAmount(Model.TotalActualProfit-Model.ProfitExpenses)</h3>
-                        <p>Total Actual Profit</p>
+                        <p>Profit (Expenses @Helpers.FormatAmount(Model.ProfitExpenses)) </p>
                     </div>
                     <div class="icon">
                         <i class="ion ion-person-add"></i>

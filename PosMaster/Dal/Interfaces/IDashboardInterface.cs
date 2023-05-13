@@ -11,7 +11,7 @@ namespace PosMaster.Dal.Interfaces
     public interface IDashboardInterface
     {
         Task<ReturnData<SuperAdminDashboardViewModel>> SuperAdminDashboardAsync(Guid instanceId, DateTime dtFrom, DateTime dateTo);
-        Task<ReturnData<ManagerDashboardViewModel>> ManagerDashboardAsync(Guid instanceId, DateTime dtFrom, DateTime dateTo);
+        Task<ReturnData<ManagerDashboardViewModel>> ManagerDashboardAsync(Guid clientId, Guid instanceId, DateTime dtFrom, DateTime dateTo);
         Task<ReturnData<ClerkDashboardViewModel>> ClerkDashboardAsync(Guid instanceId, string personnel);
     }
 
@@ -19,10 +19,14 @@ namespace PosMaster.Dal.Interfaces
     {
         private readonly DatabaseContext _context;
         private readonly ILogger<DashboardImplementation> _logger;
-        public DashboardImplementation(DatabaseContext context, ILogger<DashboardImplementation> logger)
+        private readonly IReportingInterface _reportingInterface;
+        public DashboardImplementation(DatabaseContext context, ILogger<DashboardImplementation> logger,
+            IReportingInterface reportingInterface)
         {
             _context = context;
             _logger = logger;
+            _reportingInterface = reportingInterface;
+
         }
 
         public async Task<ReturnData<ClerkDashboardViewModel>> ClerkDashboardAsync(Guid instanceId, string personnel)
@@ -64,7 +68,7 @@ namespace PosMaster.Dal.Interfaces
             }
         }
 
-        public async Task<ReturnData<ManagerDashboardViewModel>> ManagerDashboardAsync(Guid instanceId, DateTime dateFrom, DateTime dateTo)
+        public async Task<ReturnData<ManagerDashboardViewModel>> ManagerDashboardAsync(Guid clientId, Guid instanceId, DateTime dateFrom, DateTime dateTo)
         {
             var result = new ReturnData<ManagerDashboardViewModel> { Data = new ManagerDashboardViewModel() };
             var tag = nameof(ManagerDashboardAsync);
@@ -73,6 +77,7 @@ namespace PosMaster.Dal.Interfaces
             {
                 var firstWeekDay = Helpers.FirstDayOfWeek();
                 var lastWeekDay = firstWeekDay.AddDays(6);
+                var repaymentQry = _reportingInterface.RepaymentIQueryable(clientId, instanceId, dateFrom, dateTo);
                 var data = new ManagerDashboardViewModel
                 {
 
@@ -81,6 +86,9 @@ namespace PosMaster.Dal.Interfaces
 
                     TodaySales = await _context.ReceiptLineItems.Where(c => c.InstanceId.Equals(instanceId)
                       && c.DateCreated.Date.Equals(DateTime.Now.Date)).SumAsync(c => c.UnitPrice * c.Quantity),
+
+                    TodayRepayments = await repaymentQry.Where(r => r.DateCreated.Date.Equals(DateTime.Now.Date))
+                    .SumAsync(r => r.Amount),
 
                     WeeklySales = await _context.ReceiptLineItems.Where(c => c.InstanceId.Equals(instanceId)
                       && c.DateCreated.Date >= firstWeekDay.Date && c.DateCreated.Date <= lastWeekDay.Date).SumAsync(c => c.UnitPrice * c.Quantity),

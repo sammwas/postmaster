@@ -88,9 +88,10 @@
                                 }
                                 @foreach (var item in Model)
                                 {
-                                    i++;
                                     var balance = (-1 * item.Credit) + item.Debit;
+                                    if (balance.Equals(0)) continue;
                                     totalBalance += balance;
+                                    i++;
                                     <tr>
                                         <td>@i</td>
                                         <td>@item.Customer.Code - @item.Customer.FullName</td>
