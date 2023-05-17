@@ -263,7 +263,8 @@ namespace PosMaster.Dal.Interfaces
             if (instanceId.HasValue)
                 invoicesQry = invoicesQry.Where(i => i.InstanceId.Equals(instanceId));
 
-            var repaymentsQry = invoicesQry.Join(_context.GeneralLedgerEntries, i => i.Id, gl => gl.DocumentId, (i, gl) => gl)
+            var repaymentsQry = invoicesQry.Join(_context.GeneralLedgerEntries.Where(l => l.DateCreated.Date >= dateFrom.Date && l.DateCreated.Date <= dateTo.Date)
+                , i => i.Id, gl => gl.DocumentId, (i, gl) => gl)
                .GroupBy(g => new { g.DocumentId, g.Personnel, g.DateCreated })
                .Select(gl => new RepaymentQueryableViewModel
                {

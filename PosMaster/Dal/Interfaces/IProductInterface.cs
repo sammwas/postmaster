@@ -1586,7 +1586,7 @@ namespace PosMaster.Dal.Interfaces
                         invoice.Receipt.LastModifiedBy = model.Personnel;
                         invoice.Receipt.PaymentModeId = Guid.Parse(model.PaymentModeId);
                         invoice.Receipt.DateLastModified = DateTime.Now;
-                        if (invoice.Balance == 0)
+                        if (invoice.Balance <= 0)
                             invoice.Status = EntityStatus.Closed;
                         remainingAmount -= toSpend;
                         var entry = new GeneralLedgerEntry
