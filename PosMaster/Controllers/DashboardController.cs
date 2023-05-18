@@ -28,7 +28,7 @@ namespace PosMaster.Controllers
         {
             if (User.IsInRole(Role.SuperAdmin))
                 return RedirectToAction(nameof(SuperAdmin));
-            if (User.IsInRole(Role.Manager) || User.IsInRole(Role.Admin))
+            if (User.IsInRole(Role.Manager))
                 return RedirectToAction(nameof(Manager));
             if (User.IsInRole(Role.Clerk))
             {

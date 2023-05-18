@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using PosMaster.Services;
 using PosMaster.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -431,7 +432,8 @@ namespace PosMaster.Dal.Interfaces
                     Personnel = model.Personnel,
                     PersonnelName = model.PersonnelName,
                     PinNo = model.PinNo,
-                    PaymentModeNo = model.PaymentModeNo
+                    PaymentModeNo = model.PaymentModeNo,
+                    Stamp = Helpers.EncryptSha1($"{model.ClientId}{rcptRef}")
                 };
                 if (!model.IsCredit)
                     receipt.AmountReceived = model.AmountReceived;
@@ -797,6 +799,7 @@ namespace PosMaster.Dal.Interfaces
                     PersonnelName = model.PersonnelName,
                     AmountReceived = model.Amount,
                     DateLastModified = DateTime.Now,
+                    Stamp = Helpers.EncryptSha1($"{model.ClientId}{code}"),
                     ReceiptLineItems = new List<ReceiptLineItem>
                     {
                         new ReceiptLineItem
@@ -1557,13 +1560,14 @@ namespace PosMaster.Dal.Interfaces
             _logger.LogInformation($"{tag} receipt {model.UserType} {model.UserId}: clientId {model.ClientId}, instanceId {model.InstanceId}, amount {model.Amount}");
             try
             {
+                //var minute = $"{date:dd-MMM-yyyy} {string.Format("{0:hh:mm}", date)}";  
                 var invoices = await _context.Invoices
-                    .Include(i => i.Receipt)
-                    .ThenInclude(i => i.ReceiptLineItems)
-                    .Where(u => u.Receipt.CustomerId.Equals(Guid.Parse(model.UserId)))
-                    .Where(i => i.Status.Equals(EntityStatus.Active))
-                    .OrderBy(i => i.DateCreated)
-                    .ToListAsync();
+                            .Include(i => i.Receipt)
+                            .ThenInclude(i => i.ReceiptLineItems)
+                            .Where(u => u.Receipt.CustomerId.Equals(Guid.Parse(model.UserId)))
+                            .Where(i => i.Status.Equals(EntityStatus.Active))
+                            .OrderBy(i => i.DateCreated)
+                            .ToListAsync();
                 if (!invoices.Any())
                 {
                     var res = await ReceiptExcessAmount(model);
@@ -1586,6 +1590,7 @@ namespace PosMaster.Dal.Interfaces
                         invoice.Receipt.LastModifiedBy = model.Personnel;
                         invoice.Receipt.PaymentModeId = Guid.Parse(model.PaymentModeId);
                         invoice.Receipt.DateLastModified = DateTime.Now;
+                        invoice.Receipt.Stamp = Helpers.EncryptSha1($"{model.ClientId}{invoice.Receipt.Code}{toSpend}");
                         if (invoice.Balance <= 0)
                             invoice.Status = EntityStatus.Closed;
                         remainingAmount -= toSpend;
