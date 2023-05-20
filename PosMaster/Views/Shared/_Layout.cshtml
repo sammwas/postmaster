@@ -72,10 +72,11 @@
                         }
                     </a>
                 </li>
-                <li class="nav-item" style="display:none">
+                <li class="nav-item" style="">
                     <a class="nav-link" data-widget="control-sidebar" data-slide="true" href="#" role="button">
                         <i class="far fa-comments"></i>
-                        <span class="badge badge-danger navbar-badge">3</span>
+                        <span class="badge badge-danger navbar-badge"
+                              style="display:none" id="newChatBadge">NEW</span>
                     </a>
                 </li>
                 <li class="dropdown user user-menu nav-item  d-sm-inline-block">
@@ -704,84 +705,30 @@
             </div>
         </footer>
 
-        <aside class="control-sidebar control-sidebar-dark">
+        <aside class="control-sidebar control-sidebar-dark" id="chat-side-@userData.InstanceId" style="">
             <div class="col-md-12">
                 <div class="panel panel-primary">
                     <div class="panel-heading" id="accordion">
-                        <i class="fa fa-comment"></i> In App Chat
+                        <i class="fa fa-comment"></i> InApp Chat <span>&nbsp;</span>
+                        <button data-widget="control-sidebar" data-slide="true"
+                                class="btn btn-danger btn-sm float-right">
+                            Close
+                        </button>
                     </div>
+                    <hr />
                     <div class="panel-collapse" id="collapseOne">
                         <div class="panel-body messages-body">
-                            <ul class="chat">
-                                <li class="left clearfix">
-                                    <span class="chat-img pull-left">
-                                        <img src="http://placehold.it/50/55C1E7/fff&text=U" alt="User Avatar" class="img-circle" />
-                                    </span>
-                                    <div class="chat-body clearfix">
-                                        <div class="header">
-                                            <strong class="primary-font">Jack Sparrow</strong> <small class="pull-right text-muted">
-                                                <span class="glyphicon glyphicon-time"></span>12 mins ago
-                                            </small>
-                                        </div>
-                                        <p>
-                                            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur bibendum ornare
-                                            dolor, quis ullamcorper ligula sodales.
-                                        </p>
-                                    </div>
-                                </li>
-                                <li class="right clearfix">
-                                    <span class="chat-img pull-right">
-                                        <img src="http://placehold.it/50/FA6F57/fff&text=ME" alt="User Avatar" class="img-circle" />
-                                    </span>
-                                    <div class="chat-body clearfix">
-                                        <div class="header">
-                                            <small class=" text-muted"><span class="glyphicon glyphicon-time"></span>13 mins ago</small>
-                                            <strong class="pull-right primary-font">Bhaumik Patel</strong>
-                                        </div>
-                                        <p>
-                                            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur bibendum ornare
-                                            dolor, quis ullamcorper ligula sodales.
-                                        </p>
-                                    </div>
-                                </li>
-                                <li class="left clearfix">
-                                    <span class="chat-img pull-left">
-                                        <img src="http://placehold.it/50/55C1E7/fff&text=U" alt="User Avatar" class="img-circle" />
-                                    </span>
-                                    <div class="chat-body clearfix">
-                                        <div class="header">
-                                            <strong class="primary-font">Jack Sparrow</strong> <small class="pull-right text-muted">
-                                                <span class="glyphicon glyphicon-time"></span>14 mins ago
-                                            </small>
-                                        </div>
-                                        <p>
-                                            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur bibendum ornare
-                                            dolor, quis ullamcorper ligula sodales.
-                                        </p>
-                                    </div>
-                                </li>
-                                <li class="right clearfix">
-                                    <span class="chat-img pull-right">
-                                        <img src="http://placehold.it/50/FA6F57/fff&text=ME" alt="User Avatar" class="img-circle" />
-                                    </span>
-                                    <div class="chat-body clearfix">
-                                        <div class="header">
-                                            <small class=" text-muted"><span class="glyphicon glyphicon-time"></span>15 mins ago</small>
-                                            <strong class="pull-right primary-font">Bhaumik Patel</strong>
-                                        </div>
-                                        <p>
-                                            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur bibendum ornare
-                                            dolor, quis ullamcorper ligula sodales.
-                                        </p>
-                                    </div>
-                                </li>
+                            <ul class="chat" id="messagesList">
                             </ul>
                         </div>
                         <div class="panel-footer">
                             <div class="input-group">
-                                <input id="btn-input" type="text" class="form-control input-sm" placeholder="Type your message here..." />
+                                <input id="inpChatInstanceId" type="hidden" value="@userData.InstanceId" />
+                                <input id="inpChatUser" type="hidden" value="@User.Identity.Name" />
+                                <input id="inpChatReceiver" type="hidden" value="@User.Identity.Name" />
+                                <input id="inpChatMsg" type="text" class="form-control input-sm" placeholder="Type to compose..." />
                                 <span class="input-group-btn">
-                                    <button class="btn btn-warning btn-sm" id="btn-chat">
+                                    <button class="btn btn-warning" id="btnSendChat">
                                         Send
                                     </button>
                                 </span>
@@ -824,7 +771,9 @@
     <script src="~/plugins/datatables-buttons/js/buttons.html5.min.js"></script>
     <script src="~/plugins/datatables-buttons/js/buttons.print.min.js"></script>
     <script src="~/plugins/datatables-buttons/js/buttons.colVis.min.js"></script>
+    <script src="~/js//signalr/browser/signalr.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/signalr/inAppChat.js" asp-append-version="true"></script>
 
     <script>
                 $(function () {
@@ -865,7 +814,6 @@
                     if (currLink) {
                         currLink.forEach((el) => { el.classList.add('active'); });
                     }
-
                     var message = '@TempData["Message"]';
                     var title = '@TempData["Title"]';
                     var type = '@TempData["Type"]';

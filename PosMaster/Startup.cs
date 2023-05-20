@@ -11,6 +11,7 @@ using Microsoft.Net.Http.Headers;
 using PosMaster.Dal;
 using PosMaster.Dal.Interfaces;
 using PosMaster.Services;
+using PosMaster.Services.Messaging;
 using System;
 
 namespace PosMaster
@@ -123,6 +124,7 @@ namespace PosMaster
             services.AddControllers();
             services.AddDistributedMemoryCache();
             services.AddControllersWithViews();
+            services.AddSignalR();
         }
 
         public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
@@ -155,6 +157,7 @@ namespace PosMaster
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapHub<InAppChatHub>($"/chatHub");
             });
 
             DatabaseInit.Seed(app);
