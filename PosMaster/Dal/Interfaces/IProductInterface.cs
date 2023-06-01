@@ -1636,7 +1636,7 @@ namespace PosMaster.Dal.Interfaces
         {
             return _context.Products
                         .Where(p => p.ClientId.Equals(clientId))
-                        .OrderByDescending(p => p.DateCreated)
+                        .OrderBy(p => p.DateCreated)
                         .Select(p => p.Id)
                         .FirstOrDefault();
         }
