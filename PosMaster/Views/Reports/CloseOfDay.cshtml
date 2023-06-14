@@ -95,6 +95,7 @@
                 <p><b>@ViewData["Title"] </b></p>
                 <p><b>Date </b>@Model.Day</p>
                 <p><b>Cash returns </b>@userData.CurrencyShort @Helpers.FormatAmount(Model.DailyCashReturn)</p>
+                <p><b>Prepayments </b>@userData.CurrencyShort @Helpers.FormatAmount(Model.Prepayments)</p>
             </div>
         </div>
         <div class="row">

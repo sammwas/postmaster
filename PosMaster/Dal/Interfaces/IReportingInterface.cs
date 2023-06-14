@@ -326,6 +326,8 @@ namespace PosMaster.Dal.Interfaces
                 var from = dateFrom.ToString("dd-MMM-yyyy");
                 var to = dateTo.ToString("dd-MMM-yyyy");
                 _logger.LogInformation($"{tag} on client {clientId} instance {instanceId}  from {from} to {to}");
+
+                var defaultProdId = _productInterface.DefaultClientProductId(clientId);
                 var model = new CloseOfDayViewModel()
                 {
                     Day = from.Equals(to) ? $"{from}" : $"{from} to {to}"
@@ -347,6 +349,9 @@ namespace PosMaster.Dal.Interfaces
                 var dataQuery = receiptsQuery
                     .SelectMany(s => s.ReceiptLineItems)
                     .AsQueryable();
+                var prepayments = await dataQuery.SumAsync(d => d.UnitPrice * d.Quantity);
+                model.Prepayments = prepayments;
+                dataQuery = dataQuery.Where(r => !r.ProductId.Equals(defaultProdId));
                 var totalSales = await dataQuery
                     .Where(r => r.DateCreated.Date >= dateFrom.Date && r.DateCreated.Date <= dateTo.Date)
                      .SumAsync(r => r.UnitPrice * r.Quantity);

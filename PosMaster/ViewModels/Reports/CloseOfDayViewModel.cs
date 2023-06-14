@@ -13,6 +13,7 @@ namespace PosMaster.ViewModels
         public string Day { get; set; }
         public decimal TotalSale { get; set; }
         public decimal CreditSale { get; set; }
+        public decimal Prepayments { get; set; }
         public decimal CashSale => TotalSale - CreditSale;
         public List<KeyAmountViewModel> SalesByClerk { get; set; }
         public int InvoiceCustomerServed { get; set; }
@@ -22,7 +23,7 @@ namespace PosMaster.ViewModels
         public List<KeyAmountViewModel> PaymentsByMode { get; set; }
 
 
-        public decimal DailyCashReturn => CashSale + TotalRepayment;
+        public decimal DailyCashReturn => CashSale + TotalRepayment + Prepayments;
         public decimal TotalExpenses => Expenses.Sum(e => e.Amount);
     }
 

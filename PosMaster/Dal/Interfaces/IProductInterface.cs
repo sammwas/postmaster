@@ -1656,7 +1656,7 @@ namespace PosMaster.Dal.Interfaces
         public Guid DefaultClientProductId(Guid clientId)
         {
             return _context.Products
-                        .Where(p => p.ClientId.Equals(clientId))
+                        .Where(p => p.ClientId.Equals(clientId) && p.Code.Equals(Constants.DefaultProductCode))
                         .OrderBy(p => p.DateCreated)
                         .Select(p => p.Id)
                         .FirstOrDefault();
