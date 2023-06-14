@@ -57,7 +57,7 @@
                     <p><b>Date </b>@Model.DateCreated</p>
                     @if (isActive)
                     {
-                        <p><b>Due Date </b>@Model.DueDate</p>
+                        <p><b>Balance</b> @user.CurrencyShort @Helpers.FormatAmount(@Model.Balance)<b> Due</b> @Model.DueDate</p>
                     }
                 </div>
             </div>
@@ -223,7 +223,8 @@ else
             </div>
             <div class="col-6">
                 <p class="lead">
-                    Amount @if (isActive)
+                    Amount <span>@Model.Balance</span>
+                    @if (isActive)
                     {
                         <span>Due @Model.DueDate</span>
                     }
@@ -247,6 +248,13 @@ else
                                 <th>Total:</th>
                                 <td><strong>@user.CurrencyShort @Helpers.FormatAmount(Model.TotalAmount)</strong> </td>
                             </tr>
+                            @if (Model.Balance < Model.TotalAmount)
+                            {
+                                <tr>
+                                    <th>Balance:</th>
+                                    <td><strong>@user.CurrencyShort @Helpers.FormatAmount(Model.Balance)</strong> </td>
+                                </tr>
+                            }
                         </tbody>
                     </table>
                 </div>
@@ -276,7 +284,7 @@ else
                 </button>
             </div>
             <div class="modal-body">
-                <p>Pay Invoice @Model.Code of amount @user.CurrencyShort @Model.TotalAmount</p>
+                <p>Pay Invoice @Model.Code of amount @user.CurrencyShort @Model.Balance</p>
                 <form method="post" asp-action="PayInvoice" autocomplete="off">
                     <input type="hidden" name="Id" value="@Model.Id">
                     <input type="hidden" name="Code" value="@Model.Code">

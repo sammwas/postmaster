@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using PosMaster.Services;
 using PosMaster.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -18,6 +17,7 @@ namespace PosMaster.Dal.Interfaces
         Task<ReturnData<Customer>> ByIdAsync(Guid id);
         Task<ReturnData<FormSelectViewModel>> DefaultClientCustomerAsync(Guid clientId, string customerId = "");
         Task<ReturnData<List<FormSelectViewModel>>> SearchClientCustomerAsync(Guid clientId, string term, int limit = 25);
+        Task<ReturnData<decimal>> CustomerPrepaymentAsync(Guid customerId);
     }
 
     public class CustomerImplementation : ICustomerInterface
@@ -128,6 +128,33 @@ namespace PosMaster.Dal.Interfaces
                 if (result.Success)
                     result.Data = data;
                 _logger.LogInformation($"{tag} found {data.Count} customers");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                result.ErrorMessage = ex.Message;
+                result.Message = "Error occured";
+                _logger.LogError($"{tag} {result.Message} : {ex}");
+                return result;
+            }
+        }
+
+        public async Task<ReturnData<decimal>> CustomerPrepaymentAsync(Guid customerId)
+        {
+            var result = new ReturnData<decimal>();
+            var tag = nameof(CustomerPrepaymentAsync);
+            _logger.LogInformation($"{tag} get customer overpayment for {customerId}");
+            try
+            {
+                var creditAmount = await _context.GeneralLedgerEntries
+                    .Where(r => r.UserId.Equals(customerId))
+                    .Select(l => l.Credit - l.Debit)
+                    .SumAsync();
+                result.Success = creditAmount > 0;
+                result.Message = result.Success ? "Credit Found" : "No Credit";
+                result.Data = creditAmount;
+                _logger.LogInformation($"{tag} {result.Message} for customer {customerId}. Amount {creditAmount}");
                 return result;
             }
             catch (Exception ex)

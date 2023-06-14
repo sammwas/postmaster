@@ -508,6 +508,7 @@ namespace PosMaster.Dal.Interfaces
                     product.BuyingPrice = lineItem.BuyingPrice;
                 }
 
+                decimal creditAmount = 0;
                 if (model.IsCredit)
                 {
                     var balancesRes = await GlUserBalanceAsync(GlUserType.Customer, customer.Id);
@@ -517,9 +518,10 @@ namespace PosMaster.Dal.Interfaces
                         _logger.LogWarning($"{tag} sale failed {model.CustomerId} : {result.Message}");
                         return result;
                     }
+
+                    creditAmount = balancesRes.Data.CreditAmount - balancesRes.Data.DebitAmount;
                     var totalAmount = receipt.ReceiptLineItems.Sum(r => r.Amount);
-                    var availableLimit = customer.CreditLimit - balancesRes.Data.ExpectedAmount
-                        + balancesRes.Data.CreditAmount;
+                    var availableLimit = customer.CreditLimit + creditAmount;
                     if (totalAmount > availableLimit)
                     {
                         result.Message = $"{customer.Code} Limit available is {availableLimit}";
@@ -527,6 +529,14 @@ namespace PosMaster.Dal.Interfaces
                         return result;
                     }
                 }
+
+                if (model.IsCredit && creditAmount > 0)
+                {
+                    var toReceiptAmt = creditAmount >= receipt.Amount ? receipt.Amount : creditAmount;
+                    receipt.AmountReceived = toReceiptAmt;
+                    receipt.Notes += $" Paid {toReceiptAmt} prepayment";
+                }
+
                 _context.Receipts.Add(receipt);
                 await _context.SaveChangesAsync();
                 await AddInvoiceAsync(receipt);
@@ -756,7 +766,11 @@ namespace PosMaster.Dal.Interfaces
             };
             if (!receipt.IsCredit)
                 invoice.Status = EntityStatus.Inactive;
-
+            if (receipt.AmountReceived > 0)
+            {
+                invoice.Status = receipt.AmountReceived < receipt.Amount ?
+                    EntityStatus.Active : EntityStatus.Closed;
+            }
             _context.Invoices.Add(invoice);
             var entry = new GeneralLedgerEntry
             {
@@ -1560,14 +1574,13 @@ namespace PosMaster.Dal.Interfaces
             _logger.LogInformation($"{tag} receipt {model.UserType} {model.UserId}: clientId {model.ClientId}, instanceId {model.InstanceId}, amount {model.Amount}");
             try
             {
-                //var minute = $"{date:dd-MMM-yyyy} {string.Format("{0:hh:mm}", date)}";  
                 var invoices = await _context.Invoices
-                            .Include(i => i.Receipt)
-                            .ThenInclude(i => i.ReceiptLineItems)
-                            .Where(u => u.Receipt.CustomerId.Equals(Guid.Parse(model.UserId)))
-                            .Where(i => i.Status.Equals(EntityStatus.Active))
-                            .OrderBy(i => i.DateCreated)
-                            .ToListAsync();
+                           .Include(i => i.Receipt)
+                           .ThenInclude(i => i.ReceiptLineItems)
+                           .Where(u => u.Receipt.CustomerId.Equals(Guid.Parse(model.UserId)))
+                           .Where(i => i.Status.Equals(EntityStatus.Active))
+                           .OrderBy(i => i.DateCreated)
+                           .ToListAsync();
                 if (!invoices.Any())
                 {
                     var res = await ReceiptExcessAmount(model);
@@ -1577,6 +1590,7 @@ namespace PosMaster.Dal.Interfaces
                     return result;
                 }
                 decimal remainingAmount = model.Amount + model.AvailableCredit;
+                int i = 0;
                 foreach (var invoice in invoices)
                 {
                     if (remainingAmount > 0)
@@ -1593,6 +1607,7 @@ namespace PosMaster.Dal.Interfaces
                         invoice.Receipt.Stamp = Helpers.EncryptSha1($"{model.ClientId}{invoice.Receipt.Code}{toSpend}");
                         if (invoice.Balance <= 0)
                             invoice.Status = EntityStatus.Closed;
+
                         remainingAmount -= toSpend;
                         var entry = new GeneralLedgerEntry
                         {
@@ -1608,9 +1623,15 @@ namespace PosMaster.Dal.Interfaces
                             Personnel = model.Personnel,
                             IsRepayment = true
                         };
+                        if (i == 0)
+                        {
+                            var notes = $"{model.PaymentModeNo} Received {model.Amount} on {DateTime.Now}";
+                            entry.Notes += $" :{notes}";
+                        }
                         _context.GeneralLedgerEntries.Add(entry);
                     }
                     _context.SaveChanges();
+                    i++;
                 }
 
                 if (remainingAmount > 0)
