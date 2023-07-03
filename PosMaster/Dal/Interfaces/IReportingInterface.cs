@@ -450,7 +450,7 @@ namespace PosMaster.Dal.Interfaces
             try
             {
                 var hasDtFrom = DateTime.TryParse(dateFrom, out var dtFrom);
-                var hasDtTo = DateTime.TryParse(dateFrom, out var dtTo);
+                var hasDtTo = DateTime.TryParse(dateTo, out var dtTo);
                 var dataQuery = _context.Receipts
                     .Include(r => r.Customer)
                     .Include(r => r.ReceiptLineItems)
@@ -465,7 +465,7 @@ namespace PosMaster.Dal.Interfaces
                 if (isPaid.HasValue)
                     dataQuery = dataQuery.Where(d => d.AmountReceived >= d.Amount);
                 if (hasDtFrom)
-                    dataQuery = dataQuery.Where(d => d.DateCreated.Date >= dtTo.Date);
+                    dataQuery = dataQuery.Where(d => d.DateCreated.Date >= dtFrom.Date);
                 if (hasDtTo)
                     dataQuery = dataQuery.Where(d => d.DateCreated.Date <= dtTo.Date);
                 if (!string.IsNullOrEmpty(personnel))

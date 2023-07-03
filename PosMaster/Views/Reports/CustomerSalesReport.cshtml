@@ -19,19 +19,34 @@
     var customer = string.IsNullOrEmpty(customerId) ? new FormSelectViewModel()
     : _customerInterface.DefaultClientCustomerAsync(userData.ClientId, customerId).Result.Data;
     var dateToday = DateTime.Now.ToString("dd-MMM-yyyy");
+    var summary = ViewData["Summarized"]?.ToString() ?? "";
+    var isSummary = summary.ToUpper().Equals("TRUE");
+    var title = isSummary ? "Summarized" : "Not Summarized";
 }
 <div>
     <div class="card">
         <div class="row">
             <div class="col-md-8">
                 <div class="card-header">
+                    <div class="d-none d-print-block">
+                        <h2>
+                            @userData.ClientName
+                        </h2>
+                        <h4 style="text-decoration:underline">@userData.InstanceName</h4>
+                    </div>
                     <h3 class="card-title">
-                        @ViewData["Title"]
+                        @ViewData["Title"] <span>[@title]</span>
                     </h3>
                 </div>
             </div>
             <div class="col-md-4">
-                <p class="text-right"><strong>Total Sale: @Model.Sum(r =>r.Amount) Paid Amount: @Model.Sum(r =>r.AmountReceived) </strong></p>
+                <p class="text-right">
+                    <strong>
+                        <span>Total Sales : @Helpers.FormatAmount(Model.Sum(r =>r.Amount),2)</span>
+                        <span>Paid : @Helpers.FormatAmount(Model.Sum(r =>r.AmountReceived),2)</span>
+                        <span>Balance : @Helpers.FormatAmount(Model.Sum(r =>r.Balance),2)</span>
+                    </strong>
+                </p>
             </div>
         </div>
         <div class="card-body">
@@ -136,6 +151,7 @@
                     <div class="col-md-3">
                         <div class="form-group">
                             <br />
+                            <input type="hidden" name="summarized" value="@summary" />
                             <button type="submit" class="btn btn-primary">Submit</button>
                         </div>
                     </div>
@@ -145,25 +161,72 @@
                             <button class="btn btn-secondary" id="btnPrint"><i class="fas fa-print"></i> Print Report</button>
                         </div>
                     </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <br />
+                            <a style="text-decoration:underline" asp-route-insId="@instanceId" asp-route-cId="@customerId"
+                               asp-route-type="@type" asp-route-dtFrom="@ViewData["DateFrom"]" asp-route-dtTo="@ViewData["DateTo"]"
+                               asp-route-search="@ViewData["Search"]" asp-route-summarized="@(!isSummary)"><i class="fas fa-list"></i> Showing @title </a>
+                        </div>
+                    </div>
                 </div>
             </form>
             <table class="table table-bordered table-striped" style="width:100%">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Receipt #</th>
-                        <th>Customer</th>
-                        <th>Sale Type</th>
-                        <th>Amount</th>
-                        <th>Balance</th>
-                        <th>Date</th>
-                        <th>Notes</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (Model.Any())
-                    {
-                        var i = 0;
+                @if (isSummary)
+                {
+                    var k = 0;
+                    var lineItems = Model.SelectMany(m => m.ReceiptLineItems).ToList();
+                    var pIds = lineItems.Select(l => l.ProductId).Distinct().ToList();
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Code</th>
+                            <th>Name</th>
+                            <th>Quantity</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tfoot>
+                        <tr>
+                            <th>#</th>
+                            <th>Code</th>
+                            <th>Name</th>
+                            <th>Quantity</th>
+                            <th>Total</th>
+                        </tr>
+                    </tfoot>
+                    <tbody>
+                        @foreach (var pId in pIds)
+                        {
+                            k++;
+                            <tr>
+                                <td>@k</td>
+                                <td>@lineItems.FirstOrDefault(l=>l.ProductId.Equals(pId)).Product.Code</td>
+                                <td>@lineItems.FirstOrDefault(l=>l.ProductId.Equals(pId)).Product.Name</td>
+                                <td>@lineItems.Where(l=>l.ProductId.Equals(pId)).Sum(l=>l.Quantity) @lineItems.FirstOrDefault(l=>l.ProductId.Equals(pId)).Product.UnitOfMeasure?.Name</td>
+                                <td>@lineItems.Where(l=>l.ProductId.Equals(pId)).Sum(l=>l.Amount)</td>
+                            </tr>
+                        }
+                    </tbody>
+                }
+                else
+                {
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Receipt #</th>
+                            <th>Customer</th>
+                            <th>Sale Type</th>
+                            <th>Amount</th>
+                            <th>Balance</th>
+                            <th>Date</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            var i = 0;
+                        }
                         @foreach (var item in Model)
                         {
                             i++;
@@ -222,20 +285,21 @@
                                 </tr>
                             }
                         }
-                    }
-                </tbody>
-                <tfoot>
-                    <tr>
-                        <th>#</th>
-                        <th>Receipt #</th>
-                        <th>Customer</th>
-                        <th>Sale Type</th>
-                        <th>Amount</th>
-                        <th>Balance</th>
-                        <th>Date</th>
-                        <th>Notes</th>
-                    </tr>
-                </tfoot>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th>#</th>
+                            <th>Receipt #</th>
+                            <th>Customer</th>
+                            <th>Sale Type</th>
+                            <th>Amount</th>
+                            <th>Balance</th>
+                            <th>Date</th>
+                            <th>Notes</th>
+                        </tr>
+                    </tfoot>
+                }
+
             </table>
         </div>
     </div>

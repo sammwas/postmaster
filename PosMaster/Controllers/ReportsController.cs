@@ -99,8 +99,8 @@ namespace PosMaster.Controllers
             return View(result.Data);
         }
 
-        public async Task<IActionResult> CustomerSalesReport(Guid? instanceId, Guid? cId, string type = "",
-            string dtFrom = "", string dtTo = "", string search = "")
+        public async Task<IActionResult> CustomerSalesReport( Guid? insId, Guid? cId, string type = "",
+            string dtFrom = "", string dtTo = "", string search = "", bool summarized=false)
         {
             var hasDateFrom = DateTime.TryParse(dtFrom, out var dateFrom);
             var hasDateTo = DateTime.TryParse(dtTo, out var dateTo);
@@ -111,17 +111,18 @@ namespace PosMaster.Controllers
             ViewData["Search"] = search;
             ViewData["DateFrom"] = dtFrom = dateFrom.ToString("dd-MMM-yyyy");
             ViewData["DateTo"] = dtTo = dateTo.ToString("dd-MMM-yyyy");
-            instanceId = User.IsInRole(Role.Clerk) ? _userData.InstanceId : instanceId;
+            insId = User.IsInRole(Role.Clerk) ? _userData.InstanceId : insId;
             var personnel = User.IsInRole(Role.Clerk) ? User.Identity.Name : "";
             bool? isCredit = null;
             if (!string.IsNullOrEmpty(type))
                 isCredit = type.Equals("CREDIT");
 
-            ViewData["InstanceId"] = instanceId;
+            ViewData["InstanceId"] = insId;
             ViewData["CustomerId"] = cId;
             ViewData["SaleType"] = type;
+            ViewData["Summarized"] = summarized;
             var result = await _reportingInterface
-                .CustomerProductSaleReportAsync(_userData.ClientId, instanceId, cId, isCredit, null, dtFrom, dtTo, personnel, search);
+                .CustomerProductSaleReportAsync(_userData.ClientId, insId, cId, isCredit, null, dtFrom, dtTo, personnel, search);
             if (!result.Success)
                 TempData.SetData(AlertLevel.Warning, $"Customer Sales Report", result.Message);
             return View(result.Data);
