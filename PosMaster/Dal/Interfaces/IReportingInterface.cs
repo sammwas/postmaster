@@ -20,6 +20,8 @@ namespace PosMaster.Dal.Interfaces
         Task<ReturnData<List<Receipt>>> RepaymentsAsync(Guid clientId, Guid? instanceId, DateTime dateFrom,
          DateTime dateTo, string search = "", string personnel = "");
         IQueryable<RepaymentQueryableViewModel> RepaymentIQueryable(Guid clientId, Guid? instanceId, DateTime dateFrom, DateTime dateTo, string personnel = "");
+        Task<ReturnData<List<Receipt>>> CustomerProductSaleReportAsync(Guid clientId, Guid? instanceId, Guid? customerId, bool? isCredit, bool? isPaid,
+            string dateFrom = "", string dateTo = "", string personnel = "", string search = "");
 
     }
     public class ReportingImplementation : IReportingInterface
@@ -349,7 +351,10 @@ namespace PosMaster.Dal.Interfaces
                 var dataQuery = receiptsQuery
                     .SelectMany(s => s.ReceiptLineItems)
                     .AsQueryable();
-                var prepayments = await dataQuery.SumAsync(d => d.UnitPrice * d.Quantity);
+                var prepayments = await dataQuery
+                     .Where(r => r.DateCreated.Date >= dateFrom.Date && r.DateCreated.Date <= dateTo.Date)
+                     .Where(r => r.ProductId.Equals(defaultProdId))
+                    .SumAsync(d => d.UnitPrice * d.Quantity);
                 model.Prepayments = prepayments;
                 dataQuery = dataQuery.Where(r => !r.ProductId.Equals(defaultProdId));
                 var totalSales = await dataQuery
@@ -432,6 +437,57 @@ namespace PosMaster.Dal.Interfaces
                 result.ErrorMessage = ex.Message;
                 result.Message = "Error occured";
                 _logger.LogError($"{tag} {result.Message} : {ex}");
+                return result;
+            }
+        }
+
+        public async Task<ReturnData<List<Receipt>>> CustomerProductSaleReportAsync(Guid clientId, Guid? instanceId, Guid? customerId, bool? isCredit, bool? isPaid,
+            string dateFrom = "", string dateTo = "", string personnel = "", string search = "")
+        {
+            var result = new ReturnData<List<Receipt>> { Data = new List<Receipt>() };
+            var tag = nameof(CustomerProductSaleReportAsync);
+            _logger.LogInformation($"{tag} get customer sales report: customer {customerId}, instanceId {instanceId}, duration {dateFrom}-{dateTo}");
+            try
+            {
+                var hasDtFrom = DateTime.TryParse(dateFrom, out var dtFrom);
+                var hasDtTo = DateTime.TryParse(dateFrom, out var dtTo);
+                var dataQuery = _context.Receipts
+                    .Include(r => r.Customer)
+                    .Include(r => r.ReceiptLineItems)
+                    .ThenInclude(r => r.Product).ThenInclude(p => p.UnitOfMeasure)
+                   .Where(i => i.ClientId.Equals(clientId) && i.Status.Equals(EntityStatus.Active));
+                if (instanceId.HasValue)
+                    dataQuery = dataQuery.Where(d => d.InstanceId.Equals(instanceId.Value));
+                if (customerId.HasValue)
+                    dataQuery = dataQuery.Where(d => d.CustomerId.Equals(customerId.Value));
+                if (isCredit.HasValue)
+                    dataQuery = dataQuery.Where(d => d.IsCredit.Equals(isCredit.Value));
+                if (isPaid.HasValue)
+                    dataQuery = dataQuery.Where(d => d.AmountReceived >= d.Amount);
+                if (hasDtFrom)
+                    dataQuery = dataQuery.Where(d => d.DateCreated.Date >= dtTo.Date);
+                if (hasDtTo)
+                    dataQuery = dataQuery.Where(d => d.DateCreated.Date <= dtTo.Date);
+                if (!string.IsNullOrEmpty(personnel))
+                    dataQuery = dataQuery.Where(d => d.Personnel.Equals(personnel));
+                if (!string.IsNullOrEmpty(search))
+                {
+                    search = search.Trim().ToLower();
+                    dataQuery = dataQuery.Where(d => d.Code.Contains(search));
+                }
+                var data = await dataQuery.OrderByDescending(d => d.DateCreated)
+                    .ToListAsync();
+                result.Data = data;
+                result.Success = data.Any();
+                result.Message = result.Success ? "Found" : "Not Found";
+                return result;
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                result.ErrorMessage = ex.Message;
+                result.Message = "Error occurred. Try later";
                 return result;
             }
         }

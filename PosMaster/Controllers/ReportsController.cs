@@ -98,5 +98,34 @@ namespace PosMaster.Controllers
                 TempData.SetData(AlertLevel.Warning, $"Customer Statement", result.Message);
             return View(result.Data);
         }
+
+        public async Task<IActionResult> CustomerSalesReport(Guid? instanceId, Guid? cId, string type = "",
+            string dtFrom = "", string dtTo = "", string search = "")
+        {
+            var hasDateFrom = DateTime.TryParse(dtFrom, out var dateFrom);
+            var hasDateTo = DateTime.TryParse(dtTo, out var dateTo);
+            if (!hasDateFrom)
+                dateFrom = DateTime.Now;
+            if (!hasDateTo)
+                dateTo = DateTime.Now;
+            ViewData["Search"] = search;
+            ViewData["DateFrom"] = dtFrom = dateFrom.ToString("dd-MMM-yyyy");
+            ViewData["DateTo"] = dtTo = dateTo.ToString("dd-MMM-yyyy");
+            instanceId = User.IsInRole(Role.Clerk) ? _userData.InstanceId : instanceId;
+            var personnel = User.IsInRole(Role.Clerk) ? User.Identity.Name : "";
+            bool? isCredit = null;
+            if (!string.IsNullOrEmpty(type))
+                isCredit = type.Equals("CREDIT");
+
+            ViewData["InstanceId"] = instanceId;
+            ViewData["CustomerId"] = cId;
+            ViewData["SaleType"] = type;
+            var result = await _reportingInterface
+                .CustomerProductSaleReportAsync(_userData.ClientId, instanceId, cId, isCredit, null, dtFrom, dtTo, personnel, search);
+            if (!result.Success)
+                TempData.SetData(AlertLevel.Warning, $"Customer Sales Report", result.Message);
+            return View(result.Data);
+        }
+
     }
 }
