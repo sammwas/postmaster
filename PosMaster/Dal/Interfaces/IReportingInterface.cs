@@ -449,13 +449,16 @@ namespace PosMaster.Dal.Interfaces
             _logger.LogInformation($"{tag} get customer sales report: customer {customerId}, instanceId {instanceId}, duration {dateFrom}-{dateTo}");
             try
             {
+                var defaultProductId = _productInterface.DefaultClientProductId(clientId);
                 var hasDtFrom = DateTime.TryParse(dateFrom, out var dtFrom);
                 var hasDtTo = DateTime.TryParse(dateTo, out var dtTo);
                 var dataQuery = _context.Receipts
                     .Include(r => r.Customer)
-                    .Include(r => r.ReceiptLineItems)
-                    .ThenInclude(r => r.Product).ThenInclude(p => p.UnitOfMeasure)
-                   .Where(i => i.ClientId.Equals(clientId) && i.Status.Equals(EntityStatus.Active));
+                    //.Include(r => r.ReceiptLineItems)
+                    .Include(r => r.ReceiptLineItems.Where(r => !r.ProductId.Equals(defaultProductId)))
+                    .ThenInclude(r => r.Product)
+                    .ThenInclude(p => p.UnitOfMeasure)
+                    .Where(i => i.ClientId.Equals(clientId) && i.Status.Equals(EntityStatus.Active));
                 if (instanceId.HasValue)
                     dataQuery = dataQuery.Where(d => d.InstanceId.Equals(instanceId.Value));
                 if (customerId.HasValue)
@@ -475,7 +478,9 @@ namespace PosMaster.Dal.Interfaces
                     search = search.Trim().ToLower();
                     dataQuery = dataQuery.Where(d => d.Code.Contains(search));
                 }
-                var data = await dataQuery.OrderByDescending(d => d.DateCreated)
+                var data = await dataQuery
+                    //.Where(r => r.ReceiptLineItems.Any())
+                    .OrderByDescending(d => d.DateCreated)
                     .ToListAsync();
                 result.Data = data;
                 result.Success = data.Any();

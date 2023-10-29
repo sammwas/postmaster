@@ -808,7 +808,7 @@ namespace PosMaster.Dal.Interfaces
                     InstanceId = model.InstanceId,
                     PaymentModeId = Guid.Parse(model.PaymentModeId),
                     PaymentModeNo = model.PaymentModeNo,
-                    Notes = model.Notes,
+                    Notes = $"{model.Notes} - Overpayment",
                     Personnel = model.Personnel,
                     PersonnelName = model.PersonnelName,
                     AmountReceived = model.Amount,
@@ -824,7 +824,8 @@ namespace PosMaster.Dal.Interfaces
                             Quantity=1,
                             UnitPrice=model.Amount,
                             ReceiptId=id,
-                            ProductId=defProdId
+                            ProductId=defProdId,
+                            Code=$"{code}-1"
                         }
                     }
                 };
