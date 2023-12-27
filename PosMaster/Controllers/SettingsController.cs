@@ -239,8 +239,7 @@ namespace PosMaster.Controllers
                 if (System.IO.File.Exists(filePath))
                 {
                     Console.WriteLine($"Delete exisiting File at {filePath}");
-                    System.IO.File.Delete(filePath);
-                    Console.WriteLine("Deleted");
+                    System.IO.File.Delete(filePath); 
                 }
 
                 var fileLocation = new FileInfo(filePath);

@@ -284,8 +284,9 @@ namespace PosMaster.Dal.Interfaces
                 var hasUom = Guid.TryParse(model.UnitOfMeasureId, out var uomId);
                 var hasStartDate = DateTime.TryParse(model.PriceStartDateStr, out var startDate);
                 var hasEndDate = DateTime.TryParse(model.PriceEndDateStr, out var endDate);
+                var stamp = $"{model.InstanceId}_{model.Code}";
                 var dbProduct = model.IsExcelUpload ? await _context.Products
-                        .FirstOrDefaultAsync(c => c.Code.ToLower().Equals(model.Code.ToLower()))
+                        .FirstOrDefaultAsync(c => c.ProductInstanceStamp.Equals(stamp))
                 : await _context.Products
                         .FirstOrDefaultAsync(c => c.Id.Equals(model.Id));
                 if (dbProduct != null)
@@ -321,11 +322,10 @@ namespace PosMaster.Dal.Interfaces
                     return result;
                 }
 
-                var stamp = $"{model.InstanceId}_{model.Code}";
-                if (await _context.Products.AnyAsync(p => p.ProductInstanceStamp.Equals(stamp)))
+                if (_context.Products.Any(p => p.ProductInstanceStamp.Equals(stamp)))
                 {
                     result.Message = "Exists on instance";
-                    _logger.LogInformation($"{tag} added {model.Name} - {model.Code} : {result.Message}");
+                    _logger.LogInformation($"{tag} already added {model.Name} - {model.Code} : {result.Message}");
                     return result;
                 }
 

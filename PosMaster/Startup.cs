@@ -105,12 +105,12 @@ namespace PosMaster
                 options.SlidingExpiration = true;
             });
 
-            services.AddAuthentication()
-                .AddGoogle(googleOptions =>
-            {
-                googleOptions.ClientId = Configuration["Google:ClientId"];
-                googleOptions.ClientSecret = Configuration["Google:ClientSecret"];
-            });
+            //services.AddAuthentication()
+            //    .AddGoogle(googleOptions =>
+            //{
+            //    googleOptions.ClientId = Configuration["Google:ClientId"];
+            //    googleOptions.ClientSecret = Configuration["Google:ClientSecret"];
+            //});
 
             services.Configure<CookiePolicyOptions>(options =>
             {

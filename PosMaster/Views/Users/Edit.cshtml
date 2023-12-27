@@ -228,7 +228,7 @@
                                     <a asp-route-id="@Model.UserId" asp-action="SetPassword">Set Account Password</a>
                                 </p>
                             }
-                            @if (User.IsInRole(Role.Manager))
+                            @if (User.IsInRole(Role.Manager) || User.IsInRole(Role.SuperAdmin))
                             {
                                 <p>
                                     <a asp-route-id="@Model.UserId" asp-action="ChangeUsername">Change Username</a>
