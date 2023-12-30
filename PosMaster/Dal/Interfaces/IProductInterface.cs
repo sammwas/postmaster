@@ -22,8 +22,8 @@ namespace PosMaster.Dal.Interfaces
         Task<ReturnData<PurchaseOrder>> AddPurchaseOrderAsync(PoViewModel model);
         Task<ReturnData<List<PurchaseOrder>>> PurchaseOrdersAsync(Guid clientId, Guid? instanceId, bool onlyActive = false, string dateFrom = "", string dateTo = "",
             string search = "", string personnel = "");
-        Task<ReturnData<List<GoodReceivedNote>>> GoodsReceivedAsync(Guid? clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "", string personnel = "");
-        Task<ReturnData<List<GeneralLedgerEntry>>> GeneralLedgersAsync(Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "");
+        Task<ReturnData<List<GoodReceivedNote>>> GoodsReceivedAsync(Guid clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "", string personnel = "");
+        Task<ReturnData<List<GeneralLedgerEntry>>> GeneralLedgersAsync(Guid clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "");
         Task<ReturnData<List<ProductPoQuantityLog>>> ProductPoQuantityLogAsync(Guid clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "");
         Task<ReturnData<PurchaseOrder>> PurchaseOrderByIdAsync(Guid id);
         string DocumentRefNumber(Document document, Guid clientId);
@@ -1210,7 +1210,7 @@ namespace PosMaster.Dal.Interfaces
             }
         }
 
-        public async Task<ReturnData<List<GoodReceivedNote>>> GoodsReceivedAsync(Guid? clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "", string personnel = "")
+        public async Task<ReturnData<List<GoodReceivedNote>>> GoodsReceivedAsync(Guid clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "", string personnel = "")
         {
             var result = new ReturnData<List<GoodReceivedNote>> { Data = new List<GoodReceivedNote>() };
             var tag = nameof(GoodsReceivedAsync);
@@ -1220,9 +1220,7 @@ namespace PosMaster.Dal.Interfaces
                 var dataQuery = _context.GoodReceivedNotes
                     .Include(r => r.Supplier)
                     .Include(r => r.PoGrnProducts)
-                    .AsQueryable();
-                if (clientId != null)
-                    dataQuery = dataQuery.Where(r => r.ClientId.Equals(clientId.Value));
+                     .Where(r => r.ClientId.Equals(clientId));
                 if (instanceId != null)
                     dataQuery = dataQuery.Where(r => r.InstanceId.Equals(instanceId.Value));
                 var hasFromDate = DateTime.TryParse(dateFrom, out var dtFrom);
@@ -1510,14 +1508,15 @@ namespace PosMaster.Dal.Interfaces
             }
         }
 
-        public async Task<ReturnData<List<GeneralLedgerEntry>>> GeneralLedgersAsync(Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "")
+        public async Task<ReturnData<List<GeneralLedgerEntry>>> GeneralLedgersAsync(Guid clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "")
         {
             var result = new ReturnData<List<GeneralLedgerEntry>> { Data = new List<GeneralLedgerEntry>() };
             var tag = nameof(GeneralLedgersAsync);
             _logger.LogInformation($"{tag} get general ledger: instanceId {instanceId}, duration {dateFrom}-{dateTo}, search {search}");
             try
             {
-                var dataQuery = _context.GeneralLedgerEntries.AsQueryable();
+                var dataQuery = _context.GeneralLedgerEntries
+                    .Where(r => r.ClientId.Equals(clientId));
                 if (instanceId != null)
                     dataQuery = dataQuery.Where(r => r.InstanceId.Equals(instanceId.Value));
                 var prevDataQuery = dataQuery;

@@ -254,7 +254,7 @@ namespace PosMaster.Controllers
                 instanceId = iId;
             if (User.IsInRole(Role.Clerk))
                 instanceId = _userData.InstanceId;
-            var result = await _productInterface.GeneralLedgersAsync(instanceId, dtFrom, dtTo, search);
+            var result = await _productInterface.GeneralLedgersAsync(_userData.ClientId, instanceId, dtFrom, dtTo, search);
             if (!result.Success)
                 TempData.SetData(AlertLevel.Warning, "General Ledgers", result.Message);
             return View(result.Data);
