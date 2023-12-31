@@ -45,6 +45,7 @@ namespace PosMaster.Dal.Interfaces
         Task<ReturnData<ReceiptUserViewModel>> GlUserBalanceAsync(GlUserType userType, Guid userId);
         Task<ReturnData<string>> CancelReceiptAsync(CancelReceiptViewModel model);
         Task<ReturnData<string>> PaySupplierGrnAsync(ExpenseViewModel model);
+        Task<ReturnData<bool>> DeleteProductAsync(BaseViewModel model);
 
     }
 
@@ -1841,6 +1842,54 @@ namespace PosMaster.Dal.Interfaces
                 Console.WriteLine(ex);
                 result.ErrorMessage = ex.Message;
                 result.Message = "Error occurred";
+                _logger.LogError($"{tag} {result.Message} : {ex}");
+                return result;
+            }
+        }
+
+        public async Task<ReturnData<bool>> DeleteProductAsync(BaseViewModel model)
+        {
+            var result = new ReturnData<bool> { Data = false };
+            var tag = nameof(DeleteProductAsync);
+            _logger.LogInformation($"{tag} client {model.ClientId} delete product {model.Code} by {model.Personnel}");
+            try
+            {
+                var product = await _context.Products
+                    .FirstOrDefaultAsync(p => p.Id.Equals(model.Id));
+                if (product == null)
+                {
+                    result.Message = "Provided product Id not found";
+                    return result;
+                }
+                try
+                {
+                    _context.Products.Remove(product);
+                    await _context.SaveChangesAsync();
+                    result.Success = true;
+                    result.Message = "Product Deleted";
+                    result.Data = true;
+                    return result;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
+                    result.ErrorMessage = ex.Message;
+                    _logger.LogError($"{tag} Unable to delete product {product.Id}. {ex.Message}");
+                }
+                product.Status = EntityStatus.Inactive;
+                product.DateLastModified = DateTime.Now;
+                product.LastModifiedBy = model.Personnel;
+                await _context.SaveChangesAsync();
+
+                result.Success = true;
+                result.Message = "Product in use - Deactivated";
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                result.ErrorMessage = ex.Message;
+                result.Message = "Unexpected Error occurred";
                 _logger.LogError($"{tag} {result.Message} : {ex}");
                 return result;
             }

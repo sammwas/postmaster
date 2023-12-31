@@ -386,5 +386,18 @@ namespace PosMaster.Controllers
             return RedirectToAction(nameof(ReceivedGoodsDetail),
                    new { id = model.GrnId });
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteProduct(BaseViewModel model)
+        {
+            model.Personnel = User.Identity.Name;
+            var result = await _productInterface.DeleteProductAsync(model);
+            TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, "Delete Product", result.Message);
+            return
+                result.Data ?
+                RedirectToAction(nameof(Index), new { insId = model.InstanceId })
+                : RedirectToAction(nameof(ViewProduct), new { id = model.InstanceId, code = model.Code });
+        }
     }
 }

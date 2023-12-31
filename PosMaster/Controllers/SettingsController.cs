@@ -239,7 +239,7 @@ namespace PosMaster.Controllers
                 if (System.IO.File.Exists(filePath))
                 {
                     Console.WriteLine($"Delete exisiting File at {filePath}");
-                    System.IO.File.Delete(filePath); 
+                    System.IO.File.Delete(filePath);
                 }
 
                 var fileLocation = new FileInfo(filePath);
@@ -297,6 +297,7 @@ namespace PosMaster.Controllers
                                     AvailableQuantity = decimal.Parse(quantity),
                                     PriceStartDateStr = workSheet.Cells[i, 12]?.Value?.ToString() ?? "",
                                     PriceEndDateStr = workSheet.Cells[i, 13]?.Value?.ToString() ?? "",
+                                    Personnel = personnel
                                 };
 
                                 var resultProduct = await _productInterface.EditAsync(productViewModel);
@@ -324,7 +325,8 @@ namespace PosMaster.Controllers
                                     Notes = workSheet.Cells[i, 13]?.Value?.ToString() ?? "",
                                     InstanceId = _userData.InstanceId,
                                     ClientId = _userData.ClientId,
-                                    PersonnelName = _userData.FullName
+                                    PersonnelName = _userData.FullName,
+                                    Personnel = personnel
                                 };
                                 var resultCustomer = await _customerInterface.EditAsync(customerViewModel);
                                 returnData.ErrorMessage = resultCustomer.ErrorMessage;
