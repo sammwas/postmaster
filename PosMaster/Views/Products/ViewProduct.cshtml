@@ -51,6 +51,19 @@
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
+                                <label>Is a service</label>
+                                @if (Model.Product.IsService)
+                                {
+                                    <span>YES</span>
+                                }
+                                else
+                                {
+                                    <span>NO</span>
+                                }
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
                                 <label>Discountable</label>
                                 @if (Model.Product.AllowDiscount)
                                 {
@@ -89,13 +102,37 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>Date created</label>
-                                <span>@Model.Product.DateCreated by (@Model.Product.Personnel)</span>
+                                <span>@Model.Product.DateCreated</span>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>Staus</label>
+                                <label>Personnel</label>
+                                <span>@Model.Product.Personnel</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Date modified</label>
+                                <span>@Model.Product.DateLastModified</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Last modified by</label>
+                                <span>@Model.Product.LastModifiedBy</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Status</label>
                                 <span>@Model.Product.Status</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Notes</label>
+                                <span>@Model.Product.Notes</span>
                             </div>
                         </div>
                     </div>
