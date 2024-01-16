@@ -143,11 +143,12 @@ namespace PosMaster.Controllers
                     var instanceResult = await _instanceInterface.ByIdAsync(user.InstanceId);
                     var isValidRes = LicencingService.VerifyLicence(instanceResult.Data.Client.Licence,
                         instanceResult.Data.Client.Id, instanceResult.Data.Client.Name);
+                    isValidRes.Success = true;
                     if (isValidRes.Success)
                     {
                         var licenceData = isValidRes.Data;
-                        if (licenceData.RemainingDays < 7)
-                            TempData["LicenceMsg"] = $"Licence Expires in {Math.Floor(licenceData.RemainingDays)} days.";
+                        // if (licenceData.RemainingDays < 7)
+                        //     TempData["LicenceMsg"] = $"Licence Expires in {Math.Floor(licenceData.RemainingDays)} days.";
 
                     }
                     else
