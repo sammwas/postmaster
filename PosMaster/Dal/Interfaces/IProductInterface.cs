@@ -1001,7 +1001,8 @@ namespace PosMaster.Dal.Interfaces
                     {
                         ProductId = tp.Key.ProductId,
                         Personnel = tp.Key.Personnel,
-                        Volume = tp.Count()
+                        Volume = tp.Sum(s => s.Quantity),
+                        Amount = tp.Sum(s => s.Quantity * s.UnitPrice)
                     })
                     .Join(_context.Products.Include(p => p.ProductCategory)
                     .Where(p => p.Status.Equals(EntityStatus.Active)),
@@ -1010,6 +1011,7 @@ namespace PosMaster.Dal.Interfaces
                         Product = p,
                         ProductId = tp.ProductId,
                         Volume = tp.Volume,
+                        Amount = tp.Amount,
                         InstanceId = p.InstanceId,
                         ClientId = p.ClientId,
                         Personnel = tp.Personnel,
