@@ -5,9 +5,7 @@
     ViewData["Active"] = "Reports";
     ViewData["Title"] = $"Top selling by volume";
     var userData = _cookies.Read();
-    var instancesRes = User.IsInRole(Role.SuperAdmin) ?
-        await _instanceInterface.AllAsync()
-        : await _instanceInterface.ByClientIdAsync(userData.ClientId);
+    var instancesRes = await _instanceInterface.ByClientIdAsync(userData.ClientId);
     var instances = instancesRes.Data;
     var instanceId = ViewData["instanceId"]?.ToString();
     var dateToday = DateTime.Now.ToString("dd-MMM-yyyy");
@@ -30,11 +28,11 @@
                                 {
                                     if (!string.IsNullOrEmpty(instanceId) && item.Id.ToString().Equals(instanceId))
                                     {
-                                        <option selected="selected" value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
+                                                <option selected="selected" value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
                                     }
                                     else
                                     {
-                                        <option value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
+                                                <option value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
                                     }
                                 }
                             </select>
@@ -72,41 +70,41 @@
 
                 @if (Model.Any())
                 {
-                    <div class="row table-responsive">
-                        <table class="table table-striped" id="dataTable">
-                            <thead>
-                                <tr>
-                                    <th>Code</th>
-                                    <th>Product</th>
-                                    <th>Volume</th>
-                                    <th>Amount</th>
-                                </tr>
-                            </thead>
-                            <tbody>
+                        <div class="row table-responsive">
+                            <table class="table table-striped" id="dataTable">
+                                <thead>
+                                    <tr>
+                                        <th>Code</th>
+                                        <th>Product</th>
+                                        <th>Volume</th>
+                                        <th>Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
                                 @foreach (var item in Model)
                                 {
-                                    <tr>
-                                        <td>@item.Product.Code</td>
-                                        <td>
+                                            <tr>
+                                                <td>@item.Product.Code</td>
+                                                <td>
                                             @item.Product.Name <span class="label label-primary">
                                                 @item.Product.ProductCategory.Name
-                                            </span>
-                                        </td>
-                                        <td>@item.Volume</td>
-                                        <td>@item.Amount</td>
-                                    </tr>
+                                                    </span>
+                                                </td>
+                                                <td>@item.Volume</td>
+                                                <td>@item.Amount</td>
+                                            </tr>
                                 }
-                            </tbody>
-                            <tfoot>
-                                <tr>
-                                    <th>Total</th>
-                                    <th>@Model.Count</th>
-                                    <th>@Model.Sum(m=>m.Volume)</th>
-                                    <th>@Model.Sum(m=>m.Amount)</th>
-                                </tr>
-                            </tfoot>
-                        </table>
-                    </div>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th>Total</th>
+                                        <th>@Model.Count</th>
+                                        <th>@Model.Sum(m=>m.Volume)</th>
+                                        <th>@Model.Sum(m=>m.Amount)</th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
                 }
             </div>
         </div>

@@ -5,9 +5,7 @@
     ViewData["Active"] = "HR";
     ViewData["Title"] = "Users";
     var userData = _cookies.Read();
-    var instancesRes = User.IsInRole(Role.SuperAdmin) ?
-    await _clientInstance.AllAsync() :
-    await _clientInstance.ByClientIdAsync(userData.ClientId);
+    var instancesRes = await _clientInstance.ByClientIdAsync(userData.ClientId);
 }
 <div>
     <div class="card">

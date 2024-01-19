@@ -5,9 +5,7 @@
     ViewData["Active"] = "POS";
     ViewData["Title"] = "Orders";
     var userData = _cookies.Read();
-    var instancesRes = User.IsInRole(Role.SuperAdmin) ?
-    await _instanceInterface.AllAsync()
-    : await _instanceInterface.ByClientIdAsync(userData.ClientId);
+    var instancesRes = await _instanceInterface.ByClientIdAsync(userData.ClientId);
     var instances = instancesRes.Data;
     var instanceId = ViewData["InstanceId"]?.ToString();
     var dateToday = DateTime.Now.ToString("dd-MMM-yyyy");
@@ -41,17 +39,17 @@
                                 {
                                     if (!string.IsNullOrEmpty(instanceId) && item.Id.ToString().Equals(instanceId))
                                     {
-                                        <option selected="selected" value="@item.Id" title="@item.Notes">
+                                                <option selected="selected" value="@item.Id" title="@item.Notes">
                                             @item.Code - @item.Name
-                                            (@item.Client.Code - @item.Client.Name)
-                                        </option>
+                                                    (@item.Client.Code - @item.Client.Name)
+                                                </option>
                                     }
                                     else
                                     {
-                                        <option value="@item.Id" title="@item.Notes">
+                                                <option value="@item.Id" title="@item.Notes">
                                             @item.Code - @item.Name (@item.Client.Code
-                                            - @item.Client.Name)
-                                        </option>
+                                                    - @item.Client.Name)
+                                                </option>
                                     }
                                 }
                             </select>
@@ -109,38 +107,38 @@
                         @foreach (var item in Model)
                         {
                             var orderItems = Newtonsoft.Json.JsonConvert.SerializeObject(item.OrderLineItems);
-                            <tr data-items="@orderItems">
-                                <td class="details-control"></td>
-                                <td><a asp-action="Details" asp-route-id="@item.Id">@item.Code</a></td>
-                                <td>@item.DateCreated</td>
-                                <td>@item.PersonnelStr</td>
-                                <td>
+                                    <tr data-items="@orderItems">
+                                        <td class="details-control"></td>
+                                        <td><a asp-action="Details" asp-route-id="@item.Id">@item.Code</a></td>
+                                        <td>@item.DateCreated</td>
+                                        <td>@item.PersonnelStr</td>
+                                        <td>
                                     @if (item.Status.Equals(EntityStatus.Active))
                                     {
-                                        <span class="badge badge-danger"><i class="fa fa-times-circle"></i> Not Paid</span>
+                                                    <span class="badge badge-danger"><i class="fa fa-times-circle"></i> Not Paid</span>
                                     }
                                     else
                                     {
-                                        <span class="badge badge-success"><i class="fa fa-check-circle"></i> Closed</span>
+                                                    <span class="badge badge-success"><i class="fa fa-check-circle"></i> Closed</span>
                                     }
-                                </td>
-                                <td>@item.TotalAmount</td>
+                                        </td>
+                                        <td>@item.TotalAmount</td>
                                 @if (item.Status.Equals(EntityStatus.Active))
                                 {
-                                    <td>
-                                        <a asp-action="PlaceOrder" asp-route-id="@item.Id" class="btn btn-info btn-sm">
-                                            <i class="fas fa-pencil-alt">
-                                            </i>
-                                            Edit
-                                        </a>
-                                    </td>
+                                                <td>
+                                                    <a asp-action="PlaceOrder" asp-route-id="@item.Id" class="btn btn-info btn-sm">
+                                                        <i class="fas fa-pencil-alt">
+                                                        </i>
+                                                        Edit
+                                                    </a>
+                                                </td>
                                 }
                                 @if (item.Status.Equals(EntityStatus.Closed))
                                 {
-                                    <td><a asp-action="Details" asp-route-id="@item.Id">View</a></td>
+                                                <td><a asp-action="Details" asp-route-id="@item.Id">View</a></td>
                                 }
 
-                            </tr>
+                                    </tr>
                         }
 
                     }

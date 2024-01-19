@@ -7,9 +7,7 @@
     ViewData["Active"] = "POS";
     ViewData["Title"] = "Receipts";
     var userData = _cookies.Read();
-    var instancesRes = User.IsInRole(Role.SuperAdmin) ?
-    await _instanceInterface.AllAsync()
-    : await _instanceInterface.ByClientIdAsync(userData.ClientId);
+    var instancesRes = await _instanceInterface.ByClientIdAsync(userData.ClientId);
     var instances = instancesRes.Data;
     var instanceId = ViewData["InstanceId"]?.ToString();
     var modeId = ViewData["PaymentModeId"]?.ToString();
@@ -50,17 +48,17 @@
                                 {
                                     if (!string.IsNullOrEmpty(instanceId) && item.Id.ToString().Equals(instanceId))
                                     {
-                                        <option selected="selected" value="@item.Id" title="@item.Notes">
+                                                <option selected="selected" value="@item.Id" title="@item.Notes">
                                             @item.Code - @item.Name
-                                            (@item.Client.Code - @item.Client.Name)
-                                        </option>
+                                                    (@item.Client.Code - @item.Client.Name)
+                                                </option>
                                     }
                                     else
                                     {
-                                        <option value="@item.Id" title="@item.Notes">
+                                                <option value="@item.Id" title="@item.Notes">
                                             @item.Code - @item.Name (@item.Client.Code
-                                            - @item.Client.Name)
-                                        </option>
+                                                    - @item.Client.Name)
+                                                </option>
                                     }
                                 }
                             </select>
@@ -101,13 +99,13 @@
                                 {
                                     if (!string.IsNullOrEmpty(modeId) && item.Id.ToString().Equals(modeId))
                                     {
-                                        <option selected="selected" value="@item.Id" title="@item.Notes">
+                                                <option selected="selected" value="@item.Id" title="@item.Notes">
                                             @item.Code - @item.Name
-                                        </option>
+                                                </option>
                                     }
                                     else
                                     {
-                                        <option value="@item.Id" title="@item.Notes">@item.Code - @item.Name    </option>
+                                                <option value="@item.Id" title="@item.Notes">@item.Code - @item.Name    </option>
                                     }
                                 }
                             </select>
@@ -122,13 +120,13 @@
                                 {
                                     if (!string.IsNullOrEmpty(type) && item.Equals(type))
                                     {
-                                        <option selected="selected" value="@item" title="@item">
+                                                <option selected="selected" value="@item" title="@item">
                                             @item SALE
-                                        </option>
+                                                </option>
                                     }
                                     else
                                     {
-                                        <option value="@item" title="@item">    @item SALE    </option>
+                                                <option value="@item" title="@item">    @item SALE    </option>
                                     }
                                 }
                             </select>
@@ -144,13 +142,13 @@
                                     if (!string.IsNullOrEmpty(personnel)
                                     && item.EmailAddress.ToLower().Equals(personnel.ToLower()))
                                     {
-                                        <option selected="selected" value="@item.EmailAddress" title="@item.Notes">
+                                                <option selected="selected" value="@item.EmailAddress" title="@item.Notes">
                                             @item.FullName (@item.EmailAddress)
-                                        </option>
+                                                </option>
                                     }
                                     else
                                     {
-                                        <option value="@item.EmailAddress" title="@item.Notes">  @item.FullName (@item.EmailAddress)   </option>
+                                                <option value="@item.EmailAddress" title="@item.Notes">  @item.FullName (@item.EmailAddress)   </option>
                                     }
                                 }
                             </select>
@@ -190,16 +188,16 @@
                         {
                             var saleType = item.IsCredit ? "CREDIT" : "CASH";
                             var receiptItems = Newtonsoft.Json.JsonConvert.SerializeObject(item.ReceiptLineItems);
-                            <tr data-items="@receiptItems">
-                                <td class="details-control"></td>
-                                <td><a asp-action="Receipt" asp-route-id="@item.Id" title="View Receipt @item.Code">@item.Code</a></td>
-                                <td>@item.DateCreated</td>
-                                <td>@item.Customer.FullName</td>
-                                <td>@saleType</td>
-                                <td>@item.PersonnelStr </td>
-                                <td>@item.Amount</td>
-                                <td>@item.Notes</td>
-                            </tr>
+                                    <tr data-items="@receiptItems">
+                                        <td class="details-control"></td>
+                                        <td><a asp-action="Receipt" asp-route-id="@item.Id" title="View Receipt @item.Code">@item.Code</a></td>
+                                        <td>@item.DateCreated</td>
+                                        <td>@item.Customer.FullName</td>
+                                        <td>@saleType</td>
+                                        <td>@item.PersonnelStr </td>
+                                        <td>@item.Amount</td>
+                                        <td>@item.Notes</td>
+                                    </tr>
                         }
 
                     }

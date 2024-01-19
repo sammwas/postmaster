@@ -5,9 +5,7 @@
     ViewData["Active"] = "Reports";
     ViewData["Title"] = $"{ViewData["option"]} Sale Report";
     var userData = _cookies.Read();
-    var instancesRes = User.IsInRole(Role.SuperAdmin) ?
-        await _instanceInterface.AllAsync()
-        : await _instanceInterface.ByClientIdAsync(userData.ClientId);
+    var instancesRes = await _instanceInterface.ByClientIdAsync(userData.ClientId);
     var instances = instancesRes.Data;
     var instanceId = ViewData["instanceId"]?.ToString();
     var dateToday = DateTime.Now.ToString("dd-MMM-yyyy");
@@ -30,11 +28,11 @@
                                 {
                                     if (!string.IsNullOrEmpty(instanceId) && item.Id.ToString().Equals(instanceId))
                                     {
-                                        <option selected="selected" value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
+                                                <option selected="selected" value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
                                     }
                                     else
                                     {
-                                        <option value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
+                                                <option value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
                                     }
                                 }
                             </select>
@@ -72,40 +70,40 @@
 
                 @if (Model.Any())
                 {
-                    <div class="row table-responsive">
-                        <table class="table table-striped" id="dataTable">
-                            <thead>
-                                <tr>
-                                    <td>Date</td>
-                                    <td>Total Amount</td>
-                                    <td>Expected Profit</td>
-                                    <td>Actual Profit</td>
-                                </tr>
-                            </thead>
-                            <tbody>
+                        <div class="row table-responsive">
+                            <table class="table table-striped" id="dataTable">
+                                <thead>
+                                    <tr>
+                                        <td>Date</td>
+                                        <td>Total Amount</td>
+                                        <td>Expected Profit</td>
+                                        <td>Actual Profit</td>
+                                    </tr>
+                                </thead>
+                                <tbody>
                                 @foreach (var item in Model)
                                 {
-                                    <tr>
-                                        <td>
-                                            <a asp-action="CloseOfDay" asp-route-dt="@item.DayStr"
+                                            <tr>
+                                                <td>
+                                                    <a asp-action="CloseOfDay" asp-route-dt="@item.DayStr"
                                        asp-route-inId="@instanceId" asp-route-dtTo="@item.DayStr">@item.DayStr</a>
-                                        </td>
-                                        <td>@Helpers.FormatAmount(item.TotalSales, 2)</td>
-                                        <td>@Helpers.FormatAmount(item.ExpectedProfit, 2)</td>
-                                        <td>@Helpers.FormatAmount(item.ActualProfit, 2)</td>
-                                    </tr>
+                                                </td>
+                                                <td>@Helpers.FormatAmount(item.TotalSales, 2)</td>
+                                                <td>@Helpers.FormatAmount(item.ExpectedProfit, 2)</td>
+                                                <td>@Helpers.FormatAmount(item.ActualProfit, 2)</td>
+                                            </tr>
                                 }
-                            </tbody>
-                            <tfoot>
-                                <tr>
-                                    <td> Total Days : @Model.Count </td>
-                                    <td>@Helpers.FormatAmount(Model.Sum(x => x.TotalSales), 2) </td>
-                                    <td>@Helpers.FormatAmount(Model.Sum(x => x.ExpectedProfit), 2) </td>
-                                    <td>@Helpers.FormatAmount(Model.Sum(x => x.ActualProfit), 2) </td>
-                                </tr>
-                            </tfoot>
-                        </table>
-                    </div>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td> Total Days : @Model.Count </td>
+                                        <td>@Helpers.FormatAmount(Model.Sum(x => x.TotalSales), 2) </td>
+                                        <td>@Helpers.FormatAmount(Model.Sum(x => x.ExpectedProfit), 2) </td>
+                                        <td>@Helpers.FormatAmount(Model.Sum(x => x.ActualProfit), 2) </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
                 }
             </div>
         </div>
