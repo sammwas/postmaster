@@ -14,10 +14,13 @@ namespace PosMaster.Controllers
     {
         private readonly IReportingInterface _reportingInterface;
         private readonly UserCookieData _userData;
-        public ReportsController(IReportingInterface reportingInterface, ICookiesService cookiesService)
+        private readonly IProductInterface _productInterface;
+        public ReportsController(IReportingInterface reportingInterface, ICookiesService cookiesService,
+            IProductInterface productInterface)
         {
             _reportingInterface = reportingInterface;
             _userData = cookiesService.Read();
+            _productInterface = productInterface;
         }
         public async Task<IActionResult> SalesReport(Guid instanceId, string dtFrom = "", string dtTo = "", string search = "", string option = "")
         {
@@ -99,8 +102,8 @@ namespace PosMaster.Controllers
             return View(result.Data);
         }
 
-        public async Task<IActionResult> CustomerSalesReport( Guid? insId, Guid? cId, string type = "",
-            string dtFrom = "", string dtTo = "", string search = "", bool summarized=false)
+        public async Task<IActionResult> CustomerSalesReport(Guid? insId, Guid? cId, string type = "",
+            string dtFrom = "", string dtTo = "", string search = "", bool summarized = false)
         {
             var hasDateFrom = DateTime.TryParse(dtFrom, out var dateFrom);
             var hasDateTo = DateTime.TryParse(dtTo, out var dateTo);
@@ -128,5 +131,39 @@ namespace PosMaster.Controllers
             return View(result.Data);
         }
 
+        public async Task<IActionResult> LowStockProducts(Guid? inId)
+        {
+            inId = User.IsInRole(Role.Clerk) ? _userData.InstanceId : inId;
+            ViewData["instanceId"] = inId;
+            var result = await _productInterface.LowStockProductsAsync(_userData.ClientId, inId, 0);
+            if (!result.Success)
+                TempData.SetData(AlertLevel.Warning, $"Low stock products", result.Message);
+            return View(result.Data);
+        }
+
+        public async Task<IActionResult> TopSellingVolume(Guid? inId, string dt = "", string dtTo = "")
+        {
+            var hasDate = DateTime.TryParse(dt, out var date);
+            var hasDateTo = DateTime.TryParse(dtTo, out var dateTo);
+            if (!hasDate)
+            {
+                date = DateTime.Now;
+                dt = date.ToString();
+            }
+            if (!hasDateTo)
+            {
+                dateTo = DateTime.Now;
+                dtTo = dateTo.ToString();
+            }
+            ViewData["dtDay"] = date.ToString("dd-MMM-yyyy");
+            ViewData["dtDayTo"] = dateTo.ToString("dd-MMM-yyyy");
+            inId = User.IsInRole(Role.Clerk) ? _userData.InstanceId : inId;
+            var personnel = User.IsInRole(Role.Clerk) ? User.Identity.Name : "";
+            ViewData["instanceId"] = inId;
+            var result = await _productInterface.TopSellingProductsByVolumeAsync(_userData.ClientId, inId, dt, dtTo, personnel, 0);
+            if (!result.Success)
+                TempData.SetData(AlertLevel.Warning, $"Top selling by volume", result.Message);
+            return View(result.Data);
+        }
     }
 }

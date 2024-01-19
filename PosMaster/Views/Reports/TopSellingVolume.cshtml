@@ -1,9 +1,9 @@
 ﻿@inject IClientInstanceInterface _instanceInterface;
 @inject ICookiesService _cookies;
-@model List<DailySalesViewModel>
+@model List<TopSellingProductViewModel>
 @{
     ViewData["Active"] = "Reports";
-    ViewData["Title"] = $"{ViewData["option"]} Sale Report";
+    ViewData["Title"] = $"Top selling by volume";
     var userData = _cookies.Read();
     var instancesRes = User.IsInRole(Role.SuperAdmin) ?
         await _instanceInterface.AllAsync()
@@ -24,7 +24,7 @@
                     <div class="col-md-3">
                         <div class="form-group">
                             <label>Instance</label>
-                            <select class="form-control select2" name="InstanceId" style="width: 100%;">
+                            <select class="form-control select2" name="inId" style="width: 100%;">
                                 <option value="">--Select Instance--</option>
                                 @foreach (var item in instances)
                                 {
@@ -44,7 +44,7 @@
                         <div class="form-group">
                             <label>Date From</label>
                             <div class="input-group date" id="dateFrom" data-target-input="nearest">
-                                <input type="text" name="dtFrom" class="form-control datetimepicker-input" data-target="#dateFrom" value="@ViewData["dtFrom"]" placeholder="Date From (@dateToday)" />
+                                <input type="text" name="dt" class="form-control datetimepicker-input" data-target="#dateFrom" value="@ViewData["dtDay"]" placeholder="Date From (@dateToday)" />
                                 <div class="input-group-append" data-target="#dateFrom" data-toggle="datetimepicker">
                                     <div class="input-group-text"><i class="fa fa-calendar"></i></div>
                                 </div>
@@ -55,7 +55,7 @@
                         <div class="form-group">
                             <label>Date To</label>
                             <div class="input-group date" id="dateTo" data-target-input="nearest">
-                                <input type="text" name="dtTo" class="form-control datetimepicker-input" data-target="#dateTo" value="@ViewData["dtTo"]" placeholder="Date To (@dateToday)" />
+                                <input type="text" name="dtTo" class="form-control datetimepicker-input" data-target="#dateTo" value="@ViewData["dtDayTo"]" placeholder="Date To (@dateToday)" />
                                 <div class="input-group-append" data-target="#dateTo" data-toggle="datetimepicker">
                                     <div class="input-group-text"><i class="fa fa-calendar"></i></div>
                                 </div>
@@ -76,32 +76,33 @@
                         <table class="table table-striped" id="dataTable">
                             <thead>
                                 <tr>
-                                    <td>Date</td>
-                                    <td>Total Amount</td>
-                                    <td>Expected Profit</td>
-                                    <td>Actual Profit</td>
+                                    <th>Code</th>
+                                    <th>Product</th>
+                                    <th>Volume</th>
+                                    <th>Amount</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach (var item in Model)
                                 {
                                     <tr>
+                                        <td>@item.Product.Code</td>
                                         <td>
-                                            <a asp-action="CloseOfDay" asp-route-dt="@item.DayStr"
-                                       asp-route-inId="@instanceId" asp-route-dtTo="@item.DayStr">@item.DayStr</a>
+                                            @item.Product.Name <span class="label label-primary">
+                                                @item.Product.ProductCategory.Name
+                                            </span>
                                         </td>
-                                        <td>@Helpers.FormatAmount(item.TotalSales, 2)</td>
-                                        <td>@Helpers.FormatAmount(item.ExpectedProfit, 2)</td>
-                                        <td>@Helpers.FormatAmount(item.ActualProfit, 2)</td>
+                                        <td>@item.Volume</td>
+                                        <td>@item.Amount</td>
                                     </tr>
                                 }
                             </tbody>
                             <tfoot>
                                 <tr>
-                                    <td> Total Days : @Model.Count </td>
-                                    <td>@Helpers.FormatAmount(Model.Sum(x => x.TotalSales), 2) </td>
-                                    <td>@Helpers.FormatAmount(Model.Sum(x => x.ExpectedProfit), 2) </td>
-                                    <td>@Helpers.FormatAmount(Model.Sum(x => x.ActualProfit), 2) </td>
+                                    <th>Total</th>
+                                    <th>@Model.Count</th>
+                                    <th>@Model.Sum(m=>m.Volume)</th>
+                                    <th>@Model.Sum(m=>m.Amount)</th>
                                 </tr>
                             </tfoot>
                         </table>

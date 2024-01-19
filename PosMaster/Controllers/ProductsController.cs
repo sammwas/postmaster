@@ -306,7 +306,7 @@ namespace PosMaster.Controllers
         public async Task<IActionResult> LowStockProducts(Guid? inId = null)
         {
             var instanceId = User.IsInRole(Role.Clerk) ? _userData.InstanceId : inId;
-            var data = await _productInterface.LowStockProductsAsync(instanceId, 5);
+            var data = await _productInterface.LowStockProductsAsync(_userData.ClientId, instanceId, 5);
             return Json(data);
         }
 
@@ -318,7 +318,8 @@ namespace PosMaster.Controllers
                 dtTo = DateTime.Now.ToString("dd-MMM-yyyy");
             var instanceId = User.IsInRole(Role.Clerk) ? _userData.InstanceId : inId;
             var personnel = User.IsInRole(Role.Clerk) ? User.Identity.Name : "";
-            var data = await _productInterface.TopSellingProductsByVolumeAsync(instanceId, dtFrom, dtTo, personnel, 5);
+            var data = await _productInterface
+                .TopSellingProductsByVolumeAsync(_userData.ClientId, instanceId, dtFrom, dtTo, personnel, 5);
             return Json(data);
         }
 

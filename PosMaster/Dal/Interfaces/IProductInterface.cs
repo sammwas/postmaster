@@ -27,8 +27,8 @@ namespace PosMaster.Dal.Interfaces
         Task<ReturnData<List<ProductPoQuantityLog>>> ProductPoQuantityLogAsync(Guid clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "");
         Task<ReturnData<PurchaseOrder>> PurchaseOrderByIdAsync(Guid id);
         string DocumentRefNumber(Document document, Guid clientId);
-        Task<ReturnData<List<Product>>> LowStockProductsAsync(Guid? instanceId, int limit = 10);
-        Task<ReturnData<List<TopSellingProductViewModel>>> TopSellingProductsByVolumeAsync(Guid? instanceId, string dtFrom = "", string dtTo = "",
+        Task<ReturnData<List<Product>>> LowStockProductsAsync(Guid clientId, Guid? instanceId, int limit = 10);
+        Task<ReturnData<List<TopSellingProductViewModel>>> TopSellingProductsByVolumeAsync(Guid clientId, Guid? instanceId, string dtFrom = "", string dtTo = "",
            string personnel = "", int limit = 10);
         Task<ReturnData<ProductPriceViewModel>> EditPriceAsync(ProductPriceViewModel model);
         Task<ReturnData<Receipt>> ReceiptByIdAsync(string id);
@@ -949,7 +949,7 @@ namespace PosMaster.Dal.Interfaces
             }
         }
 
-        public async Task<ReturnData<List<Product>>> LowStockProductsAsync(Guid? instanceId, int limit = 10)
+        public async Task<ReturnData<List<Product>>> LowStockProductsAsync(Guid clientId, Guid? instanceId, int limit = 10)
         {
             var result = new ReturnData<List<Product>> { Data = new List<Product>() };
             var tag = nameof(LowStockProductsAsync);
@@ -960,11 +960,13 @@ namespace PosMaster.Dal.Interfaces
                     .Include(c => c.ProductCategory)
                     .Include(c => c.UnitOfMeasure)
                     .Where(p => p.AvailableQuantity <= p.ReorderLevel)
+                    .Where(p => p.ClientId.Equals(clientId))
                     .Where(p => !p.Code.Equals(Constants.DefaultProductCode) && !p.IsService);
                 if (instanceId != null)
                     dataQry = dataQry.Where(p => p.InstanceId.Equals(instanceId));
+                if (limit > 0)
+                    dataQry = dataQry.Take(limit);
                 var data = await dataQry.OrderBy(p => p.AvailableQuantity)
-                    .Take(limit)
                     .ToListAsync();
                 result.Success = data.Any();
                 result.Message = result.Success ? "Found" : "Not Found";
@@ -983,7 +985,7 @@ namespace PosMaster.Dal.Interfaces
             }
         }
 
-        public async Task<ReturnData<List<TopSellingProductViewModel>>> TopSellingProductsByVolumeAsync(Guid? instanceId, string dtFrom = "", string dtTo = "", string personnel = "", int limit = 10)
+        public async Task<ReturnData<List<TopSellingProductViewModel>>> TopSellingProductsByVolumeAsync(Guid clientId, Guid? instanceId, string dtFrom = "", string dtTo = "", string personnel = "", int limit = 10)
         {
             var result = new ReturnData<List<TopSellingProductViewModel>> { Data = new List<TopSellingProductViewModel>() };
             var tag = nameof(TopSellingProductsByVolumeAsync);
@@ -1013,12 +1015,15 @@ namespace PosMaster.Dal.Interfaces
                         Personnel = tp.Personnel,
                     })
                     .AsQueryable();
+                dataQry = dataQry.Where(d => d.ClientId.Equals(clientId));
+                if (limit > 0)
+                    dataQry = dataQry.Take(limit);
                 if (instanceId != null)
                     dataQry = dataQry.Where(p => p.InstanceId.Equals(instanceId));
                 if (!string.IsNullOrEmpty(personnel))
                     dataQry = dataQry.Where(p => p.Personnel.Equals(personnel));
                 var data = await dataQry.OrderByDescending(p => p.Volume)
-                    .Take(limit).ToListAsync();
+                   .ToListAsync();
                 result.Success = data.Any();
                 result.Message = result.Success ? "Found" : "Not Found";
                 if (result.Success)
