@@ -964,10 +964,10 @@ namespace PosMaster.Dal.Interfaces
                     .Where(p => !p.Code.Equals(Constants.DefaultProductCode) && !p.IsService);
                 if (instanceId != null)
                     dataQry = dataQry.Where(p => p.InstanceId.Equals(instanceId));
+                dataQry = dataQry.OrderBy(p => p.AvailableQuantity);
                 if (limit > 0)
                     dataQry = dataQry.Take(limit);
-                var data = await dataQry.OrderBy(p => p.AvailableQuantity)
-                    .ToListAsync();
+                var data = await dataQry.ToListAsync();
                 result.Success = data.Any();
                 result.Message = result.Success ? "Found" : "Not Found";
                 if (result.Success)
@@ -1018,14 +1018,14 @@ namespace PosMaster.Dal.Interfaces
                     })
                     .AsQueryable();
                 dataQry = dataQry.Where(d => d.ClientId.Equals(clientId));
-                if (limit > 0)
-                    dataQry = dataQry.Take(limit);
                 if (instanceId != null)
                     dataQry = dataQry.Where(p => p.InstanceId.Equals(instanceId));
                 if (!string.IsNullOrEmpty(personnel))
                     dataQry = dataQry.Where(p => p.Personnel.Equals(personnel));
-                var data = await dataQry.OrderByDescending(p => p.Volume)
-                   .ToListAsync();
+                dataQry = dataQry.OrderByDescending(p => p.Volume);
+                if (limit > 0)
+                    dataQry = dataQry.Take(limit);
+                var data = await dataQry.ToListAsync();
                 result.Success = data.Any();
                 result.Message = result.Success ? "Found" : "Not Found";
                 if (result.Success)

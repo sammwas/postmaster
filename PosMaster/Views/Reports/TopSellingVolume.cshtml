@@ -14,10 +14,10 @@
     <div class="card-header">
         <h3 class="card-title">@ViewData["Title"]</h3>
     </div>
-    <form role="form" autocomplete="off">
-        <input type="hidden" name="Option" value="@ViewData["option"]" />
-        <div class="row">
-            <div class="card-body">
+    <input type="hidden" name="Option" value="@ViewData["option"]" />
+    <div class="row">
+        <div class="card-body">
+            <form role="form" autocomplete="off" method="get">
                 <div class="row">
                     <div class="col-md-3">
                         <div class="form-group">
@@ -28,11 +28,11 @@
                                 {
                                     if (!string.IsNullOrEmpty(instanceId) && item.Id.ToString().Equals(instanceId))
                                     {
-                                                <option selected="selected" value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
+                                        <option selected="selected" value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
                                     }
                                     else
                                     {
-                                                <option value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
+                                        <option value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
                                     }
                                 }
                             </select>
@@ -67,47 +67,52 @@
                         </div>
                     </div>
                 </div>
-
-                @if (Model.Any())
-                {
-                        <div class="row table-responsive">
-                            <table class="table table-striped" id="dataTable">
-                                <thead>
-                                    <tr>
-                                        <th>Code</th>
-                                        <th>Product</th>
-                                        <th>Volume</th>
-                                        <th>Amount</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                @foreach (var item in Model)
-                                {
-                                            <tr>
-                                                <td>@item.Product.Code</td>
-                                                <td>
-                                            @item.Product.Name <span class="label label-primary">
-                                                @item.Product.ProductCategory.Name
-                                                    </span>
-                                                </td>
-                                                <td>@item.Volume</td>
-                                                <td>@item.Amount</td>
-                                            </tr>
-                                }
-                                </tbody>
-                                <tfoot>
-                                    <tr>
-                                        <th>Total</th>
-                                        <th>@Model.Count</th>
-                                        <th>@Model.Sum(m=>m.Volume)</th>
-                                        <th>@Model.Sum(m=>m.Amount)</th>
-                                    </tr>
-                                </tfoot>
-                            </table>
-                        </div>
-                }
-            </div>
+            </form>
+            @if (Model.Any())
+            {
+                <div class="row table-responsive">
+                    <table class="table table-striped" id="dataTable">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Code</th>
+                                <th>Product</th>
+                                <th>Category</th>
+                                <th>Volume</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                var i = 0;
+                            }
+                            @foreach (var item in Model)
+                            {
+                                i++;
+                                <tr>
+                                    <td>@i</td>
+                                    <td>@item.Product.Code</td>
+                                    <td> @item.Product.Name</td>
+                                    <td>@item.Product.ProductCategory.Name</td>
+                                    <td>@item.Volume</td>
+                                    <td>@item.Amount</td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th>#</th>
+                                <th>#</th>
+                                <th>Total</th>
+                                <th>@Model.Count</th>
+                                <th>@Model.Sum(m=>m.Volume)</th>
+                                <th>@Model.Sum(m=>m.Amount)</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            }
         </div>
-    </form>
+    </div>
 </div>
 
