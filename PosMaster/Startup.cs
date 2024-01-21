@@ -61,10 +61,32 @@ namespace PosMaster
                 password = EncypterService.Decrypt(password);
                 user = EncypterService.Decrypt(user);
             }
-            var conString = $"Host={server};Port={int.Parse(port)};" +
-                $"Database={database};User Id={user};Password={password}";
+            var conString = "";
             var os = Environment.Is64BitOperatingSystem ? "64" : "32";
             Console.WriteLine($"PosMaster Running. OS:{os} BIT -{Environment.OSVersion.VersionString} {Environment.MachineName}");
+
+            if (WebHostEnvironment.IsDevelopment())
+                conString = $"Host={server};Port={int.Parse(port)};" +
+                $"Database={database};User Id={user};Password={password}";
+            else
+            {
+                // Use connection string provided at runtime by FlyIO.
+                var connUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+
+                // Parse connection URL to connection string for Npgsql
+                connUrl = connUrl.Replace("postgres://", string.Empty);
+                var pgUserPass = connUrl.Split("@")[0];
+                var pgHostPortDb = connUrl.Split("@")[1];
+                var pgHostPort = pgHostPortDb.Split("/")[0];
+                var pgDb = pgHostPortDb.Split("/")[1];
+                var pgUser = pgUserPass.Split(":")[0];
+                var pgPass = pgUserPass.Split(":")[1];
+                var pgHost = pgHostPort.Split(":")[0];
+                var pgPort = pgHostPort.Split(":")[1];
+                var updatedHost = pgHost.Replace("flycast", "internal");
+
+                conString = $"Server={updatedHost};Port={pgPort};User Id={pgUser};Password={pgPass};Database={pgDb};";
+            }
 
             services.AddDbContext<DatabaseContext>(options =>
             {
