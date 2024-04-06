@@ -10,6 +10,7 @@
     <div class="card-body">
         <h3>@Model.Name &nbsp; <span class="badge badge-success">@Model.Status</span></h3>
         <div>
+            <p>Code: @Html.Raw(Model.Code)</p>
             <p>Phone Number: @Html.Raw(Model.PrimaryTelephone)</p>
             <p>Email Address: @Html.Raw(Model.EmailAddress)</p>
             <p>Country: @Html.Raw(Model.CountryFull)</p>
@@ -18,6 +19,17 @@
             <p>Display Buying Price: @Html.Raw(Model.DisplayBuyingPrice)</p>
             <p>Clerk Dashboard: @Html.Raw(Model.ShowClerkDashboard)</p>
             <p>@Html.Raw(Model.Notes)</p>
+            @if (User.IsInRole(Role.SuperAdmin))
+            {
+                <form asp-action="DeleteClient">
+                    <input type="hidden" value="@Model.Id" name="Id">
+                    <input type="hidden" value="@Model.Code" name="Code">
+                    <input type="hidden" value="@Model.InstanceId" name="InstanceId">
+                    <button class="text-danger btn-link btn-sm" type="submit" onclick='return confirm("Are you sure to delete ?")'>
+                        <i class="fa fa-times-circle"></i> Delete Client
+                    </button>
+                </form>
+            }
         </div>
         <div class="row">
             @foreach (var item in instances)

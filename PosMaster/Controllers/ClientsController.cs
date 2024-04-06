@@ -84,5 +84,14 @@ namespace PosMaster.Controllers
             var dataRes = await _clientInterface.ByIdAsync(id);
             return View(dataRes.Data);
         }
+
+        public async Task<IActionResult> DeleteClient(BaseViewModel model)
+        {
+            model.Personnel = User.Identity.Name;
+            var result = await _clientInterface.DeleteClientAsync(model);
+            TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, "Delete Client", result.Message);
+            return
+          result.Data ? RedirectToAction(nameof(All)) : RedirectToAction(nameof(Display), new { id = model.Id });
+        }
     }
 }
