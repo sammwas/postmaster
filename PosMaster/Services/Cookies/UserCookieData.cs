@@ -41,5 +41,6 @@ namespace PosMaster.Services
         public string Gender { get; set; }
         public bool ShowCardPos { get; set; }
         public bool ShowClerkDashboard { get; set; }
+        public bool IsKioskMode { get; set; }
     }
 }

@@ -79,9 +79,10 @@ namespace PosMaster.Controllers
                 TempData.SetData(AlertLevel.Warning, "Clients", result.Message);
             return View(result.Data);
         }
-        //public async Task<IActionResult> Summary()
-        //{
-        //    return View();
-        //}
+        public async Task<IActionResult> Display(Guid id)
+        {
+            var dataRes = await _clientInterface.ByIdAsync(id);
+            return View(dataRes.Data);
+        }
     }
 }

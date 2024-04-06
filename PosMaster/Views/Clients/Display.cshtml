@@ -1,0 +1,50 @@
+﻿@model Client
+@inject IClientInstanceInterface _clientInstanceInterface;
+@{
+    ViewData["Active"] = "Clients";
+    ViewData["Title"] = $"View {Model.Code}";
+    var instancesRes = await _clientInstanceInterface.ByClientIdAsync(Model.Id);
+    var instances = instancesRes.Data;
+}
+<div class="card">
+    <div class="card-body">
+        <h3>@Model.Name &nbsp; <span class="badge badge-success">@Model.Status</span></h3>
+        <div>
+            <p>Phone Number: @Html.Raw(Model.PrimaryTelephone)</p>
+            <p>Email Address: @Html.Raw(Model.EmailAddress)</p>
+            <p>Country: @Html.Raw(Model.CountryFull)</p>
+            <p>Town: @Html.Raw(Model.Town)</p>
+            <p>Currency: @Html.Raw(Model.CurrencyFull)</p>
+            <p>Display Buying Price: @Html.Raw(Model.DisplayBuyingPrice)</p>
+            <p>Clerk Dashboard: @Html.Raw(Model.ShowClerkDashboard)</p>
+            <p>@Html.Raw(Model.Notes)</p>
+        </div>
+        <div class="row">
+            @foreach (var item in instances)
+            {
+                <div class="col-md-6">
+                    <div class="card-body">
+                        <h4>@item.Name</h4>
+                        <p>@item.Notes</p>
+                        <hr />
+                        <p>
+                            <label>Phone Number</label> : @item.PrimaryTelephone @if (!string.IsNullOrEmpty(item.SecondaryTelephone))
+                            {
+                                <span>or @item.SecondaryTelephone</span>
+                            }
+                        </p>
+                        <p><label>Town</label> : @item.Town</p>
+                        <p><label>Location</label> : @item.Location</p>
+                        @if (User.IsInRole(Role.SuperAdmin))
+                        {
+                            <p>
+                                <a asp-controller="Home" asp-action="EnterKiosk" asp-route-insId="@item.Id"
+                           class="btn btn-primary"><i class="fa fa-check-circle"></i> Enter Kiosk Mode</a>
+                            </p>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

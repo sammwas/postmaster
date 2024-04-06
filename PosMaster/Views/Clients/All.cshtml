@@ -33,8 +33,7 @@
                     @foreach (var item in Model)
                     {
                         <tr>
-                            @*<td><a asp-controller="ClientInstances" asp-action="All">@item.Code</a></td>*@
-                            <td>@item.Code</td>
+                            <td><a asp-action="Display" asp-route-id="@item.Id" title="View more">@item.Code</a></td>
                             <td>@item.Name</td>
                             <td>@item.EmailAddress</td>
                             <td>

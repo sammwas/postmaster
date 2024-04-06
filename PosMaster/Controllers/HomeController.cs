@@ -667,6 +667,21 @@ namespace PosMaster.Controllers
             return View(licenceStatus.Data);
         }
 
+        public async Task<IActionResult> EnterKiosk(Guid insId)
+        {
+            var user = await _userManager.FindByNameAsync(User.Identity.Name);
+            var instanceRes = await _instanceInterface.ByIdAsync(insId);
+            await StoreCookiesDataAsync(user, instanceRes.Data);
+            return RedirectToLocal("");
+        }
+
+        public async Task<IActionResult> ExitKiosk()
+        {
+            var user = await _userManager.FindByNameAsync(User.Identity.Name);
+            await StoreCookiesDataAsync(user);
+            return RedirectToLocal("");
+        }
+
         #region Helpers 
         private void AddErrors(IdentityResult result)
         {
@@ -686,15 +701,17 @@ namespace PosMaster.Controllers
             }
 
             userData.InstanceCode = clientInstance.Code;
+            userData.InstanceId = clientInstance.Id;
             userData.InstanceName = clientInstance.Name;
             var client = clientInstance.Client;
             userData.ClientCode = client.Code;
+            userData.ClientId = client.Id;
             userData.ClientName = client.Name;
             userData.ClientLogoPath = client.LogoPath;
             userData.CurrencyShort = client.CurrencyShort;
             userData.ShowCardPos = clientInstance.ShowCardPosDisplay;
             userData.ShowClerkDashboard = clientInstance.Client.ShowClerkDashboard;
-
+            userData.IsKioskMode = !user.InstanceId.Equals(clientInstance.InstanceId);
             _cookiesService.Store(userData);
         }
 
