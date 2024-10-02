@@ -3,7 +3,7 @@
 @model List<GoodReceivedNote>
 @{
     ViewData["Active"] = "Products";
-    ViewData["Title"] = "Received Goods";
+    ViewData["Title"] = "Received & Supplier Invoices";
     var userData = _cookies.Read();
     var instancesRes = await _instanceInterface.ByClientIdAsync(userData.ClientId);
     var instances = instancesRes.Data;
@@ -14,8 +14,12 @@
     <div class="card">
         <div class="row">
             <div class="card-header">
-                <h3 class="card-title">@ViewData["Title"] <span class="text-right"><a asp-action="EditReceivedGoods"
-                            asp-route-id="" class="btn btn-sm btn-info">Add</a></span></h3>
+                <h3 class="card-title">
+                    @ViewData["Title"] <span class="text-right">
+                        <a asp-action="EditReceivedGoods"
+                           asp-route-id="" class="btn btn-sm btn-info">Add</a>
+                    </span>
+                </h3>
             </div>
         </div>
         <div class="card-body">
@@ -30,13 +34,17 @@
                                 {
                                     if (!string.IsNullOrEmpty(instanceId) && item.Id.ToString().Equals(instanceId))
                                     {
-                                        <option selected="selected" value="@item.Id" title="@item.Notes">@item.Code - @item.Name
-                                            (@item.Client.Code - @item.Client.Name)</option>
+                                        <option selected="selected" value="@item.Id" title="@item.Notes">
+                                            @item.Code - @item.Name
+                                            (@item.Client.Code - @item.Client.Name)
+                                        </option>
                                     }
                                     else
                                     {
-                                        <option value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code
-                                            - @item.Client.Name)</option>
+                                        <option value="@item.Id" title="@item.Notes">
+                                            @item.Code - @item.Name (@item.Client.Code
+                                            - @item.Client.Name)
+                                        </option>
                                     }
                                 }
                             </select>
@@ -47,8 +55,8 @@
                             <label>Date From</label>
                             <div class="input-group date" id="dateFrom" data-target-input="nearest">
                                 <input type="text" name="dtFrom" class="form-control datetimepicker-input"
-                                    data-target="#dateFrom" value="@ViewData["dtFrom"]"
-                                    placeholder="Date From (@dateToday)" />
+                                       data-target="#dateFrom" value="@ViewData["dtFrom"]"
+                                       placeholder="Date From (@dateToday)" />
                                 <div class="input-group-append" data-target="#dateFrom" data-toggle="datetimepicker">
                                     <div class="input-group-text"><i class="fa fa-calendar"></i></div>
                                 </div>
@@ -60,8 +68,8 @@
                             <label>Date To</label>
                             <div class="input-group date" id="dateTo" data-target-input="nearest">
                                 <input type="text" name="dtTo" class="form-control datetimepicker-input"
-                                    data-target="#dateTo" value="@ViewData["dtTo"]"
-                                    placeholder="Date To (@dateToday)" />
+                                       data-target="#dateTo" value="@ViewData["dtTo"]"
+                                       placeholder="Date To (@dateToday)" />
                                 <div class="input-group-append" data-target="#dateTo" data-toggle="datetimepicker">
                                     <div class="input-group-text"><i class="fa fa-calendar"></i></div>
                                 </div>
@@ -76,45 +84,55 @@
                     </div>
                 </div>
             </form>
-            <table id="dataTable" class="table table-bordered table-striped">
-                <thead>
-                    <tr>
-                        <th>Code</th>
-                        <th>Date</th>
-                        <th>Supplier</th>
-                        <th>PO Ref</th>
-                        <th>Amount</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (Model.Any())
-                    {
-                        @foreach (var item in Model)
+            <div class="table-responsive">
+                <table id="dataTable" class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Code</th>
+                            <th>Date</th>
+                            <th>Supplier</th>
+                            <th>PO Ref</th>
+                            <th>Amount</th>
+                            <th>Paid</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Any())
                         {
-                            <tr>
-                                <td><a asp-action="ReceivedGoodsDetail" asp-route-id="@item.Id">@item.Code</a></td>
-                                <td>@item.DateCreated</td>
-                                <td>@item.Supplier.Code - @item.Supplier.Name</td>
-                                <td>@item.PoCode</td>
-                                <td>@item.PoGrnProducts.Sum(p=>p.GrnAmount)</td>
-                                <td>@item.Status</td>
-                            </tr>
-                        }
+                            var i = 0;
+                            @foreach (var item in Model)
+                            {
+                                i++;
+                                <tr>
+                                    <td>@i</td>
+                                    <td><a asp-action="ReceivedGoodsDetail" asp-route-id="@item.Id">@item.Code</a></td>
+                                    <td>@item.DateCreated</td>
+                                    <td>@item.Supplier.Code - @item.Supplier.Name</td>
+                                    <td>@item.PoCode</td>
+                                    <td>@item.Amount</td>
+                                    <td>@item.AmountReceived</td>
+                                    <td>@item.Status</td>
+                                </tr>
+                            }
 
-                    }
-                </tbody>
-                <tfoot>
-                    <tr>
-                        <th>Code</th>
-                        <th>Date</th>
-                        <th>Supplier</th>
-                        <th>PO Ref</th>
-                        <th>Amount</th>
-                        <th>Status</th>
-                    </tr>
-                </tfoot>
-            </table>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th>#</th>
+                            <th>Code</th>
+                            <th>Date</th>
+                            <th>Supplier</th>
+                            <th>PO Ref</th>
+                            <th>Amount</th>
+                            <th>Paid</th>
+                            <th>Status</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
         </div>
     </div>
 </div>

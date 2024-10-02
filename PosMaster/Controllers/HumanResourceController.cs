@@ -14,11 +14,14 @@ namespace PosMaster.Controllers
     public class HumanResourceController : Controller
     {
         private readonly IHumanResourceInterface _humanResourceInterface;
+        private readonly IExpenseInterface _expenseInterface;
         private readonly UserCookieData _userData;
-        public HumanResourceController(IHumanResourceInterface humanResourceInterface, ICookiesService cookiesService)
+        public HumanResourceController(IHumanResourceInterface humanResourceInterface, ICookiesService cookiesService,
+            IExpenseInterface expenseInterface)
         {
             _humanResourceInterface = humanResourceInterface;
             _userData = cookiesService.Read();
+            _expenseInterface = expenseInterface;
         }
 
         public async Task<IActionResult> EditBank(Guid? id)
@@ -180,7 +183,8 @@ namespace PosMaster.Controllers
             if (id == null)
                 return View(new LeaveApplicationViewModel
                 {
-                    Status = EntityStatus.Active
+                    Status = EntityStatus.Active,
+                    UserId = _userData.UserId
                 });
 
             var result = await _humanResourceInterface.LeaveApplicationByIdAsync(id.Value);
@@ -285,6 +289,23 @@ namespace PosMaster.Controllers
             var result = await _humanResourceInterface.ApproveMonthPaymentAsync(model);
             if (!result.Success)
                 TempData.SetData(AlertLevel.Warning, "Approve Payments", result.Message);
+            if (result.Success)
+            {
+                var monDt = DateTime.Now.AddMonths(model.Month * -1);
+                var monthStr = monDt.ToString("MMMM");
+                var expenseModel = new ExpenseViewModel
+                {
+                    ExpenseTypeId = model.ExpenseTypeId,
+                    PaymentModeId = model.PaymentModeId,
+                    ModeNumber = model.PaymentModeNo,
+                    Notes = $"SALARY {model.Year} - {monthStr}",
+                    ClientId = _userData.ClientId,
+                    InstanceId = _userData.InstanceId,
+                    Code = model.PaymentModeNo,
+                    Amount = result.Data
+                };
+                await _expenseInterface.EditAsync(expenseModel);
+            }
             return RedirectToAction(nameof(MonthlyPayments), new
             {
                 model.Year,
@@ -302,6 +323,13 @@ namespace PosMaster.Controllers
             var result = await _humanResourceInterface.MonthlyPaymentsAsync(month, year, _userData.ClientId, instanceId);
             if (!result.Success)
                 TempData.SetData(AlertLevel.Warning, "Monthly Payments", result.Message);
+            return View(result.Data);
+        }
+
+        public async Task<IActionResult> SalaryHistory()
+        {
+            var result = await _humanResourceInterface.EmployeeMonthPaymentAsync(_userData.ClientId, _userData.InstanceId, _userData.UserId);
+            TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, "Monthly Salary", result.Message);
             return View(result.Data);
         }
     }

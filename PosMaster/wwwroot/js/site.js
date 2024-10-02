@@ -34,9 +34,20 @@ $('#issBtnAdd').click(function (event) {
     addItemToList();
 })
 
+$(".posForm-number").keyup(function (evt) {
+    evt = evt || window.event;
+    if (evt.keyCode == 13) {
+        addItemToList();
+    }
+});
+
 var addItemToList = function () {
     item = {};
-    item = $('#product-select').select2('data')[0];
+    var isCards = $("#inpShowCards").val();
+    if (isCards)
+        item = JSON.parse(atob($("#inpProductEncoded").val()));
+    else
+        item = $('#product-select').select2('data')[0];
     var productId = item.id;
     var itemName = item.name;
     var quantity = $("#quantityBought").val();
@@ -47,28 +58,35 @@ var addItemToList = function () {
     quantity = parseFloat(quantity)
     avQuantity = parseFloat(avQuantity)
     var discount = (sellingPrice - unitPrice) * quantity;
+    var fa = '<i class="fa fa-times-circle"></i> ';
+    $("#issMsg").html('');
     if (productId === "") {
-        $("#issMsg").html('<i class="fa fa-times-circle"></i> ' + " Select an item first").addClass('text-danger');
+        $("#issMsg").html(fa + " Select an item first")
+            .addClass('text-danger breadcrumb');
         $("#issItemId").focus();
         return
     }
     else if (!quantity || quantity <= 0) {
-        $("#issMsg").html('<i class="fa fa-times-circle"></i> ' + " Quantity is required").addClass('text-danger');
+        $("#issMsg").html(fa + " Quantity is required")
+            .addClass('text-danger breadcrumb');
         $("#quantityBought").focus();
         return
     }
     else if (unitPrice === "") {
-        $("#issMsg").html('<i class="fa fa-times-circle"></i> ' + " Price is required").addClass('text-danger');
+        $("#issMsg").html(fa + " Price is required")
+            .addClass('text-danger breadcrumb');
         $("#issWarehouseId").focus();
         return
     }
     else if (quantity > avQuantity) {
-        $("#issMsg").html('<i class="fa fa-times-circle"></i> ' + " Available quantity is " + avQuantity).addClass('text-danger');
+        $("#issMsg").html(fa + " Available quantity is " + avQuantity)
+            .addClass('text-danger breadcrumb');
         $("#quantityBought").focus();
         return
     }
     else {
         $("#issMsg").text("");
+        $("#issMsg").removeClass("breadcrumb");
         var listItem = {
             "productId": productId,
             "quantity": quantity,
@@ -84,6 +102,13 @@ var addItemToList = function () {
         $("#quantityBought").val("");
         $("#unitPrice").val("");
         $('#productListForm').trigger('reset');
+        if (isCards) {
+            $("#inpSearchProduct").val('');
+            $("#selectProductModal").modal('hide');
+        } else {
+            $('#product-select').select2('open');;
+        }
+
     }
 };
 var createIssueListTable = function () {
@@ -270,8 +295,11 @@ $("#fulfil-order").click(function () {
 var ul = $("#low-stock-ul");
 var x = document.getElementById('revenue-chart-canvas');
 if (x) {
+    var dFrom = $("#inpDateFrom").val();
+    var dTo = $("#inpDateTo").val();
+    var inId = $("#inpInstanceId").val();
     var salesChartCanvas = document.getElementById('revenue-chart-canvas').getContext('2d')
-    $.get('/Reports/MonthlySalesReport').done(function (data) {
+    $.get('/Reports/MonthlySalesReport?dtFrom=&dtTo=' + dTo + '&instanceId=' + inId).done(function (data) {
         let sales = new Object();
         sales = getSales(data);
         plot(sales);
@@ -364,24 +392,32 @@ $(".day").click(function () {
     var str = date[0] + '-' + date[1] + '-' + date[2];
     var date_ = new Date(str).toString().split(" ");
     var xstr = date_[2] + '-' + date_[1] + '-' + date_[3];
-    window.location.href = '/Reports/SalesReport?dtFrom=' + xstr + '&dtTo=' + xstr + '&option=Weekly';
+    //window.location.href = '/Reports/SalesReport?dtFrom=' + xstr + '&dtTo=' + xstr + '&option=Weekly';
 });
 
 if (x) {
-    $.get('/Products/LowStockProducts').done(function (data) {
+    var inId = $("#inpInstanceId").val();
+    $.get('/Products/LowStockProducts?inId=' + inId).done(function (data) {
         if (data.success) {
             data.data.forEach(element => {
                 ul.append('<li><span class= "text">[' + element.code + ']' + element.name + ' [Qty ' + element.availableQuantity + ' ' + element.uom
                     + ']</span > <small class="badge badge-info">' + element.productCategory.name + '</small>  </li >');
             });
+        } else {
+            ul.append('<li><span class= "text"> No products below re-order level </span>'
+                + '<small class="badge badge-info">' + data.message + '</small>  </li> ');
         }
     });
 }
 
-if (x) {
+var donut = document.getElementById('donutChart');
+if (donut) {
     var labels = [];
     var donutData = [];
-    $.get('/Products/TopSellingByVolume').done(function (data) {
+    var dFrom = $("#inpDateFrom").val();
+    var dTo = $("#inpDateTo").val();
+    var inId = $("#inpInstanceId").val();
+    $.get('/Products/TopSellingByVolume?dtFrom=' + dFrom + '&dtTo=' + dTo + '&inId=' + inId).done(function (data) {
         if (data.success) {
             data.data.forEach(element => {
                 labels.push(element.product.code + '-' + element.product.name + ' [' + element.product.productCategory.name + ']');
@@ -455,9 +491,91 @@ $("#item-price-select").change(function () {
     });
 })
 
+
+$("#inpRcptCode").blur(function () {
+    var code = $(this).val();
+    $.get(`/PointOfSale/ReceiptByCode?code=${code}`).done(function (data) {
+        if (data.success) {
+            $("#inpRcptAmt").val(data.data.amount);
+        }
+    });
+})
+
 removeGradingSchemeRow = function (id) {
     document.getElementById("tr_" + id).remove();
 };
+
+$("#btnSearchProduct").click(function (e) {
+    e.preventDefault();
+    getPosCardProducts();
+});
+
+$("#inpSearchProduct").keyup(function (e) {
+    e.preventDefault();
+    getPosCardProducts();
+});
+
+var addCardProduct;
+var getPosCardProducts = function () {
+    var code = $("#inpSearchProduct").val();
+    var isPos = $("#inpIsPos").val();
+    var div = $("#divPosCard");
+    if (code === '') {
+        $("#inpSearchProduct").focus();
+        div.html('');
+    } else {
+        div.html('<p class="alert alert-info"><i class="fa fa-spinner fa-spin"></i> searching ' + code + '. please wait ...</p>')
+        $.get('/Products/Search?isPos=' + isPos + '&term=' + code + '&cardView=True', function (data) {
+            var message = data.message;
+            if (!data.success) {
+                var p = '<p class="alert alert-warning">' + message + '</p>';
+                div.html(p);
+            } else {
+                var cardBody = '';
+                $.each(data.data, function () {
+                    var product = {
+                        quantity: this.availableQuantity,
+                        sellingPrice: this.sellingPrice,
+                        buyingPrice: this.buyingPrice,
+                        id: this.id,
+                        tax: this.taxRate,
+                        name: this.name,
+                        allowDiscount: this.allowDiscount,
+                        code: this.code,
+                    };
+                    var card = '<div class="col-md-6" id="modal-product-' + this.id + '" data="' + btoa(JSON.stringify(product)) + '"'
+                        + 'onclick = "addCardProduct(`' + this.id + '`)" style="cursor: pointer"> <div class="small-box bg-info">'
+                        + '<div class="inner"><h4>' + this.code + '</h4>  <p>' + this.name + ' (' + this.availableQuantity + ' ' + this.uom + ')</p></div>'
+                        + '<div class="icon"><i class="fa fa-shopping-cart"></i> </div>'
+                        + '<p class="small-box-footer">Price: ' + this.sellingPrice.toFixed(2) + '</p></div></div>';
+                    cardBody += card;
+                });
+                div.html(cardBody);
+            }
+        });
+    }
+};
+
+addCardProduct = function (id) {
+    $("#inpProductEncoded").val("")
+    $("#unitPrice").val("")
+    $("#quantityBought").val("")
+    $("#hProductTitle").text("Product")
+    var productEncoded = $("#modal-product-" + id).attr("data");
+    var product = JSON.parse(atob(productEncoded))
+    var price = product.sellingPrice;
+    var allowDisc = product.allowDiscount;
+    $("#unitPrice").val(price);
+    $("#inpProductEncoded").val(productEncoded)
+    $('#unitPrice').attr("readonly", !allowDisc);
+    $("#hProductTitle").text(product.code + ' - ' + product.name);
+    $("#selectProductModal").modal('show');
+};
+
+$("#btnAddModalProduct").click(function (e) {
+    e.preventDefault();
+    addItemToList();
+});
 
 $('.product-select-search').select2({
     ajax: {

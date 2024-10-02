@@ -4,8 +4,7 @@ namespace PosMaster.ViewModels
 {
     public class ApplyLicenceViewModel
     {
-        [Required, Display(Name = "Email address")]
-        [DataType(DataType.EmailAddress)]
+        [Required, Display(Name = "UserName")]
         public string UserName { get; set; }
         [Required]
         [DataType(DataType.MultilineText)]

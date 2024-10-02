@@ -58,7 +58,7 @@
                     <input asp-for="InstanceId" value="@userData.InstanceId" />
                     <input asp-for="PoId" type="hidden" />
                     <input asp-for="Code" type="hidden" value="@userData.InstanceCode" />
-                    <input asp-for="Personnel" value="@userData.FullName" type="hidden" />
+                    <input asp-for="Personnel" value="@User.Identity.Name" type="hidden" />
                     <input asp-for="SupplierId" type="hidden">
                     <div class="row">
                         <div class="col-md-6">

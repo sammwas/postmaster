@@ -32,6 +32,12 @@ namespace PosMaster.Controllers
                 instanceId = iId;
             if (User.IsInRole(Role.Clerk))
                 instanceId = _userData.InstanceId;
+            if (string.IsNullOrEmpty(dtFrom))
+            {
+                var date = DateTime.Now.ToString("dd-MMM-yyyy");
+                dtFrom = date;
+                ViewData["DtFrom"] = dtFrom;
+            }
             ViewData["InstanceId"] = instanceId;
             var result = await _orderInterface.OrdersAsync(_userData.ClientId, instanceId, dtFrom, dtTo, search);
             if (!result.Success)

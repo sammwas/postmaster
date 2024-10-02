@@ -1,0 +1,304 @@
+﻿@inject IMasterDataInterface _masterDataInterface;
+@inject IClientInstanceInterface _instanceInterface;
+@inject IUserInterface _userInterface;
+@inject ICookiesService _cookies;
+@inject ICustomerInterface _customerInterface;
+@model List<Receipt>
+@{
+    ViewData["Active"] = "Reports";
+    ViewData["Title"] = "Product Sales Report";
+    var userData = _cookies.Read();
+    var instancesRes = await _instanceInterface.ByClientIdAsync(userData.ClientId);
+    var instances = instancesRes.Data;
+    var instanceId = ViewData["InstanceId"]?.ToString();
+    var modeId = ViewData["PaymentModeId"]?.ToString();
+    var type = ViewData["SaleType"]?.ToString();
+    var customerId = ViewData["CustomerId"]?.ToString();
+    var customer = string.IsNullOrEmpty(customerId) ? new FormSelectViewModel()
+    : _customerInterface.DefaultClientCustomerAsync(userData.ClientId, customerId).Result.Data;
+    var dateToday = DateTime.Now.ToString("dd-MMM-yyyy");
+    var summary = ViewData["Summarized"]?.ToString() ?? "";
+    var isSummary = summary.ToUpper().Equals("TRUE");
+    var title = isSummary ? "Summarized" : "Not Summarized";
+}
+<div>
+    <div class="card">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card-header">
+                    <div class="d-none d-print-block">
+                        <h2>
+                            @userData.ClientName
+                        </h2>
+                        <h4 style="text-decoration:underline">@userData.InstanceName</h4>
+                    </div>
+                    <h3 class="card-title">
+                        @ViewData["Title"] <span>[@title]</span>
+                    </h3>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <p class="text-right">
+                    <strong>
+                        <span>Total Sales : @Helpers.FormatAmount(Model.Sum(r =>r.Amount),2)</span>
+                        <span>Paid : @Helpers.FormatAmount(Model.Sum(r =>r.AmountReceived),2)</span>
+                        <span>Balance : @Helpers.FormatAmount(Model.Sum(r =>r.Balance),2)</span>
+                    </strong>
+                </p>
+            </div>
+        </div>
+        <div class="card-body">
+            <form autocomplete="off" method="get" class="d-print-none">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Instance</label>
+                            <select class="form-control select2" name="insId" style="width: 100%;">
+                                <option value="">--Select Instance--</option>
+                                @foreach (var item in instances)
+                                {
+                                    if (!string.IsNullOrEmpty(instanceId) && item.Id.ToString().Equals(instanceId))
+                                    {
+                                                <option selected="selected" value="@item.Id" title="@item.Notes">
+                                            @item.Code - @item.Name
+                                                    (@item.Client.Code - @item.Client.Name)
+                                                </option>
+                                    }
+                                    else
+                                    {
+                                                <option value="@item.Id" title="@item.Notes">
+                                            @item.Code - @item.Name (@item.Client.Code
+                                                    - @item.Client.Name)
+                                                </option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Customer</label>
+                            <select name="cId" class="form-control select2"
+                                    id="customer-select">
+                                @if (string.IsNullOrEmpty(customerId))
+                                {
+                                        <option>--Select Customer--</option>
+
+                                }
+                                else
+                                {
+                                        <option selected value="@customer.Id">@customer.Text</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Date From</label>
+                            <div class="input-group date" id="dateFrom" data-target-input="nearest">
+                                <input type="text" name="dtFrom" class="form-control datetimepicker-input"
+                                       data-target="#dateFrom" value="@ViewData["DateFrom"]"
+                                       placeholder="Date From (@dateToday)" />
+                                <div class="input-group-append" data-target="#dateFrom" data-toggle="datetimepicker">
+                                    <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Date To</label>
+                            <div class="input-group date" id="dateTo" data-target-input="nearest">
+                                <input type="text" name="dtTo" class="form-control datetimepicker-input"
+                                       data-target="#dateTo" value="@ViewData["DateTo"]"
+                                       placeholder="Date To (@dateToday)" />
+                                <div class="input-group-append" data-target="#dateTo" data-toggle="datetimepicker">
+                                    <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Sale Type</label>
+                            <select class="form-control select2" name="type" style="width: 100%;">
+                                <option value="">--Select Type--</option>
+                                @foreach (var item in new List<string> { "", "CASH", "CREDIT" })
+                                {
+                                    if (item.Equals(type))
+                                    {
+                                                <option selected="selected" value="@item" title="@item">
+                                            @item
+                                                </option>
+                                    }
+                                    else
+                                    {
+
+                                                <option value="@item">@item</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Search</label>
+                            <input type="text" name="search" class="form-control" value="@ViewData["Search"]" placeholder="Receipt #" />
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <br />
+                            <input type="hidden" name="summarized" value="@summary" />
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <br />
+                            <button class="btn btn-secondary" id="btnPrint"><i class="fas fa-print"></i> Print Report</button>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <br />
+                            <a style="text-decoration:underline" asp-route-insId="@instanceId" asp-route-cId="@customerId"
+                               asp-route-type="@type" asp-route-dtFrom="@ViewData["DateFrom"]" asp-route-dtTo="@ViewData["DateTo"]"
+                               asp-route-search="@ViewData["Search"]" asp-route-summarized="@(!isSummary)"><i class="fas fa-list"></i> Showing @title </a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <table class="table table-bordered table-striped" style="width:100%">
+                @if (isSummary)
+                {
+                    var k = 0;
+                    var lineItems = Model.SelectMany(m => m.ReceiptLineItems).ToList();
+                    var pIds = lineItems.Select(l => l.ProductId).Distinct().ToList();
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Code</th>
+                                <th>Name</th>
+                                <th>Quantity</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tfoot>
+                            <tr>
+                                <th>#</th>
+                                <th>Code</th>
+                                <th>Name</th>
+                                <th>Quantity</th>
+                                <th>Total</th>
+                            </tr>
+                        </tfoot>
+                        <tbody>
+                        @foreach (var pId in pIds)
+                        {
+                            k++;
+                                    <tr>
+                                        <td>@k</td>
+                                        <td>@lineItems.FirstOrDefault(l=>l.ProductId.Equals(pId)).Product.Code</td>
+                                        <td>@lineItems.FirstOrDefault(l=>l.ProductId.Equals(pId)).Product.Name</td>
+                                        <td>@lineItems.Where(l=>l.ProductId.Equals(pId)).Sum(l=>l.Quantity) @lineItems.FirstOrDefault(l=>l.ProductId.Equals(pId)).Product.UnitOfMeasure?.Name</td>
+                                        <td>@lineItems.Where(l=>l.ProductId.Equals(pId)).Sum(l=>l.Amount)</td>
+                                    </tr>
+                        }
+                        </tbody>
+                }
+                else
+                {
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Receipt #</th>
+                                <th>Customer</th>
+                                <th>Sale Type</th>
+                                <th>Amount</th>
+                                <th>Balance</th>
+                                <th>Date</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @{
+                            var i = 0;
+                        }
+                        @foreach (var item in Model)
+                        {
+                            i++;
+                            var saleType = item.IsCredit ? "CREDIT" : "CASH";
+                                    <tr class="text-bold">
+                                        <td>
+                                    @i
+                                        </td>
+                                        <td>
+                                    @item.Code
+                                        </td>
+                                        <td>
+                                    @item.Customer.FullName
+                                        </td>
+                                        <td>@saleType</td>
+                                        <td>
+                                    @item.Amount
+                                        </td>
+                                        <td>
+                                    @item.Balance
+                                        </td>
+                                        <td>
+                                    @item.DateCreated
+                                        </td>
+                                        <td>
+                                    @item.Notes
+                                        </td>
+                                    </tr>
+                            var j = 0;
+                            @foreach (var lineItem in item.ReceiptLineItems)
+                            {
+                                j++;
+                                            <tr class="">
+                                                <td>
+                                                    <span>@i</span>.<span>@j</span>
+                                                </td>
+                                                <td>
+                                                    <span>#</span>  @lineItem.Product.Code
+                                                </td>
+                                                <td>
+                                        @lineItem.Product.Name
+                                                </td>
+                                                <td>
+                                        @lineItem.Quantity <span>@lineItem.Product.UnitOfMeasure?.Name</span>
+                                                </td>
+                                                <td>
+                                                    <span>&#64;</span>  @lineItem.UnitPrice
+                                                </td>
+                                                <td>
+                                        @lineItem.Amount
+                                                </td>
+                                                <td>
+                                        @lineItem.DateCreated
+                                                </td>
+                                                <td>@lineItem.Code</td>
+                                            </tr>
+                            }
+                        }
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th>#</th>
+                                <th>Receipt #</th>
+                                <th>Customer</th>
+                                <th>Sale Type</th>
+                                <th>Amount</th>
+                                <th>Balance</th>
+                                <th>Date</th>
+                                <th>Notes</th>
+                            </tr>
+                        </tfoot>
+                }
+
+            </table>
+        </div>
+    </div>
+</div>

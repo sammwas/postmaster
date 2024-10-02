@@ -5,9 +5,7 @@
     ViewData["Active"] = "Products";
     ViewData["Title"] = "Purchase Orders";
     var userData = _cookies.Read();
-    var instancesRes = User.IsInRole(Role.SuperAdmin) ?
-    await _instanceInterface.AllAsync()
-    : await _instanceInterface.ByClientIdAsync(userData.ClientId);
+    var instancesRes = await _instanceInterface.ByClientIdAsync(userData.ClientId);
     var instances = instancesRes.Data;
     var instanceId = ViewData["InstanceId"]?.ToString();
     var dateToday = DateTime.Now.ToString("dd-MMM-yyyy");
@@ -32,13 +30,13 @@
                                 {
                                     if (!string.IsNullOrEmpty(instanceId) && item.Id.ToString().Equals(instanceId))
                                     {
-                                        <option selected="selected" value="@item.Id" title="@item.Notes">@item.Code - @item.Name
-                                            (@item.Client.Code - @item.Client.Name)</option>
+                                                <option selected="selected" value="@item.Id" title="@item.Notes">@item.Code - @item.Name
+                                                    (@item.Client.Code - @item.Client.Name)</option>
                                     }
                                     else
                                     {
-                                        <option value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code
-                                            - @item.Client.Name)</option>
+                                                <option value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code
+                                                    - @item.Client.Name)</option>
                                     }
                                 }
                             </select>
@@ -93,13 +91,13 @@
                     {
                         @foreach (var item in Model)
                         {
-                            <tr>
-                                <td><a asp-action="PurchaseOrder" asp-route-id="@item.Id">@item.Code</a></td>
-                                <td>@item.DateCreated</td>
-                                <td>@item.Supplier.Code - @item.Supplier.Name</td>
-                                <td>@item.PoGrnProducts.Sum(s=>s.PoAmount)</td>
-                                <td>@item.Status</td>
-                            </tr>
+                                    <tr>
+                                        <td><a asp-action="PurchaseOrder" asp-route-id="@item.Id">@item.Code</a></td>
+                                        <td>@item.DateCreated</td>
+                                        <td>@item.Supplier.Code - @item.Supplier.Name</td>
+                                        <td>@item.PoGrnProducts.Sum(s=>s.PoAmount)</td>
+                                        <td>@item.Status</td>
+                                    </tr>
                         }
 
                     }

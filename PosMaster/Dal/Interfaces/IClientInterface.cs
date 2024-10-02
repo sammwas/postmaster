@@ -19,6 +19,7 @@ namespace PosMaster.Dal.Interfaces
         Task<ReturnData<EmailSetting>> UpdateEmailSettingAsync(EmailSettingViewModel model);
         Task<ReturnData<EmailSetting>> ClientEmailSettingAsync(Guid clientId);
         ReturnData<string> UpdateLicence(Guid clientId, string licence, string personnel);
+        Task<ReturnData<bool>> DeleteClientAsync(BaseViewModel model);
     }
 
 
@@ -185,6 +186,7 @@ namespace PosMaster.Dal.Interfaces
                     dbClient.PhoneNumberLength = model.PhoneNumberLength;
                     dbClient.TelephoneCode = model.TelephoneCode;
                     dbClient.DisplayBuyingPrice = model.DisplayBuyingPrice;
+                    dbClient.ShowClerkDashboard = model.ShowClerkDashboard;
                     dbClient.Notes = model.Notes;
                     dbClient.Status = model.Status;
                     dbClient.DateLastModified = DateTime.UtcNow;
@@ -221,6 +223,7 @@ namespace PosMaster.Dal.Interfaces
                     PhoneNumberLength = model.PhoneNumberLength,
                     TelephoneCode = model.TelephoneCode,
                     DisplayBuyingPrice = model.DisplayBuyingPrice,
+                    ShowClerkDashboard = model.ShowClerkDashboard,
                     Personnel = model.Personnel,
                     Status = model.Status,
                     LogoPath = model.LogoPath,
@@ -351,7 +354,7 @@ namespace PosMaster.Dal.Interfaces
             {
                 var product = new Product
                 {
-                    Code = "D000",
+                    Code = Constants.DefaultProductCode,
                     Name = "DEFAULT",
                     ProductCategoryId = _context.ProductCategories
                     .Where(u => u.ClientId.Equals(clientId)).Select(u => u.Id)
@@ -490,6 +493,68 @@ namespace PosMaster.Dal.Interfaces
                 Console.WriteLine(ex);
                 result.ErrorMessage = ex.Message;
                 result.Message = "Error occured";
+                _logger.LogError($"{tag} {result.Message} : {ex}");
+                return result;
+            }
+        }
+
+        public async Task<ReturnData<bool>> DeleteClientAsync(BaseViewModel model)
+        {
+            var result = new ReturnData<bool> { Data = false };
+            var tag = nameof(DeleteClientAsync);
+            _logger.LogInformation($"{tag} client {model.ClientId} delete client {model.Code} by {model.Personnel}");
+            try
+            {
+                var client = await _context.Clients
+                    .FirstOrDefaultAsync(p => p.Id.Equals(model.Id));
+                if (client == null)
+                {
+                    result.Message = "Provided client Id not found";
+                    return result;
+                }
+
+                if (_context.Users.Any(u => u.ClientId.Equals(client.Id)))
+                    result.Message = "Client has Users";
+                if (_context.GeneralLedgerEntries.Any(u => u.ClientId.Equals(client.Id)))
+                    result.Message = "Client has Sales";
+                if (_context.Products.Any(u => u.ClientId.Equals(client.Id)))
+                    result.Message = "Client has Products";
+                if (!string.IsNullOrEmpty(result.Message))
+                    return result;
+
+                try
+                {
+                    var instances = await _context.ClientInstances
+                        .Where(i => i.ClientId.Equals(client.Id)).ToListAsync();
+                    _context.ClientInstances.RemoveRange(instances);
+                    _context.Clients.Remove(client);
+                    await _context.SaveChangesAsync();
+                    result.Success = true;
+                    result.Message = "Client Deleted";
+                    result.Data = true;
+                    return result;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
+                    result.ErrorMessage = ex.Message;
+                    _logger.LogError($"{tag} Unable to delete client {client.Id}. {ex.Message}");
+                }
+
+                client.Status = EntityStatus.Inactive;
+                client.DateLastModified = DateTime.Now;
+                client.LastModifiedBy = model.Personnel;
+                await _context.SaveChangesAsync();
+
+                result.Success = true;
+                result.Message = "Client in use - Deactivated";
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                result.ErrorMessage = ex.Message;
+                result.Message = "Unexpected Error occurred";
                 _logger.LogError($"{tag} {result.Message} : {ex}");
                 return result;
             }

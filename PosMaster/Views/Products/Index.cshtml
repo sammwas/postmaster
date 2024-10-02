@@ -15,7 +15,7 @@
             <h3 class="card-title">
                 <form autocomplete="off">
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-md-5">
                             <div class="form-group">
                                 <label>Instance</label>
                                 <select class="form-control select2" name="insId" style="width: 100%;" required>
@@ -34,10 +34,16 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="col-md-3 mt-4">
+                        <div class="col-md-3 ">
+                            <div class="form-group">
+                                <label>Search</label>
+                                <input type="text" name="search" class="form-control" placeholder="Search" value="@ViewData["Search"]" />
+                            </div>
+                        </div>
+                        <div class="col-md-2 mt-4">
                             <button type="submit" class="btn btn-primary">Submit</button>
                         </div>
-                        <div class="col-md-3 mt-4">
+                        <div class="col-md-2 mt-4">
                             @if (!User.IsInRole(Role.Clerk))
                             {
                                 <span class="text-right">
@@ -49,7 +55,7 @@
                 </form>
             </h3>
         </div>
-        <div class="card-body">
+        <div class="card-body table-responsive">
             <table id="dataTable" class="table table-bordered table-striped">
                 <thead>
                     <tr>
@@ -62,7 +68,7 @@
                         <th>Tax</th>
                         <th>Discount</th>
                         <th>Service</th>
-                        <th>Status</th>
+                        <th>Active</th>
                         <th>Options</th>
                     </tr>
                 </thead>
@@ -99,10 +105,23 @@
                                     <span class="badge badge-danger">NO</span>
                                 }
                             </td>
-                            <td>@item.Status.ToString()</td>
+                            <td>
+                                @if (item.Status.Equals(EntityStatus.Active))
+                                {
+                                    <span class="badge badge-success">YES</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-danger">NO</span>
+                                }
+                            </td>
                             <td class="project-actions text-right">
+                                <span>
+                                    <a asp-action="ViewProduct" asp-route-id="@item.InstanceId" asp-route-code="@item.Code">View</a>
+                                </span>
                                 @if (!User.IsInRole(Role.Clerk))
                                 {
+                                    <span>--</span>
                                     <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-info btn-xs">
                                         <i class="fas fa-pencil-alt">
                                         </i>
@@ -124,7 +143,7 @@
                         <th>Tax</th>
                         <th>Discount</th>
                         <th>Service</th>
-                        <th>Status</th>
+                        <th>Active</th>
                         <th>Options</th>
                     </tr>
                 </tfoot>

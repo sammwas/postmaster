@@ -54,7 +54,7 @@
                     <input class="form-control form-control-navbar" name="Code" value="@ViewData["ProductCode"]"
                            placeholder="Search code in @userData.InstanceName" aria-label="Search">
                     <div class="input-group-append">
-                        <button class="btn btn-navbar" type="submit">
+                        <button class="btn btn-navbar btn-default" type="submit">
                             <i class="fas fa-search"></i>
                         </button>
                     </div>
@@ -62,6 +62,15 @@
             </form>
 
             <ul class="navbar-nav ml-auto">
+                @if (userData.IsKioskMode)
+                {
+                    <li class="nav-item d-none d-sm-inline-block">
+                        <a asp-controller="Home" asp-action="ExitKiosk" class="btn btn-danger">
+                            <i class="fa fa-times-circle"></i>&nbsp;
+                            <span>Exit Kiosk Mode</span>
+                        </a>
+                    </li>
+                }
                 <li class="nav-item d-none d-sm-inline-block">
                     <a asp-controller="Dashboard" asp-action="Index" class="nav-link">
                         <i class="fa fa-home"></i>&nbsp;
@@ -70,6 +79,13 @@
                         {
                             <span>(@userData.InstanceName)</span>
                         }
+                    </a>
+                </li>
+                <li class="nav-item" style="">
+                    <a class="nav-link" data-widget="control-sidebar" data-slide="true" href="#" role="button">
+                        <i class="far fa-comments"></i>
+                        <span class="badge badge-danger navbar-badge"
+                              style="display:none" id="newChatBadge">NEW</span>
                     </a>
                 </li>
                 <li class="dropdown user user-menu nav-item  d-sm-inline-block">
@@ -139,14 +155,17 @@
                 <nav class="mt-2">
                     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
                         data-accordion="false">
-                        <li class="nav-item">
-                            <a asp-controller="Dashboard" asp-action="Index" class="nav-link" id="MenuDashboard">
-                                <i class="nav-icon fas fa-tachometer-alt"></i>
-                                <p>
-                                    Dashboard
-                                </p>
-                            </a>
-                        </li>
+                        @if (!User.IsInRole(Role.Clerk) || userData.ShowClerkDashboard)
+                        {
+                            <li class="nav-item">
+                                <a asp-controller="Dashboard" asp-action="Index" class="nav-link" id="MenuDashboard">
+                                    <i class="nav-icon fas fa-tachometer-alt"></i>
+                                    <p>
+                                        Dashboard
+                                    </p>
+                                </a>
+                            </li>
+                        }
                         <li class="nav-item has-treeview" id="MenuPOS">
                             <a href="#" class="nav-link">
                                 <i class="nav-icon fa fa-calculator"></i>
@@ -176,6 +195,15 @@
                                         <p>Sale Receipts</p>
                                     </a>
                                 </li>
+                                @if (User.IsInRole(Role.SuperAdmin) || User.IsInRole(Role.Manager))
+                                {
+                                    <li class="nav-item">
+                                        <a asp-controller="PointOfSale" asp-action="CancelReceipt" class="nav-link">
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>Cancel Receipt</p>
+                                        </a>
+                                    </li>
+                                }
                                 <li class="nav-item">
                                     <a asp-controller="PointOfSale" asp-action="Invoices"
                                        asp-route-dtFrom="@firstDayOfWeek"
@@ -185,15 +213,28 @@
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a asp-controller="PointOfSale" asp-action="GeneralLedgers"
-                                       asp-route-dtFrom="@DateTime.Now.ToString("dd-MMM-yyyy")"
+                                    <a asp-controller="PointOfSale" asp-action="Repayments"
+                                       asp-route-dtFrom=""
                                        asp-route-dtTo="@DateTime.Now.ToString("dd-MMM-yyyy")" class="nav-link">
                                         <i class="far fa-circle nav-icon"></i>
-                                        <p>General Ledger</p>
+                                        <p>Repayments</p>
                                     </a>
                                 </li>
+                                @if (User.IsInRole(Role.SuperAdmin) || User.IsInRole(Role.Manager))
+                                {
+                                    <li class="nav-item">
+                                        <a asp-controller="PointOfSale" asp-action="GeneralLedgers"
+                                       asp-route-dtFrom="@DateTime.Now.ToString("dd-MMM-yyyy")"
+                                       asp-route-dtTo="@DateTime.Now.ToString("dd-MMM-yyyy")" class="nav-link">
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>General Ledger</p>
+                                        </a>
+                                    </li>
+                                }
                                 <li class="nav-item">
-                                    <a asp-controller="PointOfSale" asp-action="Expenses" class="nav-link">
+                                    <a asp-controller="PointOfSale" asp-action="Expenses"
+                                       asp-route-dtFrom="@firstDayOfWeek"
+                                       asp-route-dtTo="@DateTime.Now.ToString("dd-MMM-yyyy")" class="nav-link">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Expenses</p>
                                     </a>
@@ -398,7 +439,7 @@
                                        asp-route-dtFrom="@firstDayOfWeek"
                                        asp-route-dtTo="@DateTime.Now.ToString("dd-MMM-yyyy")" class="nav-link">
                                         <i class="far fa-circle nav-icon"></i>
-                                        <p>Received Goods</p>
+                                        <p>Received Goods &amp; Invoices</p>
                                     </a>
                                 </li>
                                 @if (User.IsInRole(Role.SuperAdmin) || User.IsInRole(Role.Manager))
@@ -484,6 +525,14 @@
                                 </a>
                                 <ul class="nav nav-treeview">
                                     <li class="nav-item">
+                                        <a asp-controller="Reports" asp-action="CloseOfDay"
+                                       asp-route-dt="@DateTime.Now.ToString("dd-MMM-yyyy")"
+                                       class="nav-link">
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>Close of Day</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
                                         <a asp-controller="Reports" asp-action="SalesReport"
                                        asp-route-dtFrom="@firstDayOfWeek"
                                        asp-route-dtTo="@DateTime.Now.ToString("dd-MMM-yyyy")" asp-route-option="Weekly"
@@ -499,6 +548,30 @@
                                        asp-route-option="Monthly" class="nav-link">
                                             <i class="far fa-circle nav-icon"></i>
                                             <p>Monthly Report</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a asp-controller="Reports" asp-action="SalesByClerk" class="nav-link">
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>Sales by Clerk</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a asp-controller="Reports" asp-action="LowStockProducts" class="nav-link">
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>Low Stock Products</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a asp-controller="Reports" asp-action="TopSellingVolume" class="nav-link">
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>Top Sale Products</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a asp-controller="Reports" asp-action="CustomerSalesReport" class="nav-link">
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>Customer Product Sales</p>
                                         </a>
                                     </li>
                                     <li class="nav-item">
@@ -562,6 +635,43 @@
                                 </ul>
                             </li>
                         }
+                        <li class="nav-item has-treeview" id="MenuProfile">
+                            <a href="#" class="nav-link">
+                                <i class="nav-icon fas fa-user"></i>
+                                <p>
+                                    My Account
+                                    <i class="right fas fa-angle-left"></i>
+                                </p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a asp-controller="Users" asp-action="Edit" asp-route-id="@userData.UserId" class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Profile</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a asp-controller="Users" asp-route-id="@userData.UserId" asp-action="ResetPassword"
+                                       class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Change Password</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a asp-controller="HumanResource" asp-route-dtFrom="@Helpers.firstDayOfYear.ToString("dd-MMM-yyyy")"
+                                       asp-action="MyApplications" class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Leave Applications</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a asp-controller="HumanResource" asp-action="SalaryHistory" class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Salary History</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
                         <li class="nav-item">
                             <a asp-controller="Home" asp-action="Logout" class="nav-link">
                                 <i class="nav-icon fas fa-lock"></i>
@@ -622,7 +732,39 @@
             </div>
         </footer>
 
-        <aside class="control-sidebar control-sidebar-dark">
+        <aside class="control-sidebar control-sidebar-dark" id="chat-side-@userData.InstanceId"
+               style="top: 65px; height: 512px; display: block;">
+            <div class="col-md-12">
+                <div class="panel panel-primary">
+                    <div class="panel-heading" id="accordion">
+                        <i class="fa fa-comment"></i> InApp Chat <span>&nbsp;</span>
+                        <button data-widget="control-sidebar" data-slide="true"
+                                class="btn btn-danger btn-sm float-right">
+                            Close
+                        </button>
+                    </div>
+                    <hr />
+                    <div class="panel-collapse" id="collapseOne">
+                        <div class="panel-body messages-body">
+                            <ul class="chat" id="messagesList">
+                            </ul>
+                        </div>
+                        <div class="panel-footer">
+                            <div class="input-group">
+                                <input id="inpChatInstanceId" type="hidden" value="@userData.InstanceId" />
+                                <input id="inpChatUser" type="hidden" value="@User.Identity.Name" />
+                                <input id="inpChatReceiver" type="hidden" value="@User.Identity.Name" />
+                                <input id="inpChatMsg" type="text" class="form-control input-sm" placeholder="Type to compose..." />
+                                <span class="input-group-btn">
+                                    <button class="btn btn-warning" id="btnSendChat">
+                                        Send
+                                    </button>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </aside>
     </div>
     <script src="~/plugins/jquery/jquery.min.js"></script>
@@ -657,58 +799,66 @@
     <script src="~/plugins/datatables-buttons/js/buttons.html5.min.js"></script>
     <script src="~/plugins/datatables-buttons/js/buttons.print.min.js"></script>
     <script src="~/plugins/datatables-buttons/js/buttons.colVis.min.js"></script>
+    <script src="~/js//signalr/browser/signalr.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/signalr/inAppChat.js" asp-append-version="true"></script>
 
     <script>
-        $(function () {
-            bsCustomFileInput.init();
-        });
-        $('.rich-text').summernote();
-        //$(".numbers-only").click(function () {
-        //	this.setSelectionRange(0, this.value.length)
-        //});
-        $(".numbers-only").keypress(function (evt) {
-            var iKeyCode = (evt.which) ? evt.which : evt.keyCode;
-            if (iKeyCode !== 46 && iKeyCode > 31 && (iKeyCode < 48 || iKeyCode > 57))
-                return false;
-            return true;
-        });
+                $(function () {
+                    bsCustomFileInput.init();
+                });
+                $('.rich-text').summernote();
+                //$(".numbers-only").click(function () {
+                //	this.setSelectionRange(0, this.value.length)
+                //});
+                $(".numbers-only").keypress(function (evt) {
+                    var iKeyCode = (evt.which) ? evt.which : evt.keyCode;
+                    if (iKeyCode !== 46 && iKeyCode > 31 && (iKeyCode < 48 || iKeyCode > 57))
+                        return false;
+                    return true;
+                });
 
-        $('.nav-sidebar>.nav-item>.nav-link').click(function () {
-            $('.nav-sidebar>.nav-item>.nav-link.active').removeClass("active");
-            $(this).addClass("active");
-        });
+                $('.nav-sidebar>.nav-item>.nav-link').click(function () {
+                    $('.nav-sidebar>.nav-item>.nav-link.active').removeClass("active");
+                    $(this).addClass("active");
+                });
 
-        $('.nav-treeview>.nav-item>.nav-link').click(function (e) {
-            $('.nav-treeview>.nav-item>.nav-link.active').removeClass("active");
-            $(this).closest('.nav-treeview').parent().removeClass("menu-open");
-            $(this).addClass("active");
-            $(this).closest('.nav-treeview').parent().addClass("menu-open");
+                $('.nav-treeview>.nav-item>.nav-link').click(function (e) {
+                    $('.nav-treeview>.nav-item>.nav-link.active').removeClass("active");
+                    $(this).closest('.nav-treeview').parent().removeClass("menu-open");
+                    $(this).addClass("active");
+                    $(this).closest('.nav-treeview').parent().addClass("menu-open");
 
-        });
+                });
 
-        $(document).ready(function () {
-            var opt = "@ViewData["Active"]";
-            $("#Menu" + opt).addClass("active").addClass("menu-open");
-            $("#Menu" + opt + ">.nav-link").addClass("active")
+                $(document).ready(function () {
+                    var opt = "@ViewData["Active"]";
+                    $("#Menu" + opt).addClass("active").addClass("menu-open");
+                    $("#Menu" + opt + ">.nav-link").addClass("active")
 
-            var pathName = window.location.pathname;
-            //var currLink = document.querySelectorAll("a[href^='"+pathName+"']");
-            var currLink = document.querySelectorAll("a[href='" + pathName + "']");
-            if (currLink) {
-                currLink.forEach((el) => { el.classList.add('active'); });
-            }
+                    var pathName = window.location.pathname;
+                    //var currLink = document.querySelectorAll("a[href^='"+pathName+"']");
+                    var currLink = document.querySelectorAll("a[href='" + pathName + "']");
+                    if (currLink) {
+                        currLink.forEach((el) => { el.classList.add('active'); });
+                    }
+                    var message = '@TempData["Message"]';
+                    var title = '@TempData["Title"]';
+                    var type = '@TempData["Type"]';
+                    if (message.length > 0) {
+                        if (type === 'Success')
+                            toastr.success(message, title);
+                        else if (type === 'Error')
+                            toastr.error(message, title);
+                        else
+                            toastr.warning(message, title);
+                    }
+                });
 
-            var message = '@TempData["Message"]';
-            var title = '@TempData["Title"]';
-            var type = '@TempData["Type"]';
-            if (message.length > 0) {
-                if (type === 'Success')
-                    toastr.success(message, title);
-                else if (type === 'Error')
-                    toastr.error(message, title);
-                else
-                    toastr.warning(message, title);
+         $(document).keyup(function(evt){
+            evt = evt || window.event;
+            if (evt.keyCode == 27) {
+                history.back();
             }
         });
     </script>

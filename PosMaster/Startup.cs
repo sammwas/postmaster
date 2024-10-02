@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -12,6 +11,7 @@ using Microsoft.Net.Http.Headers;
 using PosMaster.Dal;
 using PosMaster.Dal.Interfaces;
 using PosMaster.Services;
+using PosMaster.Services.Messaging;
 using System;
 
 namespace PosMaster
@@ -91,8 +91,9 @@ namespace PosMaster
             services.AddDbContext<DatabaseContext>(options =>
             {
                 var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
-                Console.WriteLine($"{env} DbConnection String > Src {from}  :- {conString}");
-                options.UseNpgsql(conString);
+                Console.WriteLine($"{env} DbConnection String > Src: {from} Server: {server} Port: {port} Database: {database} User: {user}");
+                options.UseNpgsql(conString)
+                 .UseLoggerFactory(LoggerFactory.Create(builder => builder.AddConsole()));
             });
 
             services.AddIdentity<User, IdentityRole>()
@@ -126,12 +127,12 @@ namespace PosMaster
                 options.SlidingExpiration = true;
             });
 
-            services.AddAuthentication()
-                .AddGoogle(googleOptions =>
-            {
-                googleOptions.ClientId = Configuration["Google:ClientId"];
-                googleOptions.ClientSecret = Configuration["Google:ClientSecret"];
-            });
+            //services.AddAuthentication()
+            //    .AddGoogle(googleOptions =>
+            //{
+            //    googleOptions.ClientId = Configuration["Google:ClientId"];
+            //    googleOptions.ClientSecret = Configuration["Google:ClientSecret"];
+            //});
 
             services.Configure<CookiePolicyOptions>(options =>
             {
@@ -145,6 +146,7 @@ namespace PosMaster
             services.AddControllers();
             services.AddDistributedMemoryCache();
             services.AddControllersWithViews();
+            services.AddSignalR();
         }
 
         public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
@@ -156,7 +158,7 @@ namespace PosMaster
 
             var path = Configuration["LogsPath"] ?? "Logs";
             //loggerFactory.AddFile($"{path}/PosMaster-{DateTime.Now.Date}.log");
-            loggerFactory.AddFile("Logs/PosMaster-{Date}.log");
+            loggerFactory.AddFile(path + "/PosMaster-{Date}.log");
             app.UseStaticFiles(new StaticFileOptions
             {
                 OnPrepareResponse = ctx =>
@@ -177,6 +179,7 @@ namespace PosMaster
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapHub<InAppChatHub>($"/chatHub");
             });
 
             DatabaseInit.Seed(app);

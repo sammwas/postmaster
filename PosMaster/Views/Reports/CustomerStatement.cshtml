@@ -27,17 +27,7 @@
     </div>
     <div class="row">
         <div class="card-body" id="printReceiptDiv">
-            @{
-                <style type="text/css">
-                    @@media print {
-                        #printReceiptDiv {
-                            height: auto;
-                            font-size: @fontZoom;
-                            page-break-inside: avoid;
-                        }
-                    }
-                </style>
-            }
+            <partial name="_ReceiptPrintPartial" model="fontZoom"></partial>
             <div class="row">
                 <div class="col-md-3 col-sm-6">
                     <div class="form-group">
@@ -112,7 +102,7 @@
                                     <td>@item.DateCreated.ToString("dd-MMM-yyyy")</td>
                                     <td>
                                         <a asp-controller="PointOfSale" asp-action="@item.Document.ToString()"
-                                   asp-route-id="@item.Id">@item.DocumentNumber</a>
+                                   asp-route-id="@item.DocumentId">@item.DocumentNumber</a>
                                     </td>
                                     <td>@Helpers.FormatAmount(item.Debit)</td>
                                     <td>@Helpers.FormatAmount(item.Credit)</td>

@@ -1,24 +1,35 @@
-﻿@inject IClientInstanceInterface _instanceInterface;
+﻿@inject IMasterDataInterface _masterDataInterface;
+@inject IClientInstanceInterface _instanceInterface;
+@inject IUserInterface _userInterface;
 @inject ICookiesService _cookies;
 @model List<Receipt>
 @{
     ViewData["Active"] = "POS";
     ViewData["Title"] = "Receipts";
     var userData = _cookies.Read();
-    var instancesRes = User.IsInRole(Role.SuperAdmin) ?
-    await _instanceInterface.AllAsync()
-    : await _instanceInterface.ByClientIdAsync(userData.ClientId);
+    var instancesRes = await _instanceInterface.ByClientIdAsync(userData.ClientId);
     var instances = instancesRes.Data;
     var instanceId = ViewData["InstanceId"]?.ToString();
+    var modeId = ViewData["PaymentModeId"]?.ToString();
+    var type = ViewData["SaleType"]?.ToString();
+    var personnel = ViewData["Personnel"]?.ToString();
     var dateToday = DateTime.Now.ToString("dd-MMM-yyyy");
+    var paymentModes = await _masterDataInterface.PaymentModesAsync(userData.ClientId);
+    var users = string.IsNullOrEmpty(instanceId) ?
+    await _userInterface.ByClientIdAsync(userData.ClientId, userData.InstanceId)
+    : await _userInterface.ByClientIdAsync(userData.ClientId, Guid.Parse(instanceId));
 }
 <div>
     <div class="card">
         <div class="row">
             <div class="col-md-8">
                 <div class="card-header">
-                    <h3 class="card-title">@ViewData["Title"] <span class="text-right"><a asp-action="Index"
-                                class="btn btn-sm btn-info">Add</a></span></h3>
+                    <h3 class="card-title">
+                        @ViewData["Title"] <span class="text-right">
+                            <a asp-action="Index"
+                               class="btn btn-sm btn-info">Add</a>
+                        </span>
+                    </h3>
                 </div>
             </div>
             <div class="col-md-4">
@@ -26,7 +37,7 @@
             </div>
         </div>
         <div class="card-body">
-            <form autocomplete="off">
+            <form autocomplete="off" method="get">
                 <div class="row">
                     <div class="col-md-3">
                         <div class="form-group">
@@ -37,13 +48,17 @@
                                 {
                                     if (!string.IsNullOrEmpty(instanceId) && item.Id.ToString().Equals(instanceId))
                                     {
-                                        <option selected="selected" value="@item.Id" title="@item.Notes">@item.Code - @item.Name
-                                            (@item.Client.Code - @item.Client.Name)</option>
+                                                <option selected="selected" value="@item.Id" title="@item.Notes">
+                                            @item.Code - @item.Name
+                                                    (@item.Client.Code - @item.Client.Name)
+                                                </option>
                                     }
                                     else
                                     {
-                                        <option value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code
-                                            - @item.Client.Name)</option>
+                                                <option value="@item.Id" title="@item.Notes">
+                                            @item.Code - @item.Name (@item.Client.Code
+                                                    - @item.Client.Name)
+                                                </option>
                                     }
                                 }
                             </select>
@@ -54,8 +69,8 @@
                             <label>Date From</label>
                             <div class="input-group date" id="dateFrom" data-target-input="nearest">
                                 <input type="text" name="dtFrom" class="form-control datetimepicker-input"
-                                    data-target="#dateFrom" value="@ViewData["dtFrom"]"
-                                    placeholder="Date From (@dateToday)" />
+                                       data-target="#dateFrom" value="@ViewData["dtFrom"]"
+                                       placeholder="Date From (@dateToday)" />
                                 <div class="input-group-append" data-target="#dateFrom" data-toggle="datetimepicker">
                                     <div class="input-group-text"><i class="fa fa-calendar"></i></div>
                                 </div>
@@ -67,12 +82,82 @@
                             <label>Date To</label>
                             <div class="input-group date" id="dateTo" data-target-input="nearest">
                                 <input type="text" name="dtTo" class="form-control datetimepicker-input"
-                                    data-target="#dateTo" value="@ViewData["dtTo"]"
-                                    placeholder="Date To (@dateToday)" />
+                                       data-target="#dateTo" value="@ViewData["dtTo"]"
+                                       placeholder="Date To (@dateToday)" />
                                 <div class="input-group-append" data-target="#dateTo" data-toggle="datetimepicker">
                                     <div class="input-group-text"><i class="fa fa-calendar"></i></div>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Payment Mode</label>
+                            <select class="form-control select2" name="modeId" style="width: 100%;">
+                                <option value="">--Select Mode--</option>
+                                @foreach (var item in paymentModes.Data)
+                                {
+                                    if (!string.IsNullOrEmpty(modeId) && item.Id.ToString().Equals(modeId))
+                                    {
+                                                <option selected="selected" value="@item.Id" title="@item.Notes">
+                                            @item.Code - @item.Name
+                                                </option>
+                                    }
+                                    else
+                                    {
+                                                <option value="@item.Id" title="@item.Notes">@item.Code - @item.Name    </option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Sale Type</label>
+                            <select class="form-control select2" name="type" style="width: 100%;">
+                                <option value="">--Select Type--</option>
+                                @foreach (var item in new List<string> { "CASH", "CREDIT" })
+                                {
+                                    if (!string.IsNullOrEmpty(type) && item.Equals(type))
+                                    {
+                                                <option selected="selected" value="@item" title="@item">
+                                            @item SALE
+                                                </option>
+                                    }
+                                    else
+                                    {
+                                                <option value="@item" title="@item">    @item SALE    </option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Personnel</label>
+                            <select class="form-control select2" name="personnel" style="width: 100%;">
+                                <option value="">--Select Personnel--</option>
+                                @foreach (var item in users.Data)
+                                {
+                                    if (!string.IsNullOrEmpty(personnel)
+                                    && item.EmailAddress.ToLower().Equals(personnel.ToLower()))
+                                    {
+                                                <option selected="selected" value="@item.EmailAddress" title="@item.Notes">
+                                            @item.FullName (@item.EmailAddress)
+                                                </option>
+                                    }
+                                    else
+                                    {
+                                                <option value="@item.EmailAddress" title="@item.Notes">  @item.FullName (@item.EmailAddress)   </option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Search</label>
+                            <input type="text" name="search" class="form-control" value="@ViewData["Search"]" placeholder="Search" />
                         </div>
                     </div>
                     <div class="col-md-3">
@@ -86,12 +171,14 @@
             <table id="receiptsdt" class="table table-bordered table-striped" style="width:100%">
                 <thead>
                     <tr>
-                        <th></th>
+                        <th>#</th>
                         <th>Code</th>
                         <th>Date</th>
+                        <th>Customer</th>
+                        <th>Credit</th>
                         <th>Personnel</th>
                         <th>Amount</th>
-                        <th>View</th>
+                        <th>Notes</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -99,27 +186,32 @@
                     {
                         @foreach (var item in Model)
                         {
+                            var saleType = item.IsCredit ? "CREDIT" : "CASH";
                             var receiptItems = Newtonsoft.Json.JsonConvert.SerializeObject(item.ReceiptLineItems);
-                            <tr data-items="@receiptItems">
-                                <td class="details-control"></td>
-                                <td>@item.Code</td>
-                                <td>@item.DateCreated</td>
-                                <td>@item.PersonnelName</td>
-                                <td>@item.Amount</td>
-                                <td><a asp-action="Receipt" asp-route-id="@item.Id">View</a></td>
-                            </tr>
+                                    <tr data-items="@receiptItems">
+                                        <td class="details-control"></td>
+                                        <td><a asp-action="Receipt" asp-route-id="@item.Id" title="View Receipt @item.Code">@item.Code</a></td>
+                                        <td>@item.DateCreated</td>
+                                        <td>@item.Customer.FullName</td>
+                                        <td>@saleType</td>
+                                        <td>@item.PersonnelStr </td>
+                                        <td>@item.Amount</td>
+                                        <td>@item.Notes</td>
+                                    </tr>
                         }
 
                     }
                 </tbody>
                 <tfoot>
                     <tr>
-                        <th></th>
+                        <th>#</th>
                         <th>Code</th>
                         <th>Date</th>
+                        <th>Customer</th>
+                        <th>Credit</th>
                         <th>Personnel</th>
                         <th>Amount</th>
-                        <th>View</th>
+                        <th>Notes</th>
                     </tr>
                 </tfoot>
             </table>

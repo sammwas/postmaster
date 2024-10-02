@@ -21,9 +21,10 @@
             <table id="dataTable" class="table table-bordered table-striped">
                 <thead>
                     <tr>
+                        <th>#</th>
                         <th>Full Name</th>
-                        <th>Shop</th>
-                        <th>Email Address</th>
+                        <th>Instance</th>
+                        <th>Email / Username</th>
                         <th>Phone Number</th>
                         <th>Id Number</th>
                         <th>Gender</th>
@@ -34,13 +35,19 @@
                     </tr>
                 </thead>
                 <tbody>
+                    @{
+                        var i = 0;
+                    }
                     @foreach (var item in Model)
                     {
+                        i++;
                         var instance = instancesRes.Data.FirstOrDefault(i => i.Id == item.InstanceId);
+                        var username = item.Username.Equals(item.EmailAddress) ? "" : $"/{item.Username}";
                         <tr>
+                            <td>@i</td>
                             <td><a asp-action="Edit" asp-route-id="@item.UserId">@item.FullName</a> </td>
                             <td>@instance?.Name</td>
-                            <td>@item.EmailAddress</td>
+                            <td>@item.EmailAddress<span>@username</span></td>
                             <td>@item.PhoneNumber</td>
                             <td>@item.IdNumber</td>
                             <td>@item.Gender</td>
@@ -59,9 +66,10 @@
                 </tbody>
                 <tfoot>
                     <tr>
+                        <th>#</th>
                         <th>Full Name</th>
-                        <th>Shop</th>
-                        <th>Email Address</th>
+                        <th>Instance</th>
+                        <th>Email / Username</th>
                         <th>Phone Number</th>
                         <th>Id Number</th>
                         <th>Gender</th>

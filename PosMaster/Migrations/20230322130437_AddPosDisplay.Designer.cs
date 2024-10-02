@@ -10,8 +10,8 @@ using PosMaster.Dal;
 namespace PosMaster.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20230224112532_AddPersonnelName")]
-    partial class AddPersonnelName
+    [Migration("20230322130437_AddPosDisplay")]
+    partial class AddPosDisplay
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -240,17 +240,20 @@ namespace PosMaster.Migrations
                     b.Property<string>("EmailAddress")
                         .HasColumnType("text");
 
-                    b.Property<bool>("EnforcePassword")
-                        .HasColumnType("boolean");
-
                     b.Property<Guid>("InstanceId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("LastModifiedBy")
                         .HasColumnType("text");
 
+                    b.Property<string>("Licence")
+                        .HasColumnType("text");
+
                     b.Property<string>("LogoPath")
                         .HasColumnType("text");
+
+                    b.Property<int>("MaxInstance")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Mission")
                         .HasColumnType("text");
@@ -377,11 +380,17 @@ namespace PosMaster.Migrations
                     b.Property<string>("PrimaryTelephone")
                         .HasColumnType("text");
 
+                    b.Property<int>("ReceiptFontPercent")
+                        .HasColumnType("integer");
+
                     b.Property<string>("ReceiptFooterNotes")
                         .HasColumnType("text");
 
                     b.Property<string>("SecondaryTelephone")
                         .HasColumnType("text");
+
+                    b.Property<bool>("ShowCardPosDisplay")
+                        .HasColumnType("boolean");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
@@ -1130,6 +1139,9 @@ namespace PosMaster.Migrations
                     b.Property<int>("Document")
                         .HasColumnType("integer");
 
+                    b.Property<Guid>("DocumentId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("DocumentNumber")
                         .HasColumnType("text");
 
@@ -1291,6 +1303,9 @@ namespace PosMaster.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("UserType")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
@@ -1749,7 +1764,7 @@ namespace PosMaster.Migrations
                     b.Property<Guid>("ProductId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("PurchaseOrderId")
+                    b.Property<Guid?>("PurchaseOrderId")
                         .HasColumnType("uuid");
 
                     b.Property<int>("Status")
@@ -1971,10 +1986,16 @@ namespace PosMaster.Migrations
                     b.Property<string>("PinNo")
                         .HasColumnType("text");
 
-                    b.Property<string>("PrintCount")
+                    b.Property<int>("PrintCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Stamp")
                         .HasColumnType("text");
 
                     b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("UserType")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
@@ -1982,6 +2003,9 @@ namespace PosMaster.Migrations
                     b.HasIndex("CustomerId");
 
                     b.HasIndex("PaymentModeId");
+
+                    b.HasIndex("Stamp")
+                        .IsUnique();
 
                     b.ToTable("Receipts");
                 });
@@ -2445,12 +2469,18 @@ namespace PosMaster.Migrations
 
                     b.HasIndex("ClientId");
 
+                    b.HasIndex("IdNumber")
+                        .IsUnique();
+
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
 
                     b.HasIndex("NormalizedUserName")
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex");
+
+                    b.HasIndex("PhoneNumber")
+                        .IsUnique();
 
                     b.ToTable("AspNetUsers");
                 });
@@ -2779,9 +2809,7 @@ namespace PosMaster.Migrations
 
                     b.HasOne("PosMaster.Dal.PurchaseOrder", "PurchaseOrder")
                         .WithMany()
-                        .HasForeignKey("PurchaseOrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("PurchaseOrderId");
 
                     b.Navigation("Product");
 

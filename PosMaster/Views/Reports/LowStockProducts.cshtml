@@ -1,0 +1,98 @@
+﻿@inject IClientInstanceInterface _instanceInterface;
+@inject ICookiesService _cookies;
+@model List<Product>
+@{
+    ViewData["Active"] = "Reports";
+    ViewData["Title"] = $"Top selling by volume";
+    var userData = _cookies.Read();
+    var instancesRes = await _instanceInterface.ByClientIdAsync(userData.ClientId);
+    var instances = instancesRes.Data;
+    var instanceId = ViewData["instanceId"]?.ToString();
+}
+<div class="card card-primary">
+    <div class="card-header">
+        <h3 class="card-title">@ViewData["Title"]</h3>
+    </div>
+    <div class="row">
+        <div class="card-body">
+            <form role="form" autocomplete="off" method="get">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Select Instance</label>
+                            <select class="form-control select2" name="inId" style="width: 100%;">
+                                <option value="">--Select Instance--</option>
+                                @foreach (var item in instances)
+                                {
+                                    if (!string.IsNullOrEmpty(instanceId) && item.Id.ToString().Equals(instanceId))
+                                    {
+                                        <option selected="selected" value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <br />
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            @if (Model.Any())
+            {
+                <div class="row table-responsive">
+                    <table class="table table-striped" id="dataTable">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Product</th>
+                                <th>UOM</th>
+                                <th>Available Qty</th>
+                                <th>Reorder level</th>
+                                <th>Last modified</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                var i = 0;
+                            }
+                            @foreach (var item in Model)
+                            {
+                                i++;
+                                <tr>
+                                    <td>@i</td>
+                                    <td>
+                                        <span>[@item.Code]</span>
+                                        @item.Name
+                                        <span class="badge badge-primary">@item.ProductCategory.Name</span>
+                                    </td>
+                                    <td>@item.Uom</td>
+                                    <td>@item.AvailableQuantity</td>
+                                    <td>@item.ReorderLevel</td>
+                                    <td>@item.DateLastModified</td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th>#</th>
+                                <th>Product</th>
+                                <th>UOM</th>
+                                <th>Available Qty</th>
+                                <th>Reorder level</th>
+                                <th>Last modified</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+

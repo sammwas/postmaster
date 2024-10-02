@@ -34,7 +34,8 @@
         Invoice,
         Customer,
         Leave,
-        Order
+        Order,
+        Voucher
     }
 
     public enum ApplicationStatus
@@ -47,11 +48,12 @@
     public enum GlUserType
     {
         Customer,
-        Supplier
+        Supplier,
+        Payee
     }
-    public enum BusinessShortCodeType 
+    public enum BusinessShortCodeType
     {
         Till,
         Paybill
-     }
+    }
 }

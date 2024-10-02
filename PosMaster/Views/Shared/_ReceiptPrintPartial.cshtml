@@ -1,0 +1,13 @@
+﻿@model string
+@{
+    string fontZoom = Model ?? "100%";
+}
+<style type="text/css">
+    @@media print {
+        #printReceiptDiv {
+            height: auto;
+            font-size: @fontZoom;
+            page-break-inside: avoid;
+        }
+    }
+</style>

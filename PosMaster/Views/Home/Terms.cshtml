@@ -1,9 +1,13 @@
 ﻿@inject ISystemSettingInterface _settings;
 @{
-	Layout = "_HomePageLayout";
-	ViewData["Title"] = "Terms & Conditions";
-	var privacyRes = await _settings.TermsAndPrivacyAsync();
+    Layout = "_HomePageLayout";
+    ViewData["Title"] = "Terms & Conditions";
+    var privacyRes = await _settings.TermsAndPrivacyAsync();
 }
-<div>
-	@Html.Raw(privacyRes.Data.Terms)
+<div class="container card">
+    <h3>@ViewData["Title"]</h3>
+    <hr />
+    <div class="card-body">
+        @Html.Raw(privacyRes.Data.Terms)
+    </div>
 </div>

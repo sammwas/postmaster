@@ -23,5 +23,6 @@ namespace PosMaster.Dal
         public BusinessShortCodeType BusinessShortCodeType { get; set; }
         public string BusinessShortCode { get; set; }
         public int ReceiptFontPercent { get; set; }
+        public bool ShowCardPosDisplay { get; set; }
     }
 }

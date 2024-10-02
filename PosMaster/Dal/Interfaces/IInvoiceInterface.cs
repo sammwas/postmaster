@@ -10,7 +10,8 @@ namespace PosMaster.Dal.Interfaces
 {
     public interface IInvoiceInterface
     {
-        Task<ReturnData<List<Invoice>>> GetAsync(Guid? clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "");
+        Task<ReturnData<List<Invoice>>> GetAsync(Guid? clientId, Guid? instanceId, string dateFrom = "",
+            string dateTo = "", string search = "", string personnel = "");
         Task<ReturnData<Invoice>> ByIdAsync(Guid id);
         Task<ReturnData<Invoice>> PayAsync(FulfillOrderViewModel model);
     }
@@ -92,7 +93,8 @@ namespace PosMaster.Dal.Interfaces
             }
         }
 
-        public async Task<ReturnData<List<Invoice>>> GetAsync(Guid? clientId, Guid? instanceId, string dateFrom = "", string dateTo = "", string search = "")
+        public async Task<ReturnData<List<Invoice>>> GetAsync(Guid? clientId, Guid? instanceId, string dateFrom = "",
+            string dateTo = "", string search = "", string personnel = "")
         {
             var result = new ReturnData<List<Invoice>> { Data = new List<Invoice>() };
             var tag = nameof(GetAsync);
@@ -116,6 +118,10 @@ namespace PosMaster.Dal.Interfaces
                     dataQuery = dataQuery.Where(r => r.DateCreated.Date <= dtTo.Date);
                 if (!string.IsNullOrEmpty(search))
                     dataQuery = dataQuery.Where(r => r.Code.ToLower().Contains(search.ToLower()));
+                if (!string.IsNullOrEmpty(personnel))
+                {
+                    dataQuery = dataQuery.Where(d => d.Personnel.Equals(personnel));
+                }
                 var data = await dataQuery.OrderByDescending(r => r.DateCreated)
                     .ToListAsync();
                 result.Success = data.Any();
@@ -153,10 +159,16 @@ namespace PosMaster.Dal.Interfaces
                     return result;
                 }
 
-                var balance = invoice.Balance;
+                if (model.Amount > invoice.Balance)
+                {
+                    result.Message = $"Invoice balance is {invoice.Balance}";
+                    _logger.LogInformation($"{tag} unable to update invoice details : {result.Message}");
+                    return result;
+                }
+
                 invoice.Receipt.DateLastModified = DateTime.Now;
                 invoice.Receipt.LastModifiedBy = model.Personnel;
-                invoice.Receipt.AmountReceived += balance;
+                invoice.Receipt.AmountReceived = model.Amount;
                 invoice.Status = EntityStatus.Closed;
                 invoice.LastModifiedBy = model.Personnel;
                 invoice.DateLastModified = DateTime.Now;
@@ -169,7 +181,8 @@ namespace PosMaster.Dal.Interfaces
                     UserType = GlUserType.Customer,
                     Document = Document.Receipt,
                     DocumentNumber = invoice.Receipt.Code,
-                    Credit = balance,
+                    DocumentId = invoice.Receipt.Id,
+                    Credit = model.Amount,
                     Code = $"{invoice.Code}_{invoice.Receipt.Code}"
                 };
                 _context.GeneralLedgerEntries.Add(entry);

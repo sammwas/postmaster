@@ -61,7 +61,6 @@ namespace PosMaster.Migrations
                     Vision = table.Column<string>(type: "text", nullable: true),
                     Mission = table.Column<string>(type: "text", nullable: true),
                     LogoPath = table.Column<string>(type: "text", nullable: true),
-                    EnforcePassword = table.Column<bool>(type: "boolean", nullable: false),
                     PasswordExpiryMonths = table.Column<int>(type: "integer", nullable: false),
                     PostalAddress = table.Column<string>(type: "text", nullable: true),
                     Town = table.Column<string>(type: "text", nullable: true),
@@ -73,6 +72,8 @@ namespace PosMaster.Migrations
                     PhoneNumberLength = table.Column<int>(type: "integer", nullable: false),
                     TelephoneCode = table.Column<string>(type: "text", nullable: true),
                     DisplayBuyingPrice = table.Column<bool>(type: "boolean", nullable: false),
+                    MaxInstance = table.Column<int>(type: "integer", nullable: false),
+                    Licence = table.Column<string>(type: "text", nullable: true),
                     Code = table.Column<string>(type: "text", nullable: true),
                     DateCreated = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
@@ -580,6 +581,10 @@ namespace PosMaster.Migrations
                     PinNo = table.Column<string>(type: "text", nullable: true),
                     InvoiceTerms = table.Column<string>(type: "text", nullable: true),
                     InvoiceDurationDays = table.Column<int>(type: "integer", nullable: false),
+                    ReceiptFooterNotes = table.Column<string>(type: "text", nullable: true),
+                    BusinessShortCodeType = table.Column<int>(type: "integer", nullable: false),
+                    BusinessShortCode = table.Column<string>(type: "text", nullable: true),
+                    ReceiptFontPercent = table.Column<int>(type: "integer", nullable: false),
                     Code = table.Column<string>(type: "text", nullable: true),
                     DateCreated = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
@@ -670,6 +675,10 @@ namespace PosMaster.Migrations
                     AmountReceived = table.Column<decimal>(type: "numeric", nullable: false),
                     PinNo = table.Column<string>(type: "text", nullable: true),
                     IsPrinted = table.Column<bool>(type: "boolean", nullable: false),
+                    PrintCount = table.Column<int>(type: "integer", nullable: false),
+                    PersonnelName = table.Column<string>(type: "text", nullable: true),
+                    Stamp = table.Column<string>(type: "text", nullable: true),
+                    UserType = table.Column<int>(type: "integer", nullable: false),
                     Code = table.Column<string>(type: "text", nullable: true),
                     DateCreated = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
@@ -1130,6 +1139,7 @@ namespace PosMaster.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     ReceiptId = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserType = table.Column<int>(type: "integer", nullable: false),
                     Code = table.Column<string>(type: "text", nullable: true),
                     DateCreated = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     DateLastModified = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
@@ -1196,8 +1206,8 @@ namespace PosMaster.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    PurchaseOrderId = table.Column<Guid>(type: "uuid", nullable: false),
-                    GoodReceivedNoteId = table.Column<Guid>(type: "uuid", nullable: false),
+                    PurchaseOrderId = table.Column<Guid>(type: "uuid", nullable: true),
+                    GoodReceivedNoteId = table.Column<Guid>(type: "uuid", nullable: true),
                     ProductId = table.Column<Guid>(type: "uuid", nullable: false),
                     PoQuantity = table.Column<decimal>(type: "numeric", nullable: false),
                     GrnQuantity = table.Column<decimal>(type: "numeric", nullable: false),
@@ -1223,7 +1233,7 @@ namespace PosMaster.Migrations
                         column: x => x.GoodReceivedNoteId,
                         principalTable: "GoodReceivedNotes",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_PoGrnProducts_Products_ProductId",
                         column: x => x.ProductId,
@@ -1235,7 +1245,7 @@ namespace PosMaster.Migrations
                         column: x => x.PurchaseOrderId,
                         principalTable: "PurchaseOrders",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -1244,7 +1254,7 @@ namespace PosMaster.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     ProductId = table.Column<Guid>(type: "uuid", nullable: false),
-                    PurchaseOrderId = table.Column<Guid>(type: "uuid", nullable: false),
+                    PurchaseOrderId = table.Column<Guid>(type: "uuid", nullable: true),
                     BuyingPrice = table.Column<decimal>(type: "numeric", nullable: false),
                     DeliveredQuantity = table.Column<decimal>(type: "numeric", nullable: false),
                     AvailableQuantity = table.Column<decimal>(type: "numeric", nullable: false),
@@ -1272,7 +1282,7 @@ namespace PosMaster.Migrations
                         column: x => x.PurchaseOrderId,
                         principalTable: "PurchaseOrders",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -1409,6 +1419,18 @@ namespace PosMaster.Migrations
                 name: "IX_AspNetUsers_ClientId",
                 table: "AspNetUsers",
                 column: "ClientId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AspNetUsers_IdNumber",
+                table: "AspNetUsers",
+                column: "IdNumber",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AspNetUsers_PhoneNumber",
+                table: "AspNetUsers",
+                column: "PhoneNumber",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "UserNameIndex",
@@ -1570,6 +1592,12 @@ namespace PosMaster.Migrations
                 name: "IX_Receipts_PaymentModeId",
                 table: "Receipts",
                 column: "PaymentModeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Receipts_Stamp",
+                table: "Receipts",
+                column: "Stamp",
+                unique: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

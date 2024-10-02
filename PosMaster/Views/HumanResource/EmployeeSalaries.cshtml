@@ -5,9 +5,7 @@
     ViewData["Active"] = "HR";
     ViewData["Title"] = "Salaries";
     var userData = _cookies.Read();
-    var instancesRes = User.IsInRole(Role.SuperAdmin) ?
-        await _instanceInterface.AllAsync()
-        : await _instanceInterface.ByClientIdAsync(userData.ClientId);
+    var instancesRes = await _instanceInterface.ByClientIdAsync(userData.ClientId);
     var instances = instancesRes.Data;
     var instanceId = ViewData["InstanceId"]?.ToString();
 }
@@ -31,11 +29,11 @@
                                 {
                                     if (!string.IsNullOrEmpty(instanceId) && item.Id.ToString().Equals(instanceId))
                                     {
-                                        <option selected="selected" value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
+                                                <option selected="selected" value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
                                     }
                                     else
                                     {
-                                        <option value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
+                                                <option value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
                                     }
                                 }
                             </select>
@@ -58,6 +56,7 @@
             <table id="dataTable" class="table table-bordered table-striped">
                 <thead>
                     <tr>
+                        <th>#</th>
                         <th>Employee</th>
                         <th>Phone Number</th>
                         <th>Basic Pay</th>
@@ -68,27 +67,33 @@
                     </tr>
                 </thead>
                 <tbody>
+                    @{
+                        var i = 0;
+                    }
                     @foreach (var item in Model)
                     {
-                        <tr>
-                            <td><a asp-action="EditEmployeeSalary" asp-route-userId="@item.UserId">@item.User.FullName</a></td>
-                            <td>@item.User.PhoneNumber</td>
-                            <td>@Helpers.FormatAmount(item.BasicPay, 2)</td>
-                            <td>@Helpers.FormatAmount(item.Allowance, 2)</td>
-                            <td>@Helpers.FormatAmount(item.Deduction, 2)</td>
-                            <td>@Helpers.FormatAmount(item.NetAmount, 2)</td>
-                            <td class="project-actions text-right">
-                                <a asp-action="EditEmployeeSalary" asp-route-userId="@item.UserId" class="btn btn-info btn-xs">
-                                    <i class="fas fa-pencil-alt">
-                                    </i>
-                                    Edit
-                                </a>
-                            </td>
-                        </tr>
+                        i++;
+                            <tr>
+                                <td>@i</td>
+                                <td><a asp-action="EditEmployeeSalary" asp-route-userId="@item.UserId">@item.User.FullName</a></td>
+                                <td>@item.User.PhoneNumber</td>
+                                <td>@Helpers.FormatAmount(item.BasicPay, 2)</td>
+                                <td>@Helpers.FormatAmount(item.Allowance, 2)</td>
+                                <td>@Helpers.FormatAmount(item.Deduction, 2)</td>
+                                <td>@Helpers.FormatAmount(item.NetAmount, 2)</td>
+                                <td class="project-actions text-right">
+                                    <a asp-action="EditEmployeeSalary" asp-route-userId="@item.UserId" class="btn btn-info btn-xs">
+                                        <i class="fas fa-pencil-alt">
+                                        </i>
+                                        Edit
+                                    </a>
+                                </td>
+                            </tr>
                     }
                 </tbody>
                 <tfoot>
                     <tr>
+                        <th>#</th>
                         <th>Employee</th>
                         <th>Phone Number</th>
                         <th>Basic Pay</th>

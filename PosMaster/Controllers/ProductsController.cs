@@ -19,15 +19,18 @@ namespace PosMaster.Controllers
         private readonly FileUploadService _fileUploadService;
         private readonly IWebHostEnvironment _hostingEnvironment;
         private readonly IMasterDataInterface _masterDataInterface;
+        private readonly IExpenseInterface _expenseInterface;
 
         public ProductsController(IProductInterface productInterface, ICookiesService cookiesService,
-            FileUploadService fileUploadService, IWebHostEnvironment hostingEnvironment, IMasterDataInterface masterDataInterface)
+            FileUploadService fileUploadService, IWebHostEnvironment hostingEnvironment, IExpenseInterface expenseInterface,
+            IMasterDataInterface masterDataInterface)
         {
             _productInterface = productInterface;
             _fileUploadService = fileUploadService;
             _userData = cookiesService.Read();
             _hostingEnvironment = hostingEnvironment;
             _masterDataInterface = masterDataInterface;
+            _expenseInterface = expenseInterface;
         }
         public async Task<IActionResult> Index(string insId = "", string search = "")
         {
@@ -36,7 +39,7 @@ namespace PosMaster.Controllers
 
             ViewData["InstanceId"] = insId;
             ViewData["Search"] = search;
-            var result = await _productInterface.ByInstanceIdAsync(_userData.ClientId, Guid.Parse(insId));
+            var result = await _productInterface.ByInstanceIdAsync(_userData.ClientId, Guid.Parse(insId), false, search);
             if (!result.Success)
                 TempData.SetData(AlertLevel.Warning, "Products", result.Message);
             return View(result.Data);
@@ -88,8 +91,12 @@ namespace PosMaster.Controllers
             TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, title, result.Message);
             if (!result.Success)
                 return View(model);
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Index), new
+            {
+                search = model.IsEditMode ? model.Code : ""
+            });
         }
+
         public IActionResult ProductStockAdjustment()
         {
             return View(new ProductStockAdjustmentViewModel());
@@ -131,6 +138,11 @@ namespace PosMaster.Controllers
                 instanceId = _userData.InstanceId;
                 personnel = User.Identity.Name;
             }
+            if (string.IsNullOrEmpty(dtFrom))
+            {
+                dtFrom = DateTime.Now.ToString("dd-MMM-yyyy");
+                ViewData["DtFrom"] = dtFrom;
+            }
             var result = await _productInterface.PurchaseOrdersAsync(_userData.ClientId, instanceId, false, dtFrom, dtTo, search, personnel);
             if (!result.Success)
                 TempData.SetData(AlertLevel.Warning, "Purchase Orders", result.Message);
@@ -144,6 +156,7 @@ namespace PosMaster.Controllers
                 TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, "Purchase Order", result.Message);
             return View(result.Data);
         }
+
         public async Task<IActionResult> EditPurchaseOrder(Guid? id)
         {
             if (id == null)
@@ -158,17 +171,19 @@ namespace PosMaster.Controllers
             var model = new PurchaseOrderViewModel(result.Data);
             return View(model);
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditPurchaseOrder(PurchaseOrderViewModel model)
         {
-            var title = "Add Purchase Order";
+            var title = "Purchase Order";
             if (!ModelState.IsValid)
             {
                 var message = "Missing fields";
                 TempData.SetData(AlertLevel.Warning, title, message);
                 return View(model);
             }
+            model.Personnel = User.Identity.Name;
             model.ClientId = _userData.ClientId;
             model.InstanceId = _userData.InstanceId;
             var result = await _productInterface.EditPurchaseOrderAsync(model);
@@ -181,8 +196,13 @@ namespace PosMaster.Controllers
 
         public async Task<IActionResult> ReceivedGoods(string insId = "", string dtFrom = "", string dtTo = "", string search = "")
         {
-            ViewData["InstanceId"] = insId;
             ViewData["DtFrom"] = dtFrom;
+            if (string.IsNullOrEmpty(dtFrom))
+            {
+                dtFrom = DateTime.Now.ToString("dd-MMM-yyyy");
+                ViewData["DtFrom"] = dtFrom;
+            }
+            ViewData["InstanceId"] = insId;
             ViewData["DtTo"] = dtTo;
             ViewData["Search"] = search;
             Guid? instanceId = null;
@@ -199,9 +219,12 @@ namespace PosMaster.Controllers
                 TempData.SetData(AlertLevel.Warning, "Received Goods", result.Message);
             return View(result.Data);
         }
+
         public async Task<IActionResult> StockAdjustmentLogs(string insId = "", string dtFrom = "", string dtTo = "", string search = "")
         {
             ViewData["InstanceId"] = insId;
+            if (string.IsNullOrEmpty(dtFrom))
+                dtFrom = DateTime.Now.AddDays(-7).ToString("dd-MMM-yyyy");
             ViewData["DtFrom"] = dtFrom;
             ViewData["DtTo"] = dtTo;
             ViewData["Search"] = search;
@@ -271,6 +294,7 @@ namespace PosMaster.Controllers
                 TempData.SetData(AlertLevel.Warning, title, message);
                 return View(model);
             }
+            model.Personnel = User.Identity.Name;
             var result = await _productInterface.EditGrnAsync(model);
             TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, title, result.Message);
             if (!result.Success)
@@ -278,23 +302,27 @@ namespace PosMaster.Controllers
 
             return RedirectToAction(nameof(ReceivedGoods), new { dtFrom = Helpers.FirstDayOfWeek().ToString("dd-MMM-yyyy"), dtTo = DateTime.Now.ToString("dd-MMM-yyyy") });
         }
-        public async Task<IActionResult> LowStockProducts()
+
+        public async Task<IActionResult> LowStockProducts(Guid? inId = null)
         {
-            Guid? instanceId = null;
-            if (User.IsInRole(Role.Clerk))
-                instanceId = _userData.InstanceId;
+            var instanceId = User.IsInRole(Role.Clerk) ? _userData.InstanceId : inId;
             var data = await _productInterface.LowStockProductsAsync(_userData.ClientId, instanceId, 5);
             return Json(data);
         }
 
-        public async Task<IActionResult> TopSellingByVolume()
+        public async Task<IActionResult> TopSellingByVolume(Guid? inId = null, string dtFrom = "", string dtTo = "")
         {
-            Guid? instanceId = null;
-            if (User.IsInRole(Role.Clerk))
-                instanceId = _userData.InstanceId;
-            var data = await _productInterface.TopSellingProductsByVolumeAsync(_userData.ClientId, instanceId, 5);
+            if (string.IsNullOrEmpty(dtFrom))
+                dtFrom = DateTime.Now.AddMonths(-1).ToString("dd-MMM-yyyy");
+            if (string.IsNullOrEmpty(dtTo))
+                dtTo = DateTime.Now.ToString("dd-MMM-yyyy");
+            var instanceId = User.IsInRole(Role.Clerk) ? _userData.InstanceId : inId;
+            var personnel = User.IsInRole(Role.Clerk) ? User.Identity.Name : "";
+            var data = await _productInterface
+                .TopSellingProductsByVolumeAsync(_userData.ClientId, instanceId, dtFrom, dtTo, personnel, 5);
             return Json(data);
         }
+
         public async Task<JsonResult> Search(string term = "", bool isPos = false)
         {
             var products = User.IsInRole(Role.Clerk) ?
@@ -340,5 +368,37 @@ namespace PosMaster.Controllers
             return RedirectToAction(nameof(ProductPrice), new { });
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> PayGrnSupplierInvoice(ExpenseViewModel model)
+        {
+            model.ClientId = _userData.ClientId;
+            model.InstanceId = _userData.InstanceId;
+            model.Personnel = User.Identity.Name;
+            var supplierRes = await _productInterface.PaySupplierGrnAsync(model);
+            if (!supplierRes.Success)
+            {
+                TempData.SetData(AlertLevel.Warning, "Pay Supplier", supplierRes.Message);
+                return RedirectToAction(nameof(ReceivedGoodsDetail),
+                    new { id = model.GrnId });
+            }
+            var result = await _expenseInterface.EditAsync(model);
+            TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, "Edit Expense", result.Message);
+            return RedirectToAction(nameof(ReceivedGoodsDetail),
+                   new { id = model.GrnId });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteProduct(BaseViewModel model)
+        {
+            model.Personnel = User.Identity.Name;
+            var result = await _productInterface.DeleteProductAsync(model);
+            TempData.SetData(result.Success ? AlertLevel.Success : AlertLevel.Warning, "Delete Product", result.Message);
+            return
+                result.Data ?
+                RedirectToAction(nameof(Index), new { insId = model.InstanceId })
+                : RedirectToAction(nameof(ViewProduct), new { id = model.InstanceId, code = model.Code });
+        }
     }
 }

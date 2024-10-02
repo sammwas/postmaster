@@ -1,0 +1,36 @@
+﻿@model ChangeUsernameViewModel
+@{
+    ViewData["Active"] = "HR";
+    var title = $"Change Username";
+    ViewData["Title"] = title;
+}
+<div class="card card-primary">
+    <div class="card-header">
+        <h3 class="card-title">@ViewData["Title"]</h3>
+    </div>
+    <form role="form" method="post" autocomplete="off">
+        <div asp-validation-summary="All" class="text-danger"></div>
+        <input asp-for="Id" />
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="CurrentUsername"></label>
+                        <input asp-for="CurrentUsername" readonly class="form-control" placeholder="Current Username">
+                        <span asp-validation-for="CurrentUsername" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="Username"></label>
+                        <input asp-for="Username" class="form-control" placeholder="New Username">
+                        <span asp-validation-for="Username" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+    </form>
+</div>

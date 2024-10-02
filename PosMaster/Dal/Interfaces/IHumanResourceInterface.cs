@@ -28,7 +28,8 @@ namespace PosMaster.Dal.Interfaces
         Task<ReturnData<EmployeeLeaveApplication>> LeaveApplicationByIdAsync(Guid id);
         Task<ReturnData<Guid>> ApproveLeaveApplicationAsync(ApproveLeaveViewModel model);
         Task<ReturnData<List<MonthlyPayViewModel>>> MonthlyPaymentsAsync(int month, int year, Guid clientId, Guid? instanceId);
-        Task<ReturnData<string>> ApproveMonthPaymentAsync(ApproveMonthlyPaymentViewModel model);
+        Task<ReturnData<decimal>> ApproveMonthPaymentAsync(ApproveMonthlyPaymentViewModel model);
+        Task<ReturnData<List<EmployeeMonthPayment>>> EmployeeMonthPaymentAsync(Guid clientId, Guid instanceId, string userId);
     }
 
     public class HumanResourceImplementation : IHumanResourceInterface
@@ -78,9 +79,9 @@ namespace PosMaster.Dal.Interfaces
             }
         }
 
-        public async Task<ReturnData<string>> ApproveMonthPaymentAsync(ApproveMonthlyPaymentViewModel model)
+        public async Task<ReturnData<decimal>> ApproveMonthPaymentAsync(ApproveMonthlyPaymentViewModel model)
         {
-            var result = new ReturnData<string>();
+            var result = new ReturnData<decimal>();
             var tag = nameof(ApproveMonthPaymentAsync);
             _logger.LogInformation($"{tag} approve monthly payments for clientId {model.ClientId}, instanceId {model.InstanceId}, month {model.Month} and year {model.Year}");
             try
@@ -96,6 +97,7 @@ namespace PosMaster.Dal.Interfaces
                     _logger.LogInformation($"{tag} not approved: {result.Message}");
                     return result;
                 }
+                decimal spentAmount = 0;
                 foreach (var salary in sData)
                 {
                     var approved = _context.EmployeeMonthPayments
@@ -117,6 +119,7 @@ namespace PosMaster.Dal.Interfaces
                             Code = $"{salary.UserId}_{model.Month}{model.Year}"
                         };
                         _context.EmployeeMonthPayments.Add(mPayment);
+                        spentAmount += mPayment.Netpay;
                     }
                     else
                     {
@@ -130,7 +133,8 @@ namespace PosMaster.Dal.Interfaces
                 }
                 result.Success = true;
                 result.Message = "Approved";
-                _logger.LogInformation($"{tag} approved {sData.Count} monthly salaries");
+                result.Data = spentAmount;
+                _logger.LogInformation($"{tag} approved {sData.Count} monthly salaries of {result.Data}");
                 return result;
             }
             catch (Exception ex)
@@ -667,6 +671,32 @@ namespace PosMaster.Dal.Interfaces
                 result.Success = result.Data.Any();
                 result.Message = result.Success ? "Found" : "Not Found";
                 _logger.LogInformation($"{tag} found {result.Data.Count} employee leave categories");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                result.ErrorMessage = ex.Message;
+                result.Message = "Error occured";
+                _logger.LogError($"{tag} {result.Message} : {ex}");
+                return result;
+            }
+        }
+
+        public async Task<ReturnData<List<EmployeeMonthPayment>>> EmployeeMonthPaymentAsync(Guid clientId, Guid instanceId, string userId)
+        {
+            var result = new ReturnData<List<EmployeeMonthPayment>> { Data = new List<EmployeeMonthPayment>() };
+            var tag = nameof(EmployeeMonthPaymentAsync);
+            _logger.LogInformation($"{tag} get employee {userId} monthly payments from client {clientId} and instance {instanceId}");
+            try
+            {
+                var data = await _context.EmployeeMonthPayments
+                   .Where(e => e.ClientId.Equals(clientId) && e.InstanceId.Equals(instanceId) && e.UserId.Equals(userId))
+                   .OrderByDescending(e => e.DateCreated)
+                   .ToListAsync();
+                result.Success = result.Data.Any();
+                result.Message = result.Success ? "Found" : "Not Found";
+                _logger.LogInformation($"{tag} found {result.Data.Count} employee monthly payments");
                 return result;
             }
             catch (Exception ex)

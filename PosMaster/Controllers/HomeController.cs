@@ -64,6 +64,7 @@ namespace PosMaster.Controllers
             _logger.LogInformation($"{nameof(Index)} application started {DateTime.Now}");
             return View(new LoginViewModel
             {
+                RememberMe = true,
                 AuthenticationSchemes = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList()
             });
         }
@@ -108,12 +109,24 @@ namespace PosMaster.Controllers
                 //	await _userInterface.AddLoginLogAsync(log);
                 //	return View(model);
                 //}
+                model.EmailAddress = model.EmailAddress.Trim();
+                var user = model.EmailAddress.Contains('@') ?
+                     await _userManager.FindByEmailAsync(model.EmailAddress)
+                     : await _userManager.FindByNameAsync(model.EmailAddress);
+                if (user == null)
+                {
+                    ModelState.AddModelError(string.Empty, msg);
+                    TempData.SetData(AlertLevel.Warning, "Login Failed", "Invalid credentials");
+                    log.Notes = $"Provided email or username not found [{model.EmailAddress}]";
+                    await _userInterface.AddLoginLogAsync(log);
+                    return View(model);
+                }
                 var result = await _signInManager
-                    .PasswordSignInAsync(model.EmailAddress, model.Password, model.RememberMe,
+                    .CheckPasswordSignInAsync(user, model.Password,
                     lockoutOnFailure: true);
                 if (result.Succeeded)
                 {
-                    var user = await _userManager.FindByEmailAsync(model.EmailAddress);
+                    await _signInManager.SignInAsync(user, isPersistent: model.RememberMe);
                     log.UserRole = user.Role;
                     log.Personnel = user.UserName;
                     log.ClientId = user.ClientId;
@@ -656,6 +669,21 @@ namespace PosMaster.Controllers
             return View(licenceStatus.Data);
         }
 
+        public async Task<IActionResult> EnterKiosk(Guid insId)
+        {
+            var user = await _userManager.FindByNameAsync(User.Identity.Name);
+            var instanceRes = await _instanceInterface.ByIdAsync(insId);
+            await StoreCookiesDataAsync(user, instanceRes.Data);
+            return RedirectToLocal("");
+        }
+
+        public async Task<IActionResult> ExitKiosk()
+        {
+            var user = await _userManager.FindByNameAsync(User.Identity.Name);
+            await StoreCookiesDataAsync(user);
+            return RedirectToLocal("");
+        }
+
         #region Helpers 
         private void AddErrors(IdentityResult result)
         {
@@ -675,13 +703,17 @@ namespace PosMaster.Controllers
             }
 
             userData.InstanceCode = clientInstance.Code;
+            userData.InstanceId = clientInstance.Id;
             userData.InstanceName = clientInstance.Name;
             var client = clientInstance.Client;
             userData.ClientCode = client.Code;
+            userData.ClientId = client.Id;
             userData.ClientName = client.Name;
             userData.ClientLogoPath = client.LogoPath;
             userData.CurrencyShort = client.CurrencyShort;
-
+            userData.ShowCardPos = clientInstance.ShowCardPosDisplay;
+            userData.ShowClerkDashboard = clientInstance.Client.ShowClerkDashboard;
+            userData.IsKioskMode = !user.InstanceId.Equals(clientInstance.InstanceId);
             _cookiesService.Store(userData);
         }
 

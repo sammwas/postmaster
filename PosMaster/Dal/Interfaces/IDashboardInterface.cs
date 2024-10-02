@@ -10,8 +10,8 @@ namespace PosMaster.Dal.Interfaces
 {
     public interface IDashboardInterface
     {
-        Task<ReturnData<SuperAdminDashboardViewModel>> SuperAdminDashboardAsync();
-        Task<ReturnData<ManagerDashboardViewModel>> ManagerDashboardAsync(Guid clientId);
+        Task<ReturnData<SuperAdminDashboardViewModel>> SuperAdminDashboardAsync(Guid instanceId, DateTime dtFrom, DateTime dateTo);
+        Task<ReturnData<ManagerDashboardViewModel>> ManagerDashboardAsync(Guid clientId, Guid instanceId, DateTime dtFrom, DateTime dateTo);
         Task<ReturnData<ClerkDashboardViewModel>> ClerkDashboardAsync(Guid instanceId, string personnel);
     }
 
@@ -19,10 +19,14 @@ namespace PosMaster.Dal.Interfaces
     {
         private readonly DatabaseContext _context;
         private readonly ILogger<DashboardImplementation> _logger;
-        public DashboardImplementation(DatabaseContext context, ILogger<DashboardImplementation> logger)
+        private readonly IReportingInterface _reportingInterface;
+        public DashboardImplementation(DatabaseContext context, ILogger<DashboardImplementation> logger,
+            IReportingInterface reportingInterface)
         {
             _context = context;
             _logger = logger;
+            _reportingInterface = reportingInterface;
+
         }
 
         public async Task<ReturnData<ClerkDashboardViewModel>> ClerkDashboardAsync(Guid instanceId, string personnel)
@@ -41,15 +45,12 @@ namespace PosMaster.Dal.Interfaces
                       && c.DateCreated.Date.Equals(DateTime.Now.Date)).SumAsync(c => c.Amount),
                     TodaySales = await _context.ReceiptLineItems
                     .Where(c => c.InstanceId.Equals(instanceId) && c.Personnel.Equals(personnel)
-                      && c.DateCreated.Date.Equals(DateTime.Now.Date)).SumAsync(c => c.UnitPrice * c.Quantity),
-                    WeeklySales = await _context.ReceiptLineItems
-                    .Where(c => c.InstanceId.Equals(instanceId) && c.Personnel.Equals(personnel)
-                      && c.DateCreated.Date >= firstWeekDay.Date && c.DateCreated.Date <= lastWeekDay.Date)
+                      && c.DateCreated.Date.Equals(DateTime.Now.Date))
                     .SumAsync(c => c.UnitPrice * c.Quantity),
-                    MonthlySales = await _context.ReceiptLineItems
+                    CashSales = await _context.Receipts
                     .Where(c => c.InstanceId.Equals(instanceId) && c.Personnel.Equals(personnel)
-                    && c.DateCreated.Date >= Helpers.firstDayOfMonth.Date && c.DateCreated.Date <= Helpers.lastDayOfMonth.Date)
-                    .SumAsync(c => c.UnitPrice * c.Quantity)
+                      && c.DateCreated.Date.Equals(DateTime.Now.Date))
+                    .SumAsync(c => c.AmountReceived),
                 };
                 result.Success = true;
                 result.Message = "Found";
@@ -67,7 +68,7 @@ namespace PosMaster.Dal.Interfaces
             }
         }
 
-        public async Task<ReturnData<ManagerDashboardViewModel>> ManagerDashboardAsync(Guid clientId)
+        public async Task<ReturnData<ManagerDashboardViewModel>> ManagerDashboardAsync(Guid clientId, Guid instanceId, DateTime dateFrom, DateTime dateTo)
         {
             var result = new ReturnData<ManagerDashboardViewModel> { Data = new ManagerDashboardViewModel() };
             var tag = nameof(ManagerDashboardAsync);
@@ -76,25 +77,46 @@ namespace PosMaster.Dal.Interfaces
             {
                 var firstWeekDay = Helpers.FirstDayOfWeek();
                 var lastWeekDay = firstWeekDay.AddDays(6);
+                var repaymentQry = _reportingInterface.RepaymentIQueryable(clientId, instanceId, dateFrom, dateTo);
                 var data = new ManagerDashboardViewModel
                 {
-                    TodaySales = await _context.ReceiptLineItems.Where(c => c.ClientId.Equals(clientId)
+
+                    TotalStockValue = await _context.ProductPoQuantityLogs.Where(p => p.InstanceId.Equals(instanceId))
+                    .SumAsync(p => p.BuyingPrice * p.AvailableQuantity),
+
+                    TodaySales = await _context.ReceiptLineItems.Where(c => c.InstanceId.Equals(instanceId)
                       && c.DateCreated.Date.Equals(DateTime.Now.Date)).SumAsync(c => c.UnitPrice * c.Quantity),
-                    WeeklySales = await _context.ReceiptLineItems.Where(c => c.ClientId.Equals(clientId)
+
+                    TodayRepayments = await repaymentQry.Where(r => r.DateCreated.Date.Equals(DateTime.Now.Date))
+                    .SumAsync(r => r.Amount),
+
+                    WeeklySales = await _context.ReceiptLineItems.Where(c => c.InstanceId.Equals(instanceId)
                       && c.DateCreated.Date >= firstWeekDay.Date && c.DateCreated.Date <= lastWeekDay.Date).SumAsync(c => c.UnitPrice * c.Quantity),
-                    MonthlySales = await _context.ReceiptLineItems.Where(c => c.ClientId.Equals(clientId)
+
+                    MonthlySales = await _context.ReceiptLineItems.Where(c => c.InstanceId.Equals(instanceId)
                     && c.DateCreated.Date >= Helpers.firstDayOfMonth.Date && c.DateCreated.Date <= Helpers.lastDayOfMonth.Date)
                     .SumAsync(c => c.UnitPrice * c.Quantity),
-                    Products = await _context.Products.CountAsync(p => p.ClientId.Equals(clientId)),
-                    TotalStockValue = await _context.ProductPoQuantityLogs.Where(p => p.ClientId.Equals(clientId))
-                    .SumAsync(p => p.BuyingPrice * p.AvailableQuantity),
-                    TotalActualProfit = await _context.ReceiptLineItems.Where(p => p.ClientId.Equals(clientId))
+
+                    TotalActualProfit = await _context.ReceiptLineItems.Where(p => p.InstanceId.Equals(instanceId))
+                    .Where(r => r.DateCreated.Date >= dateFrom.Date && r.DateCreated.Date <= dateTo.Date)
                     .SumAsync(r => (r.UnitPrice * r.Quantity) - (r.BuyingPrice * r.Quantity)),
-                    TotalExpectedProfit = await _context.ReceiptLineItems.Where(c => c.ClientId.Equals(clientId))
+
+                    TotalExpectedProfit = await _context.ReceiptLineItems.Where(c => c.InstanceId.Equals(instanceId))
+                    .Where(r => r.DateCreated.Date >= dateFrom.Date && r.DateCreated.Date <= dateTo.Date)
                     .SumAsync(r => (r.SellingPrice * r.Quantity) - (r.BuyingPrice * r.Quantity)),
-                    TotalReceiptsAmount = await _context.ReceiptLineItems.Where(c => c.ClientId.Equals(clientId))
+
+                    TotalReceiptsAmount = await _context.ReceiptLineItems.Where(c => c.InstanceId.Equals(instanceId))
+                    .Where(r => r.DateCreated.Date >= dateFrom.Date && r.DateCreated.Date <= dateTo.Date)
                     .SumAsync(r => r.UnitPrice * r.Quantity),
-                    TotalUsers = await _context.Users.Where(u => u.ClientId == clientId).CountAsync()
+
+                    TotalExpenses = await _context.Expenses.Where(c => c.InstanceId.Equals(instanceId))
+                     .Where(r => r.DateCreated.Date >= dateFrom.Date && r.DateCreated.Date <= dateTo.Date)
+                    .SumAsync(e => e.Amount),
+
+                    SupplierExpenses = await _context.Expenses
+                      .Where(s => s.SupplierId.HasValue).Where(c => c.InstanceId.Equals(instanceId))
+                     .Where(r => r.DateCreated.Date >= dateFrom.Date && r.DateCreated.Date <= dateTo.Date)
+                    .SumAsync(e => e.Amount)
                 };
                 result.Success = true;
                 result.Message = "Found";
@@ -112,7 +134,7 @@ namespace PosMaster.Dal.Interfaces
             }
         }
 
-        public async Task<ReturnData<SuperAdminDashboardViewModel>> SuperAdminDashboardAsync()
+        public async Task<ReturnData<SuperAdminDashboardViewModel>> SuperAdminDashboardAsync(Guid instanceId, DateTime dtFrom, DateTime dateTo)
         {
             var result = new ReturnData<SuperAdminDashboardViewModel> { Data = new SuperAdminDashboardViewModel() };
             var tag = nameof(SuperAdminDashboardAsync);
@@ -127,15 +149,18 @@ namespace PosMaster.Dal.Interfaces
                     Products = await _context.Products.CountAsync(),
                     TotalStockValue = await _context.ProductPoQuantityLogs
                     .SumAsync(p => p.BuyingPrice * p.AvailableQuantity),
+
                     TotalActualProfit = await _context.ReceiptLineItems
                     .SumAsync(r => (r.UnitPrice * r.Quantity) - (r.BuyingPrice * r.Quantity)),
+
                     TotalExpectedProfit = await _context.ReceiptLineItems.SumAsync(r =>
                     (r.SellingPrice * r.Quantity) - (r.BuyingPrice * r.Quantity)),
                     TotalReceiptsAmount = await _context.ReceiptLineItems.SumAsync(r => r.Quantity * r.UnitPrice),
                     DailySalesList = await _context.ReceiptLineItems.Where(d => d.DateCreated >= DateTime.Now.AddDays(-7))
                     .OrderBy(s => s.DateCreated).GroupBy(r => r.DateCreated.Date, (d, t)
                     => new ChartData { Day = d.ToString("dddd"), Amount = t.Sum(r => r.Quantity * r.UnitPrice) })
-                    .ToListAsync()
+                    .ToListAsync(),
+                    TotalExpenses = await _context.Expenses.SumAsync(e => e.Amount)
                 };
                 result.Success = true;
                 result.Message = "Found";

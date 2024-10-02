@@ -1,13 +1,16 @@
 ﻿@inject ICookiesService _cookies;
 @inject IClientInstanceInterface _instanceInterface;
+@inject IMasterDataInterface _masterDataInterface;
 @model ApproveMonthlyPaymentViewModel
 @{
     ViewData["Active"] = "HR";
     var title = $"Approve Payment";
     ViewData["Title"] = title;
     var userData = _cookies.Read();
-    var returnData = await _instanceInterface.ByClientIdAsync(userData.ClientId);
-    var instances = returnData.Data;
+    var instanceRes = await _instanceInterface.ByClientIdAsync(userData.ClientId);
+    var instances = instanceRes.Data;
+    var expenseTypesRes = await _masterDataInterface.ExpenseTypesAsync(userData.ClientId);
+    var paymentModeRes = await _masterDataInterface.PaymentModesAsync(userData.ClientId);
 }
 <div class="card card-primary">
     <div class="card-header">
@@ -25,7 +28,7 @@
                             <div class="form-group">
                                 <label asp-for="InstanceId"></label>
                                 <select class="form-control select2" asp-for="InstanceId" style="width: 100%;">
-                                    <option value="">--All Instances--</option>
+                                    <option value="">--Select instance--</option>
                                     @foreach (var item in instances)
                                     {
                                         <option value="@item.Id" title="@item.Notes">@item.Code - @item.Name (@item.Client.Code - @item.Client.Name)</option>
@@ -47,8 +50,6 @@
                                 <span asp-validation-for="Year" class="text-danger"></span>
                             </div>
                         </div>
-                    </div>
-                    <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label asp-for="Month"></label>
@@ -63,7 +64,44 @@
                             </div>
                         </div>
                         <div class="col-md-6">
-
+                            <div class="form-group">
+                                <label>Expense Type</label>
+                                <select class="form-control select2" asp-for="ExpenseTypeId" style="width: 100%;">
+                                    <option value="">--Select Type--</option>
+                                    @foreach (var item in expenseTypesRes.Data)
+                                    {
+                                        <option value="@item.Id" title="@item.Notes" data-pcode="@item.Code">@item.Code - @item.Name</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="ExpenseTypeId" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="PaymentModeId"></label>
+                                <select class="form-control select2" asp-for="PaymentModeId" style="width: 100%;">
+                                    <option value="">--Select Mode--</option>
+                                    @foreach (var item in paymentModeRes.Data)
+                                    {
+                                        <option value="@item.Id" title="@item.Notes" data-pcode="@item.Code">@item.Code - @item.Name</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="PaymentModeId" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="PaymentModeNo"></label>
+                                <input asp-for="PaymentModeNo" class="form-control" placeholder="Payment mode No.">
+                                <span asp-validation-for="PaymentModeNo" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6" style="display:none">
+                            <div class="form-group">
+                                <label asp-for="Notes"></label>
+                                <input asp-for="Notes" class="form-control" placeholder="Notes">
+                                <span asp-validation-for="Notes" class="text-danger"></span>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -1,8 +1,11 @@
 ﻿@model ProductDataViewModel
+@inject ICookiesService _cookies;
+@inject IClientInterface _client;
 @{
     ViewData["Active"] = "Products";
     var title = $"Product {Model.Product?.Code}";
     ViewData["Title"] = title;
+    var clientRes = await _client.ByIdAsync(_cookies.Read().ClientId);
 }
 <div class="card card-primary">
     <div class="card-header">
@@ -48,6 +51,19 @@
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
+                                <label>Is a service</label>
+                                @if (Model.Product.IsService)
+                                {
+                                    <span>YES</span>
+                                }
+                                else
+                                {
+                                    <span>NO</span>
+                                }
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
                                 <label>Discountable</label>
                                 @if (Model.Product.AllowDiscount)
                                 {
@@ -68,10 +84,55 @@
                                 </div>
                             </div>
                         }
+                        @if (clientRes.Data.DisplayBuyingPrice)
+                        {
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Last buying Price</label>
+                                    <span>@Model.Product.BuyingPrice</span>
+                                </div>
+                            </div>
+                        }
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>Tax</label>
                                 <span>@Model.Product.TaxType?.Name (@(Model.Product.TaxRate*100) %)</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Date created</label>
+                                <span>@Model.Product.DateCreated</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Personnel</label>
+                                <span>@Model.Product.Personnel</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Date modified</label>
+                                <span>@Model.Product.DateLastModified</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Last modified by</label>
+                                <span>@Model.Product.LastModifiedBy</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Status</label>
+                                <span>@Model.Product.Status</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Notes</label>
+                                <span>@Model.Product.Notes</span>
                             </div>
                         </div>
                     </div>
@@ -186,6 +247,17 @@
 
                                 <a asp-route-id="@Model.Product.Id" asp-action="Edit" asp-controller="Products">Edit product</a>
                             </p>
+                            @if (!User.IsInRole(Role.Clerk))
+                            {
+                                <div>
+                                    <form asp-action="DeleteProduct">
+                                        <input type="hidden" value="@Model.Product.Id" name="Id">
+                                        <input type="hidden" value="@Model.Product.Code" name="Code">
+                                        <input type="hidden" value="@Model.Product.InstanceId" name="InstanceId">
+                                        <button class="text-danger btn-link btn-sm" type="submit" onclick='return confirm("Are you sure to delete ?")'>Delete product</button>
+                                    </form>
+                                </div>
+                            }
                         }
                         <p>
                             <a asp-action="Index" asp-controller="Products">View products</a>

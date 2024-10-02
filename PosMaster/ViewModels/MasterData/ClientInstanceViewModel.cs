@@ -34,6 +34,7 @@ namespace PosMaster.ViewModels
             ReceiptNotes = instance.ReceiptFooterNotes;
             ShortCodeNo = instance.BusinessShortCode;
             FontZoom = instance.ReceiptFontPercent;
+            ShowCardPosDisplay = instance.ShowCardPosDisplay;
         }
 
         [Display(Name = "Opening Time")]
@@ -63,5 +64,7 @@ namespace PosMaster.ViewModels
         public string ShortCodeNo { get; set; }
         [Display(Name = "Receipt Zoom %")]
         public int FontZoom { get; set; }
+        [Display(Name = "Show Cards POS")]
+        public bool ShowCardPosDisplay { get; set; }
     }
 }

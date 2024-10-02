@@ -10,8 +10,8 @@ using PosMaster.Dal;
 namespace PosMaster.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20230302191351_AddLicencing")]
-    partial class AddLicencing
+    [Migration("20230509112546_EnhanceExpenseAsPv")]
+    partial class EnhanceExpenseAsPv
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -288,6 +288,9 @@ namespace PosMaster.Migrations
                     b.Property<string>("SecondaryTelephone")
                         .HasColumnType("text");
 
+                    b.Property<bool>("ShowClerkDashboard")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("Slogan")
                         .HasColumnType("text");
 
@@ -388,6 +391,9 @@ namespace PosMaster.Migrations
 
                     b.Property<string>("SecondaryTelephone")
                         .HasColumnType("text");
+
+                    b.Property<bool>("ShowCardPosDisplay")
+                        .HasColumnType("boolean");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
@@ -1049,8 +1055,14 @@ namespace PosMaster.Migrations
                     b.Property<string>("LastModifiedBy")
                         .HasColumnType("text");
 
+                    b.Property<string>("ModeNumber")
+                        .HasColumnType("text");
+
                     b.Property<string>("Notes")
                         .HasColumnType("text");
+
+                    b.Property<Guid?>("PaymentModeId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Personnel")
                         .HasColumnType("text");
@@ -1058,9 +1070,16 @@ namespace PosMaster.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
+                    b.Property<Guid?>("SupplierId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ExpenseTypeId");
+
+                    b.HasIndex("PaymentModeId");
+
+                    b.HasIndex("SupplierId");
 
                     b.ToTable("Expenses");
                 });
@@ -1136,6 +1155,9 @@ namespace PosMaster.Migrations
                     b.Property<int>("Document")
                         .HasColumnType("integer");
 
+                    b.Property<Guid>("DocumentId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("DocumentNumber")
                         .HasColumnType("text");
 
@@ -1173,6 +1195,9 @@ namespace PosMaster.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
+
+                    b.Property<decimal>("AmountReceived")
+                        .HasColumnType("numeric");
 
                     b.Property<Guid>("ClientId")
                         .HasColumnType("uuid");
@@ -1297,6 +1322,9 @@ namespace PosMaster.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("UserType")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
@@ -1984,6 +2012,9 @@ namespace PosMaster.Migrations
                         .HasColumnType("text");
 
                     b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("UserType")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
@@ -2681,7 +2712,19 @@ namespace PosMaster.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("PosMaster.Dal.PaymentMode", "PaymentMode")
+                        .WithMany()
+                        .HasForeignKey("PaymentModeId");
+
+                    b.HasOne("PosMaster.Dal.Supplier", "Supplier")
+                        .WithMany()
+                        .HasForeignKey("SupplierId");
+
                     b.Navigation("ExpenseType");
+
+                    b.Navigation("PaymentMode");
+
+                    b.Navigation("Supplier");
                 });
 
             modelBuilder.Entity("PosMaster.Dal.GoodReceivedNote", b =>

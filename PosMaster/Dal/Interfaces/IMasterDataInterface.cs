@@ -658,7 +658,7 @@ namespace PosMaster.Dal.Interfaces
             {
                 var data = await _context.PaymentModes
                     .Where(c => c.ClientId.Equals(clientId))
-                    .OrderByDescending(c => c.DateCreated)
+                    .OrderBy(c => c.Name)
                     .ToListAsync();
                 result.Success = data.Any();
                 result.Message = result.Success ? "Found" : "Not Found";
